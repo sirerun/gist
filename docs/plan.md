@@ -1,149 +1,316 @@
-# Plan: Gist -- In-Memory Store and E2E Testing
+# Plan: Gist -- Multi-Tool Setup, Byte Savings Visibility, and README Update
 
 **Date:** 2026-03-14
-**Prior work:** See `docs/design.md` for completed Phases 1, 2, 4, 5.
+**Prior work:** See `docs/design.md` for completed Phases 1-6.
 
 ## Context
 
 ### Problem Statement
 
-Gist's test suite has a gap: mock stores verify method calls but do not test the full Index -> Search pipeline. The only way to validate that indexed content is actually searchable is with a live PostgreSQL instance. This means:
+Three usability gaps exist:
 
-- Local development requires PostgreSQL or Docker/testcontainers.
-- Quick prototyping and demos require database setup.
-- The CLI cannot run standalone for small workloads.
+1. **Setup friction**: Integrating gist with an agentic coding tool (Claude Code, Gemini CLI, Cursor, VS Code Copilot, Codex CLI) requires manually editing two files per tool: an MCP server config and a system instructions file. Each tool has different file locations, JSON schemas, and instruction file formats. A `gist setup <tool>` subcommand should automate this into a single invocation per tool.
+
+2. **Savings visibility**: Gist tracks context reduction via BytesIndexed, BytesReturned, BytesSaved, and SavedPercent in the Stats struct, but this data is underexposed. Individual search results do not report their byte footprint, the CLI stats output uses raw integers, and MCP search responses do not include savings information.
+
+3. **README does not document setup or agentic integration**: The README documents the library API, CLI, and MCP server, but does not explain how to integrate gist with agentic coding tools. Users must discover the `gist setup` subcommand, the one-line install-and-configure workflow, and which tools are supported. The README should be the primary onboarding surface for agentic tool users.
+
+### Tool Configuration Landscape
+
+| Tool | MCP Config Path (Global) | MCP Key | Instructions File | Installed |
+|------|--------------------------|---------|-------------------|-----------|
+| Claude Code | `~/.claude/mcp.json` | `mcpServers` | `~/.claude/CLAUDE.md` | Yes |
+| Gemini CLI | `~/.gemini/mcp.json` | `mcpServers` | `~/.gemini/GEMINI.md` | Yes |
+| Cursor | `~/.cursor/mcp.json` | `mcpServers` | `~/.cursor/rules/gist.mdc` | No |
+| VS Code Copilot | `~/.vscode/mcp.json` | `servers` | `~/.github/copilot-instructions.md` | No |
+| Codex CLI | `~/.codex/config.toml` | TOML `[mcp_servers]` | N/A (no instructions file) | No |
 
 ### Objectives
 
-1. Implement an in-memory Store that supports the full Index -> Search -> Stats pipeline using Go standard library string operations.
-2. Add `WithMemory()` option so `gist.New(gist.WithMemory())` works with zero external dependencies.
-3. Write end-to-end tests that exercise the full Gist API (Index, Search, BatchIndex, Stats) against the in-memory store.
-4. Make the in-memory store the default when no store option is provided, enabling `gist.New()` without arguments.
+1. Add `gist setup <tool>` subcommand supporting claude, gemini, cursor, copilot, codex.
+2. Use an adapter pattern: each tool is a struct defining paths and formats.
+3. Support `--global` (default), `--project`, `--uninstall`, and `--dry-run` flags.
+4. Make setup idempotent.
+5. Add BytesUsed to SearchResult.
+6. Improve CLI stats formatting with human-readable byte units.
+7. Add savings summary to MCP gist_search responses.
+8. Update README to document agentic tool integration, `gist setup`, and the one-line install workflow.
 
 ### Non-Goals
 
-- Replicating PostgreSQL's exact BM25 scoring or tsvector stemming behavior.
-- Persistence (the in-memory store is ephemeral).
-- Production-scale performance (the in-memory store is for testing and small workloads).
+- Interactive wizard or TUI.
+- `gist setup --all`.
+- Auto-detecting which tools are installed.
+- Token-based metrics.
+- Dollar-based cost estimation.
+- Changing Stats struct fields or the Store interface.
 
 ### Constraints
 
 - Zero new external dependencies.
-- Must satisfy the existing Store interface exactly -- no interface changes.
-- Thread-safe (sync.RWMutex).
+- No breaking changes to existing public API.
+- The setup subcommand must skip PersistentPreRunE (no database initialization).
 - GOWORK=off for all go commands.
+- Instructions content is the same across all tools.
+- README changes must not remove or contradict existing content. Add new sections and update existing ones.
 
 ### Success Metrics
 
 | Metric | Target |
 |--------|--------|
-| E2E tests pass without PostgreSQL | Yes |
-| `gist.New()` works without arguments | Yes |
-| CI lint + test green | Yes |
-| Overall test coverage | >85% |
-| In-memory store test coverage | >95% |
+| `gist setup claude` configures Claude Code | Yes |
+| `gist setup gemini` configures Gemini CLI | Yes |
+| Setup is idempotent for all supported tools | Yes |
+| `--uninstall` cleanly removes config | Yes |
+| `--dry-run` shows changes without writing | Yes |
+| `gist setup` (no tool) prints supported tool list | Yes |
+| SearchResult includes BytesUsed | Yes |
+| CLI stats uses human-readable formatting | Yes |
+| MCP search response includes savings | Yes |
+| README documents `gist setup` and agentic integration | Yes |
+| All tests pass with -race | Yes |
 
 ### Decision Rationale
 
-See `docs/adr/001-in-memory-store.md`.
+- Setup subcommand design: See `docs/adr/003-setup-subcommand.md`.
+- Byte vs token decision: See `docs/adr/002-token-first-stats.md`.
 
 ## Scope and Deliverables
 
 ### In Scope
 
-- `store_memory.go` -- In-memory Store implementation.
-- `store_memory_test.go` -- Unit tests for the in-memory store.
-- `gist_e2e_test.go` -- End-to-end tests using in-memory store.
-- Update `gist.go` -- Add `WithMemory()` option, make in-memory the default.
-- Update `cmd/gist/main.go` -- Allow CLI to run without --dsn (uses in-memory).
-- Update `README.md` -- Document zero-dependency usage.
+- `cmd/gist/setup.go` -- Subcommand with tool adapter pattern and flag handling.
+- `cmd/gist/setup_test.go` -- Tests for all adapters using temp directories.
+- Add BytesUsed field to SearchResult in search.go.
+- Update CLI stats command (cmd/gist/stats.go) to format bytes as human-readable units.
+- Add savings summary to MCP gist_search response in mcp/tools.go.
+- Update README.md with agentic tool integration section, `gist setup` documentation, and one-line install workflow.
+- Tests for all new functionality.
 
 ### Out of Scope
 
-- Changing the PostgreSQL store.
-- Adding other storage backends (BoltDB, SQLite).
-- Changing the Store interface.
+- `gist setup --all`.
+- Auto-detection of installed tools.
+- Tool-specific instructions content.
+- TOML parsing library for Codex CLI.
+- Token-based metrics.
+- Changing Stats struct fields.
 
 ### Deliverables
 
 | ID | Description | Acceptance Criteria |
 |----|-------------|-------------------|
-| D1 | store_memory.go | Implements Store interface. All methods functional. Thread-safe. |
-| D2 | store_memory_test.go | >95% coverage on store_memory.go. Table-driven. |
-| D3 | gist_e2e_test.go | Tests Index->Search, BatchIndex->Search, Stats, Close. No PostgreSQL needed. |
-| D4 | WithMemory() option | `gist.New(gist.WithMemory())` returns working Gist. |
-| D5 | Default store | `gist.New()` uses in-memory store when no store configured. |
-| D6 | CLI without --dsn | `gist index` and `gist search` work without --dsn (in-memory). |
-| D7 | README update | Shows zero-dependency quick start. |
+| D1 | `gist setup <tool>` subcommand | Supports claude, gemini, cursor, copilot, codex. Flags: --global, --project, --uninstall, --dry-run. Idempotent. |
+| D2 | Tool adapter pattern | Each tool defined by a single struct. Adding a tool requires no new logic. |
+| D3 | SearchResult.BytesUsed | Each search result reports snippet byte count. JSON tag: bytes_used. |
+| D4 | CLI stats formatting | `gist stats` prints human-readable byte values. |
+| D5 | MCP search savings | gist_search response includes bytes_used per result and total. |
+| D6 | README update | Documents agentic tool integration, `gist setup`, supported tools table, one-line install. |
+| D7 | Tests | All new code tested. All pass with -race. |
 
 ## Checkable Work Breakdown
 
-### E1: In-Memory Store Implementation
+### E1: Setup Subcommand -- Adapter Pattern and Core Logic
 
-- [x] T1.1 Implement store_memory.go (2026-03-14)
-  - MemoryStore struct with sync.RWMutex, source/chunk slices, ID counters.
-  - SaveSource: append to sources slice, return with auto-incremented ID.
-  - SaveChunk: append to chunks slice, return with auto-incremented ID.
-  - SearchPorter: tokenize query into words, match chunks where all query words appear (case-insensitive). Score = number of matching words / total words in chunk. Limit and SourceFilter respected.
-  - SearchTrigram: match chunks where query substring appears (case-insensitive strings.Contains). Score = len(query) / len(content). Limit and SourceFilter respected.
-  - VocabularyTerms: extract unique lowercase words from all chunk content. Use strings.Fields and strings.ToLower.
-  - Sources: return copy of sources slice.
-  - Stats: count chunks, sources, sum bytes.
-  - Close: no-op, return nil.
-  - Acceptance: compiles, satisfies Store interface, go vet clean.
+- [x] T1.1 Define tool adapter types and registry  Owner: task-T1.1  Est: 30m  Done: 2026-03-14
+  - Create cmd/gist/setup.go.
+  - Define a `toolAdapter` struct:
+    ```go
+    type toolAdapter struct {
+        Name             string   // "claude", "gemini", etc.
+        DisplayName      string   // "Claude Code", "Gemini CLI", etc.
+        GlobalMCPPath    string   // e.g., "~/.claude/mcp.json"
+        ProjectMCPPath   string   // e.g., ".mcp.json"
+        MCPKey           string   // "mcpServers" or "servers"
+        GlobalInstPath   string   // e.g., "~/.claude/CLAUDE.md"
+        ProjectInstPath  string   // e.g., "CLAUDE.md"
+        InstSentinel     string   // "## Gist Context Management"
+    }
+    ```
+  - Define a `toolRegistry` map[string]toolAdapter with entries for claude, gemini, cursor, copilot, codex.
+  - Claude: GlobalMCPPath `~/.claude/mcp.json`, ProjectMCPPath `.mcp.json`, MCPKey `mcpServers`, GlobalInstPath `~/.claude/CLAUDE.md`, ProjectInstPath `CLAUDE.md`.
+  - Gemini: GlobalMCPPath `~/.gemini/mcp.json`, ProjectMCPPath `.gemini/mcp.json`, MCPKey `mcpServers`, GlobalInstPath `~/.gemini/GEMINI.md`, ProjectInstPath `GEMINI.md`.
+  - Cursor: GlobalMCPPath `~/.cursor/mcp.json`, ProjectMCPPath `.cursor/mcp.json`, MCPKey `mcpServers`, GlobalInstPath `~/.cursor/rules/gist.mdc`, ProjectInstPath `.cursor/rules/gist.mdc`.
+  - Copilot: GlobalMCPPath `~/.vscode/mcp.json`, ProjectMCPPath `.vscode/mcp.json`, MCPKey `servers`, GlobalInstPath `~/.github/copilot-instructions.md`, ProjectInstPath `.github/copilot-instructions.md`.
+  - Codex: GlobalMCPPath `~/.codex/config.toml`, ProjectMCPPath `.codex/config.toml`, MCPKey `mcp_servers` (TOML), GlobalInstPath `` (empty), ProjectInstPath `` (empty).
+  - Define the gist instructions content as a Go constant.
+  - Register the cobra Command under rootCmd. Override PersistentPreRunE with a no-op to skip database init.
+  - Args validation: require exactly one argument that matches a key in toolRegistry, or zero args to print the list of supported tools.
+  - Flags: `--project` (bool, default false), `--uninstall` (bool, default false), `--dry-run` (bool, default false).
+  - Acceptance: compiles, `gist setup` prints tool list, `gist setup invalidtool` prints error.
   - Dependencies: none.
 
-- [x] T1.2 Write store_memory_test.go (2026-03-14, 22 tests, >97% coverage)
-  - Table-driven tests for every Store method.
-  - Test cases: save source and retrieve, save chunks and search (porter), save chunks and search (trigram), search with source filter, search with limit, vocabulary terms extraction, stats accuracy, empty store behavior, concurrent read/write safety (goroutines + race detector).
-  - Acceptance: `GOWORK=off go test -run TestMemory -race -v` passes. >95% coverage on store_memory.go.
-  - Dependencies: T1.1.
+- [x] T1.2 Implement MCP config file manipulation  Owner: task-T1.2  Est: 30m  Done: 2026-03-14
+  - In cmd/gist/setup.go, implement `func configureMCP(path string, mcpKey string, gistPath string, uninstall bool, dryRun bool) (changed bool, err error)`.
+  - Detect gist binary path with `os.Executable()` + `filepath.EvalSymlinks()`.
+  - Read existing file. If absent, start with `{"<mcpKey>": {}}`.
+  - If file exists but is not valid JSON, return error (do not corrupt).
+  - Parse as `map[string]any`. Navigate to the mcpKey (create if missing).
+  - On install: set `<mcpKey>.gist` to `{"command": "<gist-path>", "args": ["serve"]}`. If already present with same values, return changed=false.
+  - On uninstall: delete `<mcpKey>.gist` if present.
+  - If dryRun, print what would be written to stderr but do not write.
+  - Write with `json.MarshalIndent` (two-space indent) + trailing newline. Create parent directories with `os.MkdirAll`.
+  - Special case for Codex (TOML format): write/read TOML using simple string operations. Generate: `[mcp_servers.gist]\ncommand = "<gist-path>"\n`. On read, check if `[mcp_servers.gist]` section exists. On uninstall, remove the section.
+  - Acceptance: function creates/updates/removes MCP entry correctly for both JSON and TOML formats.
+  - Dependencies: none.
 
-### E2: Gist API Integration
+- [x] T1.3 Implement instructions file manipulation  Owner: task-T1.3  Est: 20m  Done: 2026-03-14
+  - In cmd/gist/setup.go, implement `func configureInstructions(path string, sentinel string, uninstall bool, dryRun bool) (changed bool, err error)`.
+  - If path is empty, return changed=false (tool has no instructions file).
+  - Read existing file. If absent, start with empty string.
+  - On install: if sentinel string not found in content, append a blank line + the gist instructions section. Return changed=true. If found, return changed=false.
+  - On uninstall: if sentinel found, remove from sentinel line through the next `## ` heading (exclusive) or end of file. Trim trailing blank lines. If not found, return changed=false.
+  - If dryRun, print what would be written to stderr but do not write.
+  - Create parent directories with `os.MkdirAll`.
+  - Acceptance: function appends/removes instructions section correctly.
+  - Dependencies: none.
 
-- [x] T2.1 Add WithMemory() option and default store (2026-03-14)
-  - Add `WithMemory() Option` to gist.go that sets `cfg.store = NewMemoryStore()`.
-  - Change `New()` to use `NewMemoryStore()` as default when no store is configured (remove the "store required" error).
-  - Acceptance: `gist.New()` returns a working Gist. `gist.New(gist.WithMemory())` returns a working Gist. `gist.New(gist.WithPostgres(dsn))` still works.
-  - Dependencies: T1.1.
+- [x] T1.4 Wire adapter, MCP, and instructions into cobra RunE  Owner: task-T1.4  Est: 15m  Done: 2026-03-14
+  - In cmd/gist/setup.go, implement the cobra RunE function.
+  - Look up the tool adapter from the registry using the first arg.
+  - Determine target paths: if `--project`, use ProjectMCPPath and ProjectInstPath. Otherwise, use GlobalMCPPath and GlobalInstPath. Expand `~` to `os.UserHomeDir()`.
+  - Call configureMCP and configureInstructions.
+  - Print results to stderr: "Configured <DisplayName> MCP at <path>", "Added gist instructions to <path>", "Already configured (no changes)", "Removed gist from <path>".
+  - Acceptance: `gist setup claude` creates both files. `gist setup claude --uninstall` removes both entries.
+  - Dependencies: T1.1, T1.2, T1.3.
 
-- [x] T2.2 Write gist_e2e_test.go (2026-03-14, 6 e2e tests)
-  - End-to-end test: New() -> Index markdown -> Search -> verify results contain expected snippets.
-  - End-to-end test: New() -> Index multiple documents -> Search -> verify cross-document results.
-  - End-to-end test: New() -> BatchIndex -> Search -> verify results.
-  - End-to-end test: New() -> Index -> Stats -> verify counts and bytes.
-  - End-to-end test: New() -> Index -> Search with budget -> verify truncation.
-  - End-to-end test: New() -> Index -> Search for typo -> verify fuzzy fallback finds results.
-  - Acceptance: all tests pass with `GOWORK=off go test -run TestE2E -race -v`. No PostgreSQL required.
-  - Dependencies: T2.1.
+### E2: Setup Subcommand Tests
 
-### E3: CLI and Documentation
+- [x] T2.1 Write MCP config manipulation tests  Owner: task-T2.1  Est: 30m  Done: 2026-03-14
+  - In cmd/gist/setup_test.go.
+  - Test cases for JSON format (claude, gemini, cursor, copilot):
+    - Fresh install: no file -> creates with gist entry.
+    - Existing file with other servers -> adds gist, preserves others.
+    - Already configured -> no change (idempotent).
+    - Different gist path -> updates path.
+    - Uninstall -> removes gist, preserves others.
+    - Uninstall when not present -> no change.
+    - Malformed JSON -> returns error.
+  - Test cases for TOML format (codex):
+    - Fresh install: no file -> creates with gist section.
+    - Existing file with other sections -> adds gist section.
+    - Already configured -> no change.
+    - Uninstall -> removes gist section.
+  - Test `mcpServers` vs `servers` key difference (copilot uses `servers`).
+  - Acceptance: `GOWORK=off go test ./cmd/gist/ -run TestConfigureMCP -race -v` passes.
+  - Dependencies: T1.2.
 
-- [x] T3.1 Update CLI to work without --dsn (2026-03-14)
-  - Modify cmd/gist/main.go PersistentPreRunE: if --dsn is empty and GIST_DSN is empty, create Gist with in-memory store instead of erroring.
-  - Print a notice: "Using in-memory store (data will not persist). Use --dsn for PostgreSQL."
-  - Acceptance: `gist index README.md` works without --dsn. `gist search "context"` returns results. `gist stats` shows counts.
-  - Dependencies: T2.1.
+- [x] T2.2 Write instructions file manipulation tests  Owner: task-T2.2  Est: 20m  Done: 2026-03-14
+  - In cmd/gist/setup_test.go.
+  - Test cases:
+    - Fresh install: no file -> creates with gist section.
+    - Existing file without gist -> appends gist section.
+    - Already has gist section -> no change (idempotent).
+    - Uninstall -> removes gist section, preserves other content.
+    - Uninstall when not present -> no change.
+    - Content after gist section -> preserved on uninstall.
+    - Empty path (codex) -> no change, no error.
+  - Acceptance: `GOWORK=off go test ./cmd/gist/ -run TestConfigureInstructions -race -v` passes.
+  - Dependencies: T1.3.
 
-- [x] T3.2 Update README.md (2026-03-14)
-  - Add zero-dependency quick start section showing `gist.New()` without PostgreSQL.
-  - Update CLI section to note that --dsn is optional.
-  - Acceptance: README shows both in-memory and PostgreSQL usage paths.
-  - Dependencies: T2.1.
+- [x] T2.3 Write end-to-end setup tests  Owner: task-T2.3  Est: 20m  Done: 2026-03-14
+  - In cmd/gist/setup_test.go.
+  - Test the full flow for each tool adapter: fresh setup, idempotent re-run, uninstall.
+  - Use t.TempDir() as home directory substitute.
+  - Verify both files are created/modified/cleaned correctly for each tool.
+  - Acceptance: `GOWORK=off go test ./cmd/gist/ -run TestSetupE2E -race -v` passes.
+  - Dependencies: T1.4.
 
-### E4: Quality Gates
+### E3: Byte Savings Visibility
 
-- [x] T4.1 Run linter and fix findings (2026-03-14)
+- [x] T3.1 Add BytesUsed to SearchResult  Owner: task-T3.1  Est: 15m  Done: 2026-03-14
+  - In search.go, add `BytesUsed int` field to SearchResult struct with json tag `bytes_used`.
+  - In convertMatches(), set BytesUsed = len(snippet) for each result.
+  - Acceptance: compiles, go vet clean.
+  - Dependencies: none.
+
+- [x] T3.2 Update CLI stats command with human-readable formatting  Owner: task-T3.2  Est: 15m  Done: 2026-03-14
+  - In cmd/gist/stats.go, add a formatBytes helper function that returns "X B", "X.Y KB", or "X.Y MB" depending on magnitude.
+  - Apply formatBytes to BytesIndexed, BytesReturned, BytesSaved output lines.
+  - Keep SavedPercent, SourceCount, ChunkCount, SearchCount as plain integers.
+  - Acceptance: `gist stats` output shows human-readable byte values.
+  - Dependencies: none.
+
+- [x] T3.3 Add savings summary to MCP gist_search response  Owner: task-T3.3  Est: 20m  Done: 2026-03-14
+  - In mcp/tools.go handleSearch(), after calling g.Search(), compute total bytes used across results (sum of BytesUsed from each SearchResult).
+  - Wrap the search response in a struct that includes the results array and a `bytes_used` total field.
+  - Update the gist_search tool description in ToolDefinitions() to mention bytes_used.
+  - Acceptance: gist_search MCP response includes bytes_used per result and total.
+  - Dependencies: T3.1.
+
+### E4: Test Updates for Savings Visibility
+
+- [x] T4.1 Add SearchResult.BytesUsed tests  Owner: task-T4.1  Est: 15m  Done: 2026-03-14
+  - In search_test.go, add a test verifying BytesUsed = len(snippet) for each result.
+  - In gist_test.go TestSearch, verify BytesUsed > 0 on results.
+  - Acceptance: `GOWORK=off go test -run TestSearch -race -v` passes.
+  - Dependencies: T3.1.
+
+- [x] T4.2 Add CLI stats formatting test  Owner: task-T4.2  Est: 10m  Done: 2026-03-14
+  - In cmd/gist/stats_test.go (new file), table-driven tests for formatBytes: 0 -> "0 B", 512 -> "512 B", 1024 -> "1.0 KB", 1536 -> "1.5 KB", 1048576 -> "1.0 MB", 1572864 -> "1.5 MB", negative -> "0 B".
+  - Acceptance: `GOWORK=off go test ./cmd/gist/ -run TestFormatBytes -v` passes.
+  - Dependencies: T3.2.
+
+- [x] T4.3 Add MCP search savings test  Owner: task-T4.3  Est: 15m  Done: 2026-03-14
+  - In mcp/tools_test.go, add a test that indexes content, searches, and verifies bytes_used total in response.
+  - Update TestToolsCallSearch to verify the wrapped response structure.
+  - Acceptance: `GOWORK=off go test ./mcp/ -race -v` passes.
+  - Dependencies: T3.1, T3.3.
+
+### E5: README Update
+
+- [x] T5.1 Update README with agentic tool integration section  Owner: task-T5.1  Est: 30m  Done: 2026-03-14
+  - In README.md, add a new section titled "## Agentic Tool Integration" after the "MCP Server" section and before the "Features" section.
+  - Content of the new section:
+    - Opening paragraph: Gist integrates with agentic coding tools as an MCP server. The `gist setup` command configures everything in one step.
+    - One-line install-and-configure example per tool:
+      ```
+      brew install sirerun/tap/gist && gist setup claude
+      brew install sirerun/tap/gist && gist setup gemini
+      brew install sirerun/tap/gist && gist setup cursor
+      brew install sirerun/tap/gist && gist setup copilot
+      brew install sirerun/tap/gist && gist setup codex
+      ```
+    - Supported tools table (tool name, command, what it configures):
+      | Tool | Command | Configures |
+      |------|---------|------------|
+      | Claude Code | `gist setup claude` | `~/.claude/mcp.json` + `~/.claude/CLAUDE.md` |
+      | Gemini CLI | `gist setup gemini` | `~/.gemini/mcp.json` + `~/.gemini/GEMINI.md` |
+      | Cursor | `gist setup cursor` | `~/.cursor/mcp.json` + `~/.cursor/rules/gist.mdc` |
+      | VS Code Copilot | `gist setup copilot` | `~/.vscode/mcp.json` + `~/.github/copilot-instructions.md` |
+      | Codex CLI | `gist setup codex` | `~/.codex/config.toml` |
+    - Per-project setup: `gist setup claude --project` for project-scoped config.
+    - Uninstall: `gist setup claude --uninstall`.
+    - Dry-run: `gist setup claude --dry-run`.
+    - What setup does: brief explanation that it adds gist as an MCP server and adds context management instructions so the tool uses gist automatically.
+  - Dependencies: none (README content can be written before the setup code exists; the README documents the planned interface).
+  - Acceptance: README contains "Agentic Tool Integration" section with install commands, supported tools table, and flag documentation.
+
+- [x] T5.2 Update README MCP Server section  Owner: task-T5.2  Est: 10m  Done: 2026-03-14
+  - In README.md, update the existing "MCP Server" section.
+  - Replace the manual JSON config example with a note that `gist setup <tool>` handles configuration automatically.
+  - Keep the manual JSON example as a "Manual configuration" subsection for users who prefer manual setup or use unsupported tools.
+  - Remove `--dsn` from the MCP example since in-memory is the default and sufficient for agentic tool sessions.
+  - Acceptance: MCP Server section references `gist setup` and provides both automatic and manual configuration paths.
+
+- [x] T5.3 Update README CLI Usage section  Owner: task-T5.3  Est: 10m  Done: 2026-03-14
+  - In README.md, add `gist setup <tool>` to the CLI Usage code block.
+  - Add a one-line description: "# Configure gist for your agentic coding tool".
+  - Place it after the existing `gist serve` example.
+  - Acceptance: CLI Usage section includes `gist setup` example.
+
+### E6: Quality Gates
+
+- [x] T6.1 Run linter and fix findings  Owner: lead  Est: 10m  Done: 2026-03-14
   - `GOWORK=off go vet ./...`
   - `GOWORK=off go build ./...`
   - Acceptance: zero errors, zero warnings.
-  - Dependencies: T1.1, T1.2, T2.1, T2.2, T3.1, T3.2.
+  - Dependencies: all of E1-E5.
 
-- [ ] T4.2 Verify CI green  Owner: TBD  Est: 10m
-  - Push to main.
-  - Verify CI (lint, test, build) passes.
-  - Acceptance: all 3 CI jobs green.
-  - Dependencies: T4.1.
+- [x] T6.2 Run full test suite  Owner: lead  Est: 10m  Done: 2026-03-14
+  - `GOWORK=off go test -race -count=1 ./...`
+  - Acceptance: all tests pass.
+  - Dependencies: T6.1.
 
 ## Parallel Work
 
@@ -151,53 +318,76 @@ See `docs/adr/001-in-memory-store.md`.
 
 | Track | Tasks | Description |
 |-------|-------|-------------|
-| A: Store | T1.1, T1.2 | In-memory store and its tests |
-| B: API | T2.1, T2.2 | WithMemory option and e2e tests |
-| C: CLI/Docs | T3.1, T3.2 | CLI update and README |
-| D: Quality | T4.1, T4.2 | Lint, CI verification |
+| A: Setup Core | T1.1, T1.2, T1.3, T1.4 | Adapter types, MCP/instructions manipulation, wiring |
+| B: Setup Tests | T2.1, T2.2, T2.3 | Tests for setup subcommand |
+| C: Core API | T3.1, T4.1 | SearchResult.BytesUsed + tests |
+| D: CLI Stats | T3.2, T4.2 | Human-readable formatting + tests |
+| E: MCP Savings | T3.3, T4.3 | Search savings response + tests |
+| F: README | T5.1, T5.2, T5.3 | Documentation updates |
+| G: Quality | T6.1, T6.2 | Lint and full test suite |
 
 ### Sync Points
 
-- T1.1 must complete before T1.2, T2.1, T3.1 can start.
-- T2.1 must complete before T2.2, T3.1, T3.2 can start.
-- All of A, B, C must complete before D starts.
+- T1.1, T1.2, T1.3 have no dependencies on each other.
+- T1.4 depends on T1.1, T1.2, T1.3.
+- T2.1 depends on T1.2. T2.2 depends on T1.3. T2.3 depends on T1.4.
+- T3.1 has no dependencies. T3.3 depends on T3.1. T3.2 has no dependencies.
+- T4.1 depends on T3.1. T4.2 depends on T3.2. T4.3 depends on T3.1 and T3.3.
+- T5.1, T5.2, T5.3 have no code dependencies (they document the planned interface).
+- All tracks must complete before G starts.
 
 ### Maximum Parallelism
 
-**Wave 1** (1 task -- foundation):
-- T1.1: Implement store_memory.go
+**Wave 1** (5 tasks -- no dependencies, saturates all agent slots):
+- T1.1: Define tool adapter types and registry
+- T1.2: Implement MCP config file manipulation
+- T1.3: Implement instructions file manipulation
+- T3.1: Add BytesUsed to SearchResult
+- T3.2: Update CLI stats command with human-readable formatting
 
-**Wave 2** (3 tasks -- parallel after T1.1):
-- T1.2: Write store_memory_test.go
-- T2.1: Add WithMemory() option and default store
-- T3.1: Update CLI to work without --dsn (can stub on T2.1's interface, or run after T2.1)
+**Wave 2** (5 tasks -- after Wave 1):
+- T1.4: Wire adapter, MCP, and instructions into cobra RunE (needs T1.1, T1.2, T1.3)
+- T2.1: Write MCP config manipulation tests (needs T1.2)
+- T2.2: Write instructions file manipulation tests (needs T1.3)
+- T4.1: Add SearchResult.BytesUsed tests (needs T3.1)
+- T4.2: Add CLI stats formatting test (needs T3.2)
 
-**Wave 3** (3 tasks -- parallel after T2.1):
-- T2.2: Write gist_e2e_test.go
-- T3.2: Update README.md
-- T4.1: Run linter and fix findings (if T1.2 and T3.1 are done)
+**Wave 3** (5 tasks -- after Wave 2):
+- T2.3: Write end-to-end setup tests (needs T1.4)
+- T3.3: Add savings summary to MCP gist_search response (needs T3.1)
+- T4.3: Add MCP search savings test (needs T3.1, T3.3)
+- T5.1: Update README with agentic tool integration section (no code deps)
+- T5.2: Update README MCP Server section (no code deps)
 
-**Wave 4** (1 task):
-- T4.2: Verify CI green
+**Wave 4** (3 tasks):
+- T5.3: Update README CLI Usage section (no code deps, but logically after T5.1/T5.2 to avoid merge conflicts since all touch README.md)
+- T6.1: Run linter and fix findings (needs all code tasks)
+- T6.2: Run full test suite (needs T6.1)
 
-Note: Wave 2 has T3.1 which depends on T2.1. If strict dependency is enforced, T3.1 moves to Wave 3 and Wave 2 has 2 tasks. To maximize parallelism, T3.1 can start by reading gist.go and preparing the CLI change, then integrate WithMemory() once T2.1 commits.
+Note: T5.1, T5.2, T5.3 all edit README.md. While worktrees allow parallel file edits, placing T5.3 in Wave 4 reduces merge conflict risk. Alternatively, all three README tasks could run in Wave 1 since they have no code dependencies, but serial execution within the README is safer.
 
 ## Timeline and Milestones
 
 | Milestone | Tasks | Exit Criteria |
 |-----------|-------|--------------|
-| M1: Store works | T1.1, T1.2 | MemoryStore passes all unit tests with -race |
-| M2: API integrated | T2.1, T2.2 | gist.New() works, e2e tests pass |
-| M3: CLI standalone | T3.1, T3.2 | CLI works without --dsn, README updated |
-| M4: Ship | T4.1, T4.2 | CI green, pushed to main |
+| M1: Setup core works | T1.1-T1.4 | `gist setup claude` and `gist setup gemini` configure both files. |
+| M2: Setup tested | T2.1-T2.3 | All setup tests pass with -race. |
+| M3: Savings visible | T3.1-T3.3 | BytesUsed on results. CLI and MCP show savings. |
+| M4: All tests green | T4.1-T4.3 | All savings tests pass with -race. |
+| M5: README updated | T5.1-T5.3 | README documents agentic tool integration, setup, and CLI usage. |
+| M6: Ship | T6.1, T6.2 | Lint clean. Full test suite green. |
 
 ## Risk Register
 
 | ID | Risk | Impact | Likelihood | Mitigation |
 |----|------|--------|------------|------------|
-| R1 | In-memory search ranking differs significantly from PostgreSQL | Medium | High | Document clearly that MemoryStore is for testing/prototyping. Keep PostgreSQL integration tests in CI. |
-| R2 | Users accidentally use MemoryStore in production | Medium | Low | Print warning when MemoryStore is used. Document in README and godoc. |
-| R3 | Making in-memory the default breaks existing code that expects an error | Low | Low | Existing code passes WithPostgres or WithStore explicitly. Only code that called New() without options would have gotten an error before; now it gets a working instance. This is strictly additive. |
+| R1 | Tool config file locations change in future versions | High | Low | Pin to documented locations. Print paths in output so users can verify. |
+| R2 | os.Executable() returns temp binary path (go run) | Medium | Medium | filepath.EvalSymlinks resolves symlinks. Print resolved path. Document that setup should run from installed binary. |
+| R3 | Concurrent writes to config files | Low | Low | Write atomically: write temp file then rename. |
+| R4 | Codex TOML manipulation without a parser | Low | Medium | The config is small and predictable. String-based manipulation is sufficient. Test thoroughly. |
+| R5 | Wrapping MCP search response changes JSON shape | Medium | Low | Gist is pre-1.0. No known external consumers. |
+| R6 | Cursor .mdc format differs from plain markdown | Low | Medium | Use standard markdown content. .mdc files accept markdown. |
+| R7 | README merge conflicts from parallel edits | Low | Medium | Run README tasks sequentially or in a single wave. |
 
 ## Operating Procedure
 
@@ -209,39 +399,112 @@ Note: Wave 2 has T3.1 which depends on T2.1. If strict dependency is enforced, T
 
 ## Progress Log
 
-### 2026-03-14 -- Plan Created
+### 2026-03-14 -- Plan Updated (README)
 
-- Created plan for in-memory Store implementation and e2e testing.
-- Created `docs/design.md` with stable knowledge from completed phases.
-- Created `docs/adr/001-in-memory-store.md` documenting the decision to add an in-memory Store.
-- Trimmed completed Phases 1, 2, 4, 5 from the plan (preserved in design.md).
-- Phase 3 (Sire Integration) removed from this plan -- it belongs in sirerun/api repo.
+- Added E5 (README Update) with T5.1, T5.2, T5.3 to document agentic tool integration, `gist setup`, and CLI usage.
+- Added D6 deliverable for README update.
+- Added M5 milestone for README completion.
+- Reorganized waves: README tasks placed in Wave 3 (T5.1, T5.2) and Wave 4 (T5.3) to avoid merge conflicts.
+- Added R7 risk for README merge conflicts.
+
+### 2026-03-14 -- Plan Updated (Multi-Tool Setup)
+
+- Expanded setup subcommand from single-tool (`gist setup`) to multi-tool (`gist setup <tool>`).
+- Added tool adapter pattern supporting claude, gemini, cursor, copilot, codex.
+- Updated docs/adr/003-setup-subcommand.md with multi-tool design.
+- Reorganized work breakdown: E1 split into 4 tasks (T1.1-T1.4), E2 has 3 test tasks (T2.1-T2.3).
+
+### 2026-03-14 -- Plan Created (Setup + Savings)
+
+- Created plan merging setup subcommand (E1) and byte savings visibility (E3-E4).
+- Created docs/adr/003-setup-subcommand.md and docs/adr/002-token-first-stats.md.
 
 ## Hand-off Notes
 
-- The Store interface is in `store.go` and must not be changed.
-- PostgreSQL store (`store_postgres.go`) must not be modified.
-- The in-memory store must be pure Go standard library -- zero external dependencies.
-- Use `GOWORK=off` for all go commands because the parent directory has a go.work that does not include gist.
-- CI runs at `.github/workflows/ci.yml` with PostgreSQL service container for integration tests.
-- The `gist.New()` constructor currently errors when no store is provided. After this work, it defaults to in-memory.
+- The CLI uses cobra (github.com/spf13/cobra). New subcommands go in `cmd/gist/<name>.go` and register via `init()`.
+- To skip PersistentPreRunE (database init) for setup, override it on the setup command: `PersistentPreRunE: func(cmd *cobra.Command, args []string) error { return nil }`.
+- Claude Code global config: `~/.claude/mcp.json` + `~/.claude/CLAUDE.md`.
+- Gemini CLI global config: `~/.gemini/mcp.json` + `~/.gemini/GEMINI.md`.
+- Cursor global config: `~/.cursor/mcp.json` + `~/.cursor/rules/gist.mdc`.
+- VS Code Copilot global config: `~/.vscode/mcp.json` + `~/.github/copilot-instructions.md`.
+- Codex CLI global config: `~/.codex/config.toml` (no instructions file).
+- The gist binary via Homebrew is at `/opt/homebrew/bin/gist`. `os.Executable()` + `filepath.EvalSymlinks()` resolves it.
+- Use `GOWORK=off` for all go commands.
+- README structure: Overview > Installation > Quick Start (Zero Deps) > Quick Start (PostgreSQL) > CLI Usage > MCP Server > Agentic Tool Integration > Features > API Reference > Contributing > License.
 
 ## Appendix
 
-### MemoryStore Search Algorithm
+### gist setup Usage
 
-**SearchPorter** (word-level matching):
-1. Split query into words using `strings.Fields(strings.ToLower(query))`.
-2. For each chunk, split content into words the same way.
-3. Count how many query words appear in the chunk's word set.
-4. If at least one query word matches, include the chunk.
-5. Score = matched_words / total_chunk_words.
-6. Sort by score descending, apply limit.
+```
+gist setup                      # Print list of supported tools
+gist setup claude               # Configure Claude Code globally
+gist setup gemini               # Configure Gemini CLI globally
+gist setup claude --project     # Configure for current project
+gist setup claude --uninstall   # Remove gist config from Claude Code
+gist setup claude --dry-run     # Preview changes without writing
+```
 
-**SearchTrigram** (substring matching):
-1. Lowercase both query and chunk content.
-2. If `strings.Contains(lowerContent, lowerQuery)`, include the chunk.
-3. Score = len(query) / len(content) (longer match relative to content = higher score).
-4. Sort by score descending, apply limit.
+### Tool Adapter Registry
 
-This produces correct boolean results (found/not found) with approximate ranking, which is sufficient for e2e testing and prototyping.
+| Tool | Name | Global MCP | Project MCP | MCP Key | Global Instructions | Project Instructions |
+|------|------|------------|-------------|---------|--------------------|--------------------|
+| Claude Code | claude | ~/.claude/mcp.json | .mcp.json | mcpServers | ~/.claude/CLAUDE.md | CLAUDE.md |
+| Gemini CLI | gemini | ~/.gemini/mcp.json | .gemini/mcp.json | mcpServers | ~/.gemini/GEMINI.md | GEMINI.md |
+| Cursor | cursor | ~/.cursor/mcp.json | .cursor/mcp.json | mcpServers | ~/.cursor/rules/gist.mdc | .cursor/rules/gist.mdc |
+| VS Code Copilot | copilot | ~/.vscode/mcp.json | .vscode/mcp.json | servers | ~/.github/copilot-instructions.md | .github/copilot-instructions.md |
+| Codex CLI | codex | ~/.codex/config.toml | .codex/config.toml | mcp_servers | (none) | (none) |
+
+### README Agentic Tool Integration Section (Planned Content)
+
+The new section will appear after "MCP Server" and before "Features" in the README. It includes:
+
+1. Opening paragraph explaining gist integrates with agentic coding tools via MCP and `gist setup` automates configuration.
+2. One-line install-and-configure examples for each tool.
+3. Supported tools table with tool name, command, and what gets configured.
+4. Per-project setup, uninstall, and dry-run flag documentation.
+5. Brief explanation of what setup does (adds MCP server entry + context management instructions).
+
+### Gist Instructions Content (Shared Across All Tools)
+
+```markdown
+## Gist Context Management
+
+Use the gist MCP tools (gist_index, gist_search, gist_stats) to manage context efficiently:
+
+- When reading files over 5KB or receiving tool output over 5KB, index the content with gist_index (set a descriptive source label like the file path).
+- Instead of re-reading indexed files, use gist_search to retrieve only the relevant snippets.
+- When exploring a codebase (reading multiple files, grepping across directories), index results into gist and search across them.
+- After completing a task, call gist_stats and briefly report bytes saved (e.g., "Gist: indexed 48.2 KB, returned 3.1 KB, saved 93.6%").
+```
+
+### formatBytes Specification
+
+| Input | Output |
+|-------|--------|
+| 0 | "0 B" |
+| 512 | "512 B" |
+| 1024 | "1.0 KB" |
+| 1536 | "1.5 KB" |
+| 1048576 | "1.0 MB" |
+| 1572864 | "1.5 MB" |
+| negative | "0 B" |
+
+### MCP Search Response Shape (After)
+
+```json
+{
+  "results": [
+    {
+      "title": "Config > Database",
+      "snippet": "Connection pool size...",
+      "source": "config.md",
+      "score": 0.85,
+      "content_type": "prose",
+      "match_layer": "porter",
+      "bytes_used": 142
+    }
+  ],
+  "bytes_used": 142
+}
+```
