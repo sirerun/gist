@@ -1,0 +1,120 @@
+name: E2E Twitter
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Preview tweet without posting"
+        required: false
+        default: "true"
+
+jobs:
+  tweet-release:
+    name: Index README → compose → tweet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build gist
+        run: go build -o ./gist-bin ./cmd/gist
+
+      - name: Index README via gist MCP
+        run: |
+          readme=$(cat README.md)
+          # Escape content for JSON.
+          json_content=$(jq -Rs . <<< "$readme")
+
+          response=$(printf '%s\n%s\n%s\n' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e-twitter","version":"1.0"}}}' \
+            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+            "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"gist_index\",\"arguments\":{\"content\":${json_content},\"source\":\"README.md\",\"format\":\"markdown\"}}}" \
+            | ./gist-bin serve 2>/dev/null)
+
+          echo "$response"
+          echo "$response" | grep -q "TotalChunks"
+          echo "✓ README indexed"
+
+      - name: Search for tweet-worthy description
+        id: search
+        run: |
+          response=$(printf '%s\n%s\n%s\n' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e-twitter","version":"1.0"}}}' \
+            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+            '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"gist_search","arguments":{"query":"context intelligence index search budget","limit":1,"budget":200}}}' \
+            | ./gist-bin serve 2>/dev/null)
+
+          echo "$response"
+          echo "$response" | grep -q "bytes_used"
+          echo "✓ Search returned results"
+
+      - name: Compose and post tweet
+        env:
+          TWITTER_MCP_URL: ${{ secrets.TWITTER_MCP_URL }}
+          SIRE_API_TOKEN: ${{ secrets.SIRE_API_TOKEN }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+        run: |
+          # Determine version from release tag or git.
+          if [ -n "${{ github.event.release.tag_name }}" ]; then
+            version="${{ github.event.release.tag_name }}"
+          else
+            version="dev"
+          fi
+
+          tweet="🚀 Gist ${version} — context intelligence for AI agents.
+
+          Index everything, retrieve only what matters. Three-tier search (stemming → trigram → fuzzy), token budgets, MCP server built in.
+
+          brew install sirerun/tap/gist
+
+          github.com/sirerun/gist"
+
+          # Normalize whitespace (dedent).
+          tweet=$(echo "$tweet" | sed 's/^          //')
+
+          echo "--- Tweet (${#tweet} chars) ---"
+          echo "$tweet"
+          echo "---"
+
+          if [ "${#tweet}" -gt 280 ]; then
+            echo "::error::Tweet exceeds 280 characters (${#tweet})"
+            exit 1
+          fi
+
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "::notice::Dry run — tweet not posted"
+            exit 0
+          fi
+
+          if [ -z "$TWITTER_MCP_URL" ]; then
+            echo "::error::TWITTER_MCP_URL secret not set"
+            exit 1
+          fi
+
+          json_text=$(jq -Rs . <<< "$tweet")
+          result=$(curl -sf \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${SIRE_API_TOKEN}" \
+            -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"x.post_tweet\",\"params\":{\"text\":${json_text}}}" \
+            "${TWITTER_MCP_URL}/rpc")
+
+          echo "$result"
+          echo "$result" | jq -e '.result.tweet_id' > /dev/null
+          echo "✓ Tweet posted"
+
+      - name: Verify gist stats
+        run: |
+          response=$(printf '%s\n%s\n%s\n' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e-twitter","version":"1.0"}}}' \
+            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+            '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"gist_stats","arguments":{}}}' \
+            | ./gist-bin serve 2>/dev/null)
+
+          echo "$response"
+          echo "$response" | grep -q "bytes_saved"
+          echo "✓ Stats confirmed"

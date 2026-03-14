@@ -122,7 +122,7 @@ func (s *Server) handleRequest(ctx context.Context, req *jsonrpcRequest) *jsonrp
 	case "initialize":
 		return s.handleInitialize(req)
 
-	case "initialized":
+	case "initialized", "notifications/initialized":
 		// Notification — no response.
 		return nil
 
