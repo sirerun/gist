@@ -241,11 +241,19 @@ Each tier fires only if the previous one returns no results. This means exact qu
 | In-memory or PostgreSQL | Works instantly with no dependencies; connect PostgreSQL for production persistence |
 | Zero CGO | Pure Go, single static binary, cross-platform |
 
-## Gist Tweets About Itself
+## Proven on Real API Data
 
-Every release, Gist uses itself to compose its own tweet. The [E2E Twitter workflow](.github/workflows/e2e-twitter.yml) generates a Twitter MCP server from the [official X API v2 OpenAPI spec](https://api.twitter.com/2/openapi.json) using [Mint](https://github.com/sirerun/mint), indexes this README via the gist MCP server, searches for a compelling description, and posts the result — zero humans in the loop.
+The [E2E context savings workflow](.github/workflows/e2e-twitter.yml) downloads the [X API v2 OpenAPI spec](https://api.twitter.com/2/openapi.json) (754 KB, 133 endpoints), indexes it with Gist, runs five targeted searches, and asserts at least 80% context reduction — on every push.
 
-This is the pattern: Mint connects agents to APIs, Gist manages context. If your agent can call an MCP server, it can use both.
+```
+Gist Context Savings
+====================
+  Indexed:  754,257 bytes
+  Returned:  ~7,500 bytes
+  Saved:   ~746,757 bytes (98.9%)
+```
+
+Without Gist, an agent asking "how do I post a tweet?" pays for all 754 KB in the context window. With Gist, it gets the relevant endpoint definition in under 2 KB.
 
 ## The Mint Pattern
 

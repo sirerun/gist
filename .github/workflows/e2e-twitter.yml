@@ -1,18 +1,14 @@
-name: E2E Twitter
+name: E2E Context Savings
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: "Preview tweet without posting"
-        required: false
-        default: "true"
 
 jobs:
-  tweet-release:
-    name: Index README → compose → tweet
+  context-savings:
+    name: Index Twitter OpenAPI spec → search → measure savings
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,96 +20,67 @@ jobs:
       - name: Build gist
         run: go build -o ./gist-bin ./cmd/gist
 
-      - name: Install Mint
-        run: go install github.com/sirerun/mint/cmd/mint@latest
-
-      - name: Generate Twitter MCP from OpenAPI spec
+      - name: Download Twitter OpenAPI spec (754 KB)
         run: |
           curl -sL https://api.twitter.com/2/openapi.json -o /tmp/twitter-openapi.json
-          mint mcp generate \
-            --output ./twitter-mcp \
-            --include-tags "Tweets" \
-            --auth-env "TWITTER_BEARER_TOKEN" \
-            /tmp/twitter-openapi.json
-          cd twitter-mcp && go mod tidy && go build -o ../twitter-mcp-bin .
+          bytes=$(wc -c < /tmp/twitter-openapi.json)
+          echo "✓ Downloaded ${bytes} bytes"
 
-      - name: Index README via gist MCP
+      - name: Index spec with gist
         run: |
-          readme=$(cat README.md)
-          json_content=$(jq -Rs . <<< "$readme")
+          json_content=$(jq -Rs . < /tmp/twitter-openapi.json)
 
           response=$(printf '%s\n%s\n%s\n' \
-            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e-twitter","version":"1.0"}}}' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e","version":"1.0"}}}' \
             '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
-            "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"gist_index\",\"arguments\":{\"content\":${json_content},\"source\":\"README.md\",\"format\":\"markdown\"}}}" \
+            "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"gist_index\",\"arguments\":{\"content\":${json_content},\"source\":\"twitter-openapi.json\",\"format\":\"json\"}}}" \
             | ./gist-bin serve 2>/dev/null)
 
           echo "$response"
           echo "$response" | grep -q "TotalChunks"
-          echo "✓ README indexed"
+          echo "✓ Spec indexed"
 
-      - name: Search for tweet-worthy description
+      - name: Run targeted searches
+        run: |
+          for query in "create tweet post" "OAuth2 authentication scopes" "rate limit" "user timeline" "search recent tweets"; do
+            response=$(printf '%s\n%s\n%s\n' \
+              '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e","version":"1.0"}}}' \
+              '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+              "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"gist_search\",\"arguments\":{\"query\":\"${query}\",\"limit\":3,\"budget\":500}}}" \
+              | ./gist-bin serve 2>/dev/null)
+
+            echo "--- ${query} ---"
+            echo "$response" | tail -1 | jq -r '.result.content[0].text' | jq '.bytes_used'
+          done
+          echo "✓ All searches complete"
+
+      - name: Assert context savings
         run: |
           response=$(printf '%s\n%s\n%s\n' \
-            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e-twitter","version":"1.0"}}}' \
-            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
-            '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"gist_search","arguments":{"query":"context intelligence index search budget","limit":1,"budget":200}}}' \
-            | ./gist-bin serve 2>/dev/null)
-
-          echo "$response"
-          echo "$response" | grep -q "bytes_used"
-          echo "✓ Search returned results"
-
-      - name: Compose and post tweet
-        env:
-          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
-          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
-        run: |
-          if [ -n "${{ github.event.release.tag_name }}" ]; then
-            version="${{ github.event.release.tag_name }}"
-          else
-            version="dev"
-          fi
-
-          tweet="🚀 Gist ${version} — context intelligence for AI agents.
-
-          Index everything, retrieve only what matters. Three-tier search (stemming → trigram → fuzzy), token budgets, MCP server built in.
-
-          brew install sirerun/tap/gist
-
-          github.com/sirerun/gist"
-
-          # Normalize whitespace (dedent).
-          tweet=$(echo "$tweet" | sed 's/^          //')
-
-          echo "--- Tweet (${#tweet} chars) ---"
-          echo "$tweet"
-          echo "---"
-
-          if [ "${#tweet}" -gt 280 ]; then
-            echo "::error::Tweet exceeds 280 characters (${#tweet})"
-            exit 1
-          fi
-
-          if [ "$DRY_RUN" = "true" ]; then
-            echo "::notice::Dry run — tweet not posted"
-            exit 0
-          fi
-
-          # Post via Mint-generated Twitter MCP server (CLI mode).
-          json_text=$(jq -Rs . <<< "$tweet")
-          ./twitter-mcp-bin call createPosts text="${tweet}"
-
-          echo "✓ Tweet posted"
-
-      - name: Verify gist stats
-        run: |
-          response=$(printf '%s\n%s\n%s\n' \
-            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e-twitter","version":"1.0"}}}' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e","version":"1.0"}}}' \
             '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
             '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"gist_stats","arguments":{}}}' \
             | ./gist-bin serve 2>/dev/null)
 
-          echo "$response"
-          echo "$response" | grep -q "bytes_saved"
-          echo "✓ Stats confirmed"
+          stats_json=$(echo "$response" | tail -1 | jq -r '.result.content[0].text')
+          bytes_indexed=$(echo "$stats_json" | jq '.bytes_indexed')
+          bytes_returned=$(echo "$stats_json" | jq '.bytes_returned')
+          bytes_saved=$(echo "$stats_json" | jq '.bytes_saved')
+          saved_pct=$(echo "$stats_json" | jq '.saved_percent' | xargs printf '%.1f')
+
+          echo ""
+          echo "Gist Context Savings"
+          echo "===================="
+          echo "  Indexed:  ${bytes_indexed} bytes"
+          echo "  Returned: ${bytes_returned} bytes"
+          echo "  Saved:    ${bytes_saved} bytes (${saved_pct}%)"
+          echo ""
+
+          # Fail if savings are below 80%.
+          saved_int=$(echo "$stats_json" | jq '.saved_percent | floor')
+          if [ "$saved_int" -lt 80 ]; then
+            echo "::error::Context savings ${saved_pct}% below 80% threshold"
+            exit 1
+          fi
+
+          echo "✓ ${saved_pct}% context reduction on 754 KB spec"
