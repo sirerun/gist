@@ -19,6 +19,8 @@ type SearchResult struct {
 	ContentType string
 	// MatchLayer indicates which search tier produced the match: "porter", "trigram", or "fuzzy".
 	MatchLayer string
+	// BytesUsed is the byte length of the snippet.
+	BytesUsed int `json:"bytes_used"`
 }
 
 // SearchOption configures search behavior.
@@ -188,6 +190,7 @@ func (s *Searcher) convertMatches(matches []SearchMatch, sourceLabels map[int]st
 			Score:       m.Score,
 			ContentType: m.ContentType,
 			MatchLayer:  m.MatchLayer,
+			BytesUsed:   len(snippet),
 		})
 	}
 
