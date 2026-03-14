@@ -28,7 +28,13 @@ var rootCmd = &cobra.Command{
 			dsn = os.Getenv("GIST_DSN")
 		}
 		if dsn == "" {
-			return fmt.Errorf("--dsn flag or GIST_DSN environment variable is required")
+			fmt.Fprintln(os.Stderr, "Using in-memory store (data will not persist). Use --dsn for PostgreSQL.")
+			g, err := gist.New()
+			if err != nil {
+				return fmt.Errorf("creating in-memory store: %w", err)
+			}
+			gistDB = g
+			return nil
 		}
 		g, err := gist.New(gist.WithPostgres(dsn))
 		if err != nil {

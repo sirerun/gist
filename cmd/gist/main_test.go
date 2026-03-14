@@ -56,11 +56,15 @@ func TestRootCommandHelp(t *testing.T) {
 	}
 }
 
-func TestRootCommandRequiresDSN(t *testing.T) {
-	// Reset dsn to empty to test validation.
+func TestRootCommandFallsBackToInMemory(t *testing.T) {
+	// Reset dsn to empty to test in-memory fallback.
 	orig := dsn
 	dsn = ""
-	t.Cleanup(func() { dsn = orig })
+	origGist := gistDB
+	t.Cleanup(func() {
+		dsn = orig
+		gistDB = origGist
+	})
 	t.Setenv("GIST_DSN", "")
 
 	cmd := &cobra.Command{
@@ -72,11 +76,15 @@ func TestRootCommandRequiresDSN(t *testing.T) {
 	cmd.PersistentPreRunE = rootCmd.PersistentPreRunE
 	cmd.SetArgs([]string{})
 	cmd.SetOut(new(bytes.Buffer))
-	cmd.SetErr(new(bytes.Buffer))
+	errBuf := new(bytes.Buffer)
+	cmd.SetErr(errBuf)
 
 	err := cmd.Execute()
-	if err == nil {
-		t.Fatal("expected error when no DSN provided")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if gistDB == nil {
+		t.Fatal("expected gistDB to be set with in-memory store")
 	}
 }
 
