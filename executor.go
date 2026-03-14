@@ -88,10 +88,10 @@ func (e *Executor) Execute(ctx context.Context, lang string, code string) (*Exec
 		return nil, fmt.Errorf("executor: failed to create temp file: %w", err)
 	}
 	tmpPath := tmpFile.Name()
-	defer os.Remove(tmpPath)
+	defer func() { _ = os.Remove(tmpPath) }()
 
 	if _, err := tmpFile.WriteString(code); err != nil {
-		tmpFile.Close()
+		_ = tmpFile.Close()
 		return nil, fmt.Errorf("executor: failed to write code: %w", err)
 	}
 	if err := tmpFile.Close(); err != nil {

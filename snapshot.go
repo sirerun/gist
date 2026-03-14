@@ -98,7 +98,7 @@ func BuildSnapshot(session *Session, budget int) *Snapshot {
 	if len(errorEvents) > 0 {
 		var lines []string
 		for _, e := range errorEvents {
-			ee := e.(ErrorEvent)
+			ee, _ := e.(ErrorEvent)
 			line := fmt.Sprintf("- [%s] %s", ee.Context, ee.Message)
 			lines = append(lines, line)
 		}
@@ -137,7 +137,7 @@ func BuildSnapshot(session *Session, budget int) *Snapshot {
 	if len(searchEvents) > 0 {
 		var lines []string
 		for _, e := range searchEvents {
-			se := e.(SearchEvent)
+			se, _ := e.(SearchEvent)
 			line := fmt.Sprintf("- query=%q results=%d layer=%s", se.Query, se.ResultCount, se.MatchLayer)
 			lines = append(lines, line)
 		}
@@ -155,7 +155,7 @@ func BuildSnapshot(session *Session, budget int) *Snapshot {
 	if len(indexEvents) > 0 {
 		var lines []string
 		for _, e := range indexEvents {
-			ie := e.(IndexEvent)
+			ie, _ := e.(IndexEvent)
 			line := fmt.Sprintf("- source=%q chunks=%d", ie.Source, ie.ChunkCount)
 			lines = append(lines, line)
 		}

@@ -159,7 +159,7 @@ func TestIntegration_TokenBudgetPipeline(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer g.Close()
+	defer func() { _ = g.Close() }()
 
 	ctx := context.Background()
 
@@ -189,7 +189,7 @@ func TestIntegration_IndexChunkingOptions(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer g.Close()
+	defer func() { _ = g.Close() }()
 
 	ctx := context.Background()
 
@@ -211,7 +211,7 @@ func TestIntegration_SearchErrorPropagation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer g.Close()
+	defer func() { _ = g.Close() }()
 
 	// Search on empty store should return no results, not error.
 	results, err := g.Search(context.Background(), "anything")
@@ -230,7 +230,7 @@ func TestIntegration_IndexSaveSourceError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer g.Close()
+	defer func() { _ = g.Close() }()
 
 	_, err = g.Index(context.Background(), "# Hello\n\nContent")
 	if err == nil {
@@ -245,7 +245,7 @@ func TestIntegration_IndexSaveChunkError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer g.Close()
+	defer func() { _ = g.Close() }()
 
 	_, err = g.Index(context.Background(), "# Hello\n\nContent")
 	if err == nil {
@@ -310,7 +310,7 @@ func TestIntegration_SearchStoreError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer g.Close()
+	defer func() { _ = g.Close() }()
 
 	_, err = g.Search(context.Background(), "test")
 	if err == nil {
@@ -325,7 +325,7 @@ func TestIntegration_CodeChunkCounting(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	defer g.Close()
+	defer func() { _ = g.Close() }()
 
 	content := "# Code\n\n```go\nfunc main() {\n\tfmt.Println(\"hello\")\n\tfmt.Println(\"world\")\n\tfmt.Println(\"foo\")\n\tfmt.Println(\"bar\")\n\tfmt.Println(\"baz\")\n}\n```\n"
 	res, err := g.Index(context.Background(), content)

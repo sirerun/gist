@@ -149,7 +149,7 @@ func extractSections(doc ast.Node, source []byte) []section {
 	var headings []headingInfo
 
 	// Collect all headings.
-	ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+	_ = ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			return ast.WalkContinue, nil
 		}
