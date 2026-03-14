@@ -137,11 +137,11 @@ type Stats struct {
 
 ### Phase 4: Advanced Features (2 weeks)
 
-- [ ] `session.go` + `snapshot.go` — Session event tracking and resume snapshots
-- [ ] `executor.go` — Polyglot subprocess executor (shell, Python, Go, JS)
-- [ ] JSON and YAML structured chunking
-- [ ] Batch indexing with goroutine pool
-- [ ] `gist bench` — performance benchmarking command
+- [x] `session.go` + `snapshot.go` — Session event tracking and resume snapshots (2026-03-13)
+- [x] `executor.go` — Polyglot subprocess executor (shell, Python, Go, JS) (2026-03-13)
+- [x] JSON and YAML structured chunking (2026-03-13)
+- [x] Batch indexing with goroutine pool (2026-03-13)
+- [x] `gist bench` — performance benchmarking command (2026-03-13)
 
 ### Phase 5: Open-Source Launch (1 week)
 
