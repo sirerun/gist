@@ -181,6 +181,66 @@ func TestToolsCallSearch(t *testing.T) {
 	if result.IsError {
 		t.Fatalf("tool returned error: %s", result.Content[0].Text)
 	}
+
+	// Parse the JSON and verify searchResponse wrapper fields.
+	var sr searchResponse
+	if err := json.Unmarshal([]byte(result.Content[0].Text), &sr); err != nil {
+		t.Fatalf("unmarshal searchResponse: %v", err)
+	}
+	if len(sr.Results) == 0 {
+		t.Fatal("expected at least one search result")
+	}
+	var sum int
+	for _, r := range sr.Results {
+		if r.BytesUsed <= 0 {
+			t.Errorf("expected BytesUsed > 0, got %d", r.BytesUsed)
+		}
+		sum += r.BytesUsed
+	}
+	if sr.BytesUsed != sum {
+		t.Errorf("bytes_used = %d, want sum of results %d", sr.BytesUsed, sum)
+	}
+}
+
+func TestHandleSearchBytesUsed(t *testing.T) {
+	g := newTestGist(t)
+	defer g.Close()
+
+	// Index content so search has something to find.
+	_, err := g.Index(context.Background(), "hello world testing bytes used", gist.WithSource("bytes-test"))
+	if err != nil {
+		t.Fatalf("index: %v", err)
+	}
+
+	argsJSON, _ := json.Marshal(searchArgs{Query: "hello"})
+	raw, err := handleSearch(context.Background(), g, argsJSON)
+	if err != nil {
+		t.Fatalf("handleSearch: %v", err)
+	}
+
+	sr, ok := raw.(searchResponse)
+	if !ok {
+		t.Fatalf("result type = %T, want searchResponse", raw)
+	}
+
+	if len(sr.Results) == 0 {
+		t.Fatal("expected at least one search result")
+	}
+
+	var sum int
+	for i, r := range sr.Results {
+		if r.BytesUsed <= 0 {
+			t.Errorf("result[%d].BytesUsed = %d, want > 0", i, r.BytesUsed)
+		}
+		sum += r.BytesUsed
+	}
+
+	if sr.BytesUsed != sum {
+		t.Errorf("BytesUsed = %d, want sum of results %d", sr.BytesUsed, sum)
+	}
+	if sr.BytesUsed <= 0 {
+		t.Error("expected total BytesUsed > 0")
+	}
 }
 
 func TestToolsCallStats(t *testing.T) {
