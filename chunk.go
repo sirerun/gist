@@ -14,12 +14,18 @@ const defaultMaxChunkBytes = 4096
 
 // ContentChunk represents a single chunk of content produced by ChunkContent.
 type ContentChunk struct {
-	Content     string
-	HeadingPath string // e.g. "Config > Database > Pool"
-	ContentType string // "code" or "prose"
-	StartByte   int
-	EndByte     int
-	Index       int
+	// Content is the raw text content of this chunk.
+	Content string
+	// HeadingPath is the hierarchical heading context (e.g., "Config > Database > Pool").
+	HeadingPath string
+	// ContentType classifies the chunk as "code" or "prose".
+	ContentType string
+	// StartByte is the starting byte offset within the original content.
+	StartByte int
+	// EndByte is the ending byte offset within the original content.
+	EndByte int
+	// Index is the zero-based sequential position of this chunk.
+	Index int
 }
 
 // ChunkOption configures the chunking behavior.

@@ -437,6 +437,193 @@ func TestSearch_TrigramError(t *testing.T) {
 	}
 }
 
+func TestSearch_FuzzyFallbackTrigramPath(t *testing.T) {
+	// Fuzzy correction finds a term, porter re-search returns nothing,
+	// trigram re-search returns results.
+	fuzzyStore := &fuzzyTrigramMockStore{
+		sources:       []Source{{ID: 1, Label: "code.go"}},
+		correctedTerm: "handler",
+		trigramResults: []SearchMatch{
+			{ChunkID: 4, SourceID: 1, HeadingPath: "API", Content: "func handler() {}", ContentType: "code", Score: 0.9, MatchLayer: "trigram"},
+		},
+	}
+	vocab := NewVocabulary()
+	vocab.Add("handler", "process", "execute")
+
+	searcher := NewSearcher(fuzzyStore, vocab)
+	results, err := searcher.Search(context.Background(), "handlr") // typo
+	if err != nil {
+		t.Fatalf("Search() error = %v", err)
+	}
+	if len(results) != 1 {
+		t.Fatalf("Search() returned %d results, want 1", len(results))
+	}
+	if results[0].MatchLayer != "fuzzy" {
+		t.Errorf("MatchLayer = %q, want %q", results[0].MatchLayer, "fuzzy")
+	}
+}
+
+// fuzzyTrigramMockStore returns no porter results for corrected term,
+// but returns trigram results.
+type fuzzyTrigramMockStore struct {
+	sources        []Source
+	correctedTerm  string
+	trigramResults []SearchMatch
+}
+
+func (m *fuzzyTrigramMockStore) SaveSource(_ context.Context, _ string, _ Format) (Source, error) {
+	return Source{}, nil
+}
+func (m *fuzzyTrigramMockStore) SaveChunk(_ context.Context, _ Chunk) (Chunk, error) {
+	return Chunk{}, nil
+}
+func (m *fuzzyTrigramMockStore) SearchPorter(_ context.Context, _ SearchParams) ([]SearchMatch, error) {
+	return nil, nil
+}
+func (m *fuzzyTrigramMockStore) SearchTrigram(_ context.Context, params SearchParams) ([]SearchMatch, error) {
+	if params.Query == m.correctedTerm {
+		return m.trigramResults, nil
+	}
+	return nil, nil
+}
+func (m *fuzzyTrigramMockStore) VocabularyTerms(_ context.Context) ([]string, error) {
+	return nil, nil
+}
+func (m *fuzzyTrigramMockStore) Sources(_ context.Context) ([]Source, error) {
+	result := make([]Source, len(m.sources))
+	copy(result, m.sources)
+	return result, nil
+}
+func (m *fuzzyTrigramMockStore) Stats(_ context.Context) (StoreStats, error) {
+	return StoreStats{}, nil
+}
+func (m *fuzzyTrigramMockStore) Close() error { return nil }
+
+var _ Store = (*fuzzyTrigramMockStore)(nil)
+
+func TestSearch_SourcesError(t *testing.T) {
+	store := &sourcesErrMockStore{err: fmt.Errorf("sources broken")}
+	searcher := NewSearcher(store, NewVocabulary())
+
+	_, err := searcher.Search(context.Background(), "test")
+	if err == nil {
+		t.Fatal("expected error from Sources()")
+	}
+}
+
+type sourcesErrMockStore struct {
+	err error
+}
+
+func (m *sourcesErrMockStore) SaveSource(_ context.Context, _ string, _ Format) (Source, error) {
+	return Source{}, nil
+}
+func (m *sourcesErrMockStore) SaveChunk(_ context.Context, _ Chunk) (Chunk, error) {
+	return Chunk{}, nil
+}
+func (m *sourcesErrMockStore) SearchPorter(_ context.Context, _ SearchParams) ([]SearchMatch, error) {
+	return nil, nil
+}
+func (m *sourcesErrMockStore) SearchTrigram(_ context.Context, _ SearchParams) ([]SearchMatch, error) {
+	return nil, nil
+}
+func (m *sourcesErrMockStore) VocabularyTerms(_ context.Context) ([]string, error) { return nil, nil }
+func (m *sourcesErrMockStore) Sources(_ context.Context) ([]Source, error)         { return nil, m.err }
+func (m *sourcesErrMockStore) Stats(_ context.Context) (StoreStats, error)         { return StoreStats{}, nil }
+func (m *sourcesErrMockStore) Close() error                                        { return nil }
+
+var _ Store = (*sourcesErrMockStore)(nil)
+
+func TestSearch_FuzzyPorterErrorOnCorrected(t *testing.T) {
+	// Both porter and trigram fail for original query, fuzzy corrects,
+	// but porter fails for the corrected query.
+	store := &fuzzyErrorMockStore{
+		sources:   []Source{{ID: 1, Label: "docs.md"}},
+		failPhase: "porterCorrected",
+	}
+	vocab := NewVocabulary()
+	vocab.Add("database")
+
+	searcher := NewSearcher(store, vocab)
+	_, err := searcher.Search(context.Background(), "databse") // typo
+	if err == nil {
+		t.Fatal("expected error from porter on corrected query")
+	}
+}
+
+func TestSearch_FuzzyTrigramErrorOnCorrected(t *testing.T) {
+	// Both porter and trigram fail for original query, fuzzy corrects,
+	// porter returns nothing for corrected, trigram fails for corrected.
+	store := &fuzzyErrorMockStore{
+		sources:   []Source{{ID: 1, Label: "docs.md"}},
+		failPhase: "trigramCorrected",
+	}
+	vocab := NewVocabulary()
+	vocab.Add("database")
+
+	searcher := NewSearcher(store, vocab)
+	_, err := searcher.Search(context.Background(), "databse") // typo
+	if err == nil {
+		t.Fatal("expected error from trigram on corrected query")
+	}
+}
+
+// fuzzyErrorMockStore simulates errors during fuzzy correction re-search.
+type fuzzyErrorMockStore struct {
+	sources   []Source
+	failPhase string // "porterCorrected" or "trigramCorrected"
+	callCount int
+}
+
+func (m *fuzzyErrorMockStore) SaveSource(_ context.Context, _ string, _ Format) (Source, error) {
+	return Source{}, nil
+}
+func (m *fuzzyErrorMockStore) SaveChunk(_ context.Context, _ Chunk) (Chunk, error) {
+	return Chunk{}, nil
+}
+func (m *fuzzyErrorMockStore) SearchPorter(_ context.Context, _ SearchParams) ([]SearchMatch, error) {
+	m.callCount++
+	if m.callCount > 1 && m.failPhase == "porterCorrected" {
+		return nil, fmt.Errorf("porter corrected error")
+	}
+	return nil, nil
+}
+func (m *fuzzyErrorMockStore) SearchTrigram(_ context.Context, _ SearchParams) ([]SearchMatch, error) {
+	m.callCount++
+	if m.failPhase == "trigramCorrected" && m.callCount > 2 {
+		return nil, fmt.Errorf("trigram corrected error")
+	}
+	return nil, nil
+}
+func (m *fuzzyErrorMockStore) VocabularyTerms(_ context.Context) ([]string, error) { return nil, nil }
+func (m *fuzzyErrorMockStore) Sources(_ context.Context) ([]Source, error) {
+	out := make([]Source, len(m.sources))
+	copy(out, m.sources)
+	return out, nil
+}
+func (m *fuzzyErrorMockStore) Stats(_ context.Context) (StoreStats, error) { return StoreStats{}, nil }
+func (m *fuzzyErrorMockStore) Close() error                                { return nil }
+
+var _ Store = (*fuzzyErrorMockStore)(nil)
+
+func TestSearch_FuzzyNoResults(t *testing.T) {
+	// All three tiers fail, fuzzy correction finds a term but re-searches also return nothing.
+	store := &searchMockStore{
+		sources: []Source{{ID: 1, Label: "docs.md"}},
+	}
+	vocab := NewVocabulary()
+	vocab.Add("something")
+
+	searcher := NewSearcher(store, vocab)
+	results, err := searcher.Search(context.Background(), "somethng") // typo - within distance 2
+	if err != nil {
+		t.Fatalf("Search() error = %v", err)
+	}
+	if len(results) != 0 {
+		t.Errorf("expected 0 results, got %d", len(results))
+	}
+}
+
 func TestSearchResult_Fields(t *testing.T) {
 	r := SearchResult{
 		Title:       "Config > DB",

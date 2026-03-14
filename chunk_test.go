@@ -415,6 +415,182 @@ func TestSplitPreservingCodeBlocks(t *testing.T) {
 	}
 }
 
+func TestSplitOnParagraphs_OversizedProse(t *testing.T) {
+	// A single very long prose paragraph that exceeds maxBytes with current buffer empty.
+	longPara := strings.Repeat("x", 100)
+	chunks := splitOnParagraphs(longPara, 30)
+	if len(chunks) < 2 {
+		t.Fatalf("expected multiple sub-chunks, got %d", len(chunks))
+	}
+	var combined string
+	for _, c := range chunks {
+		combined += c.text
+	}
+	if combined != longPara {
+		t.Error("reassembled text doesn't match input")
+	}
+}
+
+func TestSplitOnParagraphs_FlushThenOversized(t *testing.T) {
+	// Current buffer has content, next paragraph causes flush, and next para is oversized prose.
+	// splitOnParagraphs uses splitPreservingCodeBlocks which needs double blank lines.
+	input := "short\n\n\n" + strings.Repeat("y", 100)
+	chunks := splitOnParagraphs(input, 30)
+	if len(chunks) < 2 {
+		t.Fatalf("expected at least 2 sub-chunks, got %d", len(chunks))
+	}
+	// First chunk should contain "short".
+	if !strings.Contains(chunks[0].text, "short") {
+		t.Errorf("first chunk = %q, should contain %q", chunks[0].text, "short")
+	}
+}
+
+func TestSplitOnParagraphs_CodeBlockKeptWhole(t *testing.T) {
+	// A code block that exceeds maxBytes should be kept whole.
+	code := "```\n" + strings.Repeat("line\n", 20) + "```"
+	chunks := splitOnParagraphs(code, 30)
+	// The entire code block should be in one chunk.
+	found := false
+	for _, c := range chunks {
+		if strings.Contains(c.text, "```") && strings.Count(c.text, "```") == 2 {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("code block was split across chunks")
+	}
+}
+
+func TestSplitOnParagraphs_FlushThenCodeBlock(t *testing.T) {
+	// Buffer has content, then a code block that causes flush but code block itself
+	// exceeds maxBytes and contains fences — kept whole.
+	code := "```\n" + strings.Repeat("c\n", 30) + "```"
+	input := "short\n\n\n" + code
+	chunks := splitOnParagraphs(input, 20)
+	if len(chunks) < 2 {
+		t.Fatalf("expected at least 2 sub-chunks, got %d", len(chunks))
+	}
+	if !strings.Contains(chunks[0].text, "short") {
+		t.Errorf("first chunk = %q, should contain %q", chunks[0].text, "short")
+	}
+}
+
+func TestSplitPreservingCodeBlocks_EmptyInput(t *testing.T) {
+	parts := splitPreservingCodeBlocks("")
+	if len(parts) != 0 {
+		t.Errorf("expected 0 parts for empty input, got %d", len(parts))
+	}
+}
+
+func TestSplitPreservingCodeBlocks_NoParagraphBreaks(t *testing.T) {
+	input := "single paragraph with no breaks"
+	parts := splitPreservingCodeBlocks(input)
+	if len(parts) != 1 {
+		t.Fatalf("expected 1 part, got %d", len(parts))
+	}
+	if parts[0] != input {
+		t.Errorf("part = %q, want %q", parts[0], input)
+	}
+}
+
+func TestSplitPreservingCodeBlocks_LeadingBlankLines(t *testing.T) {
+	input := "\n\nparagraph after blanks"
+	parts := splitPreservingCodeBlocks(input)
+	if len(parts) != 1 {
+		t.Fatalf("expected 1 part, got %d", len(parts))
+	}
+	if !strings.Contains(parts[0], "paragraph after blanks") {
+		t.Error("expected paragraph content")
+	}
+}
+
+func TestChunkPlainText_EmptyParagraphs(t *testing.T) {
+	// Input with multiple empty paragraphs in a row.
+	input := "AAA\n\n\n\nBBB\n\n\n\nCCC"
+	chunks, err := ChunkContent(input, WithChunkFormat(FormatPlainText))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(chunks) == 0 {
+		t.Fatal("expected at least one chunk")
+	}
+}
+
+func TestChunkPlainText_OversizedMiddleParagraph(t *testing.T) {
+	// First paragraph fits, second is oversized and triggers flush + split,
+	// third is normal.
+	small1 := "AA"
+	large := strings.Repeat("B", 50)
+	small2 := "CC"
+	input := small1 + "\n\n" + large + "\n\n" + small2
+	chunks, err := ChunkContent(input, WithChunkFormat(FormatPlainText), WithMaxChunkBytes(10))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(chunks) < 3 {
+		t.Fatalf("expected at least 3 chunks, got %d", len(chunks))
+	}
+	// Last chunk should contain small2.
+	last := chunks[len(chunks)-1]
+	if last.Content != small2 {
+		t.Errorf("last chunk = %q, want %q", last.Content, small2)
+	}
+}
+
+func TestChunkPlainText_OversizedFirstParaThenAnother(t *testing.T) {
+	// First paragraph is oversized (not the last), followed by more.
+	large := strings.Repeat("A", 50)
+	input := large + "\n\n" + "small"
+	chunks, err := ChunkContent(input, WithChunkFormat(FormatPlainText), WithMaxChunkBytes(20))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(chunks) < 2 {
+		t.Fatalf("expected at least 2 chunks, got %d", len(chunks))
+	}
+}
+
+func TestChunkPlainText_AccumulatedThenOversized(t *testing.T) {
+	// First paragraph is small, second is oversized prose.
+	input := "hi\n\n" + strings.Repeat("B", 50) + "\n\nend"
+	chunks, err := ChunkContent(input, WithChunkFormat(FormatPlainText), WithMaxChunkBytes(10))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(chunks) < 3 {
+		t.Fatalf("expected at least 3 chunks, got %d", len(chunks))
+	}
+}
+
+func TestChunkContent_EmptySectionAfterHeading(t *testing.T) {
+	// A heading followed immediately by another heading (empty section).
+	input := "# One\n\n# Two\n\nContent here."
+	chunks, err := ChunkContent(input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// At least one chunk for the non-empty section.
+	if len(chunks) == 0 {
+		t.Fatal("expected at least one chunk")
+	}
+}
+
+func TestSplitOnParagraphs_EmptyInput(t *testing.T) {
+	chunks := splitOnParagraphs("", 100)
+	if len(chunks) != 0 {
+		t.Errorf("expected 0 chunks for empty, got %d", len(chunks))
+	}
+}
+
+func TestSplitOnParagraphs_AccumulateAndFlush(t *testing.T) {
+	// Multiple small paragraphs that accumulate, then a paragraph triggers flush.
+	input := "aa\n\n\nbb\n\n\ncc\n\n\ndd"
+	chunks := splitOnParagraphs(input, 8)
+	if len(chunks) < 2 {
+		t.Fatalf("expected at least 2 chunks, got %d", len(chunks))
+	}
+}
+
 func TestDetectContentType(t *testing.T) {
 	tests := []struct {
 		name    string

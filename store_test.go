@@ -7,19 +7,19 @@ import (
 	"testing"
 )
 
-// mockStore is an in-memory Store implementation used to verify the interface
-// is implementable and test the supporting types.
-type mockStore struct {
+// closableMockStore is an in-memory Store implementation that tracks close
+// state and rejects operations after Close is called.
+type closableMockStore struct {
 	sources []Source
 	chunks  []Chunk
 	closed  bool
 }
 
-func newMockStore() *mockStore {
-	return &mockStore{}
+func newClosableMockStore() *closableMockStore {
+	return &closableMockStore{}
 }
 
-func (m *mockStore) SaveSource(_ context.Context, label string, format Format) (Source, error) {
+func (m *closableMockStore) SaveSource(_ context.Context, label string, format Format) (Source, error) {
 	if m.closed {
 		return Source{}, fmt.Errorf("store is closed")
 	}
@@ -32,13 +32,12 @@ func (m *mockStore) SaveSource(_ context.Context, label string, format Format) (
 	return s, nil
 }
 
-func (m *mockStore) SaveChunk(_ context.Context, chunk Chunk) (Chunk, error) {
+func (m *closableMockStore) SaveChunk(_ context.Context, chunk Chunk) (Chunk, error) {
 	if m.closed {
 		return Chunk{}, fmt.Errorf("store is closed")
 	}
 	chunk.ID = len(m.chunks) + 1
 	m.chunks = append(m.chunks, chunk)
-	// Update source stats.
 	for i := range m.sources {
 		if m.sources[i].ID == chunk.SourceID {
 			m.sources[i].ChunkCount++
@@ -49,21 +48,21 @@ func (m *mockStore) SaveChunk(_ context.Context, chunk Chunk) (Chunk, error) {
 	return chunk, nil
 }
 
-func (m *mockStore) SearchPorter(_ context.Context, params SearchParams) ([]SearchMatch, error) {
+func (m *closableMockStore) SearchPorter(_ context.Context, params SearchParams) ([]SearchMatch, error) {
 	if m.closed {
 		return nil, fmt.Errorf("store is closed")
 	}
 	return m.search(params, "porter"), nil
 }
 
-func (m *mockStore) SearchTrigram(_ context.Context, params SearchParams) ([]SearchMatch, error) {
+func (m *closableMockStore) SearchTrigram(_ context.Context, params SearchParams) ([]SearchMatch, error) {
 	if m.closed {
 		return nil, fmt.Errorf("store is closed")
 	}
 	return m.search(params, "trigram"), nil
 }
 
-func (m *mockStore) search(params SearchParams, layer string) []SearchMatch {
+func (m *closableMockStore) search(params SearchParams, layer string) []SearchMatch {
 	var matches []SearchMatch
 	for _, c := range m.chunks {
 		if params.SourceFilter != "" {
@@ -96,7 +95,7 @@ func (m *mockStore) search(params SearchParams, layer string) []SearchMatch {
 	return matches
 }
 
-func (m *mockStore) VocabularyTerms(_ context.Context) ([]string, error) {
+func (m *closableMockStore) VocabularyTerms(_ context.Context) ([]string, error) {
 	if m.closed {
 		return nil, fmt.Errorf("store is closed")
 	}
@@ -113,7 +112,7 @@ func (m *mockStore) VocabularyTerms(_ context.Context) ([]string, error) {
 	return terms, nil
 }
 
-func (m *mockStore) Sources(_ context.Context) ([]Source, error) {
+func (m *closableMockStore) Sources(_ context.Context) ([]Source, error) {
 	if m.closed {
 		return nil, fmt.Errorf("store is closed")
 	}
@@ -122,7 +121,7 @@ func (m *mockStore) Sources(_ context.Context) ([]Source, error) {
 	return result, nil
 }
 
-func (m *mockStore) Stats(_ context.Context) (StoreStats, error) {
+func (m *closableMockStore) Stats(_ context.Context) (StoreStats, error) {
 	if m.closed {
 		return StoreStats{}, fmt.Errorf("store is closed")
 	}
@@ -137,13 +136,12 @@ func (m *mockStore) Stats(_ context.Context) (StoreStats, error) {
 	}, nil
 }
 
-func (m *mockStore) Close() error {
+func (m *closableMockStore) Close() error {
 	m.closed = true
 	return nil
 }
 
-// Compile-time check that mockStore implements Store.
-var _ Store = (*mockStore)(nil)
+var _ Store = (*closableMockStore)(nil)
 
 func TestFormat_String(t *testing.T) {
 	tests := []struct {
@@ -167,7 +165,7 @@ func TestFormat_String(t *testing.T) {
 
 func TestStore_SaveSourceAndChunk(t *testing.T) {
 	ctx := context.Background()
-	s := newMockStore()
+	s := newClosableMockStore()
 	defer s.Close()
 
 	tests := []struct {
@@ -233,7 +231,7 @@ func TestStore_SaveSourceAndChunk(t *testing.T) {
 
 func TestStore_SearchPorter(t *testing.T) {
 	ctx := context.Background()
-	s := newMockStore()
+	s := newClosableMockStore()
 	defer s.Close()
 
 	src, _ := s.SaveSource(ctx, "docs.md", FormatMarkdown)
@@ -286,7 +284,7 @@ func TestStore_SearchPorter(t *testing.T) {
 
 func TestStore_SearchTrigram(t *testing.T) {
 	ctx := context.Background()
-	s := newMockStore()
+	s := newClosableMockStore()
 	defer s.Close()
 
 	src, _ := s.SaveSource(ctx, "code.go", FormatPlainText)
@@ -306,7 +304,7 @@ func TestStore_SearchTrigram(t *testing.T) {
 
 func TestStore_SearchWithSourceFilter(t *testing.T) {
 	ctx := context.Background()
-	s := newMockStore()
+	s := newClosableMockStore()
 	defer s.Close()
 
 	src1, _ := s.SaveSource(ctx, "file-a.md", FormatMarkdown)
@@ -332,7 +330,7 @@ func TestStore_SearchWithSourceFilter(t *testing.T) {
 
 func TestStore_VocabularyTerms(t *testing.T) {
 	ctx := context.Background()
-	s := newMockStore()
+	s := newClosableMockStore()
 	defer s.Close()
 
 	src, _ := s.SaveSource(ctx, "test.md", FormatMarkdown)
@@ -360,7 +358,7 @@ func TestStore_VocabularyTerms(t *testing.T) {
 
 func TestStore_Sources(t *testing.T) {
 	ctx := context.Background()
-	s := newMockStore()
+	s := newClosableMockStore()
 	defer s.Close()
 
 	s.SaveSource(ctx, "a.md", FormatMarkdown)
@@ -377,7 +375,7 @@ func TestStore_Sources(t *testing.T) {
 
 func TestStore_Stats(t *testing.T) {
 	ctx := context.Background()
-	s := newMockStore()
+	s := newClosableMockStore()
 	defer s.Close()
 
 	src, _ := s.SaveSource(ctx, "doc.md", FormatMarkdown)
@@ -401,7 +399,7 @@ func TestStore_Stats(t *testing.T) {
 
 func TestStore_Close(t *testing.T) {
 	ctx := context.Background()
-	s := newMockStore()
+	s := newClosableMockStore()
 
 	if err := s.Close(); err != nil {
 		t.Fatalf("Close() error = %v", err)

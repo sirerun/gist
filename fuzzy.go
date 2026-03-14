@@ -10,7 +10,9 @@ import (
 
 // FuzzyResult holds a vocabulary term and its edit distance from the query.
 type FuzzyResult struct {
-	Term     string
+	// Term is the matched vocabulary term.
+	Term string
+	// Distance is the Levenshtein edit distance from the query to this term.
 	Distance int
 }
 

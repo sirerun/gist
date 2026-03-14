@@ -197,6 +197,158 @@ func TestExtractSnippet(t *testing.T) {
 	}
 }
 
+func TestIsWordBoundary(t *testing.T) {
+	tests := []struct {
+		name string
+		s    string
+		i    int
+		want bool
+	}{
+		{name: "at start", s: "hello", i: 0, want: true},
+		{name: "at end", s: "hello", i: 5, want: true},
+		{name: "space before", s: "a b", i: 2, want: true},
+		{name: "space after", s: "a b", i: 1, want: true},
+		{name: "middle of word", s: "hello", i: 2, want: false},
+		{name: "negative", s: "hello", i: -1, want: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isWordBoundary(tt.s, tt.i)
+			if got != tt.want {
+				t.Errorf("isWordBoundary(%q, %d) = %v, want %v", tt.s, tt.i, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestIsSentenceEnd(t *testing.T) {
+	tests := []struct {
+		b    byte
+		want bool
+	}{
+		{'.', true},
+		{'!', true},
+		{'?', true},
+		{',', false},
+		{' ', false},
+	}
+	for _, tt := range tests {
+		got := isSentenceEnd(tt.b)
+		if got != tt.want {
+			t.Errorf("isSentenceEnd(%q) = %v, want %v", tt.b, got, tt.want)
+		}
+	}
+}
+
+func TestTrimToWordBoundary_FullContent(t *testing.T) {
+	content := "short"
+	got := trimToWordBoundary(content, 0, len(content))
+	if got != content {
+		t.Errorf("expected full content, got %q", got)
+	}
+}
+
+func TestTrimToWordBoundary_EmptyResult(t *testing.T) {
+	// When start >= end after adjustments, returns "".
+	got := trimToWordBoundary("ab", 1, 1)
+	if got != "" {
+		t.Errorf("expected empty, got %q", got)
+	}
+}
+
+func TestDensestClusterCenter_SinglePosition(t *testing.T) {
+	positions := []MatchPosition{{Start: 50, End: 60}}
+	center := densestClusterCenter(positions, 100)
+	// Should be wStart + windowSize/2 = 50 + 50 = 100
+	if center != 100 {
+		t.Errorf("center = %d, want 100", center)
+	}
+}
+
+func TestExtractSnippet_EndAdjustmentNoSentence(t *testing.T) {
+	// Long content where end adjustment needs to find word boundary (no sentence boundary nearby).
+	content := strings.Repeat("word ", 500)
+	result := ExtractSnippet(content, []MatchPosition{{Start: 100, End: 110}}, 200)
+	if len(result) == 0 {
+		t.Error("expected non-empty snippet")
+	}
+	// Should not end with space.
+	if result[len(result)-1] == ' ' {
+		t.Error("snippet ends with space")
+	}
+}
+
+func TestExtractSnippet_StartAdjustmentNoSentence(t *testing.T) {
+	// Content where start needs to move forward past a word boundary, no sentence nearby.
+	content := strings.Repeat("longword ", 500)
+	result := ExtractSnippet(content, []MatchPosition{{Start: 2000, End: 2010}}, 200)
+	if len(result) == 0 {
+		t.Error("expected non-empty snippet")
+	}
+	if result[0] == ' ' {
+		t.Error("snippet starts with space")
+	}
+}
+
+func TestDensestClusterCenter_OverlappingPositions(t *testing.T) {
+	positions := []MatchPosition{
+		{Start: 10, End: 20},
+		{Start: 15, End: 25},
+		{Start: 100, End: 110},
+	}
+	center := densestClusterCenter(positions, 50)
+	// The cluster of first two overlapping positions should win.
+	if center < 10 || center > 100 {
+		t.Errorf("center = %d, expected near the dense cluster", center)
+	}
+}
+
+func TestExtractSnippet_NegativeStartPosition(t *testing.T) {
+	// Position with negative Start should be clamped to 0.
+	content := strings.Repeat("word ", 500)
+	result := ExtractSnippet(content, []MatchPosition{{Start: -10, End: 20}}, 200)
+	if len(result) == 0 {
+		t.Error("expected non-empty snippet")
+	}
+}
+
+func TestExtractSnippet_EndBeyondContent(t *testing.T) {
+	// Position with End beyond content should be clamped.
+	content := strings.Repeat("word ", 500)
+	result := ExtractSnippet(content, []MatchPosition{{Start: 10, End: len(content) + 100}}, 200)
+	if len(result) == 0 {
+		t.Error("expected non-empty snippet")
+	}
+}
+
+func TestExtractSnippet_MatchNearEnd(t *testing.T) {
+	// Match near the very end where window end > len(content), start adjustment goes negative.
+	content := strings.Repeat("a ", 50) // 100 bytes
+	result := ExtractSnippet(content, []MatchPosition{{Start: 95, End: 100}}, 200)
+	// maxLen > content, so start would go negative after centering.
+	if len(result) == 0 {
+		t.Error("expected non-empty snippet")
+	}
+}
+
+func TestTrimToWordBoundary_AllSpaces(t *testing.T) {
+	// Content that is only spaces in the trim range, should return "".
+	content := "text " + strings.Repeat(" ", 50) + "more"
+	result := trimToWordBoundary(content, 5, 55)
+	// After trimming trailing spaces, start >= end should return empty.
+	if result != "" && strings.TrimSpace(result) == "" {
+		t.Error("should have trimmed to empty for all-space range")
+	}
+}
+
+func TestExtractSnippet_NegativeMaxLen(t *testing.T) {
+	content := strings.Repeat("a ", 1000)
+	result := ExtractSnippet(content, []MatchPosition{{Start: 500, End: 510}}, -1)
+	if len(result) > DefaultMaxSnippetLen+50 {
+		t.Errorf("expected around default max len, got %d", len(result))
+	}
+}
+
 func TestEstimateTokens(t *testing.T) {
 	tests := []struct {
 		name string
