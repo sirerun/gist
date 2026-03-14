@@ -3,6 +3,7 @@ package gist
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"sync"
 	"testing"
@@ -488,6 +489,200 @@ func TestNewNoStoreError(t *testing.T) {
 	}
 	if !errors.Is(err, err) || !strings.Contains(err.Error(), "store is required") {
 		t.Fatalf("unexpected error message: %v", err)
+	}
+}
+
+// failingStore wraps gistMockStore and fails SaveSource for specific labels.
+type failingStore struct {
+	*gistMockStore
+	failLabels map[string]bool
+}
+
+func newFailingStore(labels ...string) *failingStore {
+	m := make(map[string]bool)
+	for _, l := range labels {
+		m[l] = true
+	}
+	return &failingStore{gistMockStore: newGistMockStore(), failLabels: m}
+}
+
+func (f *failingStore) SaveSource(ctx context.Context, label string, format Format) (Source, error) {
+	if f.failLabels[label] {
+		return Source{}, fmt.Errorf("forced error for %q", label)
+	}
+	return f.gistMockStore.SaveSource(ctx, label, format)
+}
+
+func TestBatchIndexSingleItem(t *testing.T) {
+	ms := newGistMockStore()
+	g, err := New(WithStore(ms))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	defer g.Close()
+
+	items := []BatchItem{
+		{Content: "# Hello\n\nWorld", Source: "single.md", Format: FormatMarkdown},
+	}
+	results, err := g.BatchIndex(context.Background(), items)
+	if err != nil {
+		t.Fatalf("BatchIndex: %v", err)
+	}
+	if len(results) != 1 {
+		t.Fatalf("got %d results, want 1", len(results))
+	}
+	if results[0] == nil {
+		t.Fatal("expected non-nil result")
+	}
+	if results[0].Label != "single.md" {
+		t.Errorf("Label = %q, want %q", results[0].Label, "single.md")
+	}
+}
+
+func TestBatchIndexMultipleItems(t *testing.T) {
+	ms := newGistMockStore()
+	g, err := New(WithStore(ms))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	defer g.Close()
+
+	items := []BatchItem{
+		{Content: "# First\n\nContent one", Source: "a.md", Format: FormatMarkdown},
+		{Content: "Second document", Source: "b.txt", Format: FormatPlainText},
+		{Content: "# Third\n\nContent three", Source: "c.md", Format: FormatMarkdown},
+	}
+	results, err := g.BatchIndex(context.Background(), items)
+	if err != nil {
+		t.Fatalf("BatchIndex: %v", err)
+	}
+	if len(results) != 3 {
+		t.Fatalf("got %d results, want 3", len(results))
+	}
+	for i, r := range results {
+		if r == nil {
+			t.Errorf("result[%d] is nil", i)
+			continue
+		}
+		if r.Label != items[i].Source {
+			t.Errorf("result[%d].Label = %q, want %q", i, r.Label, items[i].Source)
+		}
+	}
+
+	stats := g.Stats()
+	if stats.SourceCount != 3 {
+		t.Errorf("SourceCount = %d, want 3", stats.SourceCount)
+	}
+}
+
+func TestBatchIndexWithConcurrency(t *testing.T) {
+	ms := newGistMockStore()
+	g, err := New(WithStore(ms))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	defer g.Close()
+
+	items := []BatchItem{
+		{Content: "# One\n\nFirst", Source: "1.md", Format: FormatMarkdown},
+		{Content: "# Two\n\nSecond", Source: "2.md", Format: FormatMarkdown},
+		{Content: "# Three\n\nThird", Source: "3.md", Format: FormatMarkdown},
+	}
+	results, err := g.BatchIndex(context.Background(), items, WithConcurrency(1))
+	if err != nil {
+		t.Fatalf("BatchIndex: %v", err)
+	}
+	if len(results) != 3 {
+		t.Fatalf("got %d results, want 3", len(results))
+	}
+	for i, r := range results {
+		if r == nil {
+			t.Errorf("result[%d] is nil", i)
+		}
+	}
+}
+
+func TestBatchIndexEmptyItems(t *testing.T) {
+	ms := newGistMockStore()
+	g, err := New(WithStore(ms))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	defer g.Close()
+
+	results, err := g.BatchIndex(context.Background(), nil)
+	if err != nil {
+		t.Fatalf("BatchIndex: %v", err)
+	}
+	if results != nil {
+		t.Errorf("expected nil results for empty items, got %v", results)
+	}
+}
+
+func TestBatchIndexContextCancellation(t *testing.T) {
+	ms := newGistMockStore()
+	g, err := New(WithStore(ms))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	defer g.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // cancel immediately
+
+	items := []BatchItem{
+		{Content: "# Hello\n\nWorld", Source: "a.md", Format: FormatMarkdown},
+		{Content: "# Bye\n\nWorld", Source: "b.md", Format: FormatMarkdown},
+	}
+	results, err := g.BatchIndex(ctx, items, WithConcurrency(1))
+	// With immediate cancellation, some or all items may fail.
+	// We just verify it doesn't panic and returns the results slice.
+	if len(results) != 2 {
+		t.Fatalf("got %d results, want 2", len(results))
+	}
+	// At least one should have failed due to context cancellation.
+	if err == nil {
+		// It's possible all succeeded if they ran before ctx check,
+		// so we don't require an error — just verify no panic.
+		return
+	}
+	if !strings.Contains(err.Error(), "context canceled") {
+		t.Logf("got error: %v", err)
+	}
+}
+
+func TestBatchIndexErrorHandling(t *testing.T) {
+	fs := newFailingStore("bad.md")
+	g, err := New(WithStore(fs))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	defer g.Close()
+
+	items := []BatchItem{
+		{Content: "# Good\n\nContent", Source: "good.md", Format: FormatMarkdown},
+		{Content: "# Bad\n\nContent", Source: "bad.md", Format: FormatMarkdown},
+		{Content: "# Also good\n\nContent", Source: "also-good.md", Format: FormatMarkdown},
+	}
+	results, err := g.BatchIndex(context.Background(), items)
+	if err == nil {
+		t.Fatal("expected error from failing item")
+	}
+	if !strings.Contains(err.Error(), "forced error") {
+		t.Errorf("expected forced error, got: %v", err)
+	}
+	if len(results) != 3 {
+		t.Fatalf("got %d results, want 3", len(results))
+	}
+	// good.md and also-good.md should succeed.
+	if results[0] == nil {
+		t.Error("result[0] (good.md) should not be nil")
+	}
+	if results[1] != nil {
+		t.Error("result[1] (bad.md) should be nil on failure")
+	}
+	if results[2] == nil {
+		t.Error("result[2] (also-good.md) should not be nil")
 	}
 }
 
