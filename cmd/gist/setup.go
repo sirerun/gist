@@ -122,7 +122,62 @@ var setupCmd = &cobra.Command{
 			return fmt.Errorf("unknown tool %q, supported tools: %s", toolName, strings.Join(names, ", "))
 		}
 
-		fmt.Fprintf(os.Stderr, "Setting up %s...\n", adapter.DisplayName)
+		uninstall, _ := cmd.Flags().GetBool("uninstall")
+		project, _ := cmd.Flags().GetBool("project")
+		dryRun, _ := cmd.Flags().GetBool("dry-run")
+
+		var mcpPath, instPath string
+		if project {
+			mcpPath = adapter.ProjectMCPPath
+			instPath = adapter.ProjectInstPath
+		} else {
+			home, err := os.UserHomeDir()
+			if err != nil {
+				return fmt.Errorf("determining home directory: %w", err)
+			}
+			mcpPath = strings.Replace(adapter.GlobalMCPPath, "~", home, 1)
+			instPath = strings.Replace(adapter.GlobalInstPath, "~", home, 1)
+		}
+
+		gistPath, err := os.Executable()
+		if err != nil {
+			return fmt.Errorf("detecting gist binary: %w", err)
+		}
+		gistPath, err = filepath.EvalSymlinks(gistPath)
+		if err != nil {
+			return fmt.Errorf("resolving gist binary path: %w", err)
+		}
+
+		mcpChanged, err := configureMCP(mcpPath, adapter.MCPKey, gistPath, uninstall, dryRun)
+		if err != nil {
+			return err
+		}
+		instChanged, err := configureInstructions(instPath, adapter.InstSentinel, uninstall, dryRun)
+		if err != nil {
+			return err
+		}
+
+		if uninstall {
+			if mcpChanged {
+				fmt.Fprintf(os.Stderr, "Removed gist from %s\n", mcpPath)
+			}
+			if instChanged {
+				fmt.Fprintf(os.Stderr, "Removed gist instructions from %s\n", instPath)
+			}
+			if !mcpChanged && !instChanged {
+				fmt.Fprintln(os.Stderr, "Not configured (no changes)")
+			}
+		} else {
+			if mcpChanged {
+				fmt.Fprintf(os.Stderr, "Configured %s MCP at %s\n", adapter.DisplayName, mcpPath)
+			}
+			if instChanged {
+				fmt.Fprintf(os.Stderr, "Added gist instructions to %s\n", instPath)
+			}
+			if !mcpChanged && !instChanged {
+				fmt.Fprintln(os.Stderr, "Already configured (no changes)")
+			}
+		}
 		return nil
 	},
 }
