@@ -51,6 +51,20 @@ changelog:
     - title: "Other"
       order: 999
 
+brews:
+  - repository:
+      owner: sirerun
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    name: gist
+    homepage: "https://github.com/sirerun/gist"
+    description: "Context intelligence for LLM applications — index everything, retrieve only what matters"
+    license: "Apache-2.0"
+    install: |
+      bin.install "gist"
+    test: |
+      system "#{bin}/gist", "version"
+
 release:
   github:
     owner: sirerun

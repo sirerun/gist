@@ -16,7 +16,13 @@ Gist is a Go library first: import it as a package, use it as a CLI, or run it a
 
 ## Installation
 
-**CLI:**
+**Homebrew (macOS/Linux):**
+
+```sh
+brew install sirerun/tap/gist
+```
+
+**Go install:**
 
 ```sh
 go install github.com/sirerun/gist/cmd/gist@latest
