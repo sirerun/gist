@@ -47,7 +47,7 @@ func ToolDefinitions() []Tool {
 		},
 		{
 			Name:        "gist_search",
-			Description: "Search indexed content using three-tier search (porter stemming, trigram, fuzzy correction).",
+			Description: "Search indexed content using three-tier search (porter stemming, trigram, fuzzy correction). Returns results with bytes_used per result and total.",
 			InputSchema: Schema{
 				Type: "object",
 				Properties: map[string]Property{
@@ -123,6 +123,12 @@ type searchArgs struct {
 	Budget int    `json:"budget"`
 }
 
+// searchResponse wraps search results with total bytes used.
+type searchResponse struct {
+	Results   []gist.SearchResult `json:"results"`
+	BytesUsed int                 `json:"bytes_used"`
+}
+
 func handleSearch(ctx context.Context, g *gist.Gist, args json.RawMessage) (any, error) {
 	var a searchArgs
 	if err := json.Unmarshal(args, &a); err != nil {
@@ -143,7 +149,24 @@ func handleSearch(ctx context.Context, g *gist.Gist, args json.RawMessage) (any,
 		opts = append(opts, gist.WithBudget(a.Budget))
 	}
 
-	return g.Search(ctx, a.Query, opts...)
+	results, err := g.Search(ctx, a.Query, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	if results == nil {
+		results = []gist.SearchResult{}
+	}
+
+	var totalBytesUsed int
+	for _, r := range results {
+		totalBytesUsed += r.BytesUsed
+	}
+
+	return searchResponse{
+		Results:   results,
+		BytesUsed: totalBytesUsed,
+	}, nil
 }
 
 func handleStats(g *gist.Gist) (any, error) {
