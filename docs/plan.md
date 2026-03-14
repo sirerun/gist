@@ -80,7 +80,7 @@ See `docs/adr/001-in-memory-store.md`.
 
 ### E1: In-Memory Store Implementation
 
-- [ ] T1.1 Implement store_memory.go  Owner: TBD  Est: 45m
+- [x] T1.1 Implement store_memory.go (2026-03-14)
   - MemoryStore struct with sync.RWMutex, source/chunk slices, ID counters.
   - SaveSource: append to sources slice, return with auto-incremented ID.
   - SaveChunk: append to chunks slice, return with auto-incremented ID.
@@ -93,7 +93,7 @@ See `docs/adr/001-in-memory-store.md`.
   - Acceptance: compiles, satisfies Store interface, go vet clean.
   - Dependencies: none.
 
-- [ ] T1.2 Write store_memory_test.go  Owner: TBD  Est: 45m
+- [x] T1.2 Write store_memory_test.go (2026-03-14, 22 tests, >97% coverage)
   - Table-driven tests for every Store method.
   - Test cases: save source and retrieve, save chunks and search (porter), save chunks and search (trigram), search with source filter, search with limit, vocabulary terms extraction, stats accuracy, empty store behavior, concurrent read/write safety (goroutines + race detector).
   - Acceptance: `GOWORK=off go test -run TestMemory -race -v` passes. >95% coverage on store_memory.go.
@@ -101,13 +101,13 @@ See `docs/adr/001-in-memory-store.md`.
 
 ### E2: Gist API Integration
 
-- [ ] T2.1 Add WithMemory() option and default store  Owner: TBD  Est: 20m
+- [x] T2.1 Add WithMemory() option and default store (2026-03-14)
   - Add `WithMemory() Option` to gist.go that sets `cfg.store = NewMemoryStore()`.
   - Change `New()` to use `NewMemoryStore()` as default when no store is configured (remove the "store required" error).
   - Acceptance: `gist.New()` returns a working Gist. `gist.New(gist.WithMemory())` returns a working Gist. `gist.New(gist.WithPostgres(dsn))` still works.
   - Dependencies: T1.1.
 
-- [ ] T2.2 Write gist_e2e_test.go  Owner: TBD  Est: 30m
+- [x] T2.2 Write gist_e2e_test.go (2026-03-14, 6 e2e tests)
   - End-to-end test: New() -> Index markdown -> Search -> verify results contain expected snippets.
   - End-to-end test: New() -> Index multiple documents -> Search -> verify cross-document results.
   - End-to-end test: New() -> BatchIndex -> Search -> verify results.
@@ -119,13 +119,13 @@ See `docs/adr/001-in-memory-store.md`.
 
 ### E3: CLI and Documentation
 
-- [ ] T3.1 Update CLI to work without --dsn  Owner: TBD  Est: 20m
+- [x] T3.1 Update CLI to work without --dsn (2026-03-14)
   - Modify cmd/gist/main.go PersistentPreRunE: if --dsn is empty and GIST_DSN is empty, create Gist with in-memory store instead of erroring.
   - Print a notice: "Using in-memory store (data will not persist). Use --dsn for PostgreSQL."
   - Acceptance: `gist index README.md` works without --dsn. `gist search "context"` returns results. `gist stats` shows counts.
   - Dependencies: T2.1.
 
-- [ ] T3.2 Update README.md  Owner: TBD  Est: 15m
+- [x] T3.2 Update README.md (2026-03-14)
   - Add zero-dependency quick start section showing `gist.New()` without PostgreSQL.
   - Update CLI section to note that --dsn is optional.
   - Acceptance: README shows both in-memory and PostgreSQL usage paths.
@@ -133,7 +133,7 @@ See `docs/adr/001-in-memory-store.md`.
 
 ### E4: Quality Gates
 
-- [ ] T4.1 Run linter and fix findings  Owner: TBD  Est: 10m
+- [x] T4.1 Run linter and fix findings (2026-03-14)
   - `GOWORK=off go vet ./...`
   - `GOWORK=off go build ./...`
   - Acceptance: zero errors, zero warnings.
