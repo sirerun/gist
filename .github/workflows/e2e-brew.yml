@@ -29,7 +29,7 @@ jobs:
           if [ -n "${{ inputs.version }}" ]; then
             # Strip leading v from tag (v1.1.0 -> 1.1.0)
             expected=$(echo "${{ inputs.version }}" | sed 's/^v//')
-            gist version | grep -q "$expected" || { echo "Expected $expected, got $(gist version)"; exit 1; }
+            gist version 2>&1 | grep -q "$expected" || { echo "Expected $expected, got $(gist version 2>&1)"; exit 1; }
           fi
 
       - name: Verify setup subcommand exists
