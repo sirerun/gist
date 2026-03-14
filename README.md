@@ -116,6 +116,9 @@ gist bench --docs 500 --searches 200
 
 # Check runtime environment and dependencies
 gist doctor
+
+# Configure gist for your agentic coding tool
+gist setup claude    # or gemini, cursor, copilot, codex
 ```
 
 For persistent storage, set `GIST_DSN` or pass `--dsn`:
@@ -128,14 +131,26 @@ gist search "authentication"
 
 ## MCP Server
 
-`gist serve` exposes Gist as an MCP tool provider over stdio, compatible with any MCP client:
+`gist serve` exposes Gist as an MCP tool provider over stdio, compatible with any MCP client.
+
+The easiest way to configure your tool is with `gist setup`:
+
+```sh
+gist setup claude   # or gemini, cursor, copilot, codex
+```
+
+See [Agentic Tool Integration](#agentic-tool-integration) for the full list of supported tools and options.
+
+### Manual Configuration
+
+For unsupported tools or custom setups, add gist to your MCP client configuration manually:
 
 ```json
 {
   "mcpServers": {
     "gist": {
       "command": "gist",
-      "args": ["serve", "--dsn", "postgres://localhost:5432/gist"]
+      "args": ["serve"]
     }
   }
 }
@@ -148,6 +163,50 @@ Tools provided:
 | `gist_index` | Index content with source label and format |
 | `gist_search` | Search with query, limit, source filter, and token budget |
 | `gist_stats` | Return indexing and search statistics |
+
+## Agentic Tool Integration
+
+Gist integrates with agentic coding tools as an MCP server. The `gist setup` command configures everything in one step.
+
+**One-line install and configure:**
+
+```sh
+brew install sirerun/tap/gist && gist setup claude
+brew install sirerun/tap/gist && gist setup gemini
+brew install sirerun/tap/gist && gist setup cursor
+brew install sirerun/tap/gist && gist setup copilot
+brew install sirerun/tap/gist && gist setup codex
+```
+
+**Supported tools:**
+
+| Tool | Command | Configures |
+|------|---------|------------|
+| Claude Code | `gist setup claude` | `~/.claude/mcp.json` + `~/.claude/CLAUDE.md` |
+| Gemini CLI | `gist setup gemini` | `~/.gemini/mcp.json` + `~/.gemini/GEMINI.md` |
+| Cursor | `gist setup cursor` | `~/.cursor/mcp.json` + `~/.cursor/rules/gist.mdc` |
+| VS Code Copilot | `gist setup copilot` | `~/.vscode/mcp.json` + `~/.github/copilot-instructions.md` |
+| Codex CLI | `gist setup codex` | `~/.codex/config.toml` |
+
+**Per-project setup:**
+
+```sh
+gist setup claude --project    # Configures .mcp.json + CLAUDE.md in current directory
+```
+
+**Uninstall:**
+
+```sh
+gist setup claude --uninstall  # Removes gist configuration
+```
+
+**Dry run:**
+
+```sh
+gist setup claude --dry-run    # Preview changes without writing files
+```
+
+Setup adds gist as an MCP server and includes context management instructions so the tool uses gist automatically for indexing and retrieval.
 
 ## Use Cases
 
