@@ -145,11 +145,11 @@ type Stats struct {
 
 ### Phase 5: Open-Source Launch (1 week)
 
-- [ ] README with examples and benchmarks
-- [ ] Apache 2.0 LICENSE
-- [ ] GitHub Actions CI (lint, test, release — CI runs against a PostgreSQL service container)
-- [ ] `go install github.com/sirerun/gist/cmd/gist@latest`
-- [ ] Announcement post positioning Gist alongside Mint
+- [x] README with examples and benchmarks (2026-03-13)
+- [x] Apache 2.0 LICENSE (2026-03-13)
+- [x] GitHub Actions CI (lint, test, release — CI runs against a PostgreSQL service container) (2026-03-13)
+- [x] `go install github.com/sirerun/gist/cmd/gist@latest` (2026-03-13)
+- [x] Announcement post positioning Gist alongside Mint (2026-03-13)
 
 ## Dependencies
 
