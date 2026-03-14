@@ -111,15 +111,15 @@ type Stats struct {
 
 ### Phase 1: Core Library (2 weeks)
 
-- [ ] `gist.go` — `New()`, `Index()`, `Search()`, `Close()`
-- [ ] `store.go` — `ContentStore` interface
-- [ ] `store_postgres.go` — PostgreSQL backend using `tsvector` for porter stemming and `pg_trgm` for trigram search
-- [ ] `chunk.go` — Markdown chunking (heading-aware, code-block preserving)
-- [ ] `search.go` — Three-tier fallback (porter → trigram → fuzzy)
-- [ ] `fuzzy.go` — Levenshtein distance + vocabulary correction
-- [ ] `snippet.go` — Smart snippet extraction
-- [ ] Full test suite with table-driven tests against PostgreSQL (use `testcontainers-go` or local instance)
-- [ ] `go doc` documentation on all exported types
+- [x] `gist.go` — `New()`, `Index()`, `Search()`, `Close()` (2026-03-13)
+- [x] `store.go` — `ContentStore` interface (2026-03-13)
+- [x] `store_postgres.go` — PostgreSQL backend using `tsvector` for porter stemming and `pg_trgm` for trigram search (2026-03-13)
+- [x] `chunk.go` — Markdown chunking (heading-aware, code-block preserving) (2026-03-13)
+- [x] `search.go` — Three-tier fallback (porter → trigram → fuzzy) (2026-03-13)
+- [x] `fuzzy.go` — Levenshtein distance + vocabulary correction (2026-03-13)
+- [x] `snippet.go` — Smart snippet extraction (2026-03-13)
+- [x] Full test suite with table-driven tests against PostgreSQL (use `testcontainers-go` or local instance) (2026-03-13, 82% coverage overall, 98.3% excluding store_postgres.go)
+- [x] `go doc` documentation on all exported types (2026-03-13)
 
 ### Phase 2: CLI + MCP (1 week)
 
