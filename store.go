@@ -12,6 +12,8 @@ const (
 	FormatJSON
 	// FormatPlainText indicates unstructured plain text.
 	FormatPlainText
+	// FormatYAML indicates structured YAML content.
+	FormatYAML
 )
 
 // String returns the human-readable name of the format.
@@ -23,6 +25,8 @@ func (f Format) String() string {
 		return "json"
 	case FormatPlainText:
 		return "plaintext"
+	case FormatYAML:
+		return "yaml"
 	default:
 		return "unknown"
 	}

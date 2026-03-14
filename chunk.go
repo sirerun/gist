@@ -75,6 +75,10 @@ func ChunkContent(content string, opts ...ChunkOption) ([]ContentChunk, error) {
 	switch cfg.format {
 	case FormatPlainText:
 		return chunkPlainText(content, cfg.maxChunkBytes), nil
+	case FormatJSON:
+		return chunkJSON(content, cfg.maxChunkBytes)
+	case FormatYAML:
+		return chunkYAML(content, cfg.maxChunkBytes)
 	default:
 		return chunkMarkdown(content, cfg.maxChunkBytes)
 	}

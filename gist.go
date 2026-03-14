@@ -6,9 +6,12 @@ package gist
 import (
 	"context"
 	"errors"
+	"runtime"
 	"strings"
 	"sync"
 	"sync/atomic"
+
+	"golang.org/x/sync/errgroup"
 )
 
 // Stats holds aggregate statistics about indexing and search activity.
@@ -230,6 +233,85 @@ func (g *Gist) Index(ctx context.Context, content string, opts ...IndexOption) (
 		TotalChunks: len(chunks),
 		CodeChunks:  codeChunks,
 	}, nil
+}
+
+// BatchItem represents a single item to index in a batch operation.
+type BatchItem struct {
+	Content string
+	Source  string
+	Format  Format
+}
+
+// BatchOption configures batch indexing behavior.
+type BatchOption func(*batchConfig)
+
+type batchConfig struct {
+	concurrency int
+}
+
+func defaultBatchConfig() batchConfig {
+	return batchConfig{
+		concurrency: runtime.NumCPU(),
+	}
+}
+
+// WithConcurrency sets the number of concurrent indexing goroutines.
+func WithConcurrency(n int) BatchOption {
+	return func(c *batchConfig) {
+		if n > 0 {
+			c.concurrency = n
+		}
+	}
+}
+
+// BatchIndex indexes multiple items concurrently using a goroutine pool.
+// If any item fails, partial results are returned along with the error.
+// Context cancellation stops queuing new items but lets in-flight items finish.
+func (g *Gist) BatchIndex(ctx context.Context, items []BatchItem, opts ...BatchOption) ([]*IndexResult, error) {
+	if len(items) == 0 {
+		return nil, nil
+	}
+
+	bc := defaultBatchConfig()
+	for _, opt := range opts {
+		opt(&bc)
+	}
+
+	results := make([]*IndexResult, len(items))
+	errs := make([]error, len(items))
+
+	eg, egCtx := errgroup.WithContext(ctx)
+	eg.SetLimit(bc.concurrency)
+
+	for i, item := range items {
+		i, item := i, item
+		eg.Go(func() error {
+			var indexOpts []IndexOption
+			if item.Source != "" {
+				indexOpts = append(indexOpts, WithSource(item.Source))
+			}
+			indexOpts = append(indexOpts, WithFormat(item.Format))
+
+			res, err := g.Index(egCtx, item.Content, indexOpts...)
+			if err != nil {
+				errs[i] = err
+				return nil // don't cancel other items
+			}
+			results[i] = res
+			return nil
+		})
+	}
+
+	_ = eg.Wait()
+
+	var combined error
+	for _, err := range errs {
+		if err != nil {
+			combined = errors.Join(combined, err)
+		}
+	}
+
+	return results, combined
 }
 
 // Search delegates to the three-tier Searcher. It applies the configured
