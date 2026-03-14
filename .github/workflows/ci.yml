@@ -3,7 +3,6 @@ name: CI
 on:
   push:
     branches: [main]
-    tags: ['v*']
   pull_request:
     branches: [main]
 
@@ -22,13 +21,11 @@ jobs:
       - uses: golangci/golangci-lint-action@v6
         with:
           version: latest
+          install-mode: goinstall
 
   test:
     name: Test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: [stable]
     services:
       postgres:
         image: postgres:16
@@ -45,7 +42,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version-file: go.mod
       - name: Install pg_trgm extension
         run: PGPASSWORD=testpass psql -h localhost -U postgres -d gist_test -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
       - name: Run tests
@@ -70,24 +67,3 @@ jobs:
         run: GOWORK=off go build ./...
       - name: Build binary
         run: GOWORK=off go build -o gist ./cmd/gist/
-
-  release:
-    name: Release
-    needs: [lint, test, build]
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - uses: goreleaser/goreleaser-action@v6
-        with:
-          version: '~> v2'
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
