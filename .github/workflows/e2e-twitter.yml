@@ -24,10 +24,22 @@ jobs:
       - name: Build gist
         run: go build -o ./gist-bin ./cmd/gist
 
+      - name: Install Mint
+        run: go install github.com/sirerun/mint/cmd/mint@latest
+
+      - name: Generate Twitter MCP from OpenAPI spec
+        run: |
+          curl -sL https://api.twitter.com/2/openapi.json -o /tmp/twitter-openapi.json
+          mint mcp generate \
+            --output ./twitter-mcp \
+            --include-tags "Tweets" \
+            --auth-env "TWITTER_BEARER_TOKEN" \
+            /tmp/twitter-openapi.json
+          cd twitter-mcp && go mod tidy && go build -o ../twitter-mcp-bin .
+
       - name: Index README via gist MCP
         run: |
           readme=$(cat README.md)
-          # Escape content for JSON.
           json_content=$(jq -Rs . <<< "$readme")
 
           response=$(printf '%s\n%s\n%s\n' \
@@ -41,7 +53,6 @@ jobs:
           echo "✓ README indexed"
 
       - name: Search for tweet-worthy description
-        id: search
         run: |
           response=$(printf '%s\n%s\n%s\n' \
             '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e-twitter","version":"1.0"}}}' \
@@ -55,11 +66,9 @@ jobs:
 
       - name: Compose and post tweet
         env:
-          TWITTER_MCP_URL: ${{ secrets.TWITTER_MCP_URL }}
-          SIRE_API_TOKEN: ${{ secrets.SIRE_API_TOKEN }}
+          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
         run: |
-          # Determine version from release tag or git.
           if [ -n "${{ github.event.release.tag_name }}" ]; then
             version="${{ github.event.release.tag_name }}"
           else
@@ -91,20 +100,10 @@ jobs:
             exit 0
           fi
 
-          if [ -z "$TWITTER_MCP_URL" ]; then
-            echo "::error::TWITTER_MCP_URL secret not set"
-            exit 1
-          fi
-
+          # Post via Mint-generated Twitter MCP server (CLI mode).
           json_text=$(jq -Rs . <<< "$tweet")
-          result=$(curl -sf \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${SIRE_API_TOKEN}" \
-            -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"x.post_tweet\",\"params\":{\"text\":${json_text}}}" \
-            "${TWITTER_MCP_URL}/rpc")
+          ./twitter-mcp-bin call createPosts text="${tweet}"
 
-          echo "$result"
-          echo "$result" | jq -e '.result.tweet_id' > /dev/null
           echo "✓ Tweet posted"
 
       - name: Verify gist stats
