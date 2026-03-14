@@ -123,9 +123,9 @@ type Stats struct {
 
 ### Phase 2: CLI + MCP (1 week)
 
-- [ ] `cmd/gist/main.go` — `gist index <file>`, `gist search <query>`, `gist stats`
-- [ ] `gist serve` — MCP server over stdio (tools: `gist_index`, `gist_search`, `gist_execute`)
-- [ ] `gist doctor` — runtime and dependency diagnostics (includes PostgreSQL connectivity check)
+- [x] `cmd/gist/main.go` — `gist index <file>`, `gist search <query>`, `gist stats` (2026-03-13)
+- [x] `gist serve` — MCP server over stdio (tools: `gist_index`, `gist_search`, `gist_stats`) (2026-03-13)
+- [x] `gist doctor` — runtime and dependency diagnostics (includes PostgreSQL connectivity check) (2026-03-13)
 
 ### Phase 3: Sire Integration (1 week)
 
