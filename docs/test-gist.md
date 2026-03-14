@@ -47,9 +47,9 @@ Ask Claude Code:
 
 Ask Claude Code:
 
-> Search gist for "store" with a budget of 500 bytes.
+> Search gist for "store" with a budget of 500 tokens.
 
-**Expected**: Claude calls `gist_search` with `budget: 500` and the returned `bytes_used` is at or under 500.
+**Expected**: Claude calls `gist_search` with `budget: 500` and the results fit within a 500-token budget. Note that `budget` is denominated in tokens (approximately 4 characters per token), not bytes, so `bytes_used` may be up to ~2000 bytes.
 
 ## Test 6: Stats reporting
 

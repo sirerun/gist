@@ -241,6 +241,12 @@ Each tier fires only if the previous one returns no results. This means exact qu
 | In-memory or PostgreSQL | Works instantly with no dependencies; connect PostgreSQL for production persistence |
 | Zero CGO | Pure Go, single static binary, cross-platform |
 
+## Gist Tweets About Itself
+
+Every release, Gist uses itself to compose its own tweet. The [E2E Twitter workflow](.github/workflows/e2e-twitter.yml) indexes this README via the gist MCP server, searches for a compelling description, then posts the result through the [Sire Twitter MCP server](https://github.com/sirerun/mcp-servers) — zero humans in the loop.
+
+This is the pattern: index once, search when you need it, pipe the result into the next tool. If your agent can call an MCP server, it can use Gist.
+
 ## The Mint Pattern
 
 Gist is part of the open infrastructure layer for AI agent development from [Sire](https://sire.run), alongside [Mint](https://github.com/sirerun/mint).

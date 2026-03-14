@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -20,18 +21,22 @@ type toolAdapter struct {
 	GlobalInstPath  string
 	ProjectInstPath string
 	InstSentinel    string
+	// CLIBinary is the tool's CLI binary name for MCP management (e.g., "claude").
+	// When set, the setup command will prefer using the CLI to add/remove MCP servers.
+	CLIBinary string
 }
 
 var toolRegistry = map[string]toolAdapter{
 	"claude": {
 		Name:            "claude",
 		DisplayName:     "Claude Code",
-		GlobalMCPPath:   "~/.claude/mcp.json",
+		GlobalMCPPath:   "~/.claude.json",
 		ProjectMCPPath:  ".mcp.json",
 		MCPKey:          "mcpServers",
 		GlobalInstPath:  "~/.claude/CLAUDE.md",
 		ProjectInstPath: "CLAUDE.md",
 		InstSentinel:    "## Gist Context Management",
+		CLIBinary:       "claude",
 	},
 	"gemini": {
 		Name:            "gemini",
@@ -148,9 +153,26 @@ var setupCmd = &cobra.Command{
 			return fmt.Errorf("resolving gist binary path: %w", err)
 		}
 
-		mcpChanged, err := configureMCP(mcpPath, adapter.MCPKey, gistPath, uninstall, dryRun)
-		if err != nil {
-			return err
+		// When a CLI binary is available, prefer it for MCP management
+		// (e.g., "claude mcp add" writes to the correct location and avoids
+		// reformatting the tool's internal state file).
+		var mcpChanged bool
+		if adapter.CLIBinary != "" {
+			var cliErr error
+			mcpChanged, cliErr = configureMCPCLI(adapter.CLIBinary, gistPath, project, uninstall, dryRun)
+			if cliErr != nil {
+				// CLI not found or failed — fall back to direct file manipulation.
+				mcpChanged, cliErr = configureMCP(mcpPath, adapter.MCPKey, gistPath, uninstall, dryRun)
+				if cliErr != nil {
+					return cliErr
+				}
+			}
+		} else {
+			var err error
+			mcpChanged, err = configureMCP(mcpPath, adapter.MCPKey, gistPath, uninstall, dryRun)
+			if err != nil {
+				return err
+			}
 		}
 		instChanged, err := configureInstructions(instPath, adapter.InstSentinel, uninstall, dryRun)
 		if err != nil {
@@ -250,6 +272,43 @@ func configureInstructions(path string, sentinel string, uninstall bool, dryRun 
 	}
 	if err := os.WriteFile(path, []byte(result), 0o644); err != nil {
 		return false, fmt.Errorf("writing instructions file: %w", err)
+	}
+	return true, nil
+}
+
+// configureMCPCLI uses a tool's CLI binary to add or remove the gist MCP server.
+// Returns (changed, nil) on success, or (false, err) if the CLI is unavailable.
+func configureMCPCLI(cliBinary string, gistPath string, project bool, uninstall bool, dryRun bool) (bool, error) {
+	bin, err := exec.LookPath(cliBinary)
+	if err != nil {
+		return false, fmt.Errorf("%s CLI not found: %w", cliBinary, err)
+	}
+
+	scope := "user"
+	if project {
+		scope = "project"
+	}
+
+	if dryRun {
+		if uninstall {
+			fmt.Fprintf(os.Stderr, "[dry-run] Would run: %s mcp remove gist --scope %s\n", bin, scope)
+		} else {
+			fmt.Fprintf(os.Stderr, "[dry-run] Would run: %s mcp add --transport stdio --scope %s gist %s serve\n", bin, scope, gistPath)
+		}
+		return true, nil
+	}
+
+	if uninstall {
+		cmd := exec.Command(bin, "mcp", "remove", "gist", "--scope", scope)
+		if out, err := cmd.CombinedOutput(); err != nil {
+			return false, fmt.Errorf("%s mcp remove failed: %s: %w", cliBinary, string(out), err)
+		}
+		return true, nil
+	}
+
+	cmd := exec.Command(bin, "mcp", "add", "--transport", "stdio", "--scope", scope, "gist", "--", gistPath, "serve")
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return false, fmt.Errorf("%s mcp add failed: %s: %w", cliBinary, string(out), err)
 	}
 	return true, nil
 }
