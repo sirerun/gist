@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.1.0](https://github.com/sirerun/gist/compare/v1.0.0...v1.1.0) (2026-03-14)
+
+
+### Features
+
+* **cli:** add human-readable byte formatting to stats command ([f9629ab](https://github.com/sirerun/gist/commit/f9629ab67698cd8b8fd857d2271fb98559953d45))
+* **cli:** add setup subcommand adapter types and registry ([467a3c0](https://github.com/sirerun/gist/commit/467a3c0423f8bb115d5c785c1e62b9d970b48a11))
+* **cli:** allow CLI to run without --dsn using in-memory store ([eb9120d](https://github.com/sirerun/gist/commit/eb9120d3cdb5f35e9b5bfe397f2311e6869db404))
+* **cli:** implement instructions file manipulation for setup ([346ad60](https://github.com/sirerun/gist/commit/346ad60862da977435100b20202749dbfbea60e4))
+* **cli:** implement MCP config file manipulation for setup ([77ec118](https://github.com/sirerun/gist/commit/77ec11817063743b5df728330768e1bcc9cef4b5))
+* **cli:** wire setup subcommand with MCP and instructions configuration ([c21d005](https://github.com/sirerun/gist/commit/c21d005ed941f173a5cac3f1472b33e5006eac74))
+* **gist:** add WithMemory option and default in-memory store ([958efd3](https://github.com/sirerun/gist/commit/958efd31ed3a8a67800319f2f277b9760f3d04c7))
+* **gist:** add WithMemory() option and default to in-memory store ([8c2495e](https://github.com/sirerun/gist/commit/8c2495e41b9b6a122a649240beac6d99638a39f7))
+* **mcp:** add bytes_used savings summary to gist_search response ([b142473](https://github.com/sirerun/gist/commit/b142473d9a48c66c5918516a0c7f95edd2e1fc2a))
+* **search:** add BytesUsed field to SearchResult ([0c29397](https://github.com/sirerun/gist/commit/0c29397f8df6255154685e9cd56452f8992d9d37))
+* **store:** add in-memory Store implementation ([a8fa312](https://github.com/sirerun/gist/commit/a8fa312251a8fbafdce2c2cbe2d3de169c4a03d4))
+
+
+### Bug Fixes
+
+* **cli:** restore encoding/json and path/filepath imports in setup.go ([b96b46a](https://github.com/sirerun/gist/commit/b96b46a79a595e73d0514bf599d4494a525f7a4b))
+* **lint:** restore v1 golangci-lint config for CI ([de5bbbc](https://github.com/sirerun/gist/commit/de5bbbc7f30d8a412bb93fdc6450ffc7507dad8f))
+* **lint:** update golangci-lint config to v2 format ([ec04e69](https://github.com/sirerun/gist/commit/ec04e69f04eeefb1b475ef0f43d00fe754ff14f1))
+
 ## 1.0.0 (2026-03-14)
 
 
