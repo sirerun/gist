@@ -20,49 +20,53 @@ jobs:
       - name: Build gist
         run: go build -o ./gist-bin ./cmd/gist
 
-      - name: Download Twitter OpenAPI spec (754 KB)
+      - name: Download Twitter OpenAPI spec
         run: |
           curl -sL https://api.twitter.com/2/openapi.json -o /tmp/twitter-openapi.json
           bytes=$(wc -c < /tmp/twitter-openapi.json)
           echo "✓ Downloaded ${bytes} bytes"
 
-      - name: Index spec with gist
+      - name: Index, search, and assert savings
         run: |
           json_content=$(jq -Rs . < /tmp/twitter-openapi.json)
 
-          response=$(printf '%s\n%s\n%s\n' \
+          # Build all JSON-RPC messages for a single gist serve session:
+          #   1. initialize
+          #   2. notifications/initialized
+          #   3. gist_index  (index the 754 KB spec)
+          #   4-8. gist_search (five targeted queries)
+          #   9. gist_stats
+          response=$(printf '%s\n' \
             '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e","version":"1.0"}}}' \
             '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
             "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"gist_index\",\"arguments\":{\"content\":${json_content},\"source\":\"twitter-openapi.json\",\"format\":\"json\"}}}" \
+            '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"gist_search","arguments":{"query":"create tweet post","limit":3,"budget":500}}}' \
+            '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"gist_search","arguments":{"query":"OAuth2 authentication scopes","limit":3,"budget":500}}}' \
+            '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"gist_search","arguments":{"query":"rate limit","limit":3,"budget":500}}}' \
+            '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"gist_search","arguments":{"query":"user timeline","limit":3,"budget":500}}}' \
+            '{"jsonrpc":"2.0","id":7,"method":"tools/call","params":{"name":"gist_search","arguments":{"query":"search recent tweets","limit":3,"budget":500}}}' \
+            '{"jsonrpc":"2.0","id":8,"method":"tools/call","params":{"name":"gist_stats","arguments":{}}}' \
             | ./gist-bin serve 2>/dev/null)
 
           echo "$response"
-          echo "$response" | grep -q "TotalChunks"
+
+          # Verify index succeeded (id:2).
+          echo "$response" | grep '"id":2' | grep -q "TotalChunks"
           echo "✓ Spec indexed"
 
-      - name: Run targeted searches
-        run: |
-          for query in "create tweet post" "OAuth2 authentication scopes" "rate limit" "user timeline" "search recent tweets"; do
-            response=$(printf '%s\n%s\n%s\n' \
-              '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e","version":"1.0"}}}' \
-              '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
-              "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"gist_search\",\"arguments\":{\"query\":\"${query}\",\"limit\":3,\"budget\":500}}}" \
-              | ./gist-bin serve 2>/dev/null)
-
-            echo "--- ${query} ---"
-            echo "$response" | tail -1 | jq -r '.result.content[0].text' | jq '.bytes_used'
+          # Verify searches returned results (id:3-7).
+          for id in 3 4 5 6 7; do
+            line=$(echo "$response" | grep "\"id\":${id}")
+            bytes=$(echo "$line" | jq -r '.result.content[0].text' | jq '.bytes_used')
+            echo "  Search id:${id} returned ${bytes} bytes"
+            if [ "$bytes" = "0" ] || [ "$bytes" = "null" ]; then
+              echo "::warning::Search id:${id} returned 0 bytes"
+            fi
           done
           echo "✓ All searches complete"
 
-      - name: Assert context savings
-        run: |
-          response=$(printf '%s\n%s\n%s\n' \
-            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"e2e","version":"1.0"}}}' \
-            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
-            '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"gist_stats","arguments":{}}}' \
-            | ./gist-bin serve 2>/dev/null)
-
-          stats_json=$(echo "$response" | tail -1 | jq -r '.result.content[0].text')
+          # Extract stats from id:8.
+          stats_json=$(echo "$response" | grep '"id":8' | jq -r '.result.content[0].text')
           bytes_indexed=$(echo "$stats_json" | jq '.bytes_indexed')
           bytes_returned=$(echo "$stats_json" | jq '.bytes_returned')
           bytes_saved=$(echo "$stats_json" | jq '.bytes_saved')
@@ -83,4 +87,4 @@ jobs:
             exit 1
           fi
 
-          echo "✓ ${saved_pct}% context reduction on 754 KB spec"
+          echo "✓ ${saved_pct}% context reduction on Twitter OpenAPI spec"
