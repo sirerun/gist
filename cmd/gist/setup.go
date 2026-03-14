@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -131,4 +132,69 @@ func init() {
 	setupCmd.Flags().Bool("uninstall", false, "Remove gist configuration")
 	setupCmd.Flags().Bool("dry-run", false, "Preview changes without writing files")
 	rootCmd.AddCommand(setupCmd)
+}
+
+func configureInstructions(path string, sentinel string, uninstall bool, dryRun bool) (changed bool, err error) {
+	if path == "" {
+		return false, nil
+	}
+
+	content, err := os.ReadFile(path)
+	if err != nil && !os.IsNotExist(err) {
+		return false, fmt.Errorf("reading instructions file: %w", err)
+	}
+	text := string(content)
+
+	if uninstall {
+		idx := strings.Index(text, sentinel)
+		if idx == -1 {
+			return false, nil
+		}
+		before := text[:idx]
+		after := text[idx+len(sentinel):]
+		// Find the next ## heading after the sentinel
+		nextHeading := strings.Index(after, "\n## ")
+		if nextHeading != -1 {
+			// Keep from the next heading onward (skip the newline before ##)
+			after = after[nextHeading+1:]
+		} else {
+			after = ""
+		}
+		result := strings.TrimRight(before+after, "\n")
+		if result != "" {
+			result += "\n"
+		}
+		if dryRun {
+			fmt.Fprintf(os.Stderr, "[dry-run] Would write to %s:\n%s", path, result)
+			return true, nil
+		}
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			return false, fmt.Errorf("creating directory: %w", err)
+		}
+		if err := os.WriteFile(path, []byte(result), 0o644); err != nil {
+			return false, fmt.Errorf("writing instructions file: %w", err)
+		}
+		return true, nil
+	}
+
+	// Install
+	if strings.Contains(text, sentinel) {
+		return false, nil
+	}
+	result := text
+	if result != "" && !strings.HasSuffix(result, "\n") {
+		result += "\n"
+	}
+	result += "\n" + gistInstructions
+	if dryRun {
+		fmt.Fprintf(os.Stderr, "[dry-run] Would write to %s:\n%s", path, result)
+		return true, nil
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return false, fmt.Errorf("creating directory: %w", err)
+	}
+	if err := os.WriteFile(path, []byte(result), 0o644); err != nil {
+		return false, fmt.Errorf("writing instructions file: %w", err)
+	}
+	return true, nil
 }
