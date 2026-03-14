@@ -300,6 +300,14 @@ func TestSearch(t *testing.T) {
 	if results[0].MatchLayer != "porter" {
 		t.Errorf("MatchLayer = %q, want %q", results[0].MatchLayer, "porter")
 	}
+	for i, r := range results {
+		if r.BytesUsed == 0 {
+			t.Errorf("results[%d].BytesUsed = 0, want > 0", i)
+		}
+		if r.BytesUsed != len(r.Snippet) {
+			t.Errorf("results[%d].BytesUsed = %d, want len(Snippet) = %d", i, r.BytesUsed, len(r.Snippet))
+		}
+	}
 }
 
 func TestSearchUpdatesStats(t *testing.T) {

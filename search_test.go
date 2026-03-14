@@ -638,6 +638,71 @@ func TestSearchResult_Fields(t *testing.T) {
 	}
 }
 
+func TestSearch_BytesUsed(t *testing.T) {
+	tests := []struct {
+		name    string
+		content string
+	}{
+		{name: "short content", content: "database setup guide"},
+		{name: "longer content", content: "database connection pooling configuration with multiple parameters and options"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			store := &searchMockStore{
+				sources: []Source{{ID: 1, Label: "docs.md"}},
+				porterResults: []SearchMatch{
+					{ChunkID: 1, SourceID: 1, HeadingPath: "Setup", Content: tt.content, ContentType: "prose", Score: 2.5, MatchLayer: "porter"},
+				},
+			}
+			searcher := NewSearcher(store, NewVocabulary())
+
+			results, err := searcher.Search(context.Background(), "database")
+			if err != nil {
+				t.Fatalf("Search() error = %v", err)
+			}
+			if len(results) != 1 {
+				t.Fatalf("Search() returned %d results, want 1", len(results))
+			}
+			r := results[0]
+			if r.BytesUsed == 0 {
+				t.Error("BytesUsed = 0, want > 0")
+			}
+			if r.BytesUsed != len(r.Snippet) {
+				t.Errorf("BytesUsed = %d, want len(Snippet) = %d", r.BytesUsed, len(r.Snippet))
+			}
+		})
+	}
+}
+
+func TestSearch_BytesUsedMultipleResults(t *testing.T) {
+	store := &searchMockStore{
+		sources: []Source{{ID: 1, Label: "docs.md"}},
+		porterResults: []SearchMatch{
+			{ChunkID: 1, SourceID: 1, HeadingPath: "A", Content: "first result content", ContentType: "prose", Score: 3.0, MatchLayer: "porter"},
+			{ChunkID: 2, SourceID: 1, HeadingPath: "B", Content: "second result with more content here", ContentType: "prose", Score: 2.0, MatchLayer: "porter"},
+			{ChunkID: 3, SourceID: 1, HeadingPath: "C", Content: "third", ContentType: "code", Score: 1.0, MatchLayer: "porter"},
+		},
+	}
+	searcher := NewSearcher(store, NewVocabulary())
+
+	results, err := searcher.Search(context.Background(), "result", WithLimit(10))
+	if err != nil {
+		t.Fatalf("Search() error = %v", err)
+	}
+	if len(results) != 3 {
+		t.Fatalf("Search() returned %d results, want 3", len(results))
+	}
+	for i, r := range results {
+		if r.BytesUsed == 0 {
+			t.Errorf("results[%d].BytesUsed = 0, want > 0", i)
+		}
+		if r.BytesUsed != len(r.Snippet) {
+			t.Errorf("results[%d].BytesUsed = %d, want len(Snippet) = %d", i, r.BytesUsed, len(r.Snippet))
+		}
+	}
+}
+
 func TestSearchOption_Defaults(t *testing.T) {
 	cfg := defaultSearchConfig()
 	if cfg.limit != 5 {
