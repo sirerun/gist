@@ -1,10 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 
@@ -197,4 +195,162 @@ func configureInstructions(path string, sentinel string, uninstall bool, dryRun 
 		return false, fmt.Errorf("writing instructions file: %w", err)
 	}
 	return true, nil
+}
+
+// configureMCP creates, updates, or removes the gist MCP server entry in a
+// tool's config file. It handles both JSON format (claude, gemini, cursor,
+// copilot) and TOML format (codex).
+func configureMCP(path string, mcpKey string, gistPath string, uninstall bool, dryRun bool) (changed bool, err error) {
+	if strings.HasSuffix(path, ".toml") {
+		return configureMCPTOML(path, gistPath, uninstall, dryRun)
+	}
+	return configureMCPJSON(path, mcpKey, gistPath, uninstall, dryRun)
+}
+
+func configureMCPJSON(path string, mcpKey string, gistPath string, uninstall bool, dryRun bool) (bool, error) {
+	var data map[string]any
+
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return false, err
+		}
+		data = map[string]any{mcpKey: map[string]any{}}
+	} else {
+		if err := json.Unmarshal(raw, &data); err != nil {
+			return false, fmt.Errorf("invalid JSON in %s: %w", path, err)
+		}
+	}
+
+	serversRaw, ok := data[mcpKey]
+	if !ok {
+		serversRaw = map[string]any{}
+		data[mcpKey] = serversRaw
+	}
+	servers, ok := serversRaw.(map[string]any)
+	if !ok {
+		return false, fmt.Errorf("expected %s to be an object in %s", mcpKey, path)
+	}
+
+	if uninstall {
+		if _, exists := servers["gist"]; !exists {
+			return false, nil
+		}
+		delete(servers, "gist")
+	} else {
+		if existing, exists := servers["gist"]; exists {
+			if m, ok := existing.(map[string]any); ok {
+				existingCmd, _ := m["command"].(string)
+				existingArgs, _ := m["args"].([]any)
+				if existingCmd == gistPath && len(existingArgs) == 1 {
+					if arg, ok := existingArgs[0].(string); ok && arg == "serve" {
+						return false, nil
+					}
+				}
+			}
+		}
+		servers["gist"] = map[string]any{
+			"command": gistPath,
+			"args":    []string{"serve"},
+		}
+	}
+
+	out, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return false, err
+	}
+	out = append(out, '\n')
+
+	if dryRun {
+		fmt.Fprintf(os.Stderr, "[dry-run] Would write to %s:\n%s", path, out)
+		return true, nil
+	}
+
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return false, err
+	}
+	return true, os.WriteFile(path, out, 0o644)
+}
+
+func configureMCPTOML(path string, gistPath string, uninstall bool, dryRun bool) (bool, error) {
+	const sectionHeader = "[mcp_servers.gist]"
+
+	raw, err := os.ReadFile(path)
+	if err != nil && !os.IsNotExist(err) {
+		return false, err
+	}
+	content := string(raw)
+
+	hasSectionIdx := strings.Index(content, sectionHeader)
+	hasSection := hasSectionIdx >= 0
+
+	if uninstall {
+		if !hasSection {
+			return false, nil
+		}
+		start := hasSectionIdx
+		rest := content[start+len(sectionHeader):]
+		end := len(content)
+		lines := strings.Split(rest, "\n")
+		offset := start + len(sectionHeader)
+		for i, line := range lines {
+			if i == 0 {
+				offset += len(line) + 1
+				continue
+			}
+			trimmed := strings.TrimSpace(line)
+			if strings.HasPrefix(trimmed, "[") {
+				end = offset
+				break
+			}
+			offset += len(line) + 1
+		}
+		newContent := content[:start] + content[end:]
+		newContent = strings.TrimRight(newContent, "\n")
+		if newContent != "" {
+			newContent += "\n"
+		}
+
+		if dryRun {
+			fmt.Fprintf(os.Stderr, "[dry-run] Would write to %s:\n%s", path, newContent)
+			return true, nil
+		}
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			return false, err
+		}
+		return true, os.WriteFile(path, []byte(newContent), 0o644)
+	}
+
+	// Install
+	if hasSection {
+		expectedLine := fmt.Sprintf("command = %q", gistPath)
+		if strings.Contains(content, expectedLine) {
+			return false, nil
+		}
+		// Different path: remove old section, then re-add.
+		if _, err := configureMCPTOML(path, gistPath, true, false); err != nil {
+			return false, err
+		}
+		raw, err = os.ReadFile(path)
+		if err != nil {
+			return false, err
+		}
+		content = string(raw)
+	}
+
+	section := fmt.Sprintf("%s\ncommand = %q\nargs = [\"serve\"]\n", sectionHeader, gistPath)
+	newContent := content
+	if newContent != "" && !strings.HasSuffix(newContent, "\n") {
+		newContent += "\n"
+	}
+	newContent += section
+
+	if dryRun {
+		fmt.Fprintf(os.Stderr, "[dry-run] Would write to %s:\n%s", path, newContent)
+		return true, nil
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return false, err
+	}
+	return true, os.WriteFile(path, []byte(newContent), 0o644)
 }
