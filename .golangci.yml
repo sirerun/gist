@@ -1,18 +1,19 @@
-version: "2"
-
 linters:
   enable:
     - govet
     - errcheck
     - staticcheck
     - unused
+    - gosimple
     - ineffassign
-  exclusions:
-    rules:
-      - path: _test\.go
-        linters:
-          - errcheck
 
 linters-settings:
   errcheck:
     check-type-assertions: true
+
+issues:
+  exclude-use-default: false
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
