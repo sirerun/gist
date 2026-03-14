@@ -49,7 +49,12 @@ jobs:
         env:
           GIST_TEST_DSN: postgres://postgres:testpass@localhost:5432/gist_test?sslmode=disable
         run: GOWORK=off go test ./... -race -coverprofile=coverage.out -tags=integration
-      - name: Upload coverage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage.out
+          fail_ci_if_error: false
+      - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
