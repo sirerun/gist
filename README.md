@@ -143,7 +143,7 @@ See [Agentic Tool Integration](#agentic-tool-integration) for the full list of s
 
 ### Manual Configuration
 
-For unsupported tools or custom setups, add gist to your MCP client configuration manually:
+For unsupported tools or custom setups, add gist to your MCP client configuration:
 
 ```json
 {
