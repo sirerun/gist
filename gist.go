@@ -120,6 +120,15 @@ func WithTokenBudget(max int) Option {
 	}
 }
 
+// WithMemory configures Gist to use an in-memory Store. This is useful for
+// testing, prototyping, and small workloads that do not require PostgreSQL.
+// Data is ephemeral and does not persist across restarts.
+func WithMemory() Option {
+	return func(c *config) {
+		c.store = NewMemoryStore()
+	}
+}
+
 // WithProjectRoot sets the working directory for the executor.
 func WithProjectRoot(dir string) Option {
 	return func(c *config) {
@@ -144,24 +153,25 @@ type Gist struct {
 	bytesRet    int64
 }
 
-// New creates a new Gist instance with the given options. At least one of
-// WithStore or WithPostgres must be provided; otherwise New returns an error.
+// New creates a new Gist instance with the given options. If no store is
+// configured via WithStore, WithMemory, or WithPostgres, an in-memory store
+// is used by default.
 func New(opts ...Option) (*Gist, error) {
 	var cfg config
 	for _, opt := range opts {
 		opt(&cfg)
 	}
 
-	if cfg.store == nil && cfg.postgresDSN == "" {
-		return nil, errors.New("gist: a store is required; use WithStore or WithPostgres")
-	}
-
-	if cfg.store == nil {
+	if cfg.store == nil && cfg.postgresDSN != "" {
 		s, err := NewPostgresStore(context.Background(), cfg.postgresDSN)
 		if err != nil {
 			return nil, err
 		}
 		cfg.store = s
+	}
+
+	if cfg.store == nil {
+		cfg.store = NewMemoryStore()
 	}
 
 	vocab := NewVocabulary()
