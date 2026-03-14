@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.2.0](https://github.com/sirerun/gist/compare/v1.1.0...v1.2.0) (2026-03-14)
+
+
+### Features
+
+* add coverage reporting, Go Report Card, and README badges ([6d95ae2](https://github.com/sirerun/gist/commit/6d95ae2c0106577af4ee74349afb772257c298d2))
+* add E2E Twitter workflow, fix test docs, and improve setup CLI ([6c15783](https://github.com/sirerun/gist/commit/6c15783e032ff08290f1c683f5215e3ebfc3beef))
+* E2E workflow that proves context savings on 754 KB Twitter spec ([a28c27e](https://github.com/sirerun/gist/commit/a28c27ea85dad22877af7c52c32aef2ce8f86256))
+* generate Twitter MCP from official OpenAPI spec via Mint ([275e32d](https://github.com/sirerun/gist/commit/275e32d432280b3b78902611f524b6afba3e32db))
+
+
+### Bug Fixes
+
+* **ci:** pipe all E2E messages to a single gist serve process ([01b31b5](https://github.com/sirerun/gist/commit/01b31b5350b83a8b20a1c91eed7a8a8056c95068))
+* **ci:** redirect stderr in E2E version check ([410be41](https://github.com/sirerun/gist/commit/410be4114d4580ce3ad736056fe84d7fb923f3bf))
+
 ## [1.1.0](https://github.com/sirerun/gist/compare/v1.0.0...v1.1.0) (2026-03-14)
 
 
