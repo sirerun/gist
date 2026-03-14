@@ -2,7 +2,6 @@ package gist
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -116,9 +115,8 @@ func TestNew(t *testing.T) {
 		wantErr string
 	}{
 		{
-			name:    "no store configured",
-			opts:    nil,
-			wantErr: "a store is required",
+			name: "no store configured defaults to memory",
+			opts: nil,
 		},
 		{
 			name: "with custom store",
@@ -482,14 +480,15 @@ func TestIndexOptionConstructors(t *testing.T) {
 	}
 }
 
-func TestNewNoStoreError(t *testing.T) {
-	_, err := New()
-	if err == nil {
-		t.Fatal("expected error when no store is configured")
+func TestNewDefaultMemoryStore(t *testing.T) {
+	g, err := New()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
-	if !errors.Is(err, err) || !strings.Contains(err.Error(), "store is required") {
-		t.Fatalf("unexpected error message: %v", err)
+	if g == nil {
+		t.Fatal("expected non-nil Gist")
 	}
+	defer g.Close()
 }
 
 // failingStore wraps gistMockStore and fails SaveSource for specific labels.
