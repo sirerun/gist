@@ -368,3 +368,144 @@ func readFile(t *testing.T, path string) string {
 	}
 	return string(raw)
 }
+
+func TestSetupE2E(t *testing.T) {
+	for toolName, adapter := range toolRegistry {
+		adapter := adapter
+		t.Run(toolName, func(t *testing.T) {
+			t.Parallel()
+			home := t.TempDir()
+
+			mcpPath := strings.Replace(adapter.GlobalMCPPath, "~", home, 1)
+			instPath := strings.Replace(adapter.GlobalInstPath, "~", home, 1)
+
+			isJSON := !strings.HasSuffix(mcpPath, ".toml")
+			hasInst := instPath != ""
+
+			// --- Step 1: Fresh setup ---
+			mcpChanged, err := configureMCP(mcpPath, adapter.MCPKey, testGistPath, false, false)
+			if err != nil {
+				t.Fatalf("fresh configureMCP: %v", err)
+			}
+			if !mcpChanged {
+				t.Error("fresh configureMCP: expected changed=true")
+			}
+
+			var instChanged bool
+			if hasInst {
+				instChanged, err = configureInstructions(instPath, adapter.InstSentinel, false, false)
+				if err != nil {
+					t.Fatalf("fresh configureInstructions: %v", err)
+				}
+				if !instChanged {
+					t.Error("fresh configureInstructions: expected changed=true")
+				}
+			}
+
+			// Verify MCP file content
+			if isJSON {
+				data := readJSONFile(t, mcpPath)
+				servers := jsonObj(t, data, adapter.MCPKey)
+				gist := jsonObj(t, servers, "gist")
+				if gist["command"] != testGistPath {
+					t.Errorf("MCP command = %v, want %v", gist["command"], testGistPath)
+				}
+				args, ok := gist["args"].([]any)
+				if !ok || len(args) != 1 || args[0] != "serve" {
+					t.Errorf("MCP args = %v, want [serve]", gist["args"])
+				}
+			} else {
+				content := readFile(t, mcpPath)
+				for _, want := range []string{
+					"[mcp_servers.gist]",
+					`command = "` + testGistPath + `"`,
+					`args = ["serve"]`,
+				} {
+					if !strings.Contains(content, want) {
+						t.Errorf("TOML missing %q", want)
+					}
+				}
+			}
+
+			// Verify instructions file content
+			if hasInst {
+				content := readFile(t, instPath)
+				if !strings.Contains(content, adapter.InstSentinel) {
+					t.Errorf("instructions missing sentinel %q", adapter.InstSentinel)
+				}
+				if !strings.Contains(content, "gist_index") {
+					t.Error("instructions missing gist_index reference")
+				}
+			}
+
+			// --- Step 2: Idempotent re-run ---
+			mcpChanged, err = configureMCP(mcpPath, adapter.MCPKey, testGistPath, false, false)
+			if err != nil {
+				t.Fatalf("idempotent configureMCP: %v", err)
+			}
+			if mcpChanged {
+				t.Error("idempotent configureMCP: expected changed=false")
+			}
+
+			if hasInst {
+				instChanged, err = configureInstructions(instPath, adapter.InstSentinel, false, false)
+				if err != nil {
+					t.Fatalf("idempotent configureInstructions: %v", err)
+				}
+				if instChanged {
+					t.Error("idempotent configureInstructions: expected changed=false")
+				}
+			}
+
+			// --- Step 3: Uninstall ---
+			mcpChanged, err = configureMCP(mcpPath, adapter.MCPKey, testGistPath, true, false)
+			if err != nil {
+				t.Fatalf("uninstall configureMCP: %v", err)
+			}
+			if !mcpChanged {
+				t.Error("uninstall configureMCP: expected changed=true")
+			}
+
+			if hasInst {
+				instChanged, err = configureInstructions(instPath, adapter.InstSentinel, true, false)
+				if err != nil {
+					t.Fatalf("uninstall configureInstructions: %v", err)
+				}
+				if !instChanged {
+					t.Error("uninstall configureInstructions: expected changed=true")
+				}
+			}
+
+			// Verify gist entry removed from MCP
+			if isJSON {
+				data := readJSONFile(t, mcpPath)
+				servers := jsonObj(t, data, adapter.MCPKey)
+				if _, ok := servers["gist"]; ok {
+					t.Error("uninstall: gist entry still present in MCP JSON")
+				}
+			} else {
+				content := readFile(t, mcpPath)
+				if strings.Contains(content, "[mcp_servers.gist]") {
+					t.Error("uninstall: gist section still present in TOML")
+				}
+			}
+
+			// Verify instructions removed
+			if hasInst {
+				content := readFile(t, instPath)
+				if strings.Contains(content, adapter.InstSentinel) {
+					t.Error("uninstall: instructions sentinel still present")
+				}
+			}
+
+			// Codex: verify no instructions file involvement
+			if !hasInst {
+				if _, err := os.Stat(instPath); instPath == "" {
+					// expected: no instructions path for codex
+				} else if !os.IsNotExist(err) && err != nil {
+					t.Errorf("unexpected instructions file state: %v", err)
+				}
+			}
+		})
+	}
+}
