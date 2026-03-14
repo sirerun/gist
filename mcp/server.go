@@ -240,5 +240,5 @@ func (s *Server) writeResponse(resp jsonrpcResponse) {
 		return
 	}
 	data = append(data, '\n')
-	s.writer.Write(data)
+	_, _ = s.writer.Write(data)
 }

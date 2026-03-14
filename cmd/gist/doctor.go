@@ -74,7 +74,7 @@ func checkPostgres(ctx context.Context, dsnVal string) CheckResult {
 			Message: fmt.Sprintf("connection failed: %v", err),
 		}
 	}
-	defer conn.Close(ctx)
+	defer func() { _ = conn.Close(ctx) }()
 
 	if err := conn.Ping(ctx); err != nil {
 		return CheckResult{
@@ -109,7 +109,7 @@ func checkPgTrgm(ctx context.Context, dsnVal string) CheckResult {
 			Message: fmt.Sprintf("connection failed: %v", err),
 		}
 	}
-	defer conn.Close(ctx)
+	defer func() { _ = conn.Close(ctx) }()
 
 	var name string
 	err = conn.QueryRow(ctx,

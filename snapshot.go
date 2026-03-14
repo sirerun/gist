@@ -70,7 +70,6 @@ func (s *Snapshot) Render(maxTokens int) string {
 			b.WriteString(sec.Title)
 			b.WriteString("\n")
 			b.WriteString(trimmed)
-			used += EstimateTokens(trimmed)
 			break
 		}
 		if b.Len() > 0 {

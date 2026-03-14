@@ -47,9 +47,6 @@ func (m *searchMockStore) SearchTrigram(_ context.Context, params SearchParams) 
 func filterMatches(matches []SearchMatch, params SearchParams) []SearchMatch {
 	var out []SearchMatch
 	for _, m := range matches {
-		if params.SourceFilter != "" && m.MatchLayer != "" {
-			// Simple filter: skip if doesn't match (handled by caller setup)
-		}
 		out = append(out, m)
 		if params.Limit > 0 && len(out) >= params.Limit {
 			break

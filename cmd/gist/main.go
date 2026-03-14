@@ -39,15 +39,11 @@ var rootCmd = &cobra.Command{
 	},
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {
 		if gistDB != nil {
-			gistDB.Close()
+			_ = gistDB.Close()
 		}
 	},
 }
 
-// dsnFromEnv returns the DSN from the GIST_DSN environment variable.
-func dsnFromEnv() string {
-	return os.Getenv("GIST_DSN")
-}
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&dsn, "dsn", "", "PostgreSQL DSN (also reads GIST_DSN env var)")
