@@ -2,9 +2,15 @@
 
 **Context intelligence for AI agents** — index everything, retrieve only what matters.
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/sirerun/gist.svg)](https://pkg.go.dev/github.com/sirerun/gist)
 [![CI](https://github.com/sirerun/gist/actions/workflows/ci.yml/badge.svg)](https://github.com/sirerun/gist/actions/workflows/ci.yml)
+[![E2E Context Savings](https://github.com/sirerun/gist/actions/workflows/e2e-twitter.yml/badge.svg)](https://github.com/sirerun/gist/actions/workflows/e2e-twitter.yml)
+[![codecov](https://codecov.io/gh/sirerun/gist/graph/badge.svg)](https://codecov.io/gh/sirerun/gist)
+[![Go Report Card](https://goreportcard.com/badge/github.com/sirerun/gist)](https://goreportcard.com/report/github.com/sirerun/gist)
+[![Go Reference](https://pkg.go.dev/badge/github.com/sirerun/gist.svg)](https://pkg.go.dev/github.com/sirerun/gist)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/sirerun/gist)](go.mod)
+[![Release](https://img.shields.io/github/v/release/sirerun/gist)](https://github.com/sirerun/gist/releases/latest)
+[![Homebrew](https://img.shields.io/badge/brew-sirerun/tap/gist-orange)](https://github.com/sirerun/homebrew-tap)
 
 ## The Problem
 
