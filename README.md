@@ -243,9 +243,9 @@ Each tier fires only if the previous one returns no results. This means exact qu
 
 ## Gist Tweets About Itself
 
-Every release, Gist uses itself to compose its own tweet. The [E2E Twitter workflow](.github/workflows/e2e-twitter.yml) indexes this README via the gist MCP server, searches for a compelling description, then posts the result through the [Sire Twitter MCP server](https://github.com/sirerun/mcp-servers) — zero humans in the loop.
+Every release, Gist uses itself to compose its own tweet. The [E2E Twitter workflow](.github/workflows/e2e-twitter.yml) generates a Twitter MCP server from the [official X API v2 OpenAPI spec](https://api.twitter.com/2/openapi.json) using [Mint](https://github.com/sirerun/mint), indexes this README via the gist MCP server, searches for a compelling description, and posts the result — zero humans in the loop.
 
-This is the pattern: index once, search when you need it, pipe the result into the next tool. If your agent can call an MCP server, it can use Gist.
+This is the pattern: Mint connects agents to APIs, Gist manages context. If your agent can call an MCP server, it can use both.
 
 ## The Mint Pattern
 
