@@ -5,6 +5,10 @@ Cross-repo planning and documentation lives in a dedicated git repo: `github.com
 
 Work in this project is typically cross-repo. Always read/update the plan in the shared docs repo, not a per-repo copy. Commit docs changes via PR to `sirerun/docs` independently from code PRs.
 
+## No Manual DevOps — IaC + Release Pipeline Only
+
+Production and staging are managed exclusively through IaC and the CI/CD release pipeline. Banned: `kubectl set/edit/scale/patch/delete` and `kubectl apply` against staging/prod, `gcloud secrets create/add/delete` and other imperative `gcloud` mutations, direct prod DB writes, hot-patching pods, re-tagging or force-pushing. Required path: edit IaC → PR → CI → rebase merge → tag release → deploy workflow → verify via workflow checks. Read-only diagnostics (`kubectl get/describe/logs`, `gcloud ... list/access`, `gh run view`) are fine. Agents: never run mutating commands against live infra; open a PR.
+
 ## Gist Context Management
 
 Use the gist MCP tools (gist_index, gist_search, gist_stats) to manage context efficiently:
