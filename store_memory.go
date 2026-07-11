@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 )
 
 // MemoryStore is an in-memory Store implementation for testing, prototyping,
@@ -35,12 +36,107 @@ func (m *MemoryStore) SaveSource(_ context.Context, label string, format Format)
 	}
 	m.nextSrc++
 	s := Source{
-		ID:     m.nextSrc,
-		Label:  label,
-		Format: format,
+		ID:        m.nextSrc,
+		Label:     label,
+		Format:    format,
+		IndexedAt: time.Now(),
 	}
 	m.sources = append(m.sources, s)
 	return s, nil
+}
+
+// SaveSourceWithOptions creates a new source record, applying supersession,
+// TTL, and half-life semantics. Reusing a label implies self-supersession of
+// prior sources with that label unless opts.KeepPrevious is set.
+func (m *MemoryStore) SaveSourceWithOptions(_ context.Context, label string, format Format, opts SourceOptions) (Source, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.closed {
+		return Source{}, errStoreClosed
+	}
+
+	now := time.Now()
+	m.nextSrc++
+	s := Source{
+		ID:        m.nextSrc,
+		Label:     label,
+		Format:    format,
+		IndexedAt: now,
+		HalfLife:  opts.HalfLife,
+	}
+	if opts.TTL > 0 {
+		s.ExpiresAt = now.Add(opts.TTL)
+	}
+
+	targets := make(map[string]bool)
+	if opts.Supersedes != "" {
+		targets[opts.Supersedes] = true
+	}
+	if !opts.KeepPrevious {
+		targets[label] = true
+	}
+	if len(targets) > 0 {
+		for i := range m.sources {
+			if targets[m.sources[i].Label] && m.sources[i].SupersededBy == 0 {
+				m.sources[i].SupersededBy = s.ID
+			}
+		}
+	}
+
+	m.sources = append(m.sources, s)
+	return s, nil
+}
+
+// Vacuum removes superseded and expired sources and their chunks.
+func (m *MemoryStore) Vacuum(_ context.Context) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.closed {
+		return errStoreClosed
+	}
+
+	now := time.Now()
+	removed := make(map[int]bool)
+	keepSources := make([]Source, 0, len(m.sources))
+	for _, s := range m.sources {
+		expired := !s.ExpiresAt.IsZero() && now.After(s.ExpiresAt)
+		superseded := s.SupersededBy != 0
+		if expired || superseded {
+			removed[s.ID] = true
+			continue
+		}
+		keepSources = append(keepSources, s)
+	}
+	m.sources = keepSources
+
+	keepChunks := make([]Chunk, 0, len(m.chunks))
+	for _, c := range m.chunks {
+		if removed[c.SourceID] {
+			continue
+		}
+		keepChunks = append(keepChunks, c)
+	}
+	m.chunks = keepChunks
+	return nil
+}
+
+// sourceActive reports whether a source is neither superseded nor expired,
+// along with the source record itself. Must be called with mu held.
+func (m *MemoryStore) sourceActive(sourceID int) (Source, bool) {
+	now := time.Now()
+	for _, s := range m.sources {
+		if s.ID == sourceID {
+			if s.SupersededBy != 0 {
+				return s, false
+			}
+			if !s.ExpiresAt.IsZero() && now.After(s.ExpiresAt) {
+				return s, false
+			}
+			return s, true
+		}
+	}
+	// No matching source record (e.g. an orphan chunk) — treat as active.
+	return Source{}, true
 }
 
 // SaveChunk persists a chunk and updates the parent source's byte count.
@@ -88,6 +184,10 @@ func (m *MemoryStore) SearchPorter(_ context.Context, params SearchParams) ([]Se
 		if !m.matchesSourceFilter(c.SourceID, params.SourceFilter) {
 			continue
 		}
+		src, active := m.sourceActive(c.SourceID)
+		if !active {
+			continue
+		}
 		contentWords := strings.Fields(strings.ToLower(c.Content))
 		wordSet := make(map[string]struct{}, len(contentWords))
 		for _, w := range contentWords {
@@ -117,6 +217,7 @@ func (m *MemoryStore) SearchPorter(_ context.Context, params SearchParams) ([]Se
 				ContentType: c.ContentType,
 				Score:       score,
 				MatchLayer:  "porter",
+				IndexedAt:   src.IndexedAt,
 			},
 			score: score,
 		})
@@ -163,6 +264,10 @@ func (m *MemoryStore) SearchTrigram(_ context.Context, params SearchParams) ([]S
 		if !m.matchesSourceFilter(c.SourceID, params.SourceFilter) {
 			continue
 		}
+		src, active := m.sourceActive(c.SourceID)
+		if !active {
+			continue
+		}
 		lowerContent := strings.ToLower(c.Content)
 		if !strings.Contains(lowerContent, lowerQuery) {
 			continue
@@ -180,6 +285,7 @@ func (m *MemoryStore) SearchTrigram(_ context.Context, params SearchParams) ([]S
 				ContentType: c.ContentType,
 				Score:       score,
 				MatchLayer:  "trigram",
+				IndexedAt:   src.IndexedAt,
 			},
 			score: score,
 		})
@@ -275,3 +381,10 @@ func (m *MemoryStore) matchesSourceFilter(sourceID int, filter string) bool {
 
 // errStoreClosed is returned when operations are attempted on a closed store.
 var errStoreClosed = errors.New("gist: store is closed")
+
+// Compile-time checks that MemoryStore implements the optional interfaces.
+var (
+	_ Store            = (*MemoryStore)(nil)
+	_ SupersedingStore = (*MemoryStore)(nil)
+	_ Vacuumer         = (*MemoryStore)(nil)
+)

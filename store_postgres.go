@@ -3,6 +3,7 @@ package gist
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -40,7 +41,10 @@ CREATE TABLE IF NOT EXISTS sources (
 	id SERIAL PRIMARY KEY,
 	label TEXT NOT NULL,
 	created_at TIMESTAMPTZ DEFAULT NOW(),
-	bytes_indexed BIGINT DEFAULT 0
+	bytes_indexed BIGINT DEFAULT 0,
+	superseded_by INT,
+	expires_at TIMESTAMPTZ,
+	half_life_seconds BIGINT
 );
 
 CREATE TABLE IF NOT EXISTS chunks (
@@ -64,19 +68,80 @@ CREATE INDEX IF NOT EXISTS idx_chunks_trgm ON chunks USING GIN (content gin_trgm
 
 // SaveSource creates a new source record.
 func (s *PostgresStore) SaveSource(ctx context.Context, label string, format Format) (Source, error) {
+	return s.SaveSourceWithOptions(ctx, label, format, SourceOptions{})
+}
+
+// SaveSourceWithOptions creates a new source record, applying supersession,
+// TTL, and half-life semantics. Reusing a label implies self-supersession of
+// prior sources with that label unless opts.KeepPrevious is set.
+func (s *PostgresStore) SaveSourceWithOptions(ctx context.Context, label string, format Format, opts SourceOptions) (Source, error) {
 	var id int
+	var indexedAt time.Time
+	var halfLifeSeconds *int64
+	if opts.HalfLife > 0 {
+		hl := int64(opts.HalfLife / time.Second)
+		halfLifeSeconds = &hl
+	}
+	var expiresAt *time.Time
+	if opts.TTL > 0 {
+		t := time.Now().Add(opts.TTL)
+		expiresAt = &t
+	}
+
 	err := s.pool.QueryRow(ctx,
-		`INSERT INTO sources (label) VALUES ($1) RETURNING id`,
-		label,
-	).Scan(&id)
+		`INSERT INTO sources (label, expires_at, half_life_seconds) VALUES ($1, $2, $3)
+		 RETURNING id, created_at`,
+		label, expiresAt, halfLifeSeconds,
+	).Scan(&id, &indexedAt)
 	if err != nil {
 		return Source{}, fmt.Errorf("insert source: %w", err)
 	}
-	return Source{
-		ID:     id,
-		Label:  label,
-		Format: format,
-	}, nil
+
+	targets := make([]string, 0, 2)
+	if opts.Supersedes != "" {
+		targets = append(targets, opts.Supersedes)
+	}
+	if !opts.KeepPrevious {
+		targets = append(targets, label)
+	}
+	if len(targets) > 0 {
+		_, err = s.pool.Exec(ctx,
+			`UPDATE sources SET superseded_by = $1
+			 WHERE label = ANY($2) AND id != $1 AND superseded_by IS NULL`,
+			id, targets,
+		)
+		if err != nil {
+			return Source{}, fmt.Errorf("mark superseded: %w", err)
+		}
+	}
+
+	src := Source{
+		ID:        id,
+		Label:     label,
+		Format:    format,
+		IndexedAt: indexedAt,
+	}
+	if opts.HalfLife > 0 {
+		src.HalfLife = opts.HalfLife
+	}
+	if expiresAt != nil {
+		src.ExpiresAt = *expiresAt
+	}
+	return src, nil
+}
+
+// Vacuum deletes superseded and expired sources and their chunks.
+func (s *PostgresStore) Vacuum(ctx context.Context) error {
+	_, err := s.pool.Exec(ctx, `
+DELETE FROM chunks WHERE source_id IN (
+	SELECT id FROM sources WHERE superseded_by IS NOT NULL OR (expires_at IS NOT NULL AND expires_at < NOW())
+);
+DELETE FROM sources WHERE superseded_by IS NOT NULL OR (expires_at IS NOT NULL AND expires_at < NOW());
+`)
+	if err != nil {
+		return fmt.Errorf("vacuum: %w", err)
+	}
+	return nil
 }
 
 // SaveChunk persists a chunk and updates the tsvector and source byte count.
@@ -108,18 +173,21 @@ func (s *PostgresStore) SaveChunk(ctx context.Context, chunk Chunk) (Chunk, erro
 func (s *PostgresStore) SearchPorter(ctx context.Context, params SearchParams) ([]SearchMatch, error) {
 	query := `
 		SELECT c.id, c.source_id, c.heading_path, c.content, c.content_type,
-		       ts_rank(c.tsv, plainto_tsquery('english', $1)) AS score
-		FROM chunks c`
+		       ts_rank(c.tsv, plainto_tsquery('english', $1)) AS score, src.created_at
+		FROM chunks c
+		JOIN sources src ON src.id = c.source_id`
 	args := []any{params.Query}
 	argIdx := 2
 
 	if params.SourceFilter != "" {
-		query += fmt.Sprintf(` JOIN sources s ON s.id = c.source_id AND s.label = $%d`, argIdx)
+		query += fmt.Sprintf(` AND src.label = $%d`, argIdx)
 		args = append(args, params.SourceFilter)
 		argIdx++
 	}
 
 	query += ` WHERE c.tsv @@ plainto_tsquery('english', $1)
+		AND src.superseded_by IS NULL
+		AND (src.expires_at IS NULL OR src.expires_at > NOW())
 		ORDER BY score DESC`
 
 	if params.Limit > 0 {
@@ -136,7 +204,7 @@ func (s *PostgresStore) SearchPorter(ctx context.Context, params SearchParams) (
 	var matches []SearchMatch
 	for rows.Next() {
 		var m SearchMatch
-		if err := rows.Scan(&m.ChunkID, &m.SourceID, &m.HeadingPath, &m.Content, &m.ContentType, &m.Score); err != nil {
+		if err := rows.Scan(&m.ChunkID, &m.SourceID, &m.HeadingPath, &m.Content, &m.ContentType, &m.Score, &m.IndexedAt); err != nil {
 			return nil, fmt.Errorf("scan porter result: %w", err)
 		}
 		m.MatchLayer = "porter"
@@ -149,18 +217,21 @@ func (s *PostgresStore) SearchPorter(ctx context.Context, params SearchParams) (
 func (s *PostgresStore) SearchTrigram(ctx context.Context, params SearchParams) ([]SearchMatch, error) {
 	query := `
 		SELECT c.id, c.source_id, c.heading_path, c.content, c.content_type,
-		       similarity(c.content, $1) AS score
-		FROM chunks c`
+		       similarity(c.content, $1) AS score, src.created_at
+		FROM chunks c
+		JOIN sources src ON src.id = c.source_id`
 	args := []any{params.Query}
 	argIdx := 2
 
 	if params.SourceFilter != "" {
-		query += fmt.Sprintf(` JOIN sources s ON s.id = c.source_id AND s.label = $%d`, argIdx)
+		query += fmt.Sprintf(` AND src.label = $%d`, argIdx)
 		args = append(args, params.SourceFilter)
 		argIdx++
 	}
 
 	query += ` WHERE c.content ILIKE '%' || $1 || '%'
+		AND src.superseded_by IS NULL
+		AND (src.expires_at IS NULL OR src.expires_at > NOW())
 		ORDER BY score DESC`
 
 	if params.Limit > 0 {
@@ -177,7 +248,7 @@ func (s *PostgresStore) SearchTrigram(ctx context.Context, params SearchParams) 
 	var matches []SearchMatch
 	for rows.Next() {
 		var m SearchMatch
-		if err := rows.Scan(&m.ChunkID, &m.SourceID, &m.HeadingPath, &m.Content, &m.ContentType, &m.Score); err != nil {
+		if err := rows.Scan(&m.ChunkID, &m.SourceID, &m.HeadingPath, &m.Content, &m.ContentType, &m.Score, &m.IndexedAt); err != nil {
 			return nil, fmt.Errorf("scan trigram result: %w", err)
 		}
 		m.MatchLayer = "trigram"
@@ -209,7 +280,8 @@ func (s *PostgresStore) VocabularyTerms(ctx context.Context) ([]string, error) {
 // Sources returns all indexed sources.
 func (s *PostgresStore) Sources(ctx context.Context) ([]Source, error) {
 	rows, err := s.pool.Query(ctx,
-		`SELECT id, label, bytes_indexed FROM sources ORDER BY id`)
+		`SELECT id, label, bytes_indexed, created_at, superseded_by, expires_at, half_life_seconds
+		 FROM sources ORDER BY id`)
 	if err != nil {
 		return nil, fmt.Errorf("list sources: %w", err)
 	}
@@ -218,8 +290,20 @@ func (s *PostgresStore) Sources(ctx context.Context) ([]Source, error) {
 	var sources []Source
 	for rows.Next() {
 		var src Source
-		if err := rows.Scan(&src.ID, &src.Label, &src.BytesIndexed); err != nil {
+		var supersededBy *int
+		var expiresAt *time.Time
+		var halfLifeSeconds *int64
+		if err := rows.Scan(&src.ID, &src.Label, &src.BytesIndexed, &src.IndexedAt, &supersededBy, &expiresAt, &halfLifeSeconds); err != nil {
 			return nil, fmt.Errorf("scan source: %w", err)
+		}
+		if supersededBy != nil {
+			src.SupersededBy = *supersededBy
+		}
+		if expiresAt != nil {
+			src.ExpiresAt = *expiresAt
+		}
+		if halfLifeSeconds != nil {
+			src.HalfLife = time.Duration(*halfLifeSeconds) * time.Second
 		}
 		sources = append(sources, src)
 	}
@@ -247,5 +331,9 @@ func (s *PostgresStore) Close() error {
 	return nil
 }
 
-// Compile-time check that PostgresStore implements Store.
-var _ Store = (*PostgresStore)(nil)
+// Compile-time checks that PostgresStore implements the optional interfaces.
+var (
+	_ Store            = (*PostgresStore)(nil)
+	_ SupersedingStore = (*PostgresStore)(nil)
+	_ Vacuumer         = (*PostgresStore)(nil)
+)
