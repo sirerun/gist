@@ -139,6 +139,32 @@ func (s *Searcher) Search(ctx context.Context, query string, opts ...SearchOptio
 		return s.convertMatches(matches, sourceLabels, sourceHalfLife, cfg), nil
 	}
 
+	// Tier 3.5: Query expansion (identifier splitting + multi-term OR).
+	// A cheap lexical remedy for paraphrase divergence, tried before fuzzy
+	// correction. See ADR 006.
+	expanded := ExpandQueryString(query)
+	if expanded != "" && expanded != strings.ToLower(strings.TrimSpace(query)) {
+		expandedParams := params
+		expandedParams.Query = expanded
+
+		matches, err = s.store.SearchPorter(ctx, expandedParams)
+		if err != nil {
+			return nil, err
+		}
+		if len(matches) == 0 {
+			matches, err = s.store.SearchTrigram(ctx, expandedParams)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if len(matches) > 0 {
+			for i := range matches {
+				matches[i].MatchLayer = "expansion"
+			}
+			return s.convertMatches(matches, sourceLabels, sourceHalfLife, cfg), nil
+		}
+	}
+
 	// Tier 3: Fuzzy correction.
 	if s.vocab == nil {
 		return nil, nil
