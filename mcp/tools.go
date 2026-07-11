@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/sirerun/gist"
 )
@@ -34,13 +35,16 @@ func ToolDefinitions() []Tool {
 	return []Tool{
 		{
 			Name:        "gist_index",
-			Description: "Index content for later search. Chunks and stores content with optional source label and format.",
+			Description: "Index content for later search. Chunks and stores content with optional source label and format. Re-index volatile sources (browser snapshots, live tool output) under a stable label so supersession applies automatically; use ttl_seconds or half_life_seconds to bound or decay stale content.",
 			InputSchema: Schema{
 				Type: "object",
 				Properties: map[string]Property{
-					"content": {Type: "string", Description: "The content to index"},
-					"source":  {Type: "string", Description: "Source label (e.g., file path)"},
-					"format":  {Type: "string", Description: "Content format: markdown, json, or plaintext"},
+					"content":           {Type: "string", Description: "The content to index"},
+					"source":            {Type: "string", Description: "Source label (e.g., file path)"},
+					"format":            {Type: "string", Description: "Content format: markdown, json, or plaintext"},
+					"supersedes":        {Type: "string", Description: "Label of prior sources to mark as superseded (excluded from search)"},
+					"ttl_seconds":       {Type: "integer", Description: "Expire this source's chunks from search after this many seconds"},
+					"half_life_seconds": {Type: "integer", Description: "Declare source volatility: relevance score decays by half every this many seconds"},
 				},
 				Required: []string{"content"},
 			},
@@ -86,9 +90,12 @@ func dispatchTool(ctx context.Context, g *gist.Gist, name string, args json.RawM
 
 // indexArgs are the arguments for gist_index.
 type indexArgs struct {
-	Content string `json:"content"`
-	Source  string `json:"source"`
-	Format  string `json:"format"`
+	Content         string `json:"content"`
+	Source          string `json:"source"`
+	Format          string `json:"format"`
+	Supersedes      string `json:"supersedes"`
+	TTLSeconds      int    `json:"ttl_seconds"`
+	HalfLifeSeconds int    `json:"half_life_seconds"`
 }
 
 func handleIndex(ctx context.Context, g *gist.Gist, args json.RawMessage) (any, error) {
@@ -110,6 +117,15 @@ func handleIndex(ctx context.Context, g *gist.Gist, args json.RawMessage) (any, 
 			return nil, err
 		}
 		opts = append(opts, gist.WithFormat(f))
+	}
+	if a.Supersedes != "" {
+		opts = append(opts, gist.WithSupersedes(a.Supersedes))
+	}
+	if a.TTLSeconds > 0 {
+		opts = append(opts, gist.WithTTL(time.Duration(a.TTLSeconds)*time.Second))
+	}
+	if a.HalfLifeSeconds > 0 {
+		opts = append(opts, gist.WithHalfLife(time.Duration(a.HalfLifeSeconds)*time.Second))
 	}
 
 	return g.Index(ctx, a.Content, opts...)

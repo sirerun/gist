@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+* **store:** add source supersession, TTL, and opt-in half-life recency decay (ADR 005)
+
+### BREAKING CHANGES
+
+* **store:** reusing a source label now self-supersedes prior sources with that label by default; use `WithKeepPrevious()` to opt out.
+
 ## [1.2.0](https://github.com/sirerun/gist/compare/v1.1.0...v1.2.0) (2026-03-14)
 
 

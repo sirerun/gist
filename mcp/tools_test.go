@@ -161,6 +161,37 @@ func TestToolsCallIndex(t *testing.T) {
 	}
 }
 
+func TestToolsCallIndexSupersession(t *testing.T) {
+	g := newTestGist(t)
+	defer g.Close()
+	s := NewServer(g)
+
+	resp := sendToolCall(t, s, "gist_index", map[string]any{
+		"content":           "snapshot v1",
+		"source":            "browser-snapshot",
+		"supersedes":        "browser-snapshot",
+		"ttl_seconds":       60,
+		"half_life_seconds": 30,
+	})
+
+	if resp.Error != nil {
+		t.Fatalf("unexpected error: %v", resp.Error)
+	}
+
+	result := extractToolResult(t, resp)
+	if result.IsError {
+		t.Fatalf("tool returned error: %s", result.Content[0].Text)
+	}
+
+	var ir gist.IndexResult
+	if err := json.Unmarshal([]byte(result.Content[0].Text), &ir); err != nil {
+		t.Fatalf("unmarshal IndexResult: %v", err)
+	}
+	if ir.TotalChunks == 0 {
+		t.Error("expected at least one chunk")
+	}
+}
+
 func TestToolsCallSearch(t *testing.T) {
 	g := newTestGist(t)
 	defer g.Close()

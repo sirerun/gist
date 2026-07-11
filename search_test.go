@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 )
 
 // searchMockStore is a mock Store for search tests that allows controlling
@@ -718,6 +719,38 @@ func TestSearchOption_Defaults(t *testing.T) {
 	}
 	if cfg.sourceFilter != "" {
 		t.Errorf("default sourceFilter = %q, want empty", cfg.sourceFilter)
+	}
+}
+
+func TestSearchResultIndexedAt(t *testing.T) {
+	ctx := context.Background()
+	store := NewMemoryStore()
+	defer store.Close()
+
+	vocab := NewVocabulary()
+	searcher := NewSearcher(store, vocab)
+
+	before := time.Now()
+	src, err := store.SaveSource(ctx, "doc.md", FormatMarkdown)
+	if err != nil {
+		t.Fatalf("SaveSource() error = %v", err)
+	}
+	if _, err := store.SaveChunk(ctx, Chunk{SourceID: src.ID, Content: "hello world", ContentType: "prose"}); err != nil {
+		t.Fatalf("SaveChunk() error = %v", err)
+	}
+
+	results, err := searcher.Search(ctx, "hello")
+	if err != nil {
+		t.Fatalf("Search() error = %v", err)
+	}
+	if len(results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(results))
+	}
+	if results[0].IndexedAt.IsZero() {
+		t.Error("expected non-zero IndexedAt")
+	}
+	if results[0].IndexedAt.Before(before) {
+		t.Errorf("IndexedAt = %v, want after %v", results[0].IndexedAt, before)
 	}
 }
 

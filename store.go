@@ -1,6 +1,9 @@
 package gist
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 // Format describes the content format of indexed material.
 type Format int
@@ -44,6 +47,34 @@ type Source struct {
 	BytesIndexed int64
 	// ChunkCount is the number of chunks produced from this source.
 	ChunkCount int
+	// IndexedAt is when this source was indexed.
+	IndexedAt time.Time
+	// SupersededBy is the ID of the source that superseded this one, or 0 if
+	// this source has not been superseded.
+	SupersededBy int
+	// ExpiresAt is the time at which this source's chunks are excluded from
+	// search results. Zero means no expiry.
+	ExpiresAt time.Time
+	// HalfLife declares this source's volatility for opt-in recency decay
+	// scoring. Zero means no decay is applied.
+	HalfLife time.Duration
+}
+
+// SourceOptions configures optional supersession, TTL, and decay behavior
+// applied when saving a source (see SupersedingStore.SaveSourceWithOptions).
+type SourceOptions struct {
+	// Supersedes marks all prior sources with this label as superseded by
+	// the new source.
+	Supersedes string
+	// KeepPrevious opts out of the default self-supersession behavior that
+	// applies when a source is saved under a label that already exists.
+	KeepPrevious bool
+	// TTL, if non-zero, sets the source to expire this duration after
+	// IndexedAt.
+	TTL time.Duration
+	// HalfLife, if non-zero, declares the source's volatility for opt-in
+	// recency decay scoring at search time.
+	HalfLife time.Duration
 }
 
 // Chunk represents a single indexed piece of content derived from a source.
@@ -92,6 +123,8 @@ type SearchMatch struct {
 	Score float64
 	// MatchLayer indicates which search tier produced the match ("porter", "trigram", or "fuzzy").
 	MatchLayer string
+	// IndexedAt is when the matched chunk's source was indexed.
+	IndexedAt time.Time
 }
 
 // StoreStats contains aggregate statistics about the indexed content.
@@ -140,4 +173,23 @@ type Store interface {
 
 	// Close releases any resources held by the store (e.g., database connections).
 	Close() error
+}
+
+// SupersedingStore is implemented by stores that support supersession, TTL,
+// and half-life options on source creation. Stores that do not implement
+// this interface simply ignore those options (callers fall back to plain
+// Store.SaveSource).
+type SupersedingStore interface {
+	Store
+
+	// SaveSourceWithOptions behaves like SaveSource but also applies the
+	// supersession, TTL, and half-life semantics described by opts.
+	SaveSourceWithOptions(ctx context.Context, label string, format Format, opts SourceOptions) (Source, error)
+}
+
+// Vacuumer is implemented by stores that support removing superseded and
+// expired sources/chunks on demand.
+type Vacuumer interface {
+	// Vacuum(ctx context.Context) error deletes superseded and expired rows.
+	Vacuum(ctx context.Context) error
 }

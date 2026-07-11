@@ -57,6 +57,10 @@ type indexConfig struct {
 	source        string
 	format        Format
 	maxChunkBytes int
+	supersedes    string
+	keepPrevious  bool
+	ttl           time.Duration
+	halfLife      time.Duration
 }
 
 func defaultIndexConfig() indexConfig {
@@ -89,6 +93,42 @@ func WithIndexMaxChunkBytes(n int) IndexOption {
 		if n > 0 {
 			c.maxChunkBytes = n
 		}
+	}
+}
+
+// WithSupersedes marks all prior sources with the given label as superseded
+// by this newly indexed source. Superseded sources are excluded from search.
+// Requires a store implementing SupersedingStore; ignored otherwise.
+func WithSupersedes(label string) IndexOption {
+	return func(c *indexConfig) {
+		c.supersedes = label
+	}
+}
+
+// WithKeepPrevious opts out of the default self-supersession behavior that
+// applies when indexing reuses a label that already exists.
+func WithKeepPrevious() IndexOption {
+	return func(c *indexConfig) {
+		c.keepPrevious = true
+	}
+}
+
+// WithTTL sets a time-to-live for the indexed source. Once the TTL elapses
+// from indexing time, the source's chunks are excluded from search results.
+// Requires a store implementing SupersedingStore; ignored otherwise.
+func WithTTL(d time.Duration) IndexOption {
+	return func(c *indexConfig) {
+		c.ttl = d
+	}
+}
+
+// WithHalfLife declares the indexed source's volatility for opt-in recency
+// decay scoring: a chunk's relevance score is multiplied by
+// 0.5^(age/halfLife) at search time. Requires a store implementing
+// SupersedingStore; ignored otherwise.
+func WithHalfLife(d time.Duration) IndexOption {
+	return func(c *indexConfig) {
+		c.halfLife = d
 	}
 }
 
@@ -223,7 +263,17 @@ func (g *Gist) Index(ctx context.Context, content string, opts ...IndexOption) (
 		return nil, err
 	}
 
-	src, err := g.store.SaveSource(ctx, ic.source, ic.format)
+	var src Source
+	if ss, ok := g.store.(SupersedingStore); ok {
+		src, err = ss.SaveSourceWithOptions(ctx, ic.source, ic.format, SourceOptions{
+			Supersedes:   ic.supersedes,
+			KeepPrevious: ic.keepPrevious,
+			TTL:          ic.ttl,
+			HalfLife:     ic.halfLife,
+		})
+	} else {
+		src, err = g.store.SaveSource(ctx, ic.source, ic.format)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -442,6 +492,17 @@ func (g *Gist) Stats() *Stats {
 		MissCount:     missCount,
 		MissRate:      missRate,
 	}
+}
+
+// Vacuum deletes superseded and expired sources and chunks from the
+// underlying store on demand. It is a no-op if the store does not implement
+// Vacuumer.
+func (g *Gist) Vacuum(ctx context.Context) error {
+	v, ok := g.store.(Vacuumer)
+	if !ok {
+		return nil
+	}
+	return v.Vacuum(ctx)
 }
 
 // Close releases resources held by the underlying Store.

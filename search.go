@@ -2,7 +2,9 @@ package gist
 
 import (
 	"context"
+	"math"
 	"strings"
+	"time"
 )
 
 // SearchResult represents a single result from the three-tier search engine.
@@ -21,6 +23,9 @@ type SearchResult struct {
 	MatchLayer string
 	// BytesUsed is the byte length of the snippet.
 	BytesUsed int `json:"bytes_used"`
+	// IndexedAt is when the matched chunk's source was indexed, letting
+	// callers judge freshness themselves.
+	IndexedAt time.Time `json:"indexed_at"`
 }
 
 // SearchOption configures search behavior.
@@ -102,14 +107,18 @@ func (s *Searcher) Search(ctx context.Context, query string, opts ...SearchOptio
 		SourceFilter: cfg.sourceFilter,
 	}
 
-	// Build a source-ID-to-label map for resolving source names.
+	// Build source-ID-to-label and source-ID-to-halfLife maps.
 	sources, err := s.store.Sources(ctx)
 	if err != nil {
 		return nil, err
 	}
 	sourceLabels := make(map[int]string, len(sources))
+	sourceHalfLife := make(map[int]time.Duration, len(sources))
 	for _, src := range sources {
 		sourceLabels[src.ID] = src.Label
+		if src.HalfLife > 0 {
+			sourceHalfLife[src.ID] = src.HalfLife
+		}
 	}
 
 	// Tier 1: Porter stemming.
@@ -118,7 +127,7 @@ func (s *Searcher) Search(ctx context.Context, query string, opts ...SearchOptio
 		return nil, err
 	}
 	if len(matches) > 0 {
-		return s.convertMatches(matches, sourceLabels, cfg), nil
+		return s.convertMatches(matches, sourceLabels, sourceHalfLife, cfg), nil
 	}
 
 	// Tier 2: Trigram.
@@ -127,7 +136,7 @@ func (s *Searcher) Search(ctx context.Context, query string, opts ...SearchOptio
 		return nil, err
 	}
 	if len(matches) > 0 {
-		return s.convertMatches(matches, sourceLabels, cfg), nil
+		return s.convertMatches(matches, sourceLabels, sourceHalfLife, cfg), nil
 	}
 
 	// Tier 3: Fuzzy correction.
@@ -161,12 +170,12 @@ func (s *Searcher) Search(ctx context.Context, query string, opts ...SearchOptio
 		matches[i].MatchLayer = "fuzzy"
 	}
 
-	return s.convertMatches(matches, sourceLabels, cfg), nil
+	return s.convertMatches(matches, sourceLabels, sourceHalfLife, cfg), nil
 }
 
 // convertMatches transforms store SearchMatch results into SearchResults with
-// snippets and optional budget enforcement.
-func (s *Searcher) convertMatches(matches []SearchMatch, sourceLabels map[int]string, cfg searchConfig) []SearchResult {
+// snippets, opt-in recency decay, and optional budget enforcement.
+func (s *Searcher) convertMatches(matches []SearchMatch, sourceLabels map[int]string, sourceHalfLife map[int]time.Duration, cfg searchConfig) []SearchResult {
 	var results []SearchResult
 	var usedTokens int
 
@@ -183,14 +192,21 @@ func (s *Searcher) convertMatches(matches []SearchMatch, sourceLabels map[int]st
 			usedTokens += tokens
 		}
 
+		score := m.Score
+		if hl, ok := sourceHalfLife[m.SourceID]; ok && hl > 0 && !m.IndexedAt.IsZero() {
+			age := time.Since(m.IndexedAt)
+			score *= math.Pow(0.5, float64(age)/float64(hl))
+		}
+
 		results = append(results, SearchResult{
 			Title:       m.HeadingPath,
 			Snippet:     snippet,
 			Source:      sourceLabels[m.SourceID],
-			Score:       m.Score,
+			Score:       score,
 			ContentType: m.ContentType,
 			MatchLayer:  m.MatchLayer,
 			BytesUsed:   len(snippet),
+			IndexedAt:   m.IndexedAt,
 		})
 	}
 
