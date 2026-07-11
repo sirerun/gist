@@ -50,7 +50,6 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-
 func init() {
 	rootCmd.PersistentFlags().StringVar(&dsn, "dsn", "", "PostgreSQL DSN (also reads GIST_DSN env var)")
 }

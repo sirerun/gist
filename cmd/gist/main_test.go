@@ -9,10 +9,10 @@ import (
 
 func TestRootCommandHelp(t *testing.T) {
 	tests := []struct {
-		name     string
-		args     []string
-		wantOut  string
-		wantErr  bool
+		name    string
+		args    []string
+		wantOut string
+		wantErr bool
 	}{
 		{
 			name:    "help flag",

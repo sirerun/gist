@@ -103,8 +103,8 @@ func TestPostgresStore_SaveChunk(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		chunk   Chunk
+		name  string
+		chunk Chunk
 	}{
 		{
 			name: "prose chunk",

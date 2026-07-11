@@ -13,12 +13,12 @@ import (
 // implements word-level and substring search using Go standard library
 // string operations. Data is ephemeral — it does not persist across restarts.
 type MemoryStore struct {
-	mu       sync.RWMutex
-	sources  []Source
-	chunks   []Chunk
-	nextSrc  int
-	nextChk  int
-	closed   bool
+	mu      sync.RWMutex
+	sources []Source
+	chunks  []Chunk
+	nextSrc int
+	nextChk int
+	closed  bool
 }
 
 // NewMemoryStore creates a new empty MemoryStore.

@@ -56,7 +56,7 @@ func TestPercentile(t *testing.T) {
 			want:   6,
 		},
 		{
-			name:   "p95 of twenty",
+			name: "p95 of twenty",
 			values: func() []time.Duration {
 				d := make([]time.Duration, 20)
 				for i := range d {

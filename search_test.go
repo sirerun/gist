@@ -10,12 +10,12 @@ import (
 // searchMockStore is a mock Store for search tests that allows controlling
 // which tiers return results.
 type searchMockStore struct {
-	sources       []Source
-	chunks        []Chunk
-	porterResults []SearchMatch
+	sources        []Source
+	chunks         []Chunk
+	porterResults  []SearchMatch
 	trigramResults []SearchMatch
-	porterErr     error
-	trigramErr    error
+	porterErr      error
+	trigramErr     error
 }
 
 func (m *searchMockStore) SaveSource(_ context.Context, label string, format Format) (Source, error) {
@@ -329,8 +329,10 @@ func (m *sourceFilterMockStore) Sources(_ context.Context) ([]Source, error) {
 	copy(result, m.sources)
 	return result, nil
 }
-func (m *sourceFilterMockStore) Stats(_ context.Context) (StoreStats, error) { return StoreStats{}, nil }
-func (m *sourceFilterMockStore) Close() error                                { return nil }
+func (m *sourceFilterMockStore) Stats(_ context.Context) (StoreStats, error) {
+	return StoreStats{}, nil
+}
+func (m *sourceFilterMockStore) Close() error { return nil }
 
 var _ Store = (*sourceFilterMockStore)(nil)
 

@@ -131,9 +131,9 @@ func TestHandleStats(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	stats, ok := result.(*gist.Stats)
+	stats, ok := result.(statsResponse)
 	if !ok {
-		t.Fatalf("result type = %T, want *gist.Stats", result)
+		t.Fatalf("result type = %T, want statsResponse", result)
 	}
 
 	if stats.SourceCount != 0 {
@@ -263,6 +263,56 @@ func TestToolsCallStats(t *testing.T) {
 	var stats gist.Stats
 	if err := json.Unmarshal([]byte(result.Content[0].Text), &stats); err != nil {
 		t.Fatalf("unmarshal stats: %v", err)
+	}
+}
+
+func TestToolsCallStatsMisses(t *testing.T) {
+	g := newTestGist(t)
+	defer g.Close()
+	s := NewServer(g)
+
+	// Index content then search for a query with no matching terms to
+	// force a retrieval miss.
+	g.Index(context.Background(), "completely unrelated indexed content here", gist.WithSource("test"))
+	g.Search(context.Background(), "zzz_no_such_term_zzz")
+
+	resp := sendToolCall(t, s, "gist_stats", map[string]any{})
+	if resp.Error != nil {
+		t.Fatalf("unexpected error: %v", resp.Error)
+	}
+
+	result := extractToolResult(t, resp)
+	if result.IsError {
+		t.Fatalf("tool returned error: %s", result.Content[0].Text)
+	}
+
+	var parsed map[string]any
+	if err := json.Unmarshal([]byte(result.Content[0].Text), &parsed); err != nil {
+		t.Fatalf("unmarshal stats: %v", err)
+	}
+
+	misses, ok := parsed["misses"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected misses object in response, got %T", parsed["misses"])
+	}
+
+	count, ok := misses["count"].(float64)
+	if !ok || count < 1 {
+		t.Fatalf("expected misses.count >= 1, got %v", misses["count"])
+	}
+
+	if _, ok := misses["class_breakdown"]; !ok {
+		t.Error("expected misses.class_breakdown field")
+	}
+	if _, ok := misses["recent"]; !ok {
+		t.Error("expected misses.recent field")
+	}
+
+	if parsed["miss_count"] == nil {
+		t.Error("expected top-level miss_count field")
+	}
+	if parsed["miss_rate"] == nil {
+		t.Error("expected top-level miss_rate field")
 	}
 }
 

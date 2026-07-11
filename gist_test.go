@@ -166,12 +166,12 @@ func TestWithPostgresOption(t *testing.T) {
 
 func TestIndex(t *testing.T) {
 	tests := []struct {
-		name        string
-		content     string
-		opts        []IndexOption
-		wantChunks  int
-		wantLabel   string
-		wantErr     bool
+		name       string
+		content    string
+		opts       []IndexOption
+		wantChunks int
+		wantLabel  string
+		wantErr    bool
 	}{
 		{
 			name:       "simple markdown",
@@ -371,6 +371,39 @@ func TestStats(t *testing.T) {
 	}
 }
 
+func TestStatsMissFields(t *testing.T) {
+	g, err := New(WithMemory())
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	defer g.Close()
+
+	ctx := context.Background()
+	if _, err := g.Index(ctx, "alpha beta gamma delta", WithSource("doc1")); err != nil {
+		t.Fatalf("Index: %v", err)
+	}
+
+	stats := g.Stats()
+	if stats.MissCount != 0 {
+		t.Fatalf("expected MissCount 0 before any search, got %d", stats.MissCount)
+	}
+	if stats.MissRate != 0 {
+		t.Fatalf("expected MissRate 0 before any search, got %f", stats.MissRate)
+	}
+
+	if _, err := g.Search(ctx, "zzz_nonexistent_query_zzz"); err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+
+	stats = g.Stats()
+	if stats.MissCount != 1 {
+		t.Errorf("MissCount = %d, want 1", stats.MissCount)
+	}
+	if stats.MissRate != 1.0 {
+		t.Errorf("MissRate = %f, want 1.0", stats.MissRate)
+	}
+}
+
 func TestStatsMultipleIndexCalls(t *testing.T) {
 	ms := newGistMockStore()
 	g, err := New(WithStore(ms))
@@ -428,9 +461,9 @@ func TestIndexOptionDefaults(t *testing.T) {
 
 func TestIndexOptionConstructors(t *testing.T) {
 	tests := []struct {
-		name   string
-		opt    IndexOption
-		check  func(t *testing.T, ic indexConfig)
+		name  string
+		opt   IndexOption
+		check func(t *testing.T, ic indexConfig)
 	}{
 		{
 			name: "WithSource",

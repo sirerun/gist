@@ -122,9 +122,9 @@ func TestSince(t *testing.T) {
 
 func TestDuration(t *testing.T) {
 	tests := []struct {
-		name     string
-		events   []Event
-		wantDur  time.Duration
+		name    string
+		events  []Event
+		wantDur time.Duration
 	}{
 		{
 			name:    "no events",

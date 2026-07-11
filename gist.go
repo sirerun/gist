@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -31,6 +32,10 @@ type Stats struct {
 	ChunkCount int `json:"chunk_count"`
 	// SearchCount is the total number of search operations performed.
 	SearchCount int `json:"search_count"`
+	// MissCount is the number of searches recorded as retrieval misses.
+	MissCount int `json:"miss_count"`
+	// MissRate is the fraction of searches that were recorded as misses.
+	MissRate float64 `json:"miss_rate"`
 }
 
 // IndexResult holds the outcome of an Index operation.
@@ -91,10 +96,12 @@ func WithIndexMaxChunkBytes(n int) IndexOption {
 type Option func(*config)
 
 type config struct {
-	store       Store
-	postgresDSN string
-	tokenBudget int
-	projectRoot string
+	store          Store
+	postgresDSN    string
+	tokenBudget    int
+	projectRoot    string
+	missScoreFloor float64
+	missLogSize    int
 }
 
 // WithPostgres configures Gist to use a PostgreSQL store with the given DSN.
@@ -136,6 +143,14 @@ func WithProjectRoot(dir string) Option {
 	}
 }
 
+// WithMissScoreFloor sets the relevance score below which a search's top
+// result is recorded as a retrieval miss. Defaults to defaultMissScoreFloor.
+func WithMissScoreFloor(floor float64) Option {
+	return func(c *config) {
+		c.missScoreFloor = floor
+	}
+}
+
 // Gist is the top-level API for the context intelligence library.
 // It ties together content indexing, three-tier search, vocabulary
 // management, and statistics tracking.
@@ -144,6 +159,7 @@ type Gist struct {
 	searcher *Searcher
 	vocab    *Vocabulary
 	cfg      config
+	missLog  *MissLog
 
 	mu          sync.Mutex
 	sourceCount int
@@ -174,6 +190,10 @@ func New(opts ...Option) (*Gist, error) {
 		cfg.store = NewMemoryStore()
 	}
 
+	if cfg.missScoreFloor <= 0 {
+		cfg.missScoreFloor = defaultMissScoreFloor
+	}
+
 	vocab := NewVocabulary()
 	searcher := NewSearcher(cfg.store, vocab)
 
@@ -182,6 +202,7 @@ func New(opts ...Option) (*Gist, error) {
 		searcher: searcher,
 		vocab:    vocab,
 		cfg:      cfg,
+		missLog:  NewMissLog(cfg.missLogSize),
 	}, nil
 }
 
@@ -345,7 +366,43 @@ func (g *Gist) Search(ctx context.Context, query string, opts ...SearchOption) (
 	atomic.AddInt64(&g.searchCount, 1)
 	atomic.AddInt64(&g.bytesRet, retBytes)
 
+	g.recordMissIfNeeded(query, results)
+
 	return results, nil
+}
+
+// recordMissIfNeeded logs a MissRecord when a search returned no results or
+// its top result's score fell below the configured floor.
+func (g *Gist) recordMissIfNeeded(query string, results []SearchResult) {
+	isMiss := len(results) == 0 || results[0].Score < g.cfg.missScoreFloor
+	if !isMiss {
+		return
+	}
+
+	matchLayer := ""
+	if len(results) > 0 {
+		matchLayer = results[0].MatchLayer
+	}
+
+	g.missLog.Record(MissRecord{
+		Time:       time.Now(),
+		Query:      query,
+		Class:      classifyMiss(results),
+		NearMisses: nearMisses(results),
+		ScoreFloor: g.cfg.missScoreFloor,
+		MatchLayer: matchLayer,
+	})
+}
+
+// Misses returns up to n of the most recent retrieval miss records. If
+// n <= 0, all retained records are returned.
+func (g *Gist) Misses(n int) []MissRecord {
+	return g.missLog.Recent(n)
+}
+
+// MissClassBreakdown returns the count of retained miss records by class.
+func (g *Gist) MissClassBreakdown() map[MissClass]int {
+	return g.missLog.ClassBreakdown()
 }
 
 // Stats returns a snapshot of indexing and search statistics.
@@ -368,6 +425,12 @@ func (g *Gist) Stats() *Stats {
 		pct = float64(saved) / float64(bi) * 100
 	}
 
+	missCount := g.missLog.Count()
+	var missRate float64
+	if searches > 0 {
+		missRate = float64(missCount) / float64(searches)
+	}
+
 	return &Stats{
 		BytesIndexed:  bi,
 		BytesReturned: br,
@@ -376,6 +439,8 @@ func (g *Gist) Stats() *Stats {
 		SourceCount:   sc,
 		ChunkCount:    cc,
 		SearchCount:   int(searches),
+		MissCount:     missCount,
+		MissRate:      missRate,
 	}
 }
 

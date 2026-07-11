@@ -106,12 +106,12 @@ func TestMemoryStore_SaveChunkUpdatesSource(t *testing.T) {
 
 func TestMemoryStore_SearchPorter(t *testing.T) {
 	tests := []struct {
-		name       string
-		chunks     []string
-		query      string
-		wantCount  int
-		wantFirst  string
-		wantLayer  string
+		name      string
+		chunks    []string
+		query     string
+		wantCount int
+		wantFirst string
+		wantLayer string
 	}{
 		{
 			name:      "single word match",
@@ -222,12 +222,12 @@ func TestMemoryStore_SearchPorterWithLimit(t *testing.T) {
 
 func TestMemoryStore_SearchTrigram(t *testing.T) {
 	tests := []struct {
-		name       string
-		chunks     []string
-		query      string
-		wantCount  int
-		wantFirst  string
-		wantLayer  string
+		name      string
+		chunks    []string
+		query     string
+		wantCount int
+		wantFirst string
+		wantLayer string
 	}{
 		{
 			name:      "substring match",

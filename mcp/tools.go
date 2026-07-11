@@ -169,8 +169,31 @@ func handleSearch(ctx context.Context, g *gist.Gist, args json.RawMessage) (any,
 	}, nil
 }
 
+// statsResponse wraps gist.Stats with a miss telemetry summary.
+type statsResponse struct {
+	*gist.Stats
+	Misses missesSummary `json:"misses"`
+}
+
+// missesSummary summarises retrieval miss telemetry for the gist_stats response.
+type missesSummary struct {
+	Count          int                    `json:"count"`
+	Rate           float64                `json:"rate"`
+	ClassBreakdown map[gist.MissClass]int `json:"class_breakdown"`
+	Recent         []gist.MissRecord      `json:"recent"`
+}
+
 func handleStats(g *gist.Gist) (any, error) {
-	return g.Stats(), nil
+	s := g.Stats()
+	return statsResponse{
+		Stats: s,
+		Misses: missesSummary{
+			Count:          s.MissCount,
+			Rate:           s.MissRate,
+			ClassBreakdown: g.MissClassBreakdown(),
+			Recent:         g.Misses(10),
+		},
+	}, nil
 }
 
 // parseFormat converts a string to a gist.Format.
