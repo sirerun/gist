@@ -157,3 +157,12 @@ selected routes, record exact digests and licenses, and mark every provider
 catalog-only until conformance passes. If rejected, David should name the
 replacement route or scoring change; the same criteria and evidence boundary
 continue to apply.
+
+## Approval record
+
+**Approved as selected** (operator ruling, 2026-09-25): Composio (aggregator),
+GitHub MCP Server (MCP server), and Slack Web API (direct API) proceed to D2
+as the three-provider M1 launch set, with `identity`, `communication`, and
+`document` as the initial capability-contract families. Nango and Google
+Drive API remain scored reserves. D2 must still satisfy every D2 acceptance
+criterion before anything is treated as more than catalog-only.
