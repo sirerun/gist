@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS connections (
 DO $$
 DECLARE t text;
 BEGIN
-    FOREACH t IN ARRAY ARRAY['workspaces','workspace_memberships','policy_decisions','cursors','resolutions','connections'] LOOP
+    FOREACH t IN ARRAY ARRAY['workspace_memberships','policy_decisions','cursors','resolutions','connections'] LOOP
         EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
         EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', t);
         EXECUTE format('DROP POLICY IF EXISTS tenant_isolation ON %I', t);
