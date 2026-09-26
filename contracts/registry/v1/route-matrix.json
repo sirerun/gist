@@ -1,0 +1,30 @@
+{
+  "contract":"gist-registry-rest-v1",
+  "version":"1",
+  "authentication":{"required":true,"read_scope":"catalog:read","publish_scope":"catalog:publish","publish_requires_maintainer_policy":true,"publish_scope_does_not_grant_read":true},
+  "routes":[
+    {"method":"POST","path":"/v1/discover","scope":"catalog:read","success_status":200,"examples":[{"request":{"query":"x","max_bytes":1},"status":200}]},
+    {"method":"GET","path":"/v1/skills/{id}/versions","scope":"catalog:read","success_status":200,"examples":[{"status":200}]},
+    {"method":"GET","path":"/v1/skills/{id}/versions/{version}","scope":"catalog:read","success_status":200,"examples":[{"status":200}]},
+    {"method":"GET","path":"/v1/skills/{id}/versions/{version}/package","scope":"catalog:read","success_status":200,"examples":[{"status":200,"content_type":"application/octet-stream"}]},
+    {"method":"GET","path":"/v1/tools/{id}/versions/{version}","scope":"catalog:read","success_status":200,"examples":[{"status":200}]},
+    {"method":"GET","path":"/v1/capabilities/{id}/versions/{version}","scope":"catalog:read","success_status":200,"examples":[{"status":200}]},
+    {"method":"POST","path":"/v1/resolve","scope":"catalog:read","success_status":200,"examples":[{"status":200,"aggregate":"ready"}]},
+    {"method":"POST","path":"/v1/connections","scope":"catalog:read","success_status":201,"examples":[{"status":201,"credential_fields":false}]},
+    {"method":"GET","path":"/v1/connections/{id}","scope":"catalog:read","success_status":200,"examples":[{"status":200},{"status":404,"foreign":"uniform"}]},
+    {"method":"GET","path":"/v1/taxonomies","scope":"catalog:read","success_status":200,"examples":[{"status":200,"attribution":true}]},
+    {"method":"GET","path":"/v1/taxonomies/{id}/nodes","scope":"catalog:read","success_status":200,"examples":[{"status":200,"attribution":true}]},
+    {"method":"POST","path":"/v1/publish/skills","scope":"catalog:publish","requires_maintainer":true,"success_status":201,"examples":[{"status":201},{"status":409,"changed_bytes":true}]},
+    {"method":"POST","path":"/v1/publish/capabilities","scope":"catalog:publish","requires_maintainer":true,"success_status":201,"examples":[{"status":201},{"status":409,"namespace_conflict":true}]},
+    {"method":"POST","path":"/v1/publish/tools","scope":"catalog:publish","requires_maintainer":true,"success_status":201,"examples":[{"status":201}]},
+    {"method":"POST","path":"/v1/publish/providers","scope":"catalog:publish","requires_maintainer":true,"success_status":201,"examples":[{"status":201,"network_fetch":false}]},
+    {"method":"POST","path":"/v1/publish/bindings","scope":"catalog:publish","requires_maintainer":true,"success_status":201,"examples":[{"status":201,"goldens":"passed"}]},
+    {"method":"POST","path":"/v1/publish/taxonomies","scope":"catalog:publish","requires_maintainer":true,"success_status":201,"examples":[{"status":201,"attribution":true}]},
+    {"method":"POST","path":"/v1/publish/revocations","scope":"catalog:publish","requires_maintainer":true,"success_status":201,"examples":[{"status":201},{"status":201,"repeat":"existing_notice"}]},
+    {"method":"GET","path":"/v1/events","scope":"catalog:read","success_status":200,"examples":[{"status":200},{"status":409,"code":"cursor_expired"}]},
+    {"method":"POST","path":"/v1/artifacts/batch-get","scope":"catalog:read","success_status":200,"examples":[{"status":200,"items_complete_or_error":true},{"status":413,"aggregate_over_budget":true}]}
+  ],
+  "errors":[{"code":"unauthorized","http_status":401,"retryable":false},{"code":"forbidden","http_status":403,"retryable":false},{"code":"not_found","http_status":404,"retryable":false},{"code":"version_conflict","http_status":409,"retryable":false},{"code":"budget_exceeded","http_status":413,"retryable":false},{"code":"validation_failed","http_status":422,"retryable":false},{"code":"rate_limited","http_status":429,"retryable":true,"retry_after":true},{"code":"service_unavailable","http_status":503,"retryable":true,"retry_after":true},{"code":"integrity_error","http_status":422,"retryable":false},{"code":"artifact_revoked","http_status":409,"retryable":false},{"code":"cursor_expired","http_status":409,"retryable":false},{"code":"resolution_expired","http_status":409,"retryable":false}],
+  "error_envelope":{"required_fields":["code","message","request_id","retryable"],"private_visibility":"authorize before expiry/revocation detail; foreign and missing private objects are uniform 404"},
+  "byte_budget":{"unit":"UTF-8 serialized bytes","required_content":"never truncated","over_budget":"413 budget_exceeded"}
+}

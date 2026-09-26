@@ -1,0 +1,4 @@
+[
+  {"name":"known inventory","inventory":[{"media_type":"text/plain","path":"SKILL.md","sha256":"00","size":0}],"canonical":"[{\"media_type\":\"text/plain\",\"path\":\"SKILL.md\",\"sha256\":\"00\",\"size\":0}]","package_digest":"49911e4d4399ed15e34c0b9a5ebe8ea3bb8c4c3f110671f7abd940c5b2d74485","valid":false},
+  {"name":"empty inventory","inventory":[],"canonical":"[]","valid":true}
+]

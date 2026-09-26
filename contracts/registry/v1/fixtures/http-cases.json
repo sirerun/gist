@@ -1,0 +1,22 @@
+[
+  {"route":"/v1/discover","method":"POST","valid":true,"status":200},
+  {"route":"/v1/skills/{id}/versions","method":"GET","valid":true,"status":200},
+  {"route":"/v1/skills/{id}/versions/{version}","method":"GET","valid":true,"status":200},
+  {"route":"/v1/skills/{id}/versions/{version}/package","method":"GET","valid":true,"status":200},
+  {"route":"/v1/tools/{id}/versions/{version}","method":"GET","valid":true,"status":200},
+  {"route":"/v1/capabilities/{id}/versions/{version}","method":"GET","valid":true,"status":200},
+  {"route":"/v1/resolve","method":"POST","valid":true,"status":200},
+  {"route":"/v1/connections","method":"POST","valid":true,"status":201},
+  {"route":"/v1/connections/{id}","method":"GET","valid":false,"status":404},
+  {"route":"/v1/taxonomies","method":"GET","valid":true,"status":200},
+  {"route":"/v1/taxonomies/{id}/nodes","method":"GET","valid":true,"status":200},
+  {"route":"/v1/publish/skills","method":"POST","valid":true,"status":201},
+  {"route":"/v1/publish/capabilities","method":"POST","valid":true,"status":201},
+  {"route":"/v1/publish/tools","method":"POST","valid":true,"status":201},
+  {"route":"/v1/publish/providers","method":"POST","valid":true,"status":201},
+  {"route":"/v1/publish/bindings","method":"POST","valid":true,"status":201},
+  {"route":"/v1/publish/taxonomies","method":"POST","valid":true,"status":201},
+  {"route":"/v1/publish/revocations","method":"POST","valid":true,"status":201},
+  {"route":"/v1/events","method":"GET","valid":true,"status":200},
+  {"route":"/v1/artifacts/batch-get","method":"POST","valid":true,"status":200}
+]
