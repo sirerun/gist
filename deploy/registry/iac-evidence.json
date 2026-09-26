@@ -1,0 +1,6 @@
+{
+  "status": "verified",
+  "revision": "static-configuration-review",
+  "evidence": "Cloud Run, private PostgreSQL, private object storage, workload identity, secret references, probes, migration job, metrics, backups, and bounded limits are declared in the Pulumi program; no secret values are present.",
+  "checks": ["public_access_prevention=enforced", "ipv4_enabled=false", "container_image_requires_digest", "secret_manager_references_only"]
+}
