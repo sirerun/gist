@@ -231,9 +231,15 @@ func (s eventStoreAdapter) Read(ctx context.Context, c ports.Cursor) (ports.Even
 	return s.store.Read(ctx, c)
 }
 
+// identityCatalog is the workspace-scoped identity table. Reads and writes
+// carry the workspace so storage can run them under row-level security.
+type identityCatalog interface {
+	Revoke(ctx context.Context, workspaceID, issuer, subject string) error
+}
+
 type verifiedIdentity struct {
 	issuer  *identity.WorkloadIssuer
-	catalog ports.IdentityStore
+	catalog identityCatalog
 }
 
 func (v verifiedIdentity) Lookup(ctx context.Context, token, audience string) (ports.IdentityRecord, error) {
@@ -243,8 +249,15 @@ func (v verifiedIdentity) Lookup(ctx context.Context, token, audience string) (p
 	}
 	return ports.IdentityRecord{Issuer: got.Principal.Issuer, Subject: got.Principal.Subject, WorkspaceID: got.Principal.WorkspaceID, SubjectType: got.Principal.SubjectType, Scopes: got.Principal.Scopes, PolicyGeneration: got.Principal.PolicyGeneration, ExpiresAt: got.ExpiresAt.Unix()}, nil
 }
+
+// Revoke revokes a workload identity in the caller's own workspace. The
+// workspace comes from the authenticated principal on ctx, never from input.
 func (v verifiedIdentity) Revoke(ctx context.Context, issuer, subject string) error {
-	return v.catalog.Revoke(ctx, issuer, subject)
+	auth, ok := identity.FromContext(ctx)
+	if !ok || auth.Principal().WorkspaceID == "" {
+		return identity.ErrUnauthorized
+	}
+	return v.catalog.Revoke(ctx, auth.Principal().WorkspaceID, issuer, subject)
 }
 
 type lexicalAdapter struct{ service *discovery.Service }
