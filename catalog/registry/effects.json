@@ -1,0 +1,1 @@
+{"vocabulary_version":"1","terms":[{"id":"read_document","class":"read_only","sensitivity":"normal"},{"id":"send_message","class":"mutation","sensitivity":"normal"},{"id":"create_identity","class":"mutation","sensitivity":"sensitive"}],"aggregate":{"class":"mutation","sensitivity":"sensitive"}}
