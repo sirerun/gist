@@ -1,0 +1,37 @@
+{
+  "fixture": "runtime-contract-v1-offline",
+  "skill_ref": "gist://skills/asset-skill@1.0.0",
+  "tool_uri": "gist://tools/github/issues.create",
+  "tool_version": "2026-09-25",
+  "workspace": "workspace-a",
+  "parent": {
+    "principal": "principal-a",
+    "child": "worker-a",
+    "capabilities": ["gist://tools/github/issues.create"],
+    "effect_ceiling": "mutation"
+  },
+  "spend_policy": {
+    "currency": "USD",
+    "amount": 25,
+    "period": "day",
+    "approval": "required"
+  },
+  "connection": {
+    "status": "connected",
+    "audience": "github",
+    "scope_summary": "issues:write",
+    "challenge_id": "challenge-1"
+  },
+  "protected_effects": {
+    "attempt_id": "attempt-1",
+    "submission_key": "principal-a/gist://tools/github/issues.create/submission-1",
+    "timeout_ms": 5000,
+    "effect_class": "mutation",
+    "unknown_outcome_requires_recovery": true
+  },
+  "external_receipts": {
+    "X-R1": null,
+    "X-R2": null,
+    "status": "deferred"
+  }
+}
