@@ -1,0 +1,25 @@
+name: gist-registry
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: IaC for the hosted Gist registry deployment surface
+backend:
+  url: file://.pulumi-state
+config:
+  gist-registry:project:
+    description: Cloud project hosting this isolated registry stack
+  gist-registry:region:
+    default: us-central1
+  gist-registry:publicOrigin:
+    description: Exact HTTPS origin with no path or trailing slash
+  gist-registry:resourceAudience:
+    description: Exact audience; defaults to publicOrigin in the service
+  gist-registry:containerImage:
+    description: Immutable container reference, preferably by digest
+  gist-registry:githubRepository:
+    description: owner/repository allowed to deploy through GitHub OIDC
+  gist-registry:stateBucket:
+    description: Pre-created private bucket used as the Pulumi state backend
+  gist-registry:limits:
+    description: JSON object containing bounded service limits and SLOs
