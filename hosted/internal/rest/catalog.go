@@ -58,7 +58,13 @@ func (h *Handler) listVersions(w http.ResponseWriter, r *http.Request, p ports.P
 	if err != nil {
 		return appError("service_unavailable", "Service unavailable", 503, true)
 	}
-	return h.writeJSON(w, map[string]any{"items": page.Records, "next_cursor": page.Next.ID}, q.MaxBytes)
+	items := make([]ports.CatalogRecord, 0, len(page.Records))
+	for _, rec := range page.Records {
+		if rec.Ref.ID == id && rec.Ref.Kind == ports.KindSkill {
+			items = append(items, rec)
+		}
+	}
+	return h.writeJSON(w, map[string]any{"items": items, "next_cursor": page.Next.ID}, q.MaxBytes)
 }
 func (h *Handler) discover(w http.ResponseWriter, r *http.Request, p ports.Principal) error {
 	var in struct {
@@ -90,7 +96,7 @@ func (h *Handler) download(w http.ResponseWriter, r *http.Request, p ports.Princ
 	if err := h.authorize(r.Context(), p, ports.ActionRead, &ref); err != nil {
 		return err
 	}
-	if h.s.Artifacts == nil {
+	if h.s.Artifacts == nil || h.s.Catalog == nil {
 		return appError("service_unavailable", "Service unavailable", 503, true)
 	}
 	a, err := h.s.Artifacts.Open(r.Context(), ref)

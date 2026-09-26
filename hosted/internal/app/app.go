@@ -230,6 +230,11 @@ func (s eventStoreAdapter) Read(ctx context.Context, c ports.Cursor) (ports.Even
 	}
 	return s.store.Read(ctx, c)
 }
+func (s eventStoreAdapter) NewCursor(p ports.Principal, ttl time.Duration) (ports.Cursor, error) {
+	return s.store.NewCursor(p, ttl)
+}
+
+var _ rest.EventCursorOpener = eventStoreAdapter{}
 
 // identityCatalog is the workspace-scoped identity table. Reads and writes
 // carry the workspace so storage can run them under row-level security.
