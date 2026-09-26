@@ -26,7 +26,7 @@ type Handler struct {
 	cfg      Config
 	mu       sync.Mutex
 	sessions map[string]bool
-	calls    map[string]int
+	calls    map[string]int // in-flight tools/call count per session
 }
 
 func New(c Config) (*Handler, error) {
@@ -139,10 +139,19 @@ func (h *Handler) sessionOK(r *http.Request) bool {
 }
 func (h *Handler) call(w http.ResponseWriter, r *http.Request, id any, raw json.RawMessage) {
 	sid := r.Header.Get("Mcp-Session-Id")
+	// calls counts in-flight tools/call requests per session, so MaxCalls caps
+	// concurrency, not lifetime volume: the slot is released when the call returns.
 	h.mu.Lock()
 	h.calls[sid]++
 	limited := h.calls[sid] > h.cfg.MaxCalls
 	h.mu.Unlock()
+	defer func() {
+		h.mu.Lock()
+		if h.calls[sid]--; h.calls[sid] <= 0 {
+			delete(h.calls, sid)
+		}
+		h.mu.Unlock()
+	}()
 	if limited {
 		writeRPC(w, rpcOK(id, map[string]any{"isError": true, "content": []map[string]any{{"type": "text", "text": `{"code":"rate_limited","message":"Rate limit exceeded","retryable":true}`}}}))
 		return
