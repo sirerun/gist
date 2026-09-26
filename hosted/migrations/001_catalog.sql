@@ -97,6 +97,55 @@ CREATE TABLE IF NOT EXISTS taxonomy_nodes (
 ALTER TABLE taxonomy_nodes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE taxonomy_nodes FORCE ROW LEVEL SECURITY;
 
+CREATE TABLE IF NOT EXISTS workload_identities (
+    issuer text NOT NULL,
+    subject text NOT NULL,
+    subject_type text NOT NULL CHECK (subject_type IN ('workload', 'human')),
+    workspace_id text NOT NULL,
+    scopes text[] NOT NULL DEFAULT ARRAY[]::text[],
+    policy_generation bigint NOT NULL,
+    expires_at timestamptz NOT NULL,
+    revoked_at timestamptz,
+    PRIMARY KEY (issuer, subject)
+);
+CREATE TABLE IF NOT EXISTS oauth_clients (
+    client_id text PRIMARY KEY,
+    client_name text NOT NULL,
+    redirect_uris text[] NOT NULL,
+    audience text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS oauth_authorization_codes (
+    code_hash bytea PRIMARY KEY,
+    client_id text NOT NULL REFERENCES oauth_clients(client_id),
+    subject text NOT NULL,
+    workspace_id text NOT NULL,
+    redirect_uri text NOT NULL,
+    resource text NOT NULL,
+    scope text[] NOT NULL,
+    code_challenge text NOT NULL,
+    issued_at timestamptz NOT NULL,
+    expires_at timestamptz NOT NULL,
+    consumed_at timestamptz
+);
+CREATE TABLE IF NOT EXISTS oauth_refresh_families (
+    family_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    client_id text NOT NULL REFERENCES oauth_clients(client_id),
+    subject text NOT NULL,
+    workspace_id text NOT NULL,
+    resource text NOT NULL,
+    scope text[] NOT NULL,
+    revoked_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS oauth_refresh_tokens (
+    token_hash bytea PRIMARY KEY,
+    family_id uuid NOT NULL REFERENCES oauth_refresh_families(family_id) ON DELETE CASCADE,
+    issued_at timestamptz NOT NULL,
+    expires_at timestamptz NOT NULL,
+    consumed_at timestamptz
+);
+
 CREATE OR REPLACE FUNCTION registry_workspace_visible(row_workspace text)
 RETURNS boolean LANGUAGE sql STABLE AS $$
     SELECT row_workspace = current_setting('registry.workspace_id', true)
