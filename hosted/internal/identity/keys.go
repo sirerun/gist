@@ -3,7 +3,6 @@ package identity
 import (
 	"crypto/ed25519"
 	"crypto/rand"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"sync"
@@ -105,5 +104,3 @@ func validateSigningKey(key SigningKey, requirePrivate bool) error {
 	}
 	return nil
 }
-
-func b64(data []byte) string { return base64.RawURLEncoding.EncodeToString(data) }
