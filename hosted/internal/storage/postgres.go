@@ -99,10 +99,19 @@ func (s *Postgres) Search(ctx context.Context, q ports.SearchQuery) (ports.Searc
 	return page, nil
 }
 
-func (s *Postgres) Lookup(ctx context.Context, issuer, subject string) (ports.IdentityRecord, error) {
+// Lookup reads an unrevoked workload identity. workload_identities is under
+// FORCE ROW LEVEL SECURITY keyed on registry.workspace_id, so the read runs
+// inside WithTenant for the caller's workspace; without that scope every row is
+// invisible and the lookup always reports ErrNotFound.
+func (s *Postgres) Lookup(ctx context.Context, workspaceID, issuer, subject string) (ports.IdentityRecord, error) {
+	if err := validateIdentityKey(workspaceID, issuer, subject); err != nil {
+		return ports.IdentityRecord{}, err
+	}
 	var r ports.IdentityRecord
 	var scopes []string
-	err := s.pool.QueryRow(ctx, `SELECT issuer, subject, workspace_id, subject_type, scopes, policy_generation, extract(epoch from expires_at)::bigint FROM workload_identities WHERE issuer=$1 AND subject=$2 AND revoked_at IS NULL`, issuer, subject).Scan(&r.Issuer, &r.Subject, &r.WorkspaceID, &r.SubjectType, &scopes, &r.PolicyGeneration, &r.ExpiresAt)
+	err := WithTenant(ctx, s.pool, workspaceID, func(ctx context.Context, tx pgx.Tx) error {
+		return tx.QueryRow(ctx, `SELECT issuer, subject, workspace_id, subject_type, scopes, policy_generation, extract(epoch from expires_at)::bigint FROM workload_identities WHERE workspace_id=$1 AND issuer=$2 AND subject=$3 AND revoked_at IS NULL`, workspaceID, issuer, subject).Scan(&r.Issuer, &r.Subject, &r.WorkspaceID, &r.SubjectType, &scopes, &r.PolicyGeneration, &r.ExpiresAt)
+	})
 	if errors.Is(err, pgx.ErrNoRows) {
 		return ports.IdentityRecord{}, ErrNotFound
 	}
@@ -113,13 +122,30 @@ func (s *Postgres) Lookup(ctx context.Context, issuer, subject string) (ports.Id
 	return r, nil
 }
 
-func (s *Postgres) Revoke(ctx context.Context, issuer, subject string) error {
-	command, err := s.pool.Exec(ctx, `UPDATE workload_identities SET revoked_at=now() WHERE issuer=$1 AND subject=$2`, issuer, subject)
+// Revoke marks a workload identity revoked. Like Lookup it must run under the
+// workspace's RLS scope, or the UPDATE matches zero rows.
+func (s *Postgres) Revoke(ctx context.Context, workspaceID, issuer, subject string) error {
+	if err := validateIdentityKey(workspaceID, issuer, subject); err != nil {
+		return err
+	}
+	var affected int64
+	err := WithTenant(ctx, s.pool, workspaceID, func(ctx context.Context, tx pgx.Tx) error {
+		command, err := tx.Exec(ctx, `UPDATE workload_identities SET revoked_at=now() WHERE workspace_id=$1 AND issuer=$2 AND subject=$3`, workspaceID, issuer, subject)
+		affected = command.RowsAffected()
+		return err
+	})
 	if err != nil {
 		return fmt.Errorf("revoke identity: %w", err)
 	}
-	if command.RowsAffected() == 0 {
+	if affected == 0 {
 		return ErrNotFound
+	}
+	return nil
+}
+
+func validateIdentityKey(workspaceID, issuer, subject string) error {
+	if workspaceID == "" || issuer == "" || subject == "" {
+		return errors.New("storage: incomplete identity key")
 	}
 	return nil
 }
@@ -139,5 +165,4 @@ func decodeMetadata(raw []byte) (map[string]any, error) {
 }
 
 var _ ports.CatalogStore = (*Postgres)(nil)
-var _ ports.IdentityStore = (*Postgres)(nil)
 var _ io.Reader
