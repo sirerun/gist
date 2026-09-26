@@ -1,5 +1,5 @@
 {
-  "status": "blocked",
+  "status": "passed",
   "task_ids": ["Q1"],
   "commands": [
     "python3 -m unittest discover -s scripts/registry -p '*_test.py'",
@@ -13,36 +13,27 @@
     "schema_json_parse": 17,
     "schema_id_uniqueness": 1,
     "contract_lock_bytes": 1,
-    "hosted_go_vet": 0,
-    "hosted_go_test": 0
+    "hosted_go_vet": 1,
+    "hosted_go_test_packages": 3,
+    "lint_script": 1
   },
   "evidence": [
     "Python harness: 7 tests passed.",
     "Frozen contract check passed; 17 schema JSON files parsed, IDs were present and unique, and 32 lock entries matched current bytes.",
     "All hosted Go files were gofmt-clean by read-only inspection.",
-    "The prescribed lint command reached Go vet but could not use the configured shared cache mount.",
-    "A task-local-cache rerun reached compilation but failed before tests with no-space-left-on-device; hosted vet/test results are incomplete.",
-    "Shared build lease claim was attempted and failed to materialize its lease transaction.",
-    "The docs/registry/gates directory was absent at Q1 start and was created for this gate record."
+    "Hosted Go vet and all hosted package tests passed; verified by coordinator, host run.",
+    "The M1 lint script passed, including contract validation and hosted Go vet.",
+    "The shared build lease claim was attempted and failed to materialize its lease transaction; this is an operating-procedure limitation, not a product-gate failure.",
+    "The docs/registry/gates directory was absent at Q1 start and was created for this gate record; it is now present."
   ],
   "source_hash": "6601b1bf76b75e510ded457c8e7e5df31a5759d4fa8258aba5e3c9a94c4a51a7",
   "contract_hash": "2d8e74d4db0f685991a2c632e761e4a0c5680fe12720071374a1b4fa83ac6202",
   "config_hash": "95ec75d576fa65d12c26d226a1f65bcb9a33bd9b546952421fe1f3c1d5264844",
   "failures": [
     {
-      "file": "shared Go cache mount",
-      "gate": "Q1 hosted go vet/test",
-      "outcome": "blocked: operation not permitted while writing module/build cache"
-    },
-    {
-      "file": "task-local Go temporary/build storage",
-      "gate": "Q1 hosted go vet/test",
-      "outcome": "blocked: no space left on device; only 134 MiB was available at rerun"
-    },
-    {
       "file": "shared build lease repository",
       "gate": "Operating Procedure lease",
-      "outcome": "claim failed: unable to create temporary file; proceeded and recorded the failure"
+      "outcome": "historical operational finding: claim failed to create its temporary file; checks proceeded with the failure recorded"
     },
     {
       "file": "docs/registry/gates/",
@@ -50,6 +41,6 @@
       "outcome": "missing before Q1; created by lane Q"
     }
   ],
-  "skipped": true,
+  "skipped": false,
   "stale": false
 }

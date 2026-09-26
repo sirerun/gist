@@ -925,14 +925,14 @@ tests, fixtures and document checks alone cannot close a hosted milestone.
   - Verification: `python3 -m unittest discover -s scripts/registry -p '*_test.py'`.
   - acc: [The verification harness rejects missing, skipped, empty and stale evidence rather than reporting a vacuous pass.]
 
-- [ ] Q1 Run M1 format, schema lint and tests. Owner: Q. Est: 60m. kind: any. owning_lane: Q. depends_on: [C7, D4, R1, Q0]. verifies: [infrastructure, UC-001].
+- [x] Q1 Run M1 format, schema lint and tests. Owner: Q. Est: 60m. kind: any. owning_lane: Q. depends_on: [C7, D4, R1, Q0]. verifies: [infrastructure, UC-001].
   - Files: create `docs/registry/gates/m1-quality.json`.
   - Do: run formatting checks, OpenAPI/schema lint, fixture suites and root compatibility tests; record commands/build hashes. Return source fixes to owning lanes and rerun affected checks. Never format another lane's files from Q.
   - Acceptance: zero formatter/lint errors, complete test counts, root dependencies unchanged; no production deployment required for M1's offline contracts.
   - Verification: `sh scripts/registry/lint.sh M1`; `python3 scripts/registry/check.py contracts --freeze-check`; `(cd hosted && GOWORK=off go test ./internal/contract ./internal/seed ./internal/ports -count=1)`; `GOWORK=off go test ./... -count=1`.
   - acc: [Frozen contracts and seed fixtures pass lint and tests while all existing local package tests remain green.]
 
-- [ ] Q2 Verify final M1 wiring and freeze handoffs. Owner: Q. Est: 60m. kind: any. owning_lane: Q. depends_on: [A1, A2, A3, Q1]. verifies: [UC-002, UC-004, UC-005, UC-010, UC-011].
+- [x] Q2 Verify final M1 wiring and freeze handoffs. Owner: Q. Est: 60m. kind: any. owning_lane: Q. depends_on: [A1, A2, A3, Q1]. verifies: [UC-002, UC-004, UC-005, UC-010, UC-011].
   - Files: create `docs/registry/gates/m1.json`.
   - Do: traverse seed skill -> inventory -> capabilities -> tools -> bindings -> goldens -> runtime contract and both package-import directions. Check all M1 section 15 bullets and approved ADRs. Lock endpoint/error/schema inventory and C-owned ports; issue external runtime handoffs only now.
   - Acceptance: asset and multi-capability examples resolve offline consistently, selected provider count/classes hold, review/private-trust/effects/taxonomy rules validate; no open authorization/digest/governance mechanism remains.
@@ -1091,6 +1091,8 @@ policy-gated runtimes retain exact grants and their own protected-effects engine
 2026 09 25: Created the M1-M3 lane plan, embedded use-case manifest and proposed ADRs 004-007, external interface receipts, contract inventory, testing/lint tasks and final milestone wiring gates; no tasks completed and no companion files changed.
 2026 09 25: Q0 completed the dependency-free verification harness, evidence rules, lint interface, and wiring test-environment contract; hosted module implementation remains lane C work.
 2026 09 25: Q1 attempted the M1 quality gate. Python harness tests (7), schema parsing/ID checks (17 schemas), and the 32-entry contract lock check passed; hosted Go vet/tests could not complete because the shared cache mount was not writable and task-local compilation exhausted the filesystem. The shared build-lease claim also failed to materialize its transaction. Q1 remains open; Q2 was not started. Evidence: `docs/registry/gates/m1-quality.json`.
+2026 09 25: Q1 completed after coordinator host verification and a successful task-local-cache rerun: Python unittest (7), contract/schema/lock checks, hosted `go vet ./...`, hosted `go test ./... -count=1` (three packages), and M1 lint passed. The build-lease repository still rejected its temporary-file transaction and remains recorded as an operational finding. Evidence: `docs/registry/gates/m1-quality.json`.
+2026 09 25: Q2 completed the offline M1 wiring traversal and freeze handoff. ADRs 004-006, the 32-entry contract/ports lock, three-provider catalog and captures, package inventories/digests, taxonomy attribution/export, hosted runtime contracts, and hosted contract/seed tests were consistent. Wave-2 handoff: B/S/I/T consume the frozen ports, contracts, catalog, taxonomy, and runtime handoff rules recorded in `docs/registry/gates/m1-handoff.md`. Evidence: `docs/registry/gates/m1.json`.
 
 ## Appendix: source map
 
