@@ -88,3 +88,26 @@ func TestWorkloadExpiryAndWrongAudience(t *testing.T) {
 		t.Fatalf("expiry: %v", err)
 	}
 }
+
+// Regression: Mint must enforce the scope ceiling from the stored policy, not
+// from caller-supplied ParentScopes.
+func TestMintEnforcesStoredPolicyScopeCeiling(t *testing.T) {
+	issuer, _, _ := newTestIssuer(t)
+	_, err := issuer.Mint(context.Background(), WorkloadRequest{Subject: "w", WorkspaceID: "workspace-a", Scopes: []string{"catalog:admin"}, ParentSubject: "parent", ParentScopes: []string{"catalog:admin"}})
+	if !errors.Is(err, ErrUnauthorized) {
+		t.Fatalf("caller-supplied parent scopes widened the ceiling: %v", err)
+	}
+	token, err := issuer.Mint(context.Background(), WorkloadRequest{Subject: "w", WorkspaceID: "workspace-a", Scopes: []string{"catalog:read"}, ParentScopes: []string{"catalog:read", "catalog:admin"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	verified, err := issuer.Verify(context.Background(), token)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, s := range verified.ParentScopes {
+		if s == "catalog:admin" {
+			t.Fatalf("token parent_scopes carried caller-supplied scope: %v", verified.ParentScopes)
+		}
+	}
+}

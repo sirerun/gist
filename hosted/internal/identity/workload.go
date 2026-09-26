@@ -73,9 +73,11 @@ func (i *WorkloadIssuer) Mint(ctx context.Context, req WorkloadRequest) (string,
 	if err != nil {
 		return "", fmt.Errorf("check workload membership: %w", err)
 	}
-	if !policy.Allowed || policy.Revoked || !containsAll(req.ParentScopes, req.Scopes) {
+	if !policy.Allowed || policy.Revoked || len(policy.ParentScopes) == 0 || !containsAll(policy.ParentScopes, req.Scopes) {
 		return "", ErrUnauthorized
 	}
+	// The scope ceiling is the stored policy, never the caller-supplied request.
+	req.ParentScopes = append([]string(nil), policy.ParentScopes...)
 	now := i.cfg.Clock.Now().UTC().Truncate(time.Second)
 	ttl := req.TTL
 	if ttl <= 0 || ttl > i.cfg.MaxTTL {
