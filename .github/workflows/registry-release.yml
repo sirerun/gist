@@ -1,0 +1,94 @@
+name: Registry release
+
+on:
+  workflow_dispatch:
+    inputs:
+      stack:
+        description: Pulumi stack to update (use an explicitly reviewed stack)
+        required: true
+        default: candidate
+      origin:
+        description: Exact HTTPS origin configured for this stack
+        required: true
+        type: string
+  push:
+    tags: ["registry-v*"]
+
+permissions:
+  contents: read
+  id-token: write
+  actions: read
+
+env:
+  REGION: us-central1
+  REPOSITORY: registry
+  IMAGE_NAME: hosted
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: registry
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - uses: pulumi/actions@v6
+        with:
+          pulumi-version: latest
+      - name: Install Pulumi provider
+        run: python -m pip install --requirement deploy/registry/requirements.txt
+      - name: Configure self-hosted state and stack
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          PULUMI_STATE_BUCKET: ${{ secrets.PULUMI_STATE_BUCKET }}
+          STACK: ${{ inputs.stack || 'candidate' }}
+        run: |
+          test -n "$PULUMI_STATE_BUCKET"
+          pulumi login "gs://${PULUMI_STATE_BUCKET}"
+          pulumi stack select "$STACK" --create --cwd deploy/registry
+          pulumi config set gist-registry:project "${{ secrets.GCP_PROJECT }}" --cwd deploy/registry
+          pulumi config set gist-registry:region "$REGION" --cwd deploy/registry
+          pulumi config set gist-registry:publicOrigin "${{ inputs.origin || secrets.GIST_PUBLIC_ORIGIN }}" --cwd deploy/registry
+          pulumi config set gist-registry:resourceAudience "${{ inputs.origin || secrets.GIST_PUBLIC_ORIGIN }}" --cwd deploy/registry
+          pulumi config set gist-registry:githubRepository "${{ github.repository }}" --cwd deploy/registry
+          pulumi config set gist-registry:stateBucket "gs://${PULUMI_STATE_BUCKET}" --cwd deploy/registry
+      - name: Build immutable image with Podman
+        run: |
+          gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+          podman build --file deploy/registry/Containerfile --tag "${REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${REPOSITORY}/${IMAGE_NAME}:${GITHUB_SHA}" .
+          podman push "${REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${REPOSITORY}/${IMAGE_NAME}:${GITHUB_SHA}"
+          IMAGE_REF="${REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${REPOSITORY}/${IMAGE_NAME}@$(gcloud artifacts docker images describe "${REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${REPOSITORY}/${IMAGE_NAME}:${GITHUB_SHA}" --format='value(image_summary.digest)')"
+          echo "IMAGE_REF=$IMAGE_REF" >> "$GITHUB_ENV"
+          pulumi config set gist-registry:containerImage "$IMAGE_REF" --cwd deploy/registry
+      - name: Preview and apply IaC
+        run: pulumi preview --diff --non-interactive && pulumi up --yes --non-interactive
+        working-directory: deploy/registry
+      - name: Run database migrations
+        run: gcloud run jobs execute "$(pulumi stack output migration_job_name --stack "${{ inputs.stack || 'candidate' }}" --cwd deploy/registry)" --region "$REGION" --wait
+      - name: Live readiness and liveness checks
+        env:
+          EXPECTED_ORIGIN: ${{ inputs.origin || secrets.GIST_PUBLIC_ORIGIN }}
+        run: |
+          curl --fail --silent --show-error --retry 12 --retry-delay 5 "${EXPECTED_ORIGIN}/healthz"
+          curl --fail --silent --show-error --retry 12 --retry-delay 5 "${EXPECTED_ORIGIN}/readyz"
+      - name: Emit immutable release evidence
+        env:
+          STACK: ${{ inputs.stack || 'candidate' }}
+        run: |
+          mkdir -p evidence
+          pulumi stack export --stack "$STACK" --file /tmp/pulumi-stack.json --cwd deploy/registry
+          cp /tmp/pulumi-stack.json evidence/pulumi-stack.json
+          jq 'del(.deployment.resources[]?.outputs | .secret? // empty)' evidence/pulumi-stack.json > evidence/pulumi-stack.sanitized.json
+          jq -n --arg commit "$GITHUB_SHA" --arg image "$IMAGE_REF" --arg stack "$STACK" --arg origin "${{ inputs.origin || secrets.GIST_PUBLIC_ORIGIN }}" '{status:"verified", revision:$commit, stack:$stack, origin:$origin, image:$image, evidence:"healthz and readyz passed; migration job completed", generated_at:(now|todateiso8601)}' > evidence/registry-release.json
+          sha256sum evidence/registry-release.json evidence/pulumi-stack.sanitized.json > evidence/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: registry-release-evidence-${{ github.sha }}
+          path: evidence/
+          if-no-files-found: error
