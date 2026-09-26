@@ -1,0 +1,364 @@
+{
+  "schema_version": "registry-smoke-corpus-v1",
+  "hash_method": "sha256 over UTF-8 canonical JSON of the full document with the top-level sha256 field removed: json.dumps(doc_without_sha256, sort_keys=True, separators=(',',':'), ensure_ascii=False).encode('utf-8')",
+  "workspaces": [
+    {
+      "key": "workspace-alpha",
+      "id": "fixture-workspace-alpha",
+      "visibility": "private"
+    },
+    {
+      "key": "workspace-beta",
+      "id": "fixture-workspace-beta",
+      "visibility": "private"
+    }
+  ],
+  "principals": [
+    {
+      "key": "principal-alpha-reader",
+      "subject": "fixture-user-alpha-reader",
+      "workspace_key": "workspace-alpha",
+      "scopes": [
+        "catalog:read"
+      ]
+    },
+    {
+      "key": "principal-alpha-builder",
+      "subject": "fixture-user-alpha-builder",
+      "workspace_key": "workspace-alpha",
+      "scopes": [
+        "catalog:read",
+        "catalog:resolve"
+      ]
+    },
+    {
+      "key": "principal-beta-reader",
+      "subject": "fixture-user-beta-reader",
+      "workspace_key": "workspace-beta",
+      "scopes": [
+        "catalog:read"
+      ]
+    },
+    {
+      "key": "principal-beta-builder",
+      "subject": "fixture-user-beta-builder",
+      "workspace_key": "workspace-beta",
+      "scopes": [
+        "catalog:read",
+        "catalog:resolve"
+      ]
+    }
+  ],
+  "artifact_keys": [
+    "gist/skill/asset-skill",
+    "gist/skill/multi-capability-skill",
+    "gist/identity/user.create",
+    "gist/composio/identity-user-create",
+    "gist/communication/message.send",
+    "gist/document/parse",
+    "gist/github-mcp-server/communication-message-send",
+    "gist/slack-web-api/document-parse",
+    "gist/skill/asset-skill@workspace-alpha",
+    "gist/skill/multi-capability-skill@workspace-alpha",
+    "gist/identity/user.create@workspace-alpha",
+    "gist/composio/identity-user-create@workspace-alpha",
+    "gist/communication/message.send@workspace-alpha",
+    "gist/document/parse@workspace-alpha",
+    "gist/github-mcp-server/communication-message-send@workspace-alpha",
+    "gist/slack-web-api/document-parse@workspace-alpha",
+    "gist/skill/asset-skill@workspace-beta",
+    "gist/skill/multi-capability-skill@workspace-beta",
+    "gist/identity/user.create@workspace-beta",
+    "gist/composio/identity-user-create@workspace-beta",
+    "gist/communication/message.send@workspace-beta",
+    "gist/document/parse@workspace-beta",
+    "gist/github-mcp-server/communication-message-send@workspace-beta",
+    "gist/slack-web-api/document-parse@workspace-beta"
+  ],
+  "artifacts": [
+    {
+      "workspace_key": "workspace-alpha",
+      "kind": "skill",
+      "id": "gist/skill/asset-skill",
+      "version": "1.0.0",
+      "logical_name": "asset-skill",
+      "summary": "Offline document parsing fixture with preserved assets.",
+      "trust": "operator_asserted",
+      "tags": [
+        "document",
+        "fixture",
+        "offline"
+      ],
+      "required_capabilities": [
+        "gist/document/parse"
+      ],
+      "estimated_bytes": 593
+    },
+    {
+      "workspace_key": "workspace-alpha",
+      "kind": "skill",
+      "id": "gist/skill/multi-capability-skill",
+      "version": "1.0.0",
+      "logical_name": "multi-capability-skill",
+      "summary": "Fixture with two distinct required capabilities.",
+      "trust": "operator_asserted",
+      "tags": [
+        "identity",
+        "communication",
+        "fixture"
+      ],
+      "required_capabilities": [
+        "gist/identity/user.create",
+        "gist/communication/message.send"
+      ],
+      "estimated_bytes": 324
+    },
+    {
+      "workspace_key": "workspace-alpha",
+      "kind": "capability",
+      "id": "gist/identity/user.create",
+      "version": "1.0.0",
+      "logical_name": "identity user create",
+      "summary": "Create a user record through the identity capability.",
+      "trust": "operator_asserted",
+      "tags": [
+        "identity",
+        "mutation"
+      ],
+      "required_capabilities": [],
+      "estimated_bytes": 512
+    },
+    {
+      "workspace_key": "workspace-alpha",
+      "kind": "tool",
+      "id": "composio/identity-user-create",
+      "version": "2026-09-25",
+      "logical_name": "identity user create tool",
+      "summary": "Aggregator catalog tool for creating an identity user.",
+      "trust": "operator_asserted",
+      "tags": [
+        "identity",
+        "mutation",
+        "aggregator"
+      ],
+      "required_capabilities": [],
+      "estimated_bytes": 512
+    },
+    {
+      "workspace_key": "workspace-alpha",
+      "kind": "capability",
+      "id": "gist/communication/message.send",
+      "version": "1.0.0",
+      "logical_name": "communication message send",
+      "summary": "Send a message to a communication channel.",
+      "trust": "operator_asserted",
+      "tags": [
+        "communication",
+        "mutation"
+      ],
+      "required_capabilities": [],
+      "estimated_bytes": 512
+    },
+    {
+      "workspace_key": "workspace-alpha",
+      "kind": "capability",
+      "id": "gist/document/parse",
+      "version": "1.0.0",
+      "logical_name": "document parse",
+      "summary": "Parse a document into text without changing the source.",
+      "trust": "operator_asserted",
+      "tags": [
+        "document",
+        "read_only"
+      ],
+      "required_capabilities": [],
+      "estimated_bytes": 512
+    },
+    {
+      "workspace_key": "workspace-alpha",
+      "kind": "binding",
+      "id": "gist/github-mcp-server/communication-message-send",
+      "version": "1.0.0",
+      "logical_name": "GitHub issue comment message binding",
+      "summary": "Communication message binding backed by the GitHub MCP Server.",
+      "trust": "operator_asserted",
+      "tags": [
+        "communication",
+        "github",
+        "mcp"
+      ],
+      "required_capabilities": [
+        "gist/communication/message.send"
+      ],
+      "estimated_bytes": 768
+    },
+    {
+      "workspace_key": "workspace-alpha",
+      "kind": "binding",
+      "id": "gist/slack-web-api/document-parse",
+      "version": "1.0.0",
+      "logical_name": "public document parser binding",
+      "summary": "Document parser binding backed by a direct Web API route.",
+      "trust": "operator_asserted",
+      "tags": [
+        "document",
+        "slack",
+        "direct_api"
+      ],
+      "required_capabilities": [
+        "gist/document/parse"
+      ],
+      "estimated_bytes": 768
+    },
+    {
+      "workspace_key": "workspace-beta",
+      "kind": "skill",
+      "id": "gist/skill/asset-skill",
+      "version": "1.0.0",
+      "logical_name": "asset-skill",
+      "summary": "Public document parser skill with preserved assets.",
+      "trust": "operator_asserted",
+      "tags": [
+        "document",
+        "fixture",
+        "public"
+      ],
+      "required_capabilities": [
+        "gist/document/parse"
+      ],
+      "estimated_bytes": 593
+    },
+    {
+      "workspace_key": "workspace-beta",
+      "kind": "skill",
+      "id": "gist/skill/multi-capability-skill",
+      "version": "1.0.0",
+      "logical_name": "multi-capability-skill",
+      "summary": "Public fixture with two distinct required capabilities.",
+      "trust": "operator_asserted",
+      "tags": [
+        "identity",
+        "communication",
+        "fixture",
+        "public"
+      ],
+      "required_capabilities": [
+        "gist/identity/user.create",
+        "gist/communication/message.send"
+      ],
+      "estimated_bytes": 324
+    },
+    {
+      "workspace_key": "workspace-beta",
+      "kind": "capability",
+      "id": "gist/identity/user.create",
+      "version": "1.0.0",
+      "logical_name": "identity user create",
+      "summary": "Create a user record through the identity capability.",
+      "trust": "operator_asserted",
+      "tags": [
+        "identity",
+        "mutation"
+      ],
+      "required_capabilities": [],
+      "estimated_bytes": 512
+    },
+    {
+      "workspace_key": "workspace-beta",
+      "kind": "tool",
+      "id": "composio/identity-user-create",
+      "version": "2026-09-25",
+      "logical_name": "identity user create tool",
+      "summary": "Aggregator catalog tool for creating an identity user.",
+      "trust": "operator_asserted",
+      "tags": [
+        "identity",
+        "mutation",
+        "aggregator"
+      ],
+      "required_capabilities": [],
+      "estimated_bytes": 512
+    },
+    {
+      "workspace_key": "workspace-beta",
+      "kind": "capability",
+      "id": "gist/communication/message.send",
+      "version": "1.0.0",
+      "logical_name": "communication message send",
+      "summary": "Send a message to a communication channel.",
+      "trust": "operator_asserted",
+      "tags": [
+        "communication",
+        "mutation"
+      ],
+      "required_capabilities": [],
+      "estimated_bytes": 512
+    },
+    {
+      "workspace_key": "workspace-beta",
+      "kind": "capability",
+      "id": "gist/document/parse",
+      "version": "1.0.0",
+      "logical_name": "document parse",
+      "summary": "Parse a document into text without changing the source.",
+      "trust": "operator_asserted",
+      "tags": [
+        "document",
+        "read_only"
+      ],
+      "required_capabilities": [],
+      "estimated_bytes": 512
+    },
+    {
+      "workspace_key": "workspace-beta",
+      "kind": "binding",
+      "id": "gist/github-mcp-server/communication-message-send",
+      "version": "1.0.0",
+      "logical_name": "GitHub issue comment message binding",
+      "summary": "Communication message binding backed by the GitHub MCP Server.",
+      "trust": "operator_asserted",
+      "tags": [
+        "communication",
+        "github",
+        "mcp"
+      ],
+      "required_capabilities": [
+        "gist/communication/message.send"
+      ],
+      "estimated_bytes": 768
+    },
+    {
+      "workspace_key": "workspace-beta",
+      "kind": "binding",
+      "id": "gist/slack-web-api/document-parse",
+      "version": "1.0.0",
+      "logical_name": "public document parser binding",
+      "summary": "Document parser binding backed by a direct Web API route.",
+      "trust": "operator_asserted",
+      "tags": [
+        "document",
+        "slack",
+        "direct_api"
+      ],
+      "required_capabilities": [
+        "gist/document/parse"
+      ],
+      "estimated_bytes": 768
+    }
+  ],
+  "fixture_provenance": {
+    "catalog_artifacts": [
+      "gist/skill/asset-skill",
+      "gist/skill/multi-capability-skill",
+      "gist/identity/user.create",
+      "gist/communication/message.send",
+      "gist/document/parse",
+      "gist/composio/identity-user-create",
+      "gist/github-mcp-server/communication-message-send",
+      "gist/slack-web-api/document-parse"
+    ],
+    "synthetic_artifact_shapes": true,
+    "note": "IDs, versions, capability relationships, and package summaries mirror catalog/registry/. Workspace copies and public/confusable summaries are synthetic, shape-valid fixtures for authorization and lexical-boundary tests."
+  },
+  "sha256": "4cd53e04d8cbdf46fa9afaddf1e43039cb23b8bfde5c1342d61eed641b225583"
+}

@@ -1,0 +1,50 @@
+{
+  "schema_version": "registry-smoke-thresholds-v1",
+  "status": "proposed_targets",
+  "evaluation_mode": "labels_only_before_runner",
+  "case_count": 24,
+  "class_counts": {
+    "exact": 6,
+    "no_match": 6,
+    "ambiguous": 6,
+    "unauthorized_candidate": 6
+  },
+  "targets": {
+    "unauthorized_leakage_rate": {
+      "operator": "<=",
+      "value": 0.0,
+      "unit": "fraction",
+      "cases": "unauthorized_candidate"
+    },
+    "no_match_nonempty_rate": {
+      "operator": "<=",
+      "value": 0.0,
+      "unit": "fraction",
+      "cases": "no_match"
+    },
+    "ambiguous_false_ready_rate": {
+      "operator": "<=",
+      "value": 0.0,
+      "unit": "fraction",
+      "cases": "ambiguous"
+    },
+    "ambiguous_selection_request_rate": {
+      "operator": ">=",
+      "value": 1.0,
+      "unit": "fraction",
+      "cases": "ambiguous"
+    },
+    "exact_target_top3_recall": {
+      "operator": ">=",
+      "value": 1.0,
+      "unit": "fraction",
+      "cases": "exact"
+    }
+  },
+  "freeze": {
+    "cases_sha256": "cd5a976dd930fc6524543a0f849dfae99479616c18e3dd00189f6e9207468553",
+    "corpus_sha256": "4cd53e04d8cbdf46fa9afaddf1e43039cb23b8bfde5c1342d61eed641b225583",
+    "hash_method": "sha256 over UTF-8 canonical JSON of the full document with the top-level sha256 field removed: json.dumps(doc_without_sha256, sort_keys=True, separators=(',',':'), ensure_ascii=False).encode('utf-8')"
+  },
+  "interpretation": "These are release targets, not observed results. No retrieval runner or evaluation result is included in E1."
+}
