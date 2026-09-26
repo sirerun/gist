@@ -1,0 +1,140 @@
+openapi: 3.1.0
+info:
+  title: Gist Hosted Skill and Execution-Schema Registry
+  version: 1.0.0
+  description: >-
+    Authenticated, tenant-scoped registry contract. Discovery and resolution
+    confer no execution authority. Required content is complete or fails; it is
+    never silently truncated.
+servers:
+  - url: https://gist.example.com
+    description: Provisional service origin; final domain is TBD.
+security:
+  - bearerAuth: [catalog:read]
+paths:
+  /v1/discover: {post: {$ref: '#/components/x-operations/discover'}}
+  /v1/skills/{id}/versions: {get: {$ref: '#/components/x-operations/listSkillVersions'}}
+  /v1/skills/{id}/versions/{version}: {get: {$ref: '#/components/x-operations/getSkillVersion'}}
+  /v1/skills/{id}/versions/{version}/package: {get: {$ref: '#/components/x-operations/downloadPackage'}}
+  /v1/tools/{id}/versions/{version}: {get: {$ref: '#/components/x-operations/getToolVersion'}}
+  /v1/capabilities/{id}/versions/{version}: {get: {$ref: '#/components/x-operations/getCapabilityVersion'}}
+  /v1/resolve: {post: {$ref: '#/components/x-operations/resolve'}}
+  /v1/connections: {post: {$ref: '#/components/x-operations/createConnection'}}
+  /v1/connections/{id}: {get: {$ref: '#/components/x-operations/getConnection'}}
+  /v1/taxonomies: {get: {$ref: '#/components/x-operations/listTaxonomies'}}
+  /v1/taxonomies/{id}/nodes: {get: {$ref: '#/components/x-operations/listTaxonomyNodes'}}
+  /v1/publish/skills: {post: {$ref: '#/components/x-operations/publishSkill'}}
+  /v1/publish/capabilities: {post: {$ref: '#/components/x-operations/publishCapability'}}
+  /v1/publish/tools: {post: {$ref: '#/components/x-operations/publishTool'}}
+  /v1/publish/providers: {post: {$ref: '#/components/x-operations/publishProvider'}}
+  /v1/publish/bindings: {post: {$ref: '#/components/x-operations/publishBinding'}}
+  /v1/publish/taxonomies: {post: {$ref: '#/components/x-operations/publishTaxonomy'}}
+  /v1/publish/revocations: {post: {$ref: '#/components/x-operations/publishRevocation'}}
+  /v1/events: {get: {$ref: '#/components/x-operations/listEvents'}}
+  /v1/artifacts/batch-get: {post: {$ref: '#/components/x-operations/batchGet'}}
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id: {name: id, in: path, required: true, description: Opaque URL-safe registry key, schema: {type: string, pattern: '^[A-Za-z0-9._~-]+$'}}
+    Version: {name: version, in: path, required: true, description: Exact immutable version; encoded slashes and traversal are rejected, schema: {type: string, minLength: 1, maxLength: 128}}
+    MaxBytes: {name: max_bytes, in: query, required: false, description: Enforced UTF-8 serialized response budget in bytes. Required content is never truncated; an over-budget aggregate fails with budget_exceeded., schema: {type: integer, minimum: 1, maximum: 100000000}}
+    RequestId: {name: X-Request-ID, in: header, required: false, schema: {type: string, maxLength: 128}}
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      required: [code, message, request_id, retryable]
+      properties:
+        code: {type: string, enum: [unauthorized, forbidden, not_found, version_conflict, budget_exceeded, validation_failed, rate_limited, service_unavailable, integrity_error, artifact_revoked, cursor_expired, resolution_expired]}
+        message: {type: string, description: Safe message; no exception text or account identifiers.}
+        request_id: {type: string}
+        retryable: {type: boolean}
+    Generic: {type: object, additionalProperties: true}
+    BatchItem:
+      type: object
+      additionalProperties: false
+      required: [reference, kind, complete]
+      properties:
+        reference: {type: string, description: Exact typed canonical reference.}
+        kind: {type: string, enum: [manifest, package, tool, capability, binding]}
+        complete: {type: boolean, const: true}
+        artifact: {type: object}
+        error: {$ref: '#/components/schemas/Error'}
+  responses:
+    Error401: {description: Authentication required, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}, example: {code: unauthorized, message: Authentication required, request_id: req_123, retryable: false}}}}
+    Error403: {description: Insufficient scope or policy denial, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    Error404: {description: Not found or deliberately indistinguishable private reference, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    Error409: {description: Conflict or expired state, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    Error413: {description: Required content or aggregate exceeds byte budget; code is budget_exceeded and content is never truncated, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}, example: {code: budget_exceeded, message: Response exceeds the requested byte budget, request_id: req_123, retryable: false}}}}
+    Error422: {description: Invalid request or integrity failure, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    Error429: {description: Rate limited; includes Retry-After, headers: {Retry-After: {schema: {type: integer}}}, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    Error503: {description: Service unavailable; includes Retry-After, headers: {Retry-After: {schema: {type: integer}}}, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  x-operations:
+    discover: {operationId: discover, summary: Discover authorized candidates, security: [{bearerAuth: [catalog:read]}], requestBody: {$ref: '#/components/x-requestBodies/discover'}, responses: {$ref: '#/components/x-responses/standardRead'} }
+    listSkillVersions: {operationId: listSkillVersions, parameters: [{$ref: '#/components/parameters/Id'}, {$ref: '#/components/parameters/MaxBytes'}], security: [{bearerAuth: [catalog:read]}], responses: {$ref: '#/components/x-responses/standardRead'} }
+    getSkillVersion: {operationId: getSkillVersion, parameters: [{$ref: '#/components/parameters/Id'}, {$ref: '#/components/parameters/Version'}, {$ref: '#/components/parameters/MaxBytes'}], security: [{bearerAuth: [catalog:read]}], responses: {$ref: '#/components/x-responses/standardRead'} }
+    downloadPackage: {operationId: downloadPackage, parameters: [{$ref: '#/components/parameters/Id'}, {$ref: '#/components/parameters/Version'}], security: [{bearerAuth: [catalog:read]}], responses: {$ref: '#/components/x-responses/package'} }
+    getToolVersion: {operationId: getToolVersion, parameters: [{$ref: '#/components/parameters/Id'}, {$ref: '#/components/parameters/Version'}, {$ref: '#/components/parameters/MaxBytes'}], security: [{bearerAuth: [catalog:read]}], responses: {$ref: '#/components/x-responses/standardRead'} }
+    getCapabilityVersion: {operationId: getCapabilityVersion, parameters: [{$ref: '#/components/parameters/Id'}, {$ref: '#/components/parameters/Version'}, {$ref: '#/components/parameters/MaxBytes'}], security: [{bearerAuth: [catalog:read]}], responses: {$ref: '#/components/x-responses/standardRead'} }
+    resolve: {operationId: resolve, summary: Resolve exact capability bindings, security: [{bearerAuth: [catalog:read]}], requestBody: {$ref: '#/components/x-requestBodies/budgeted'}, responses: {$ref: '#/components/x-responses/standardRead'} }
+    createConnection: {operationId: createConnection, security: [{bearerAuth: [catalog:read]}], requestBody: {$ref: '#/components/x-requestBodies/budgeted'}, responses: {$ref: '#/components/x-responses/created'} }
+    getConnection: {operationId: getConnection, parameters: [{$ref: '#/components/parameters/Id'}, {$ref: '#/components/parameters/MaxBytes'}], security: [{bearerAuth: [catalog:read]}], responses: {$ref: '#/components/x-responses/standardRead'} }
+    listTaxonomies: {operationId: listTaxonomies, parameters: [{$ref: '#/components/parameters/MaxBytes'}], security: [{bearerAuth: [catalog:read]}], responses: {$ref: '#/components/x-responses/standardRead'} }
+    listTaxonomyNodes: {operationId: listTaxonomyNodes, parameters: [{$ref: '#/components/parameters/Id'}, {$ref: '#/components/parameters/MaxBytes'}], security: [{bearerAuth: [catalog:read]}], responses: {$ref: '#/components/x-responses/standardRead'} }
+    publishSkill: {$ref: '#/components/x-operations/publishBase', operationId: publishSkill, summary: Publish immutable reviewed skill package}
+    publishCapability: {$ref: '#/components/x-operations/publishBase', operationId: publishCapability, summary: Publish governed capability contract}
+    publishTool: {$ref: '#/components/x-operations/publishBase', operationId: publishTool, summary: Publish complete execution schema}
+    publishProvider: {$ref: '#/components/x-operations/publishBase', operationId: publishProvider, summary: Publish stable provider record}
+    publishBinding: {$ref: '#/components/x-operations/publishBase', operationId: publishBinding, summary: Publish exact-version binding}
+    publishTaxonomy: {$ref: '#/components/x-operations/publishBase', operationId: publishTaxonomy, summary: Publish attributed taxonomy edition}
+    publishRevocation: {$ref: '#/components/x-operations/publishBase', operationId: publishRevocation, summary: Publish immutable revocation notice}
+    listEvents: {operationId: listEvents, parameters: [{$ref: '#/components/parameters/MaxBytes'}], security: [{bearerAuth: [catalog:read]}], responses: {$ref: '#/components/x-responses/standardRead'} }
+    batchGet: {operationId: batchGet, summary: Batch retrieval of complete typed artifacts, security: [{bearerAuth: [catalog:read]}], requestBody: {$ref: '#/components/x-requestBodies/budgeted'}, responses: {$ref: '#/components/x-responses/batch'} }
+    publishBase: {security: [{bearerAuth: [catalog:publish]}], requestBody: {$ref: '#/components/x-requestBodies/budgeted'}, responses: {$ref: '#/components/x-responses/created'} }
+  x-requestBodies:
+    budgeted: {required: true, content: {application/json: {schema: {type: object, required: [max_bytes], properties: {max_bytes: {type: integer, minimum: 1, maximum: 100000000}, token_estimate: {type: integer, minimum: 0}}, additionalProperties: true}, example: {max_bytes: 6000}}}}
+    discover: {required: true, content: {application/json: {schema: {type: object, required: [query, max_bytes], properties: {query: {type: string, minLength: 1}, max_results: {type: integer, minimum: 1}, max_bytes: {type: integer, minimum: 1}, token_estimate: {type: integer, minimum: 0}}, additionalProperties: true}, example: {query: Onboard an engineer, max_results: 3, max_bytes: 6000}}}}
+  x-responses:
+    standardRead:
+      '200': {description: Complete authorized JSON response, content: {application/json: {schema: {$ref: '#/components/schemas/Generic'}}}}
+      '401': {$ref: '#/components/responses/Error401'}
+      '403': {$ref: '#/components/responses/Error403'}
+      '404': {$ref: '#/components/responses/Error404'}
+      '409': {$ref: '#/components/responses/Error409'}
+      '413': {$ref: '#/components/responses/Error413'}
+      '422': {$ref: '#/components/responses/Error422'}
+      '429': {$ref: '#/components/responses/Error429'}
+      '503': {$ref: '#/components/responses/Error503'}
+    created:
+      '201': {description: Complete created resource, content: {application/json: {schema: {$ref: '#/components/schemas/Generic'}}}}
+      '401': {$ref: '#/components/responses/Error401'}
+      '403': {$ref: '#/components/responses/Error403'}
+      '404': {$ref: '#/components/responses/Error404'}
+      '409': {$ref: '#/components/responses/Error409'}
+      '413': {$ref: '#/components/responses/Error413'}
+      '422': {$ref: '#/components/responses/Error422'}
+      '429': {$ref: '#/components/responses/Error429'}
+      '503': {$ref: '#/components/responses/Error503'}
+    package:
+      '200': {description: Complete immutable package bytes, headers: {ETag: {schema: {type: string}}, Digest: {schema: {type: string}}, Content-Length: {schema: {type: integer}}}, content: {application/octet-stream: {schema: {type: string, format: binary}}}}
+      '401': {$ref: '#/components/responses/Error401'}
+      '403': {$ref: '#/components/responses/Error403'}
+      '404': {$ref: '#/components/responses/Error404'}
+      '409': {$ref: '#/components/responses/Error409'}
+      '422': {$ref: '#/components/responses/Error422'}
+      '429': {$ref: '#/components/responses/Error429'}
+      '503': {$ref: '#/components/responses/Error503'}
+    batch:
+      '200': {description: Complete items or per-item errors; aggregate is bounded and never truncated, content: {application/json: {schema: {type: object, required: [items], properties: {items: {type: array, items: {$ref: '#/components/schemas/BatchItem'}}, next_cursor: {type: string, nullable: true}}}}}}
+      '401': {$ref: '#/components/responses/Error401'}
+      '403': {$ref: '#/components/responses/Error403'}
+      '404': {$ref: '#/components/responses/Error404'}
+      '409': {$ref: '#/components/responses/Error409'}
+      '413': {$ref: '#/components/responses/Error413'}
+      '422': {$ref: '#/components/responses/Error422'}
+      '429': {$ref: '#/components/responses/Error429'}
+      '503': {$ref: '#/components/responses/Error503'}

@@ -1,0 +1,68 @@
+{
+  "contract": "gist-registry-rest-v1",
+  "version": "1",
+  "base_path": "/v1",
+  "authentication": {
+    "required": true,
+    "read_scope": "catalog:read",
+    "publish_scope": "catalog:publish",
+    "publish_requires_maintainer_policy": true,
+    "publish_scope_does_not_grant_read": true
+  },
+  "key_rules": {
+    "route_ids": "opaque URL-safe registry keys; never logical names",
+    "logical_names": "may contain slash-separated names and are not authorization handles",
+    "versions": "exact immutable versions; validate and escape; reject traversal and ambiguous encoded slashes",
+    "canonical_urls": "responses provide canonical URLs; clients follow them rather than constructing aliases",
+    "tenant_selection": "derived from validated credentials and authorized workspace selection, never an untrusted tenant identifier"
+  },
+  "byte_budget": {
+    "unit": "UTF-8 serialized bytes",
+    "request_field": "max_bytes",
+    "token_estimate": "optional approximate preference only",
+    "reduction": "may reduce candidates or omit optional descriptive text",
+    "required_content": "never truncated; if required content cannot fit, fail the aggregate response with HTTP 413 and code budget_exceeded",
+    "batch": "each returned item is complete; no item is truncated; per-item errors are allowed; an aggregate response over budget fails 413"
+  },
+  "routes": [
+    {"method":"POST","path":"/v1/discover","operation_id":"discover","scope":"catalog:read","success_status":200,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["candidate.id","candidate.version","candidate.manifest_url","next_cursor"],"max_bytes":"request max_bytes; UTF-8 serialized aggregate response; optional text may be omitted, required fields never truncated","pending_a2_resolution":false},
+    {"method":"GET","path":"/v1/skills/{id}/versions","operation_id":"list_skill_versions","scope":"catalog:read","success_status":200,"negative_statuses":[401,403,404,409,422,429,503],"canonical_keys":["id","version","url","manifest_url","package_url","next_cursor"],"max_bytes":"serialized response is bounded by configured catalog limit; pagination is preferred over truncation","pending_a2_resolution":false},
+    {"method":"GET","path":"/v1/skills/{id}/versions/{version}","operation_id":"get_skill_version","scope":"catalog:read","success_status":200,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["id","version","url","package_url","manifest_digest","package_digest"],"max_bytes":"complete manifest and required instruction metadata; never truncate; over-budget required content returns 413 budget_exceeded","pending_a2_resolution":false},
+    {"method":"GET","path":"/v1/skills/{id}/versions/{version}/package","operation_id":"download_skill_package","scope":"catalog:read","success_status":200,"negative_statuses":[401,403,404,409,422,429,503],"canonical_keys":["id","version","content_digest","content_length","content_type"],"max_bytes":"complete immutable bytes only; Content-Length and digest describe the full transfer; no truncation","pending_a2_resolution":false},
+    {"method":"GET","path":"/v1/tools/{id}/versions/{version}","operation_id":"get_tool_version","scope":"catalog:read","success_status":200,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["id","version","url","schema_digest","schema_dialect"],"max_bytes":"complete executable schema; never truncate; over-budget required schema returns 413 budget_exceeded","pending_a2_resolution":false},
+    {"method":"GET","path":"/v1/capabilities/{id}/versions/{version}","operation_id":"get_capability_version","scope":"catalog:read","success_status":200,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["id","version","url","fixtures_url"],"max_bytes":"complete contract and required fixtures; never truncate; over-budget required content returns 413 budget_exceeded","pending_a2_resolution":false},
+    {"method":"POST","path":"/v1/resolve","operation_id":"resolve","scope":"catalog:read","success_status":200,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["resolution_id","resolution_url","expires_at","findings[].capability_id","findings[].status"],"max_bytes":"request max_bytes; complete per-requirement findings are mandatory; aggregate over budget returns 413 budget_exceeded","pending_a2_resolution":false},
+    {"method":"POST","path":"/v1/connections","operation_id":"create_connection","scope":"catalog:read","success_status":201,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["connection_id","connection_url","connect_url","status"],"max_bytes":"complete connection record; no credentials or provider secrets; over-budget response returns 413 budget_exceeded","pending_a2_resolution":false},
+    {"method":"GET","path":"/v1/connections/{id}","operation_id":"get_connection","scope":"catalog:read","success_status":200,"negative_statuses":[401,403,404,409,422,429,503],"canonical_keys":["id","url","status","created_at","updated_at"],"max_bytes":"complete status record; no credentials or provider secrets","pending_a2_resolution":false},
+    {"method":"GET","path":"/v1/taxonomies","operation_id":"list_taxonomies","scope":"catalog:read","success_status":200,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["id","edition","url","attribution","nodes_url"],"max_bytes":"complete edition metadata and attribution; paginate rather than truncate","pending_a2_resolution":false},
+    {"method":"GET","path":"/v1/taxonomies/{id}/nodes","operation_id":"list_taxonomy_nodes","scope":"catalog:read","success_status":200,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["taxonomy_id","edition","url","nodes[].id","nodes[].attribution","next_cursor"],"max_bytes":"complete returned nodes and attribution; paginate rather than truncate","pending_a2_resolution":false},
+    {"method":"POST","path":"/v1/publish/skills","operation_id":"publish_skill","scope":"catalog:publish","success_status":201,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["id","version","url","manifest_url","package_url","package_digest"],"max_bytes":"complete immutable package/manifest intake; oversized input or response is rejected, never truncated","pending_a2_resolution":true,"pending_reason":"publish route expansion and maintainer-policy mechanics await A2 resolution"},
+    {"method":"POST","path":"/v1/publish/capabilities","operation_id":"publish_capability","scope":"catalog:publish","success_status":201,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["id","version","url","fixtures_url"],"max_bytes":"complete governed contract intake; oversized input or response is rejected, never truncated","pending_a2_resolution":true,"pending_reason":"publish route expansion and unowned-prefix policy await A2 resolution"},
+    {"method":"POST","path":"/v1/publish/tools","operation_id":"publish_tool","scope":"catalog:publish","success_status":201,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["id","version","url","schema_digest","schema_dialect"],"max_bytes":"complete schema intake with capture provenance; oversized input or response is rejected, never truncated","pending_a2_resolution":true,"pending_reason":"publish route expansion and capture-provenance mechanics await A2 resolution"},
+    {"method":"POST","path":"/v1/publish/providers","operation_id":"publish_provider","scope":"catalog:publish","success_status":201,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["id","url","support_state","last_verified_at"],"max_bytes":"complete provider record; no network fetch; oversized input or response is rejected, never truncated","pending_a2_resolution":true,"pending_reason":"publish route expansion and provider-record policy await A2 resolution"},
+    {"method":"POST","path":"/v1/publish/bindings","operation_id":"publish_binding","scope":"catalog:publish","success_status":201,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["id","version","url","capability_url","tool_url"],"max_bytes":"complete exact-version binding and successful goldens; oversized input or response is rejected, never truncated","pending_a2_resolution":true,"pending_reason":"publish route expansion and golden-fixture acceptance policy await A2 resolution"},
+    {"method":"POST","path":"/v1/publish/taxonomies","operation_id":"publish_taxonomy","scope":"catalog:publish","success_status":201,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["id","edition","url","nodes_url","attribution"],"max_bytes":"complete attributed edition intake; oversized input or response is rejected, never truncated","pending_a2_resolution":true,"pending_reason":"publish route expansion and taxonomy ownership policy await A2 resolution"},
+    {"method":"POST","path":"/v1/publish/revocations","operation_id":"publish_revocation","scope":"catalog:publish","success_status":201,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["id","url","event_url","revoked_ref","revoked_at"],"max_bytes":"complete immutable revocation notice; repeat returns the existing notice; oversized input or response is rejected","pending_a2_resolution":true,"pending_reason":"publish route expansion and repeat/idempotency policy await A2 resolution"},
+    {"method":"GET","path":"/v1/events","operation_id":"list_events","scope":"catalog:read","success_status":200,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["event_id","cursor","next_cursor","event_type","subject_ref"],"max_bytes":"complete ordered notices; paginate; retention gaps return a documented 409 error, never a partial silent feed","pending_a2_resolution":false},
+    {"method":"POST","path":"/v1/artifacts/batch-get","operation_id":"batch_get_artifacts","scope":"catalog:read","success_status":200,"negative_statuses":[401,403,404,409,413,422,429,503],"canonical_keys":["items[].reference","items[].kind","items[].complete","items[].artifact","items[].error","next_cursor"],"max_bytes":"request max_bytes; each item is complete or has a per-item error; aggregate serialized response over budget fails 413 budget_exceeded","pending_a2_resolution":true,"pending_reason":"batch shape, item limit, and cursor mechanics await A2 resolution"}
+  ],
+  "errors": [
+    {"code":"unauthorized","http_status":401,"retryable":false,"pending_a2_resolution":false},
+    {"code":"forbidden","http_status":403,"retryable":false,"pending_a2_resolution":false},
+    {"code":"not_found","http_status":404,"retryable":false,"pending_a2_resolution":false},
+    {"code":"version_conflict","http_status":409,"retryable":false,"pending_a2_resolution":false},
+    {"code":"budget_exceeded","http_status":413,"retryable":false,"pending_a2_resolution":false,"note":"payload_too_large is the condition description, not an error code"},
+    {"code":"validation_failed","http_status":422,"retryable":false,"pending_a2_resolution":false},
+    {"code":"rate_limited","http_status":429,"retryable":true,"pending_a2_resolution":false,"retry_after":true},
+    {"code":"service_unavailable","http_status":503,"retryable":true,"pending_a2_resolution":false,"retry_after":true},
+    {"code":"integrity_error","http_status":422,"retryable":false,"pending_a2_resolution":true},
+    {"code":"artifact_revoked","http_status":409,"retryable":false,"pending_a2_resolution":true},
+    {"code":"cursor_expired","http_status":409,"retryable":false,"pending_a2_resolution":true},
+    {"code":"resolution_expired","http_status":409,"retryable":false,"pending_a2_resolution":true}
+  ],
+  "error_envelope": {
+    "required_fields":["code","message","request_id","retryable"],
+    "safe_message":"must not include exception text, account identifiers, or foreign-resource existence",
+    "private_visibility":"authorized and foreign private references use indistinguishable 404 responses; expiry/revocation detail follows authorization"
+  }
+}
