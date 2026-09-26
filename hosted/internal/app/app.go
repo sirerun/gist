@@ -3,6 +3,8 @@ package app
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirerun/gist/hosted/internal/discovery"
 	"github.com/sirerun/gist/hosted/internal/events"
@@ -28,6 +31,7 @@ type App struct {
 	cfg       Config
 	pool      *pgxpool.Pool
 	objects   *storage.ObjectStore
+	issuer    *identity.WorkloadIssuer
 	server    *http.Server
 	closeOnce sync.Once
 }
@@ -104,12 +108,12 @@ func newWithStores(cfg Config, pool *pgxpool.Pool, objects *storage.ObjectStore)
 		return nil, err
 	}
 	feed := events.NewStore(clock)
-	broker := newBroker(cfg.BrokerURL, cfg.RequestTimeout)
+	broker := newBroker(cfg.BrokerURL, cfg.RequestTimeout, cfg.BrokerClient)
 	var connections ports.ConnectionInitiator
 	if broker != nil {
 		connections = broker
 	}
-	services := rest.Services{Identity: identityStore, Authorizer: policy, Catalog: catalog, Search: lexicalAdapter{service: search}, Artifacts: objects, Resolutions: resolutionStore, Connections: connections, Events: feed, Publisher: publisher{pool: pool, objects: objects, limits: cfg}, Resolver: resolverAdapter{resolver: resolver, maxBytes: cfg.MaxResponseBytes}, Limits: cfg.RESTLimits(), Audience: cfg.ResourceAudience}
+	services := rest.Services{Identity: identityStore, Authorizer: policy, Catalog: catalog, Search: lexicalAdapter{service: search}, Artifacts: objects, Resolutions: resolutionStore, Connections: connections, Events: eventStoreAdapter{store: feed}, Publisher: publisher{pool: pool, objects: objects, limits: cfg}, Resolver: resolverAdapter{resolver: resolver, maxBytes: cfg.MaxResponseBytes}, Limits: cfg.RESTLimits(), Audience: cfg.ResourceAudience}
 	rh, err := rest.New(services)
 	if err != nil {
 		pool.Close()
@@ -120,10 +124,43 @@ func newWithStores(cfg Config, pool *pgxpool.Pool, objects *storage.ObjectStore)
 		pool.Close()
 		return nil, err
 	}
-	return &App{cfg: cfg, pool: pool, objects: objects, server: &http.Server{Addr: cfg.ListenAddress, Handler: requestContext{rest: rh, mcp: mcp, ready: func(ctx context.Context) error { return pool.Ping(ctx) }}, ReadHeaderTimeout: cfg.RequestTimeout}}, nil
+	return &App{cfg: cfg, pool: pool, objects: objects, issuer: issuer, server: &http.Server{Addr: cfg.ListenAddress, Handler: requestContext{rest: rh, mcp: mcp, ready: func(ctx context.Context) error { return pool.Ping(ctx) }}, ReadHeaderTimeout: cfg.RequestTimeout}}, nil
 }
 
 func (a *App) Handler() http.Handler { return a.server.Handler }
+
+// MintWorkloadToken is the local workload-issuer seam used by acceptance
+// fixtures. Production callers obtain tokens from the identity service; the
+// composed app keeps the issuer private while allowing an in-process fixture
+// to mint tokens signed by the exact key set used for verification.
+func (a *App) MintWorkloadToken(ctx context.Context, req identity.WorkloadRequest) (string, error) {
+	if a == nil || a.issuer == nil {
+		return "", errors.New("app: workload issuer is unavailable")
+	}
+	return a.issuer.Mint(ctx, req)
+}
+
+// SeedAcceptanceArtifact installs a complete artifact into the same
+// filesystem/catalog stores used by the composed handler. It is intentionally
+// narrow and exists for the integration fixture; normal publication uses the
+// REST publisher path.
+func (a *App) SeedAcceptanceArtifact(ctx context.Context, p ports.Principal, ref ports.ArtifactRef, raw, metadata []byte) error {
+	if a == nil || a.objects == nil || a.pool == nil {
+		return errors.New("app: acceptance stores are unavailable")
+	}
+	sum := sha256.Sum256(raw)
+	digest := ports.Digest{Algorithm: "sha256", Value: hex.EncodeToString(sum[:])}
+	if err := a.objects.Put(ctx, digest, bytesReader(raw), int64(len(raw))); err != nil {
+		return err
+	}
+	if err := a.objects.Bind(ref, digest); err != nil {
+		return err
+	}
+	return storage.WithTenantPrincipal(ctx, a.pool, storage.Tenant{Issuer: p.Issuer, Subject: p.Subject, Audience: p.Audience, WorkspaceID: p.WorkspaceID, Scopes: p.Scopes, PolicyGeneration: p.PolicyGeneration}, func(ctx context.Context, tx pgx.Tx) error {
+		_, err := tx.Exec(ctx, `INSERT INTO catalog_versions(workspace_id,kind,artifact_id,version,state,digest_algorithm,digest_value,manifest_digest_algorithm,manifest_digest_value,metadata,package_key,owner_id) VALUES($1,$2,$3,$4,'published','sha256',$5,'sha256',$5,$6,$5,$7) ON CONFLICT DO NOTHING`, ref.WorkspaceID, ref.Kind, ref.ID, ref.Version, digest.Value, metadata, p.Subject)
+		return err
+	})
+}
 func (a *App) ListenAndServe() error {
 	if a.server == nil {
 		return errors.New("app: not initialized")
@@ -181,6 +218,18 @@ func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 type identityClock struct{}
 
 func (identityClock) Now() time.Time { return time.Now().UTC() }
+
+type eventStoreAdapter struct{ store *events.Store }
+
+func (s eventStoreAdapter) Append(ctx context.Context, e ports.Event) error {
+	return s.store.Append(ctx, e)
+}
+func (s eventStoreAdapter) Read(ctx context.Context, c ports.Cursor) (ports.EventPage, error) {
+	if c.ID == "" {
+		return ports.EventPage{}, nil
+	}
+	return s.store.Read(ctx, c)
+}
 
 type verifiedIdentity struct {
 	issuer  *identity.WorkloadIssuer
@@ -251,7 +300,7 @@ type broker struct {
 	client   *http.Client
 }
 
-func newBroker(endpoint string, timeout time.Duration) *broker {
+func newBroker(endpoint string, timeout time.Duration, client *http.Client) *broker {
 	if strings.TrimSpace(endpoint) == "" {
 		return nil
 	}
@@ -259,7 +308,10 @@ func newBroker(endpoint string, timeout time.Duration) *broker {
 	if err != nil || u.Scheme != "https" || u.Host == "" {
 		return nil
 	}
-	return &broker{endpoint: strings.TrimRight(endpoint, "/"), client: &http.Client{Timeout: timeout}}
+	if client == nil {
+		client = &http.Client{Timeout: timeout}
+	}
+	return &broker{endpoint: strings.TrimRight(endpoint, "/"), client: client}
 }
 func (b *broker) Begin(ctx context.Context, p ports.Principal, ref ports.ArtifactRef) (ports.Connection, error) {
 	return b.call(ctx, http.MethodPost, "", p, ref)

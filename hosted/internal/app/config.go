@@ -3,6 +3,7 @@ package app
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -19,6 +20,7 @@ type Config struct {
 	DatabaseURL           string
 	ObjectStoreRoot       string
 	BrokerURL             string
+	BrokerClient          *http.Client
 	RequestTimeout        time.Duration
 	MaxPackageBytes       int64
 	MaxExpandedBytes      int64

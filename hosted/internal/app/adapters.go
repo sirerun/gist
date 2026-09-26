@@ -26,7 +26,9 @@ func (p *postgresPolicy) CheckWorkload(ctx context.Context, subject, workspace s
 	if p == nil || p.pool == nil {
 		return got, errors.New("policy database unavailable")
 	}
-	err := p.pool.QueryRow(ctx, `SELECT wm.policy_generation, wm.scopes, wm.active, w.policy_generation FROM workspace_memberships wm JOIN workspaces w ON w.id=wm.workspace_id WHERE wm.subject=$1 AND wm.workspace_id=$2 ORDER BY wm.created_at DESC LIMIT 1`, subject, workspace).Scan(&got.PolicyGeneration, &got.ParentScopes, &got.Allowed, &current)
+	err := storage.WithTenant(ctx, p.pool, workspace, func(ctx context.Context, tx pgx.Tx) error {
+		return tx.QueryRow(ctx, `SELECT wm.policy_generation, wm.scopes, wm.active, w.policy_generation FROM workspace_memberships wm JOIN workspaces w ON w.id=wm.workspace_id WHERE wm.subject=$1 AND wm.workspace_id=$2 ORDER BY wm.created_at DESC LIMIT 1`, subject, workspace).Scan(&got.PolicyGeneration, &got.ParentScopes, &got.Allowed, &current)
+	})
 	if err != nil {
 		return identity.Policy{}, fmt.Errorf("lookup workload policy: %w", err)
 	}
@@ -40,7 +42,9 @@ func (p *postgresPolicy) CheckWorkload(ctx context.Context, subject, workspace s
 func (p *postgresPolicy) CheckWorkloadForIssuer(ctx context.Context, issuer, subject, workspace string, scopes []string, generation uint64) (identity.Policy, error) {
 	var got identity.Policy
 	var current uint64
-	err := p.pool.QueryRow(ctx, `SELECT wm.policy_generation, wm.scopes, wm.active, w.policy_generation FROM workspace_memberships wm JOIN workspaces w ON w.id=wm.workspace_id WHERE wm.subject=$1 AND wm.workspace_id=$2 AND wm.issuer=$3`, subject, workspace, issuer).Scan(&got.PolicyGeneration, &got.ParentScopes, &got.Allowed, &current)
+	err := storage.WithTenant(ctx, p.pool, workspace, func(ctx context.Context, tx pgx.Tx) error {
+		return tx.QueryRow(ctx, `SELECT wm.policy_generation, wm.scopes, wm.active, w.policy_generation FROM workspace_memberships wm JOIN workspaces w ON w.id=wm.workspace_id WHERE wm.subject=$1 AND wm.workspace_id=$2 AND wm.issuer=$3`, subject, workspace, issuer).Scan(&got.PolicyGeneration, &got.ParentScopes, &got.Allowed, &current)
+	})
 	if err != nil {
 		return identity.Policy{}, fmt.Errorf("lookup workload policy: %w", err)
 	}
@@ -64,7 +68,9 @@ func (p *postgresPolicy) Decide(ctx context.Context, principal ports.Principal, 
 	var role string
 	var active bool
 	var generation uint64
-	err := p.pool.QueryRow(ctx, `SELECT role, active, policy_generation FROM workspace_memberships WHERE workspace_id=$1 AND issuer=$2 AND subject=$3`, principal.WorkspaceID, principal.Issuer, principal.Subject).Scan(&role, &active, &generation)
+	err := storage.WithTenant(ctx, p.pool, principal.WorkspaceID, func(ctx context.Context, tx pgx.Tx) error {
+		return tx.QueryRow(ctx, `SELECT role, active, policy_generation FROM workspace_memberships WHERE workspace_id=$1 AND issuer=$2 AND subject=$3`, principal.WorkspaceID, principal.Issuer, principal.Subject).Scan(&role, &active, &generation)
+	})
 	if errors.Is(err, pgx.ErrNoRows) {
 		return ports.Decision{Status: 404}, nil
 	}
@@ -108,12 +114,16 @@ func (s *postgresResolutionStore) Put(ctx context.Context, r ports.Resolution) e
 	if err != nil {
 		return err
 	}
-	_, err = s.pool.Exec(ctx, `INSERT INTO resolutions (id,workspace_id,issuer,subject,audience,principal_hash,policy_generation,skill_id,skill_version,expires_at,payload) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,to_timestamp($10),$11)`, r.ID, r.Principal.WorkspaceID, r.Principal.Issuer, r.Principal.Subject, r.Principal.Audience, r.Principal.Subject+"\x00"+r.Principal.WorkspaceID, r.Principal.PolicyGeneration, r.Skill.ID, r.Skill.Version, r.ExpiresAt, payload)
-	return err
+	return storage.WithTenantPrincipal(ctx, s.pool, storage.Tenant{Issuer: r.Principal.Issuer, Subject: r.Principal.Subject, Audience: r.Principal.Audience, WorkspaceID: r.Principal.WorkspaceID, Scopes: r.Principal.Scopes, PolicyGeneration: r.Principal.PolicyGeneration}, func(ctx context.Context, tx pgx.Tx) error {
+		_, err := tx.Exec(ctx, `INSERT INTO resolutions (id,workspace_id,issuer,subject,audience,principal_hash,policy_generation,skill_id,skill_version,expires_at,payload) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,to_timestamp($10),$11)`, r.ID, r.Principal.WorkspaceID, r.Principal.Issuer, r.Principal.Subject, r.Principal.Audience, r.Principal.Subject+"\x00"+r.Principal.WorkspaceID, r.Principal.PolicyGeneration, r.Skill.ID, r.Skill.Version, r.ExpiresAt, payload)
+		return err
+	})
 }
 func (s *postgresResolutionStore) Get(ctx context.Context, c ports.Cursor) (ports.Resolution, error) {
 	var raw []byte
-	err := s.pool.QueryRow(ctx, `SELECT payload FROM resolutions WHERE id=$1 AND workspace_id=$2 AND expires_at>now()`, c.ID, c.WorkspaceID).Scan(&raw)
+	err := storage.WithTenant(ctx, s.pool, c.WorkspaceID, func(ctx context.Context, tx pgx.Tx) error {
+		return tx.QueryRow(ctx, `SELECT payload FROM resolutions WHERE id=$1 AND workspace_id=$2 AND expires_at>now()`, c.ID, c.WorkspaceID).Scan(&raw)
+	})
 	if err != nil {
 		return ports.Resolution{}, err
 	}
@@ -146,7 +156,10 @@ func (p publisher) Publish(ctx context.Context, principal ports.Principal, kind 
 	if err := p.objects.Put(ctx, digest, bytesReader(raw), int64(len(raw))); err != nil {
 		return nil, err
 	}
-	_, err = p.pool.Exec(ctx, `INSERT INTO catalog_versions (workspace_id,kind,artifact_id,version,state,digest_algorithm,digest_value,manifest_digest_algorithm,manifest_digest_value,metadata,package_key,owner_id) VALUES ($1,$2,$3,$4,'published',$5,$6,'sha256',$7,$8,$6,$9)`, ref.WorkspaceID, ref.Kind, ref.ID, ref.Version, digest.Algorithm, digest.Value, pack.ManifestDigest, pack.ManifestBytes, principal.Subject)
+	err = storage.WithTenantPrincipal(ctx, p.pool, storage.Tenant{Issuer: principal.Issuer, Subject: principal.Subject, Audience: principal.Audience, WorkspaceID: principal.WorkspaceID, Scopes: principal.Scopes, PolicyGeneration: principal.PolicyGeneration}, func(ctx context.Context, tx pgx.Tx) error {
+		_, err := tx.Exec(ctx, `INSERT INTO catalog_versions (workspace_id,kind,artifact_id,version,state,digest_algorithm,digest_value,manifest_digest_algorithm,manifest_digest_value,metadata,package_key,owner_id) VALUES ($1,$2,$3,$4,'published',$5,$6,'sha256',$7,$8,$6,$9)`, ref.WorkspaceID, ref.Kind, ref.ID, ref.Version, digest.Algorithm, digest.Value, pack.ManifestDigest, pack.ManifestBytes, principal.Subject)
+		return err
+	})
 	if err != nil {
 		return nil, err
 	}
