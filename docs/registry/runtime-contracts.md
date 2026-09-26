@@ -166,3 +166,30 @@ principal and operation, timeout handling, effect-class approval routing, and
 no hidden retries. Gist supplies mappings and evidence requirements only. A
 runtime that cannot expose these controls is unsupported for the corresponding
 acceptance line, even if discovery and artifact retrieval succeed.
+
+## R2 offline probe coverage
+
+R2 adds contract-only probes under
+`hosted/acceptance/runtimes/` and the deterministic fixture
+`hosted/acceptance/runtimes/fixtures/runtime-contract-fixture.json`. The probes
+consume the frozen v1 contract and model runtime-owned boundaries; they do not
+claim that an external adapter or deployed registry has passed. X-R1 and X-R2
+receipts are not present in this checkout, so their live qualification is
+deferred rather than treated as a probe failure.
+
+| Contract clause / target | Probe or fixture | Result |
+| --- | --- | --- |
+| UC-004: exact skill/tool URI and immutable version; no wildcard or range grant | `TestPolicyRuntimeRejectsWildcardAndTaxonomyGrants`; fixture `tool_uri`/`tool_version` | PASS offline; exact URI `gist://tools/github/issues.create` and version `2026-09-25` are required. |
+| UC-004: complete package, detached manifest, file and package digests | `TestArtifactImportVerifiesCompletePackageAndDigestClosure`; `contract.VerifyPackage`; `runtime-contract-fixture.json` | PASS offline for the complete package and all four corrupt/incomplete variants are rejected. |
+| UC-005: no wildcard taxonomy authority; parent and spend separation | `TestPolicyRuntimeRejectsWildcardAndTaxonomyGrants` | PASS offline; taxonomy capability, widened capability set, and missing independent spend policy reject readiness. |
+| UC-005: runtime readiness requires connection/complete binding | `TestRuntimeOwnedConnectionChallengeIsReused` | PASS offline; pending connection returns `requires_connection`, then the same runtime challenge is reused. |
+| UC-010: protected-effects submission key, timeout, effect class, unknown outcome | `TestPolicyRuntimeRechecksGrantBeforeDispatchAndMapsProtectedEffects`; fixture `protected_effects` | PASS offline; mapping is preserved and `unknown` remains an explicit recovery state. |
+| UC-010: no silent update | `TestArtifactImportDoesNotSilentlyUpdate` | PASS offline; a new-version notice leaves the bound exact version unchanged until explicit update. |
+| UC-008: dispatch-time revocation recheck | `TestPolicyRuntimeRechecksGrantBeforeDispatchAndMapsProtectedEffects` | PASS offline; a revoke between readiness and dispatch stops the second dispatch and increments the recheck. |
+| UC-008: event-feed/missed-cursor resync | Live event-feed adapter probe | DEFERRED to deployed registry and X-R1/X-R2 receipts; no live service or receipt is available. |
+| X-R1 policy-gated runtime qualification | X-R1 receipt | DEFERRED; receipt not present. |
+| X-R2 artifact-importing runtime qualification | X-R2 receipt | DEFERRED; receipt not present. |
+
+The exact offline command and observed result are recorded in the R2 lane
+handoff: `GOWORK=off go test ./acceptance/runtimes` from `hosted/`, with the
+module-local cache variables set as required by the hosted-module conventions.
