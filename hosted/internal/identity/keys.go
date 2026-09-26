@@ -1,0 +1,109 @@
+package identity
+
+import (
+	"crypto/ed25519"
+	"crypto/rand"
+	"encoding/base64"
+	"errors"
+	"fmt"
+	"sync"
+	"time"
+)
+
+var (
+	ErrUnauthorized       = errors.New("unauthorized")
+	ErrServiceUnavailable = errors.New("service unavailable")
+	ErrExpired            = errors.New("token expired")
+	ErrRevoked            = errors.New("principal revoked")
+	ErrReplay             = errors.New("token replay rejected")
+)
+
+const (
+	defaultMaxTokenAge = 5 * time.Minute
+	maxClockSkew       = 30 * time.Second
+)
+
+type SigningKey struct {
+	KID       string
+	Algorithm string
+	Private   ed25519.PrivateKey
+	Public    ed25519.PublicKey
+	NotAfter  time.Time
+}
+
+type KeySet struct {
+	mu      sync.RWMutex
+	current SigningKey
+	keys    map[string]SigningKey
+	clock   Clock
+}
+
+func NewKeySet(clock Clock, current SigningKey) (*KeySet, error) {
+	if clock == nil {
+		return nil, fmt.Errorf("key set clock is required")
+	}
+	if err := validateSigningKey(current, true); err != nil {
+		return nil, err
+	}
+	return &KeySet{current: current, keys: map[string]SigningKey{current.KID: current}, clock: clock}, nil
+}
+
+func GenerateSigningKey(kid string, now time.Time) (SigningKey, error) {
+	if kid == "" {
+		return SigningKey{}, fmt.Errorf("key id is required")
+	}
+	public, private, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		return SigningKey{}, fmt.Errorf("generate workload signing key: %w", err)
+	}
+	// Key lifetime is controlled by rotation/revocation, not by the local
+	// validation-cache freshness bound. The timestamp is retained for callers
+	// that provision an explicit key retirement time.
+	_ = now
+	return SigningKey{KID: kid, Algorithm: "EdDSA", Private: private, Public: public}, nil
+}
+
+func (k *KeySet) Rotate(next SigningKey) error {
+	if err := validateSigningKey(next, true); err != nil {
+		return err
+	}
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	k.current = next
+	k.keys[next.KID] = next
+	return nil
+}
+
+func (k *KeySet) currentKey() (SigningKey, error) {
+	k.mu.RLock()
+	defer k.mu.RUnlock()
+	if k.current.Private == nil {
+		return SigningKey{}, fmt.Errorf("signing key is unavailable")
+	}
+	return k.current, nil
+}
+
+func (k *KeySet) verifyKey(kid string, now time.Time) (SigningKey, error) {
+	k.mu.RLock()
+	key, ok := k.keys[kid]
+	k.mu.RUnlock()
+	if !ok || key.Algorithm != "EdDSA" || len(key.Public) != ed25519.PublicKeySize {
+		return SigningKey{}, fmt.Errorf("unknown signing key")
+	}
+	if !key.NotAfter.IsZero() && now.After(key.NotAfter) {
+		return SigningKey{}, fmt.Errorf("signing key freshness exceeded")
+	}
+	return key, nil
+}
+
+func validateSigningKey(key SigningKey, requirePrivate bool) error {
+	if key.KID == "" || key.Algorithm != "EdDSA" || len(key.Public) != ed25519.PublicKeySize {
+		return fmt.Errorf("invalid EdDSA signing key")
+	}
+	if requirePrivate && len(key.Private) != ed25519.PrivateKeySize {
+		return fmt.Errorf("private signing key is required")
+	}
+	return nil
+}
+
+func b64(data []byte) string { return base64.RawURLEncoding.EncodeToString(data) }
