@@ -15,6 +15,7 @@ import (
 	mathrand "math/rand"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -102,12 +103,21 @@ func startFixture() (*fixture, error) {
 			_, _ = admin.Exec(context.Background(), `DROP DATABASE `+quoteIdent(dbName))
 		}
 	}()
-	cfg := *adminCfg
-	cfg.Database = dbName
-	dsn := cfg.ConnString()
+	// pgxpool.Config.ConnString() returns the original parsed string and
+	// ignores field mutations, so the database name must be rewritten in
+	// the URL itself; otherwise migrations silently land in the admin DB.
+	dsn, err := fixtureDSN(adminDSN, dbName)
+	if err != nil {
+		return nil, err
+	}
 	pool, err := pgxpool.New(ctx, dsn)
 	if err != nil {
 		return nil, fmt.Errorf("open fixture pool: %w", err)
+	}
+	var connected string
+	if err := pool.QueryRow(ctx, "select current_database()").Scan(&connected); err != nil || connected != dbName {
+		pool.Close()
+		return nil, fmt.Errorf("fixture pool connected to %q, want %q: %v", connected, dbName, err)
 	}
 	for _, name := range []string{"001_catalog.sql", "002_policy.sql", "003_identity.sql", "004_events.sql"} {
 		raw, readErr := os.ReadFile(filepath.Join("..", "..", "migrations", name))
@@ -116,22 +126,6 @@ func startFixture() (*fixture, error) {
 			return nil, fmt.Errorf("read migration %s: %w", name, readErr)
 		}
 		sql := string(raw)
-		// 002_policy currently includes workspaces in a workspace_id policy
-		// loop even though that table's key is id. Preserve the migration bytes
-		// and apply the safe equivalent until the owning migration lane fixes it.
-		if name == "002_policy.sql" {
-			sql = strings.Replace(sql, "ARRAY['workspaces','workspace_memberships'", "ARRAY['workspace_memberships'", 1)
-		}
-		if name == "003_identity.sql" {
-			// The identity tables are not touched by this acceptance flow. The
-			// migration's policy block currently references workspace_id on an
-			// identity table variant without that column; apply its schema and
-			// leave these tables fail-closed until the owning migration lane
-			// publishes the corrected policy block.
-			if idx := strings.Index(sql, "ALTER TABLE workload_identities ENABLE"); idx >= 0 {
-				sql = sql[:idx]
-			}
-		}
 		if name == "004_events.sql" {
 			sql = strings.Replace(sql, "CREATE POLICY event_tenant_isolation", "DROP POLICY IF EXISTS event_tenant_isolation ON event_outbox; CREATE POLICY event_tenant_isolation", 1)
 			sql = strings.Replace(sql, "CREATE POLICY cursor_tenant_isolation", "DROP POLICY IF EXISTS cursor_tenant_isolation ON event_cursors; CREATE POLICY cursor_tenant_isolation", 1)
@@ -318,4 +312,14 @@ func testPackage() ([]byte, error) {
 		return nil, err
 	}
 	return out.Bytes(), nil
+}
+
+// fixtureDSN rewrites the database path of a postgres URL.
+func fixtureDSN(adminDSN, dbName string) (string, error) {
+	u, err := url.Parse(adminDSN)
+	if err != nil {
+		return "", fmt.Errorf("parse admin dsn: %w", err)
+	}
+	u.Path = "/" + dbName
+	return u.String(), nil
 }
