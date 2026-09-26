@@ -1,0 +1,43 @@
+{
+  "status": "passed",
+  "task_ids": ["Q2"],
+  "commands": [
+    "python3 scripts/registry/check.py evidence --milestone M1",
+    "(cd hosted && GOWORK=off go test ./internal/contract ./internal/seed -count=1)",
+    "(cd hosted && GOWORK=off go vet ./...)",
+    "(cd hosted && GOWORK=off go test ./... -count=1)"
+  ],
+  "tests": {
+    "catalog_chain": 1,
+    "package_inventory_digests": 2,
+    "taxonomy_provenance": 1,
+    "contract_lock_entries": 32,
+    "hosted_contract_seed_packages": 2,
+    "hosted_all_packages": 3
+  },
+  "evidence": [
+    "ADRs 004-006 are present and settle governance, authorization, and hosted-module/digest decisions.",
+    "The frozen 32-entry lock matches all schema, fixture, OpenAPI, route-matrix, hosted module, and C-owned port bytes.",
+    "The three-provider catalog chain is consistent from providers through capabilities, tools, exact-version bindings, and golden fixtures; provenance captures are present.",
+    "asset-skill and multi-capability-skill package inventories and detached digests are present; hosted seed tests pass both package fixtures offline.",
+    "Taxonomy export preserves its edition, APQC attribution, and node apqc_ref values; family mapping points at the export edition.",
+    "Runtime contract documentation preserves exact skill/resolution/capability/effect/connection/receipt handoff fields and both import archetypes.",
+    "Wave-2 handoff is frozen in docs/registry/gates/m1-handoff.md for B, S, I, and T."
+  ],
+  "source_hash": "c53f46cb06bcf9fb586950702479a98a464291dd8fae85dafb1784b728be9e0f",
+  "contract_hash": "19462b2bde307c26bf0fdeb2be58fc83809a1e3371b737c4555aae3d1b0572a7",
+  "config_hash": "797d87849fd8272ef4d3c1fb7019698606053908b8d542ae31c897d5630dfd36",
+  "hashes": {
+    "docs/adr/004-registry-governance.md": "c97048abbdc542ae6d835ea95b81240e6839f45d09a097b1991d8fb408e682a6",
+    "docs/adr/005-registry-authorization.md": "476f9e9997d4cb303f35bf8c190c2e64f6d16bdeffbc463e799adfed55a6f1b7",
+    "docs/adr/006-hosted-module.md": "a04b3c19128d32124f1de578068df75478a728fbe93c6d41c5348d6bd5f605cf",
+    "contracts/registry/v1/lock.json": "19462b2bde307c26bf0fdeb2be58fc83809a1e3371b737c4555aae3d1b0572a7",
+    "catalog/registry/catalog.json": "c53f46cb06bcf9fb586950702479a98a464291dd8fae85dafb1784b728be9e0f",
+    "catalog/registry/taxonomy.json": "a0aecfdd4131735b1fe1dc039b1198db9de8f30d4d5e855d3b5d580ff8b631de",
+    "docs/registry/runtime-contracts.md": "797d87849fd8272ef4d3c1fb7019698606053908b8d542ae31c897d5630dfd36",
+    "hosted/go.mod": "48a0109f055d5f00f7c63d8363f53120a145ba060eabcfb5002b419cea266104",
+    "hosted/go.sum": "5f198dc467f133f24c0a92786c3420cdf6aa5f9bfece1794ebfe2347a791805f"
+  },
+  "skipped": false,
+  "stale": false
+}
