@@ -20,10 +20,21 @@ func NewRevocationLease(ttl time.Duration) (*RevocationLease, error) {
 	}
 	return &RevocationLease{revoked: make(map[string]time.Time), ttl: ttl}, nil
 }
-func (r *RevocationLease) Revoke(jti string, now time.Time) {
+
+// Revoke records jti as revoked. The entry is retained until the later of the
+// lease TTL and the token's own expiry, so a revoked token can never become
+// valid again while it is still unexpired.
+func (r *RevocationLease) Revoke(jti string, expiresAt, now time.Time) {
+	until := now.Add(r.ttl)
+	if expiresAt.After(until) {
+		until = expiresAt
+	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.revoked[jti] = now.Add(r.ttl)
+	if prev, ok := r.revoked[jti]; ok && prev.After(until) {
+		until = prev
+	}
+	r.revoked[jti] = until
 }
 func (r *RevocationLease) IsRevoked(jti string, now time.Time) bool {
 	r.mu.RLock()
