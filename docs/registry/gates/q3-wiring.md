@@ -31,15 +31,23 @@ paths remain explicit service outcomes.
   instances, so package bytes, digest, ETag, and tenant isolation are real
   filesystem/PostgreSQL behavior rather than mocks.
 
-## Migration amendment proposal
+## Migration amendment — resolved
 
-The checked-in migrations contain two fixture-blocking schema-policy defects:
-`002_policy.sql` includes `workspaces` in a `workspace_id` policy loop even
-though its key is `id`; `003_identity.sql`'s policy block is not compatible
-with the identity-table shape in this checkout. The fixture does not edit
-those files. It applies the safe schema equivalent for the affected policy
-blocks and leaves the affected identity tables fail-closed. The owning
-migration lane should correct the SQL and remove these fixture adaptations.
+The fixture originally worked around two schema-policy defects. Both are now
+fixed in the migrations themselves and the fixture adaptations are removed:
+
+* `002_policy.sql` no longer includes `workspaces` in the `workspace_id`
+  policy loop (B follow-up, `effff24`).
+* The identity tables (`workload_identities`, `oauth_*`) are created with
+  their canonical `workspace_id` shape in `001_catalog.sql` before
+  `003_identity.sql` applies RLS (B follow-up 2).
+
+A second, fixture-only defect surfaced during verification: `pgxpool.Config.
+ConnString()` ignores a mutated `Database` field, so the fixture pool and the
+app under test were connecting to the admin `postgres` database, where stale
+old-shape tables survived `CREATE TABLE IF NOT EXISTS`. The fixture now
+rewrites the database in the URL and asserts `current_database()` equals the
+per-run fixture database.
 
 ## Verification
 
