@@ -1,0 +1,48 @@
+{
+  "status": "passed",
+  "task_ids": [
+    "Q4"
+  ],
+  "commands": [
+    "sh scripts/registry/lint.sh M2a",
+    "(cd hosted && GOWORK=off go test ./... -tags=integration -count=1)",
+    "GOWORK=off go test ./... -count=1",
+    "(cd hosted && GOWORK=off go test ./internal/discovery ./internal/events ./internal/remotemcp -race -count=1)",
+    "grep -c 'sirerun/gist/hosted' go.mod go.sum"
+  ],
+  "tests": {
+    "lint_script_m2a": 1,
+    "hosted_integration_packages_ok": 16,
+    "hosted_integration_test_passes": 132,
+    "hosted_integration_skips": 0,
+    "root_packages_ok": 4,
+    "root_test_passes": 445,
+    "root_test_skips": 0,
+    "race_packages_ok": 3,
+    "dependency_pollution_matches": 0
+  },
+  "evidence": [
+    "Environment: go1.27.1 darwin/arm64, golangci-lint 2.13.2, local Postgres at 127.0.0.1:5432 (database created per fixture), one-minute load ~4.2 at run time; coordinator host run in worktree lane-q at a1ed935.",
+    "M2a lint script passed: 'registry check: PASS: contracts' and 'lint: PASS (M2a)'; gofmt clean on all M2a-owned Go files; golangci-lint 2.13.2 reported zero issues.",
+    "Hosted integration suite (-tags=integration): 16 packages ok, 0 FAIL, 1 package with no test files, 132 test passes, 0 skips. Missing fixtures fail: TestWorkload fatals when GIST_CODEX_CLI_BUILD, GIST_CLAUDE_CODE_BUILD or GIST_POLICY_RUNTIME_BUILD is unset; run with local placeholder values 'x@local-fixture' (no external clouds).",
+    "Root module tests: ok for gist, cmd/gist, internal/runtime, mcp; 445 passes, 0 FAIL, 0 skips.",
+    "Race detector on internal/discovery, internal/events, internal/remotemcp: all ok.",
+    "Dependency pollution: 'sirerun/gist/hosted' appears 0 times in root go.mod and go.sum; hosted remains a separate module.",
+    "Known, out of scope: 9 root-module files (cmd/gist/*.go, store_memory.go, gist_test.go, search_test.go, session_test.go, store_memory_test.go, store_postgres_test.go) are not gofmt-clean on main prior to this lane and are not in the M2a-owned file set; 49 further gofmt hits are vendored .gomodcache copies. No M2a file regressed.",
+    "Q5 (CI/cloud credential runs) not covered here; blocked on founder credentials."
+  ],
+  "source_hash": "c53f46cb06bcf9fb586950702479a98a464291dd8fae85dafb1784b728be9e0f",
+  "contract_hash": "74f2fc7f6318d0dafc529d0a1da7b1b27240ffb0864bb528be1909675ae69441",
+  "config_hash": "17a91d703b9b0ae1f427d9a6ea3ff6c5514498d9bfdbec4f9dbff183afb518bf",
+  "hashes": {
+    "contracts/registry/v1/lock.json": "74f2fc7f6318d0dafc529d0a1da7b1b27240ffb0864bb528be1909675ae69441",
+    "catalog/registry/catalog.json": "c53f46cb06bcf9fb586950702479a98a464291dd8fae85dafb1784b728be9e0f",
+    "docs/registry/runtime-contracts.md": "17a91d703b9b0ae1f427d9a6ea3ff6c5514498d9bfdbec4f9dbff183afb518bf",
+    "hosted/go.mod": "ead3ffd9a682d2ffbf05b77f1388072021c626e40871c50dd5d8b9c3279e84e5",
+    "hosted/go.sum": "f388c494cc5e4a4f682590b959b467be0a7fa89870d9f16ca62eef271d797f4b",
+    "go.mod": "67cac5fa21ab26b9a3505c29d7b64eba8509ade405112dc658a77ce5e66ce420",
+    "go.sum": "3dd4b607c77852af22d9249999e8d3758ac4ae6745e6ddfc357d461944ec39f5"
+  },
+  "skipped": false,
+  "stale": false
+}

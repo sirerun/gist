@@ -946,7 +946,7 @@ tests, fixtures and document checks alone cannot close a hosted milestone.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/app ./acceptance/wiring -tags=integration -count=1)`.
   - acc: [The composed registry serves every API route using real storage and rejects all tested cross-tenant and outage paths.]
 
-- [ ] Q4 Run M2a full tests and formatting/lint. Owner: Q. Est: 60m. kind: any. owning_lane: Q. depends_on: [Q3, R3]. verifies: [infrastructure, UC-001].
+- [x] Q4 Run M2a full tests and formatting/lint. Owner: Q. Est: 60m. kind: any. owning_lane: Q. depends_on: [Q3, R3]. verifies: [infrastructure, UC-001].
   - Files: create `docs/registry/gates/m2a-quality.json`.
   - Do: run scoped race tests on concurrent hosted packages, full module suites and formatter/linter checks after all M2a code. Ensure tools are pinned and both modules use separate dependency graphs. Missing integration fixtures fail rather than skip.
   - Acceptance: zero lint/format errors; root CLI/stdio/library regression tests pass; no dependency pollution; evidence names test count and environment.
