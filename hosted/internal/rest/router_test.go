@@ -3,11 +3,15 @@ package rest
 import (
 	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
+	"github.com/sirerun/gist/hosted/internal/events"
 	"github.com/sirerun/gist/hosted/internal/ports"
 )
 
@@ -65,6 +69,9 @@ func (testEvents) Append(context.Context, ports.Event) error { return nil }
 func (testEvents) Read(context.Context, ports.Cursor) (ports.EventPage, error) {
 	return ports.EventPage{}, nil
 }
+func (testEvents) NewCursor(ports.Principal, time.Duration) (ports.Cursor, error) {
+	return ports.Cursor{ID: "cur"}, nil
+}
 
 type testPublisher struct{}
 
@@ -121,6 +128,160 @@ func TestResponseBudgetIs413AndNeverTruncated(t *testing.T) {
 	h := testHandler(t)
 	w := do(t, h, "POST", "/v1/discover", `{"query":"x","max_bytes":1}`)
 	if w.Code != 413 {
+		t.Fatalf("status=%d body=%s", w.Code, w.Body.String())
+	}
+}
+
+type fixedClock struct{ now time.Time }
+
+func (c *fixedClock) Now() time.Time { return c.now }
+
+type versionsSearch struct{}
+
+func (versionsSearch) Search(context.Context, ports.SearchQuery) (ports.SearchPage, error) {
+	return ports.SearchPage{Records: []ports.CatalogRecord{
+		{Ref: ports.ArtifactRef{Kind: ports.KindSkill, ID: "wanted", Version: "1"}},
+		{Ref: ports.ArtifactRef{Kind: ports.KindSkill, ID: "other", Version: "1"}},
+		{Ref: ports.ArtifactRef{Kind: ports.KindSkill, ID: "wanted", Version: "2"}},
+	}}, nil
+}
+
+type errEvents struct {
+	page ports.EventPage
+	err  error
+}
+
+func (errEvents) Append(context.Context, ports.Event) error { return nil }
+func (e errEvents) Read(context.Context, ports.Cursor) (ports.EventPage, error) {
+	return e.page, e.err
+}
+
+func handlerWith(t *testing.T, mutate func(*Services)) *Handler {
+	t.Helper()
+	s := Services{Identity: testIdentity{}, Authorizer: testPolicy{}, Catalog: testCatalog{}, Search: testSearch{}, Artifacts: testArtifact{}, Connections: testConn{}, Events: testEvents{}, Publisher: testPublisher{}, Resolver: testResolver{}, Limits: Limits{MaxResponseBytes: 4096}}
+	mutate(&s)
+	h, err := New(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return h
+}
+
+func decodeJSON(t *testing.T, w *httptest.ResponseRecorder, v any) {
+	t.Helper()
+	if err := json.Unmarshal(w.Body.Bytes(), v); err != nil {
+		t.Fatalf("decode %q: %v", w.Body.String(), err)
+	}
+}
+
+// Regression: GET /v1/events used to send an unbound cursor and had no way to
+// open one, so every request failed with 503.
+func TestEventsOpensPrincipalBoundCursorAndResumes(t *testing.T) {
+	clock := &fixedClock{now: time.Unix(1_700_000_000, 0)}
+	store := events.NewStore(clock)
+	ref := ports.ArtifactRef{WorkspaceID: "workspace-a", Kind: ports.KindSkill, ID: "s", Version: "1"}
+	if err := store.Append(context.Background(), ports.Event{ID: "e1", WorkspaceID: "workspace-a", Type: ports.EventVersionPublished, Subject: ref, OccurredAt: clock.now.Unix()}); err != nil {
+		t.Fatal(err)
+	}
+	h := handlerWith(t, func(s *Services) { s.Events = store })
+
+	w := do(t, h, "GET", "/v1/events", "")
+	if w.Code != 200 {
+		t.Fatalf("open status=%d body=%s", w.Code, w.Body.String())
+	}
+	var first struct {
+		Events     []ports.Event `json:"events"`
+		NextCursor string        `json:"next_cursor"`
+	}
+	decodeJSON(t, w, &first)
+	if len(first.Events) != 1 || first.NextCursor == "" {
+		t.Fatalf("first page = %+v", first)
+	}
+
+	if err := store.Append(context.Background(), ports.Event{ID: "e2", WorkspaceID: "workspace-a", Type: ports.EventVersionRevoked, Subject: ref, OccurredAt: clock.now.Unix()}); err != nil {
+		t.Fatal(err)
+	}
+	w = do(t, h, "GET", "/v1/events?cursor="+first.NextCursor, "")
+	if w.Code != 200 {
+		t.Fatalf("resume status=%d body=%s", w.Code, w.Body.String())
+	}
+	var second struct {
+		Events []ports.Event `json:"events"`
+	}
+	decodeJSON(t, w, &second)
+	if len(second.Events) != 1 || second.Events[0].ID != "e2" {
+		t.Fatalf("second page = %+v", second)
+	}
+}
+
+func TestEventsRejectsCursorOfAnotherPrincipal(t *testing.T) {
+	store := events.NewStore(&fixedClock{now: time.Unix(1_700_000_000, 0)})
+	foreign, err := store.NewCursor(ports.Principal{Issuer: "test", Subject: "someone-else", WorkspaceID: "workspace-a"}, time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := handlerWith(t, func(s *Services) { s.Events = store })
+	w := do(t, h, "GET", "/v1/events?cursor="+foreign.ID, "")
+	if w.Code != 409 || !bytes.Contains(w.Body.Bytes(), []byte(`"cursor_expired"`)) {
+		t.Fatalf("status=%d body=%s", w.Code, w.Body.String())
+	}
+}
+
+func TestEventsCursorErrorsMapTo409(t *testing.T) {
+	cases := map[string]errEvents{
+		"expired":       {err: events.ErrCursorExpired},
+		"retention gap": {page: ports.EventPage{RetentionGap: true}, err: events.ErrCursorExpired},
+		"gap flag only": {page: ports.EventPage{RetentionGap: true}},
+		"binding":       {err: events.ErrCursorBinding},
+	}
+	for name, ev := range cases {
+		t.Run(name, func(t *testing.T) {
+			h := handlerWith(t, func(s *Services) { s.Events = ev })
+			w := do(t, h, "GET", "/v1/events?cursor=abc", "")
+			if w.Code != 409 || !bytes.Contains(w.Body.Bytes(), []byte(`"cursor_expired"`)) {
+				t.Fatalf("status=%d body=%s", w.Code, w.Body.String())
+			}
+		})
+	}
+	h := handlerWith(t, func(s *Services) { s.Events = errEvents{err: errors.New("db down")} })
+	if w := do(t, h, "GET", "/v1/events?cursor=abc", ""); w.Code != 503 {
+		t.Fatalf("store failure status=%d", w.Code)
+	}
+}
+
+func TestEventsWithoutCursorOpenerIs503(t *testing.T) {
+	h := handlerWith(t, func(s *Services) { s.Events = errEvents{} })
+	if w := do(t, h, "GET", "/v1/events", ""); w.Code != 503 {
+		t.Fatalf("status=%d", w.Code)
+	}
+}
+
+// Regression: listVersions ignored the path id and returned every skill.
+func TestListVersionsFiltersByPathID(t *testing.T) {
+	h := handlerWith(t, func(s *Services) { s.Search = versionsSearch{} })
+	w := do(t, h, "GET", "/v1/skills/wanted/versions", "")
+	if w.Code != 200 {
+		t.Fatalf("status=%d body=%s", w.Code, w.Body.String())
+	}
+	var out struct {
+		Items []ports.CatalogRecord `json:"items"`
+	}
+	decodeJSON(t, w, &out)
+	if len(out.Items) != 2 {
+		t.Fatalf("items=%d want 2: %s", len(out.Items), w.Body.String())
+	}
+	for _, it := range out.Items {
+		if it.Ref.ID != "wanted" {
+			t.Fatalf("leaked item %+v", it.Ref)
+		}
+	}
+}
+
+// Regression: download dereferenced a nil Catalog and panicked.
+func TestDownloadWithNilCatalogIs503(t *testing.T) {
+	h := handlerWith(t, func(s *Services) { s.Catalog = nil })
+	w := do(t, h, "GET", "/v1/skills/s/versions/1/package", "")
+	if w.Code != 503 {
 		t.Fatalf("status=%d body=%s", w.Code, w.Body.String())
 	}
 }
