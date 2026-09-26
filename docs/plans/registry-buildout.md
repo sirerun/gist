@@ -918,7 +918,7 @@ fidelity: executable
 Acceptance: no milestone is done until its final wiring task passes. Component
 tests, fixtures and document checks alone cannot close a hosted milestone.
 
-- [ ] Q0 Create verification harness and evidence rules. Owner: Q. Est: 90m. kind: any. owning_lane: Q. depends_on: []. verifies: [infrastructure].
+- [x] Q0 Create verification harness and evidence rules. Owner: Q. Est: 90m. kind: any. owning_lane: Q. depends_on: []. verifies: [infrastructure].
   - Files: create `scripts/registry/{check.py,check_test.py,lint.sh}`, `hosted/acceptance/wiring/README.md`.
   - Do: implement the future commands referenced here: `contracts` validates inventory/references/examples via the hosted validator once C2-C6 exist; `receipt` validates revisioned evidence; `eval` checks label/result coverage; `iac` and `release` inspect workflow/config/evidence; `evidence --milestone` verifies required passing cases/build hashes. Reject absent files, zero tests, skipped required checks and mismatched artifact/config hashes. Define temporary PostgreSQL/object-store setup, `REGISTRY_BASE_URL`, audience, synthetic-account credential injection, artifact output location and explicit live opt-in. Secrets are environment/CI-injected, never committed. Use Podman fixtures or CI services, no Docker Compose dependency.
   - Acceptance: negative tests show missing/empty/stale evidence fails. Harness is a gate on real evidence, not a substitute for it; contract validation is not only a file-existence check. `lint.sh` is read-only: require empty `gofmt -l` and `goimports -l` results for owned Go files, run `go vet` and a compatible pinned `golangci-lint` on both modules separately, validate OpenAPI/JSON schemas, and run Python/TypeScript formatting and lint for added tooling/UI. Record the pinned tool versions in the script; fail on unavailable tools rather than omit a check.
@@ -1089,6 +1089,7 @@ policy-gated runtimes retain exact grants and their own protected-effects engine
 ## Progress Log
 
 2026 09 25: Created the M1-M3 lane plan, embedded use-case manifest and proposed ADRs 004-007, external interface receipts, contract inventory, testing/lint tasks and final milestone wiring gates; no tasks completed and no companion files changed.
+2026 09 25: Q0 completed the dependency-free verification harness, evidence rules, lint interface, and wiring test-environment contract; hosted module implementation remains lane C work.
 
 ## Appendix: source map
 
