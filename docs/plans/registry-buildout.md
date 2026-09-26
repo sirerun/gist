@@ -1090,6 +1090,7 @@ policy-gated runtimes retain exact grants and their own protected-effects engine
 
 2026 09 25: Created the M1-M3 lane plan, embedded use-case manifest and proposed ADRs 004-007, external interface receipts, contract inventory, testing/lint tasks and final milestone wiring gates; no tasks completed and no companion files changed.
 2026 09 25: Q0 completed the dependency-free verification harness, evidence rules, lint interface, and wiring test-environment contract; hosted module implementation remains lane C work.
+2026 09 25: Q1 attempted the M1 quality gate. Python harness tests (7), schema parsing/ID checks (17 schemas), and the 32-entry contract lock check passed; hosted Go vet/tests could not complete because the shared cache mount was not writable and task-local compilation exhausted the filesystem. The shared build-lease claim also failed to materialize its transaction. Q1 remains open; Q2 was not started. Evidence: `docs/registry/gates/m1-quality.json`.
 
 ## Appendix: source map
 
