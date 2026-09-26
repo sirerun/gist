@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://gist.local/contracts/registry/v1/publish.schema.json","type":"object","additionalProperties":false,"required":["artifact","max_bytes","idempotency_key"],"properties":{"artifact":{"type":"object","minProperties":1},"max_bytes":{"type":"integer","minimum":1},"idempotency_key":{"type":"string","minLength":1}}}

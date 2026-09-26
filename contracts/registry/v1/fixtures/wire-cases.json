@@ -1,0 +1,7 @@
+[
+  {"name":"ready all requirements","route":"/v1/resolve","status":200,"body":{"aggregate":"ready","findings":[{"capability_id":"gist/a","required":true,"status":"ready"}]}},
+  {"name":"partial ready rejected","route":"/v1/resolve","status":422,"body":{"aggregate":"ready","findings":[{"capability_id":"gist/a","required":true,"status":"incomplete"}]}},
+  {"name":"runtime owned connection","route":"/v1/resolve","status":200,"body":{"aggregate":"ready","findings":[{"capability_id":"gist/a","required":true,"status":"ready","provenance":"client_asserted"}]}},
+  {"name":"foreign artifact","route":"/v1/artifacts/batch-get","status":200,"body":{"items":[{"reference":"foreign@1","kind":"manifest","complete":false,"error":{"code":"not_found","message":"Not found","request_id":"r1","retryable":false}}]}},
+  {"name":"budget","route":"/v1/discover","status":413,"body":{"code":"budget_exceeded","message":"Response exceeds budget","request_id":"r1","retryable":false}}
+]
