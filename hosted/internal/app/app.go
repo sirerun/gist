@@ -239,11 +239,18 @@ var _ rest.EventCursorOpener = eventStoreAdapter{}
 // identityCatalog is the workspace-scoped identity table. Reads and writes
 // carry the workspace so storage can run them under row-level security.
 type identityCatalog interface {
+	Lookup(ctx context.Context, workspaceID, issuer, subject string) (ports.IdentityRecord, error)
 	Revoke(ctx context.Context, workspaceID, issuer, subject string) error
 }
 
+// tokenVerifier verifies a workload token's signature, audience binding and
+// expiry. *identity.WorkloadIssuer is the production implementation.
+type tokenVerifier interface {
+	Verify(ctx context.Context, rawToken string) (identity.VerifiedToken, error)
+}
+
 type verifiedIdentity struct {
-	issuer  *identity.WorkloadIssuer
+	issuer  tokenVerifier
 	catalog identityCatalog
 }
 
@@ -252,7 +259,18 @@ func (v verifiedIdentity) Lookup(ctx context.Context, token, audience string) (p
 	if err != nil || got.Principal.Audience != audience {
 		return ports.IdentityRecord{}, identity.ErrUnauthorized
 	}
-	return ports.IdentityRecord{Issuer: got.Principal.Issuer, Subject: got.Principal.Subject, WorkspaceID: got.Principal.WorkspaceID, SubjectType: got.Principal.SubjectType, Scopes: got.Principal.Scopes, PolicyGeneration: got.Principal.PolicyGeneration, ExpiresAt: got.ExpiresAt.Unix()}, nil
+	// A valid signature is not enough: the stored identity must still exist
+	// and be unrevoked. Storage filters revoked rows, so a revoked identity
+	// surfaces as not-found. Any storage failure fails closed.
+	if v.catalog == nil {
+		return ports.IdentityRecord{}, identity.ErrUnauthorized
+	}
+	p := got.Principal
+	stored, err := v.catalog.Lookup(ctx, p.WorkspaceID, p.Issuer, p.Subject)
+	if err != nil || stored.WorkspaceID != p.WorkspaceID || stored.Issuer != p.Issuer || stored.Subject != p.Subject {
+		return ports.IdentityRecord{}, identity.ErrUnauthorized
+	}
+	return ports.IdentityRecord{Issuer: p.Issuer, Subject: p.Subject, WorkspaceID: p.WorkspaceID, SubjectType: p.SubjectType, Scopes: p.Scopes, PolicyGeneration: p.PolicyGeneration, ExpiresAt: got.ExpiresAt.Unix()}, nil
 }
 
 // Revoke revokes a workload identity in the caller's own workspace. The
