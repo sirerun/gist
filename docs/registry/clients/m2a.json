@@ -1,0 +1,53 @@
+{
+  "document": "M2a named-client and workload acceptance target",
+  "status": "local_fixture_ready_q5_live_evidence_required",
+  "date": "2026-09-25",
+  "transport": {
+    "protocol": "remote MCP",
+    "revision": "2025-06-18",
+    "local_fixture_origin": "HTTPS loopback with self-signed certificate",
+    "bridge": "explicit loopback remote-MCP bridge; no stdio or global client configuration"
+  },
+  "targets": [
+    {
+      "name": "OpenAI Codex CLI",
+      "adapter": "CodexCLIAdapter",
+      "build_env": "GIST_CODEX_CLI_BUILD",
+      "role": "policy_gated_runtime",
+      "q5_receipt": "X-R1"
+    },
+    {
+      "name": "Anthropic Claude Code",
+      "adapter": "ClaudeCodeAdapter",
+      "build_env": "GIST_CLAUDE_CODE_BUILD",
+      "role": "coding_client",
+      "q5_receipt": "client-build-codex-claude"
+    },
+    {
+      "name": "selected policy-gated runtime",
+      "adapter": "PolicyGatedRuntimeAdapter",
+      "build_env": "GIST_POLICY_RUNTIME_BUILD",
+      "role": "runtime_adapter",
+      "q5_receipt": "X-R1"
+    }
+  ],
+  "schema_subset": {
+    "supported": ["initialize", "tools/list", "tools/call", "gist_discover", "gist_get", "gist_resolve", "gist_connect"],
+    "local_assertion": "Every advertised tool has an object inputSchema; exact skill retrieval is exercised.",
+    "losses": [],
+    "not_claimed": ["native skill installation", "runtime execution", "protected-effects dispatch"]
+  },
+  "credentials": {
+    "kind": "short-lived workload bearer",
+    "fixture_ttl": "2m",
+    "negative_cases": ["one-second expiry at protected-resource boundary", "SQL membership revocation at protected-resource boundary"],
+    "forwarding": "The workload token is sent only to Gist and is never treated as a provider credential."
+  },
+  "local_evidence": {
+    "exact_retrieval": "m2a-fixture-skill@1.0.0 skill metadata through gist_get",
+    "errors": "unsupported resolution returns explicit service_unavailable MCP tool error",
+    "revocation": "active membership is revoked in the disposable PostgreSQL fixture and the next MCP request is denied",
+    "production": "deferred to Q5; no X-R1 receipt or actual Codex/Claude Code build receipt exists in this checkout",
+    "known_fixture_boundary": "The current server-side MCP wrapper cannot encode raw ZIP bytes in structuredContent; Q5 must prove complete package retrieval or record the corrected transport receipt."
+  }
+}
