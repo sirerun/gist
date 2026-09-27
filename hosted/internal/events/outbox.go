@@ -22,12 +22,19 @@ type Store struct {
 	retention time.Duration
 	events    []ports.Event
 	cursors   map[string]cursorState
+	seq       uint64
 }
 type cursorState struct {
 	cursor ports.Cursor
 	next   int
 	oldest time.Time
+	seq    uint64
 }
+
+// MaxCursorsPerPrincipal bounds the open cursors one principal may hold.
+// Opening one more evicts that principal's oldest cursor, so repeated
+// cursorless GET /v1/events calls cannot grow memory without bound.
+const MaxCursorsPerPrincipal = 16
 
 func NewStore(clock Clock) *Store {
 	if clock == nil {
@@ -62,10 +69,58 @@ func (s *Store) NewCursor(principal ports.Principal, ttl time.Duration) (ports.C
 		return ports.Cursor{}, err
 	}
 	c := ports.Cursor{ID: id, PrincipalHash: principalHash(principal), WorkspaceID: principal.WorkspaceID, ExpiresAt: s.clock.Now().Add(ttl).Unix()}
+	now := s.clock.Now()
 	s.mu.Lock()
-	s.cursors[id] = cursorState{cursor: c, next: 0, oldest: s.clock.Now()}
-	s.mu.Unlock()
+	defer s.mu.Unlock()
+	s.pruneExpiredLocked(now)
+	s.evictForPrincipalLocked(c.PrincipalHash)
+	s.seq++
+	s.cursors[id] = cursorState{cursor: c, next: 0, oldest: now, seq: s.seq}
 	return c, nil
+}
+
+// pruneExpiredLocked drops every cursor whose TTL has passed. Callers hold
+// s.mu. It runs on every cursor open and every purge, so no background
+// goroutine is needed to keep the map bounded.
+func (s *Store) pruneExpiredLocked(now time.Time) int {
+	n := 0
+	for id, state := range s.cursors {
+		if now.Unix() >= state.cursor.ExpiresAt {
+			delete(s.cursors, id)
+			n++
+		}
+	}
+	return n
+}
+
+// evictForPrincipalLocked removes the principal's oldest cursors until one
+// more fits under MaxCursorsPerPrincipal. Callers hold s.mu.
+func (s *Store) evictForPrincipalLocked(hash string) {
+	for {
+		count := 0
+		oldestID := ""
+		var oldestSeq uint64
+		for id, state := range s.cursors {
+			if state.cursor.PrincipalHash != hash {
+				continue
+			}
+			count++
+			if oldestID == "" || state.seq < oldestSeq {
+				oldestID, oldestSeq = id, state.seq
+			}
+		}
+		if count < MaxCursorsPerPrincipal {
+			return
+		}
+		delete(s.cursors, oldestID)
+	}
+}
+
+// OpenCursors reports how many cursors the store currently holds.
+func (s *Store) OpenCursors() int {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return len(s.cursors)
 }
 func (s *Store) Read(ctx context.Context, c ports.Cursor) (ports.EventPage, error) {
 	if err := ctx.Err(); err != nil {
@@ -78,6 +133,7 @@ func (s *Store) Read(ctx context.Context, c ports.Cursor) (ports.EventPage, erro
 		return ports.EventPage{}, ErrCursorBinding
 	}
 	if s.clock.Now().Unix() >= state.cursor.ExpiresAt {
+		delete(s.cursors, c.ID)
 		return ports.EventPage{}, ErrCursorExpired
 	}
 	if len(s.events) > 0 && state.next < len(s.events) && s.events[state.next].OccurredAt < s.clock.Now().Add(-s.retention).Unix() {
@@ -99,6 +155,7 @@ func (s *Store) Read(ctx context.Context, c ports.Cursor) (ports.EventPage, erro
 func (s *Store) Purge() int {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	s.pruneExpiredLocked(s.clock.Now())
 	cutoff := s.clock.Now().Add(-s.retention).Unix()
 	i := 0
 	for i < len(s.events) && s.events[i].OccurredAt < cutoff {
