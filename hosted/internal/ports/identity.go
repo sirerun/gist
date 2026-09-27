@@ -1,6 +1,14 @@
 package ports
 
-import "context"
+import (
+	"context"
+	"errors"
+)
+
+// ErrIdentityNotFound is returned by IdentityStore.Revoke when no identity
+// with that issuer and subject exists in the caller's workspace. Missing and
+// foreign identities are deliberately indistinguishable.
+var ErrIdentityNotFound = errors.New("identity not found")
 
 type IdentityRecord struct {
 	Issuer, Subject, WorkspaceID, SubjectType string

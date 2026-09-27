@@ -64,7 +64,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-	p, err := h.authenticate(r)
+	ctx, p, err := h.authenticate(r)
 	if err != nil {
 		if statusFor(err) == 401 {
 			w.Header().Set("WWW-Authenticate", `Bearer realm="gist"`)
@@ -76,6 +76,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, appError("budget_exceeded", "Request exceeds the requested byte budget", 413, false), id)
 		return
 	}
+	r = r.WithContext(ctx)
 	path := strings.TrimPrefix(r.URL.Path, "/")
 	parts := strings.Split(path, "/")
 	if strings.Contains(r.URL.RawPath, "%2f") || strings.Contains(r.URL.RawPath, "%2F") || strings.Contains(path, "..") {
@@ -110,6 +111,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		routeErr = h.events(w, r, p)
 	case r.Method == "POST" && path == "v1/artifacts/batch-get":
 		routeErr = h.batch(w, r, p)
+	case r.Method == "POST" && path == "v1/identities/revoke":
+		routeErr = h.revokeIdentity(w, r, p)
 	case r.Method == "POST" && len(parts) == 3 && parts[0] == "v1" && parts[1] == "publish":
 		routeErr = h.publish(w, r, p, parts[2])
 	default:
@@ -120,17 +123,32 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) authenticate(r *http.Request) (ports.Principal, error) {
+// ContextAuthenticator is optionally implemented by Services.Identity. When
+// present, authentication also yields a context carrying the verified
+// identity, which workspace-bound operations such as Identity.Revoke read the
+// caller's workspace from.
+type ContextAuthenticator interface {
+	AuthenticateContext(ctx context.Context, token, audience string) (context.Context, ports.IdentityRecord, error)
+}
+
+func (h *Handler) authenticate(r *http.Request) (context.Context, ports.Principal, error) {
+	ctx := r.Context()
 	a := r.Header.Get("Authorization")
 	if !strings.HasPrefix(a, "Bearer ") || len(strings.TrimSpace(strings.TrimPrefix(a, "Bearer "))) == 0 {
-		return ports.Principal{}, appError("unauthorized", "Authentication required", 401, false)
+		return ctx, ports.Principal{}, appError("unauthorized", "Authentication required", 401, false)
 	}
 	token := strings.TrimSpace(strings.TrimPrefix(a, "Bearer "))
-	rec, err := h.s.Identity.Lookup(r.Context(), token, h.s.Audience)
-	if err != nil {
-		return ports.Principal{}, appError("unauthorized", "Authentication required", 401, false)
+	var rec ports.IdentityRecord
+	var err error
+	if ca, ok := h.s.Identity.(ContextAuthenticator); ok {
+		ctx, rec, err = ca.AuthenticateContext(ctx, token, h.s.Audience)
+	} else {
+		rec, err = h.s.Identity.Lookup(ctx, token, h.s.Audience)
 	}
-	return ports.Principal{Issuer: rec.Issuer, Subject: rec.Subject, Audience: h.s.Audience, WorkspaceID: rec.WorkspaceID, Scopes: rec.Scopes, PolicyGeneration: rec.PolicyGeneration, SubjectType: rec.SubjectType}, nil
+	if err != nil {
+		return r.Context(), ports.Principal{}, appError("unauthorized", "Authentication required", 401, false)
+	}
+	return ctx, ports.Principal{Issuer: rec.Issuer, Subject: rec.Subject, Audience: h.s.Audience, WorkspaceID: rec.WorkspaceID, Scopes: rec.Scopes, PolicyGeneration: rec.PolicyGeneration, SubjectType: rec.SubjectType}, nil
 }
 func (h *Handler) authorize(ctx context.Context, p ports.Principal, action ports.Action, ref *ports.ArtifactRef) error {
 	d, err := h.s.Authorizer.Decide(ctx, p, action, ref)

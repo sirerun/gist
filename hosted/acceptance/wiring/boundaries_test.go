@@ -36,6 +36,7 @@ func TestC1HTTPAndRemoteMCPBoundaries(t *testing.T) {
 		{"publish bindings", "POST", "/v1/publish/bindings", `{}`, 503, "service_unavailable"},
 		{"publish taxonomies", "POST", "/v1/publish/taxonomies", `{}`, 503, "service_unavailable"},
 		{"publish revocations", "POST", "/v1/publish/revocations", `{}`, 503, "service_unavailable"},
+		{"revoke identity without scope", "POST", "/v1/identities/revoke", `{"issuer":"https://issuer.test","subject":"q3-other"}`, 403, "forbidden"},
 		{"events", "GET", "/v1/events", "", 200, ""},
 		{"batch", "POST", "/v1/artifacts/batch-get", `{"references":[{"workspace_id":"q3-tenant-a","kind":"skill","id":"q3-fixture-skill","version":"1.0.0"}],"max_bytes":4096}`, 200, ""},
 	}
