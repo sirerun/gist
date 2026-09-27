@@ -135,7 +135,11 @@ type memStore struct {
 	families map[string]*storedFamily
 	tokens   map[string]*storedRefresh
 	seq      int
+	// down simulates a persistence outage for code redemption and refresh.
+	down bool
 }
+
+var errStoreDown = errors.New("store unavailable")
 
 func newMemStore() *memStore {
 	return &memStore{clients: map[string]oauth.Client{}, codes: map[string]*storedCode{}, families: map[string]*storedFamily{}, tokens: map[string]*storedRefresh{}}
@@ -170,6 +174,9 @@ func (s *memStore) SaveCode(_ context.Context, c oauth.AuthCode) error {
 func (s *memStore) RedeemCode(_ context.Context, ws string, hash []byte, check func(oauth.AuthCode) error, first oauth.RefreshToken) (oauth.AuthCode, string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.down {
+		return oauth.AuthCode{}, errStoreDown
+	}
 	c, ok := s.codes[hkey(hash)]
 	if !ok || c.code.WorkspaceID != ws {
 		return oauth.AuthCode{}, "", oauth.ErrNotFound
@@ -210,6 +217,9 @@ func (s *memStore) familiesFrom(codeHash []byte) []bool {
 func (s *memStore) RotateRefresh(_ context.Context, ws string, hash []byte, check func(oauth.RefreshFamily, oauth.RefreshToken) error, next oauth.RefreshToken) (oauth.RefreshFamily, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.down {
+		return oauth.RefreshFamily{}, errStoreDown
+	}
 	t, ok := s.tokens[hkey(hash)]
 	if !ok {
 		return oauth.RefreshFamily{}, oauth.ErrNotFound
@@ -257,6 +267,8 @@ func (s *memStore) RevokeRefresh(_ context.Context, ws string, hash []byte, clie
 	f.revoked = true
 	return nil
 }
+
+func (s *memStore) setDown(v bool) { s.mu.Lock(); defer s.mu.Unlock(); s.down = v }
 
 func (s *memStore) codeCount() int { s.mu.Lock(); defer s.mu.Unlock(); return len(s.codes) }
 
