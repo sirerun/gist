@@ -533,7 +533,7 @@ handoffs with every M1 condition in section 15 covered.
   - Verification: `python3 -m json.tool contracts/registry/v1/route-matrix.json`; compare the complete method/path set and error enum to the tables above. Q0/C6 provide automated contract validation before C7 freezes it.
   - acc: [The route inventory contains every prescribed registry operation and zero execution operations.]
 
-- [ ] C2 Create the isolated hosted module and shared ports. Owner: C. Est: 90m. kind: any. owning_lane: C. depends_on: [A3]. verifies: [infrastructure, UC-001].
+- [x] C2 Create the isolated hosted module and shared ports. Owner: C. Est: 90m. kind: any. owning_lane: C. depends_on: [A3]. verifies: [infrastructure, UC-001].
   - Files: create `hosted/go.mod`, `hosted/go.sum`, `hosted/internal/ports/{catalog,policy,search,connections,identity,events,clock}.go`, `hosted/internal/ports/contracts_test.go`.
   - Do: create the nested module with pinned dependencies and shared value types; ports separate catalog/object storage, authorization, lexical search, resolution, opaque connection initiation, identity records and event storage. Pass `context.Context` to I/O. Include transaction/outbox boundaries and principal/workspace policy context. Test doubles stay in tests.
   - Acceptance: ports support A2's auth tables, codes/sessions/refresh families, cursor/resolution records and outbox without a later cross-lane signature guess; no dependency added to root module.
@@ -547,7 +547,7 @@ handoffs with every M1 condition in section 15 covered.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/contract -run 'TestDigest|TestPackage')`.
   - acc: [Package verification rejects any changed manifest or payload byte and accepts the canonical inventory vectors.]
 
-- [ ] C4 Encode semantics, effects and conformance. Owner: C. Est: 90m. kind: any. owning_lane: C. depends_on: [C3, A1]. verifies: [UC-004, UC-005, UC-010, UC-011].
+- [x] C4 Encode semantics, effects and conformance. Owner: C. Est: 90m. kind: any. owning_lane: C. depends_on: [C3, A1]. verifies: [UC-004, UC-005, UC-010, UC-011].
   - Files: create `contracts/registry/v1/{capability,execution-schema,effects,provider,binding,golden-fixture,taxonomy}.schema.json`, `hosted/internal/contract/{compile,conversion,semantics_test}.go`.
   - Do: implement runtime-field coverage and golden format above; require exact binding versions and effect vocabulary classes. Include destination/credential/cost metadata. Normalize transport schema subsets only with loss reports and fail-closed treatment of security constraints.
   - Acceptance: a schema/contract pair compiles to the complete runtime record; omission of any required security field fails; doc-only loss is disclosed; security loss degrades the provider and blocks a resolvable binding.
@@ -581,21 +581,21 @@ handoffs with every M1 condition in section 15 covered.
   - Acceptance: record selected names, public primary sources, scores, rejected alternatives and capture dates; cover taxonomy seed families `identity`, `communication`, `document`, `payment`, `case`, `approval`, `schedule`, `report`, `record`, `deploy` in a ranked shortlist. Recommend `identity`, `communication`, `document` for initial contracts when demand supports them; do not import every family merely for coverage.
   - Verification: `test -s docs/registry/catalog-selection.md`; manually verify provider-count and class coverage against the selection table; `git diff --check`.
 
-- [ ] D2 Ingest catalog records and binding goldens. Owner: D. Est: 90m per selected route. kind: any. owning_lane: D. depends_on: [D1, C7, A1]. verifies: [UC-002, UC-004, UC-005].
+- [x] D2 Ingest catalog records and binding goldens. Owner: D. Est: 90m per selected route. kind: any. owning_lane: D. depends_on: [D1, C7, A1]. verifies: [UC-002, UC-004, UC-005].
   - Files: create `catalog/registry/{providers,capabilities,tools,bindings,effects,goldens,captures}.json`, `hosted/internal/seed/{catalog,catalog_test}.go`.
   - Do: populate finite arrays for D1's selected providers, exact capture digests, owners, licenses, effects and binding fixtures. State catalog-only vs resolvable truthfully; no provider marked executable. All captures are offline uploads, not URLs fetched by the registry. Align chosen core contracts with taxonomy guidance without encoding taxonomy paths into identity.
   - Acceptance: 3-5 distinct provider records, all three route classes, every resolvable binding has passing input/output goldens and conformance metadata; no account IDs or credentials.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/seed -run TestCatalog)`.
   - acc: [The curated catalog validates 3-5 providers across all three required route classes and every resolvable binding passes its goldens.]
 
-- [ ] D3 Produce both package interoperability fixtures. Owner: D. Est: 90m. kind: any. owning_lane: D. depends_on: [D2]. verifies: [UC-002, UC-004, UC-010].
+- [x] D3 Produce both package interoperability fixtures. Owner: D. Est: 90m. kind: any. owning_lane: D. depends_on: [D2]. verifies: [UC-002, UC-004, UC-010].
   - Files: create `catalog/registry/packages/asset-skill/{manifest.json,SKILL.md,references/guide.md,scripts/example.sh}`, `catalog/registry/packages/multi-capability-skill/{manifest.json,SKILL.md}`, `catalog/registry/packages/agent-skills-only/SKILL.md`, `catalog/registry/packages/transfer-inventories.json`, `hosted/internal/seed/packages_test.go`.
   - Do: use an inert script and asset references in the first fixture; require at least two distinct capabilities in the second. Validate Gist instruction cores through a validating Agent Skills adapter; wrap the third using explicit publication metadata with derived fields marked unverified.
   - Acceptance: all files survive round-trip byte for byte, both import directions pass, immutable digests match, sentinel proves no script ran, capabilities cannot be silently dropped.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/seed -run TestPackageInterop)`.
   - acc: [Both Agent Skills interoperability directions pass with complete assets and no script execution.]
 
-- [ ] D4 Export attributed taxonomy and test catalog wiring. Owner: D. Est: 90m. kind: any. owning_lane: D. depends_on: [D3]. verifies: [UC-011, UC-005].
+- [x] D4 Export attributed taxonomy and test catalog wiring. Owner: D. Est: 90m. kind: any. owning_lane: D. depends_on: [D3]. verifies: [UC-011, UC-005].
   - Files: create `catalog/registry/taxonomy.json`, `catalog/registry/family-map.json`, `hosted/internal/seed/{taxonomy,taxonomy_test}.go`.
   - Do: derive edition 1 from the checked-in taxonomy; carry the exact attribution block, IDs, levels and provenance. Record chosen-family rationale and optional skill memberships. Do not edit or copy private prose from the taxonomy source.
   - Acceptance: 13/74/362 nodes, parent links and `apqc_ref` values preserved; every exported/paginated shape retains attribution; changing membership changes no grant or binding identity.
@@ -665,7 +665,7 @@ runtime in sandboxed production workspaces, with existing local behavior intact.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/discovery ./internal/resolution -count=1)`.
   - acc: [Revoked, foreign, ambiguous and unsupported requirements never produce a ready resolution.]
 
-- [ ] I1 Implement workload identity and policy evaluation. Owner: I. Est: 90m per token/policy slice. kind: any. owning_lane: I. depends_on: [Q2]. verifies: [UC-007, UC-009].
+- [x] I1 Implement workload identity and policy evaluation. Owner: I. Est: 90m per token/policy slice. kind: any. owning_lane: I. depends_on: [Q2]. verifies: [UC-007, UC-009].
   - Files: create `hosted/internal/identity/{workload,policy,keys,identity_test}.go`.
   - Do: provision workload principals via reviewed deployment configuration, using workload federation or an operator-controlled issuer process, never a pasted permanent bearer. Recommend signed JWT access tokens with 5-minute maximum life, `iss`, `sub`, `aud`, `exp`, `iat`, `jti`, selected workspace and explicit scopes; keys rotate by `kid`, algorithm allowlist, at most 30-second clock skew. No public arbitrary token-mint endpoint. Scope/membership changes require online policy checks and bounded key freshness per A2.
   - Acceptance: issuer, audience, expiry, signature, scope, workspace, revoked principal and policy-store failures are enforced; tokens cannot be used as provider credentials. Test M2a with two synthetic workspaces and narrow read/publish principals.
@@ -686,7 +686,7 @@ runtime in sandboxed production workspaces, with existing local behavior intact.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/identity -race -count=1)`.
   - acc: [Token replay across resources and revoked-membership access fail even before token expiry.]
 
-- [ ] T1 Implement all REST routes over shared services. Owner: T. Est: 90m per route family. kind: any. owning_lane: T. depends_on: [Q2]. verifies: [UC-002, UC-003, UC-004, UC-005, UC-006, UC-007, UC-008, UC-011].
+- [x] T1 Implement all REST routes over shared services. Owner: T. Est: 90m per route family. kind: any. owning_lane: T. depends_on: [Q2]. verifies: [UC-002, UC-003, UC-004, UC-005, UC-006, UC-007, UC-008, UC-011].
   - Files: create `hosted/internal/rest/{router,catalog,publish,connections,events,taxonomies,batch,errors,limits,router_test}.go`.
   - Do: bind every OpenAPI operation to C2 service ports, authenticate before parsing trusted context, implement request IDs, body limits, per-principal/workspace throttles, Retry-After, private cache headers and 304 policy rechecks. Publisher routes remain outside MCP. Enforce response-byte budgets on serialized bytes.
   - Acceptance: real HTTP tests assert successful and denied status/body for all routes including batch and 413; runtime-less connection URL/status actionable through configured broker; missing backend fails loudly, never mock-success production code.
@@ -728,6 +728,7 @@ R5 supplies the complete M3 client/archetype matrix.
   - acc: [Runtime contract probes detect lost package assets, widened tool grants and bypassed connection or protected-effects lifecycles.]
 
 - [x] R3 Exercise the M2a runtime and coding clients. Owner: R. Est: 90m. kind: any. owning_lane: R. depends_on: [R2, Q3, X-R1]. verifies: [UC-009, UC-010, UC-004].
+  - Note (2026-09-27): R3's runtime tests ran with GIST_*_BUILD set to local@local-fixture placeholders, not released client/runtime builds. Its X-R1 dependency is still open. Real runtime verification is pending X-R1 and gates Q5.
   - Files: create `hosted/acceptance/clients/workload_test.go`, `docs/registry/clients/m2a.json`.
   - Do: prepare executable remote-MCP acceptance for pinned Codex/Claude Code builds and the selected policy-gated runtime with short-lived workload credentials; Q5 runs it against the deployed service. Record remote vs explicit local bridge and schema subset, token expiry, exact retrieval, errors and revocation evidence.
   - Acceptance: tests require configured targets and fail if absent; actual client/runtime build evidence is required at Q5, not just a generic HTTP client. No global client configuration changes. Production-observed completion is inherited from Q5.
@@ -776,6 +777,7 @@ uses IaC/release workflows, and delegated issuance passes the entire checklist.
   - acc: [An IaC-created isolated preview exposes the configured OAuth resource and has enforced teardown and a distinct audience.]
 
 - [ ] I4 Implement built-in reference authorization server. Owner: I. Est: 90m per discovery/grant/session slice. kind: any. owning_lane: I. depends_on: [A4, O2, I3, B5]. verifies: [UC-009, UC-007].
+  - Waiver (David, 2026-09-27): the formal dependency on O2 is waived for implementation and local acceptance. Live preview verification still requires O2.
   - Files: create `hosted/internal/oauth/{server,metadata,registration,authorize,consent,token,refresh,revoke,jwks,session,oauth_test}.go`, `hosted/internal/oauth/consent.html`.
   - Do: implement the entire section 10 requirement checklist below using reviewed maintained primitives; attach to configured authenticated identity session, explicit workspace selection and consent. B1 supplies all persistence; no hidden migration edits. PKCE S256 only, codes hashed/single-use, client+redirect+resource bound, scope reject-not-downgrade; rotate refresh tokens and revoke family on reuse; never persist raw refresh/code values.
   - Acceptance: real HTTP tests cover positive and negative flows including stolen code, redirect mismatch, consent denial/CSRF, two resources, role/scope escalation and workspace reissue. Both metadata documents and correct PRM challenge exist. Complete AS operates without a delegated issuer.
@@ -838,6 +840,7 @@ full evaluation or a token-savings marketing claim.
   - acc: [The frozen smoke set contains all 24 labeled cases with explicit forbidden IDs and non-vacuous release thresholds.]
 
 - [ ] E2 Implement reproducible retrieval smoke runner. Owner: E. Est: 90m. kind: any. owning_lane: E. depends_on: [E1, Q5]. verifies: [UC-003, UC-005, UC-007].
+  - Waiver (David, 2026-09-27): the formal dependency on Q5 is waived for implementation against the local composition. The production run remains E3.
   - Files: create `hosted/acceptance/retrieval/{smoke_test,metrics_test}.go`, `eval/registry/baseline.json`.
   - Do: call actual discover/get/resolve boundaries using the frozen corpus; record top-k recall, no-match accuracy, ambiguity handling, leak count, completion, bytes, labeled token estimates, p50/p95 and network round trips with client/build/config/corpus hashes. Include a deliberately unauthorized high-score candidate and negative-control run that makes the checker fail. Compare only matched catalogs/configurations.
   - Acceptance: all mandatory cases execute, zero skips, missing environment is failure; failure output identifies case IDs. No vector/reranker implementation, percentage savings target or broad benchmark expansion.
@@ -955,6 +958,7 @@ tests, fixtures and document checks alone cannot close a hosted milestone.
   - acc: [Both modules pass their tests and format/lint gates without adding hosted dependencies to the public library.]
 
 - [ ] Q5 Deploy and verify final M2a wiring. Owner: Q. Est: 90m plus workflow time. kind: any. owning_lane: Q. depends_on: [Q4, O1, R3, X-R1]. verifies: [UC-003, UC-004, UC-005, UC-007, UC-008, UC-009, UC-010].
+  - Held for David (2026-09-27): needs production credentials and a real X-R1 runtime handoff. Agents do not run it.
   - Files: create `docs/registry/gates/m2a.json`.
   - Do: trigger the reviewed O1 release workflow after PR/CI/merge/tag; use dedicated sandboxed workspaces, never manual infrastructure changes. Run actual Codex/Claude Code and selected-runtime workload acceptance, full package download, version change/revocation feed, 413/no-truncation and issuer/audience denial checks. Confirm exact retrieval during controlled index lag without disabling production shared services.
   - Acceptance: live production URLs/config hashes are captured in access-controlled evidence; public report is redacted. One real runtime passes, tokens expire, per-requirement findings honest, limits enforced, existing local release compatible. A CI-only pass does not close M2a.
@@ -1088,6 +1092,8 @@ Artifact-importing runtimes keep their current import and evaluation lifecycle;
 policy-gated runtimes retain exact grants and their own protected-effects engine.
 
 ## Progress Log
+
+2026 09 27: Ticked C2, C4, D2, D3, D4, I1 and T1, each verified against code, tests and gate records on main. Annotated R3 (placeholder builds; X-R1 open). Recorded David's waivers for I4 and E2 and the Q5 hold. Lane-q review follow-ups merged in #23-#26.
 
 2026 09 25: Created the M1-M3 lane plan, embedded use-case manifest and proposed ADRs 004-007, external interface receipts, contract inventory, testing/lint tasks and final milestone wiring gates; no tasks completed and no companion files changed.
 2026 09 25: Q0 completed the dependency-free verification harness, evidence rules, lint interface, and wiring test-environment contract; hosted module implementation remains lane C work.
