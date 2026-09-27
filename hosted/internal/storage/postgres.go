@@ -189,6 +189,12 @@ var ErrIdentityRevoked = errors.New("registry identity revoked")
 // update matches nothing and RecordIssued returns ErrIdentityRevoked, so the
 // caller must discard the token. expires_at only moves forward, so a
 // shorter-lived mint never shortens the record of an outstanding token.
+//
+// Revocation is permanent for the (workspace, issuer, subject) key: once
+// revoked, that subject can never be minted again in that workspace, even
+// after its old tokens expire. This is the deliberate safe default (ADR 005
+// amendment, 2026-09-26); there is no reinstatement API. A retired or
+// compromised workload that needs access again gets a new subject.
 func (s *Postgres) RecordIssued(ctx context.Context, r ports.IdentityRecord) error {
 	if err := validateIdentityKey(r.WorkspaceID, r.Issuer, r.Subject); err != nil {
 		return err
