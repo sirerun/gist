@@ -4,8 +4,6 @@ runtime:
   options:
     virtualenv: venv
 description: IaC for the hosted Gist registry deployment surface
-backend:
-  url: file://.pulumi-state
 config:
   gist-registry:project:
     description: Cloud project hosting this isolated registry stack
