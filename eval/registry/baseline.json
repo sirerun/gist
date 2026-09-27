@@ -1,0 +1,1415 @@
+{
+  "schema_version": "registry-smoke-baseline-v1",
+  "target": "local-composition",
+  "go_version": "go1.27.1 darwin/arm64",
+  "hashes": {
+    "client_sha256": "b29035bc79bd3d1559e99b25949ff78e3f02887a3087dfcbf87404ac6a8f4491",
+    "build_sha256": "9f80dcfe49bbc30af5711c5eb77e693af4461e8e32db00a4120dc2bd839dff42",
+    "config_sha256": "fd06217975151e3b3afdbc1e48d9ffef8babd59c4e17e96f2fa9fba5f6803253",
+    "catalog_sha256": "aa4e517e758039abbf1a2129efcc38c3cce994aea5dac9b4017018b86f8efe44",
+    "target_config_sha256": "00e7e2989f9b14016d76d4c48223f73e318d5472ab45f35a64ea0c417eb03340",
+    "corpus_sha256": "4cd53e04d8cbdf46fa9afaddf1e43039cb23b8bfde5c1342d61eed641b225583",
+    "cases_sha256": "cd5a976dd930fc6524543a0f849dfae99479616c18e3dd00189f6e9207468553"
+  },
+  "config": {
+    "top_k": 3,
+    "discover_max_results": 10,
+    "runtime_id": "go",
+    "boundaries": [
+      "POST /v1/discover",
+      "POST /v1/artifacts/batch-get (top 3)",
+      "POST /v1/resolve (each fetched skill)",
+      "probe: POST /v1/artifacts/batch-get (labeled relevant + forbidden foreign refs)",
+      "probe: POST /v1/resolve (labeled relevant skills)"
+    ],
+    "behavior_rule": "empty: discover returns no candidate; ambiguous (selection requested): two or more candidates, or a resolved skill reports requires_selection; ready: exactly one candidate that is not a skill or resolves ready; incomplete: otherwise",
+    "capability_ref_translation": "corpus required_capabilities id -\u003e id@\u003ccorpus version\u003e (the resolver's pinned reference form)",
+    "adversaries": "per distinct query: a published high-score candidate whose ID contains the query in fixture-workspace-adversary (no smoke principal is a member) and a revoked copy in each smoke workspace"
+  },
+  "aggregate": {
+    "cases_executed": 24,
+    "cases_skipped": 0,
+    "class_counts": {
+      "ambiguous": 6,
+      "exact": 6,
+      "no_match": 6,
+      "unauthorized_candidate": 6
+    },
+    "exact_top3_recall": 0,
+    "no_match_accuracy": 1,
+    "ambiguous_false_ready": 0,
+    "ambiguous_selection_requested": 0,
+    "leak_count": 0,
+    "forbidden_hit_count": 0,
+    "completion_rate": 0.7916666666666666,
+    "over_budget_case_ids": null,
+    "total_response_bytes": 744,
+    "mean_response_bytes_per_case": 31,
+    "total_token_estimate": 192,
+    "token_estimate_method": "ceil(response_bytes/4); a labeled byte heuristic, not a tokenizer measurement",
+    "total_round_trips": 24,
+    "mean_round_trips_per_case": 1,
+    "case_latency": {
+      "count": 24,
+      "p50_ms": 1.715,
+      "p95_ms": 2.447
+    },
+    "boundary_latency": {
+      "discover": {
+        "count": 24,
+        "p50_ms": 1.715,
+        "p95_ms": 2.447
+      }
+    },
+    "boundary_status_counts": {
+      "discover": {
+        "200": 24
+      }
+    },
+    "probe_relevant_get_rate": 1,
+    "probe_forbidden_denied": "12/12",
+    "probe_resolve_status_counts": {
+      "http_503": 6
+    },
+    "probe_round_trips": 24,
+    "probe_response_bytes": 21114
+  },
+  "thresholds": {
+    "ambiguous_false_ready_rate": {
+      "operator": "\u003c=",
+      "target": 0,
+      "measured": 0,
+      "cases": 6,
+      "verdict": "PASS",
+      "failing_case_ids": []
+    },
+    "ambiguous_selection_request_rate": {
+      "operator": "\u003e=",
+      "target": 1,
+      "measured": 0,
+      "cases": 6,
+      "verdict": "FAIL",
+      "failing_case_ids": [
+        "ambiguous-01-document",
+        "ambiguous-02-message",
+        "ambiguous-03-identity",
+        "ambiguous-04-skill",
+        "ambiguous-05-public-document",
+        "ambiguous-06-communication"
+      ]
+    },
+    "exact_target_top3_recall": {
+      "operator": "\u003e=",
+      "target": 1,
+      "measured": 0,
+      "cases": 6,
+      "verdict": "FAIL",
+      "failing_case_ids": [
+        "exact-01-asset-document",
+        "exact-02-multi-capability",
+        "exact-03-identity-capability",
+        "exact-04-message-capability",
+        "exact-05-document-capability",
+        "exact-06-github-binding"
+      ]
+    },
+    "no_match_nonempty_rate": {
+      "operator": "\u003c=",
+      "target": 0,
+      "measured": 0,
+      "cases": 6,
+      "verdict": "PASS",
+      "failing_case_ids": []
+    },
+    "unauthorized_leakage_rate": {
+      "operator": "\u003c=",
+      "target": 0,
+      "measured": 0,
+      "cases": 6,
+      "verdict": "PASS",
+      "failing_case_ids": []
+    }
+  },
+  "cases": [
+    {
+      "case_id": "exact-01-asset-document",
+      "class": "exact",
+      "expected_behavior": "ready",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": false,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.69,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.69
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [
+          "gist/skill/asset-skill"
+        ],
+        "relevant_fetched": [
+          "gist/skill/asset-skill"
+        ],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [
+          "http_503"
+        ],
+        "round_trips": 2,
+        "response_bytes": 997,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 873,
+            "latency_ms": 2.049
+          },
+          {
+            "boundary": "probe-resolve",
+            "status": 503,
+            "bytes": 124,
+            "latency_ms": 8.034,
+            "error": "error code service_unavailable"
+          }
+        ]
+      },
+      "threshold_pass": false,
+      "failures": [
+        "probe probe-resolve returned 503",
+        "threshold exact_target_top3_recall"
+      ]
+    },
+    {
+      "case_id": "exact-02-multi-capability",
+      "class": "exact",
+      "expected_behavior": "ready",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": false,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.805,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.805
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [
+          "gist/skill/multi-capability-skill"
+        ],
+        "relevant_fetched": [
+          "gist/skill/multi-capability-skill"
+        ],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [
+          "http_503"
+        ],
+        "round_trips": 2,
+        "response_bytes": 1107,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 983,
+            "latency_ms": 2.342
+          },
+          {
+            "boundary": "probe-resolve",
+            "status": 503,
+            "bytes": 124,
+            "latency_ms": 5.561,
+            "error": "error code service_unavailable"
+          }
+        ]
+      },
+      "threshold_pass": false,
+      "failures": [
+        "probe probe-resolve returned 503",
+        "threshold exact_target_top3_recall"
+      ]
+    },
+    {
+      "case_id": "exact-03-identity-capability",
+      "class": "exact",
+      "expected_behavior": "ready",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.854,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.854
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [
+          "gist/identity/user.create"
+        ],
+        "relevant_fetched": [
+          "gist/identity/user.create"
+        ],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 1,
+        "response_bytes": 853,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 853,
+            "latency_ms": 2.52
+          }
+        ]
+      },
+      "threshold_pass": false,
+      "failures": [
+        "threshold exact_target_top3_recall"
+      ]
+    },
+    {
+      "case_id": "exact-04-message-capability",
+      "class": "exact",
+      "expected_behavior": "ready",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 2.384,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 2.384
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [
+          "gist/communication/message.send"
+        ],
+        "relevant_fetched": [
+          "gist/communication/message.send"
+        ],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 1,
+        "response_bytes": 872,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 872,
+            "latency_ms": 2.09
+          }
+        ]
+      },
+      "threshold_pass": false,
+      "failures": [
+        "threshold exact_target_top3_recall"
+      ]
+    },
+    {
+      "case_id": "exact-05-document-capability",
+      "class": "exact",
+      "expected_behavior": "ready",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.715,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.715
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [
+          "gist/document/parse"
+        ],
+        "relevant_fetched": [
+          "gist/document/parse"
+        ],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 1,
+        "response_bytes": 828,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 828,
+            "latency_ms": 3.114
+          }
+        ]
+      },
+      "threshold_pass": false,
+      "failures": [
+        "threshold exact_target_top3_recall"
+      ]
+    },
+    {
+      "case_id": "exact-06-github-binding",
+      "class": "exact",
+      "expected_behavior": "ready",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.975,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.975
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [
+          "gist/github-mcp-server/communication-message-send"
+        ],
+        "relevant_fetched": [
+          "gist/github-mcp-server/communication-message-send"
+        ],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 1,
+        "response_bytes": 1102,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 1102,
+            "latency_ms": 2.479
+          }
+        ]
+      },
+      "threshold_pass": false,
+      "failures": [
+        "threshold exact_target_top3_recall"
+      ]
+    },
+    {
+      "case_id": "no-match-01-calendar",
+      "class": "no_match",
+      "expected_behavior": "empty",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.954,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.954
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [],
+        "relevant_fetched": [],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 0,
+        "response_bytes": 0,
+        "calls": null
+      },
+      "threshold_pass": true,
+      "failures": []
+    },
+    {
+      "case_id": "no-match-02-payment",
+      "class": "no_match",
+      "expected_behavior": "empty",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.614,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.614
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [],
+        "relevant_fetched": [],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 0,
+        "response_bytes": 0,
+        "calls": null
+      },
+      "threshold_pass": true,
+      "failures": []
+    },
+    {
+      "case_id": "no-match-03-deployment",
+      "class": "no_match",
+      "expected_behavior": "empty",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 3.5,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 3.5
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [],
+        "relevant_fetched": [],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 0,
+        "response_bytes": 0,
+        "calls": null
+      },
+      "threshold_pass": true,
+      "failures": []
+    },
+    {
+      "case_id": "no-match-04-timesheet",
+      "class": "no_match",
+      "expected_behavior": "empty",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.863,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.863
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [],
+        "relevant_fetched": [],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 0,
+        "response_bytes": 0,
+        "calls": null
+      },
+      "threshold_pass": true,
+      "failures": []
+    },
+    {
+      "case_id": "no-match-05-weather",
+      "class": "no_match",
+      "expected_behavior": "empty",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.869,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.869
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [],
+        "relevant_fetched": [],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 0,
+        "response_bytes": 0,
+        "calls": null
+      },
+      "threshold_pass": true,
+      "failures": []
+    },
+    {
+      "case_id": "no-match-06-invoice",
+      "class": "no_match",
+      "expected_behavior": "empty",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 2.09,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 2.09
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [],
+        "relevant_fetched": [],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 0,
+        "response_bytes": 0,
+        "calls": null
+      },
+      "threshold_pass": true,
+      "failures": []
+    },
+    {
+      "case_id": "ambiguous-01-document",
+      "class": "ambiguous",
+      "expected_behavior": "ambiguous",
+      "observed_behavior": "empty",
+      "selection_required": true,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": false,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 2.447,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 2.447
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [
+          "gist/skill/asset-skill",
+          "gist/document/parse"
+        ],
+        "relevant_fetched": [
+          "gist/skill/asset-skill",
+          "gist/document/parse"
+        ],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [
+          "http_503"
+        ],
+        "round_trips": 2,
+        "response_bytes": 1815,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 1691,
+            "latency_ms": 4.379
+          },
+          {
+            "boundary": "probe-resolve",
+            "status": 503,
+            "bytes": 124,
+            "latency_ms": 4.785,
+            "error": "error code service_unavailable"
+          }
+        ]
+      },
+      "threshold_pass": false,
+      "failures": [
+        "probe probe-resolve returned 503",
+        "threshold ambiguous_selection_request_rate"
+      ]
+    },
+    {
+      "case_id": "ambiguous-02-message",
+      "class": "ambiguous",
+      "expected_behavior": "ambiguous",
+      "observed_behavior": "empty",
+      "selection_required": true,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.993,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.993
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [
+          "gist/communication/message.send",
+          "gist/github-mcp-server/communication-message-send"
+        ],
+        "relevant_fetched": [
+          "gist/communication/message.send",
+          "gist/github-mcp-server/communication-message-send"
+        ],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 1,
+        "response_bytes": 1963,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 1963,
+            "latency_ms": 3.517
+          }
+        ]
+      },
+      "threshold_pass": false,
+      "failures": [
+        "threshold ambiguous_selection_request_rate"
+      ]
+    },
+    {
+      "case_id": "ambiguous-03-identity",
+      "class": "ambiguous",
+      "expected_behavior": "ambiguous",
+      "observed_behavior": "empty",
+      "selection_required": true,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.508,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.508
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [
+          "gist/identity/user.create",
+          "gist/composio/identity-user-create"
+        ],
+        "relevant_fetched": [
+          "gist/identity/user.create",
+          "gist/composio/identity-user-create"
+        ],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 1,
+        "response_bytes": 1732,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 1732,
+            "latency_ms": 3.011
+          }
+        ]
+      },
+      "threshold_pass": false,
+      "failures": [
+        "threshold ambiguous_selection_request_rate"
+      ]
+    },
+    {
+      "case_id": "ambiguous-04-skill",
+      "class": "ambiguous",
+      "expected_behavior": "ambiguous",
+      "observed_behavior": "empty",
+      "selection_required": true,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": false,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.795,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.795
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [
+          "gist/skill/asset-skill",
+          "gist/skill/multi-capability-skill"
+        ],
+        "relevant_fetched": [
+          "gist/skill/asset-skill",
+          "gist/skill/multi-capability-skill"
+        ],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [
+          "http_503",
+          "http_503"
+        ],
+        "round_trips": 3,
+        "response_bytes": 2093,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 1845,
+            "latency_ms": 2.819
+          },
+          {
+            "boundary": "probe-resolve",
+            "status": 503,
+            "bytes": 124,
+            "latency_ms": 4.598,
+            "error": "error code service_unavailable"
+          },
+          {
+            "boundary": "probe-resolve",
+            "status": 503,
+            "bytes": 124,
+            "latency_ms": 4.304,
+            "error": "error code service_unavailable"
+          }
+        ]
+      },
+      "threshold_pass": false,
+      "failures": [
+        "probe probe-resolve returned 503",
+        "probe probe-resolve returned 503",
+        "threshold ambiguous_selection_request_rate"
+      ]
+    },
+    {
+      "case_id": "ambiguous-05-public-document",
+      "class": "ambiguous",
+      "expected_behavior": "ambiguous",
+      "observed_behavior": "empty",
+      "selection_required": true,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.389,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.389
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [
+          "gist/document/parse",
+          "gist/slack-web-api/document-parse"
+        ],
+        "relevant_fetched": [
+          "gist/document/parse",
+          "gist/slack-web-api/document-parse"
+        ],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 1,
+        "response_bytes": 1819,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 1819,
+            "latency_ms": 3.306
+          }
+        ]
+      },
+      "threshold_pass": false,
+      "failures": [
+        "threshold ambiguous_selection_request_rate"
+      ]
+    },
+    {
+      "case_id": "ambiguous-06-communication",
+      "class": "ambiguous",
+      "expected_behavior": "ambiguous",
+      "observed_behavior": "empty",
+      "selection_required": true,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.646,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.646
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [
+          "gist/communication/message.send",
+          "gist/github-mcp-server/communication-message-send"
+        ],
+        "relevant_fetched": [
+          "gist/communication/message.send",
+          "gist/github-mcp-server/communication-message-send"
+        ],
+        "forbidden_requested": [],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 1,
+        "response_bytes": 1963,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 1963,
+            "latency_ms": 2.499
+          }
+        ]
+      },
+      "threshold_pass": false,
+      "failures": [
+        "threshold ambiguous_selection_request_rate"
+      ]
+    },
+    {
+      "case_id": "unauthorized-01-cross-workspace-document",
+      "class": "unauthorized_candidate",
+      "expected_behavior": "ready",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": false,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.249,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.249
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [
+          "gist/skill/asset-skill"
+        ],
+        "relevant_fetched": [
+          "gist/skill/asset-skill"
+        ],
+        "forbidden_requested": [
+          "gist/skill/asset-skill@workspace-beta",
+          "gist/document/parse@workspace-beta"
+        ],
+        "forbidden_returned": [],
+        "resolve_status": [
+          "http_503"
+        ],
+        "round_trips": 2,
+        "response_bytes": 1319,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 1195,
+            "latency_ms": 1.87
+          },
+          {
+            "boundary": "probe-resolve",
+            "status": 503,
+            "bytes": 124,
+            "latency_ms": 3.527,
+            "error": "error code service_unavailable"
+          }
+        ]
+      },
+      "threshold_pass": true,
+      "failures": [
+        "probe probe-resolve returned 503"
+      ]
+    },
+    {
+      "case_id": "unauthorized-02-cross-workspace-message",
+      "class": "unauthorized_candidate",
+      "expected_behavior": "ready",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.457,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.457
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [
+          "gist/communication/message.send"
+        ],
+        "relevant_fetched": [
+          "gist/communication/message.send"
+        ],
+        "forbidden_requested": [
+          "gist/communication/message.send@workspace-beta",
+          "gist/github-mcp-server/communication-message-send@workspace-beta"
+        ],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 1,
+        "response_bytes": 1236,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 1236,
+            "latency_ms": 1.754
+          }
+        ]
+      },
+      "threshold_pass": true,
+      "failures": []
+    },
+    {
+      "case_id": "unauthorized-03-private-identity",
+      "class": "unauthorized_candidate",
+      "expected_behavior": "empty",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.587,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.587
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [],
+        "relevant_fetched": [],
+        "forbidden_requested": [
+          "gist/identity/user.create@workspace-alpha",
+          "gist/composio/identity-user-create@workspace-alpha"
+        ],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 1,
+        "response_bytes": 345,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 345,
+            "latency_ms": 1.139
+          }
+        ]
+      },
+      "threshold_pass": true,
+      "failures": []
+    },
+    {
+      "case_id": "unauthorized-04-private-document",
+      "class": "unauthorized_candidate",
+      "expected_behavior": "empty",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.564,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.564
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [],
+        "relevant_fetched": [],
+        "forbidden_requested": [
+          "gist/document/parse@workspace-beta",
+          "gist/slack-web-api/document-parse@workspace-beta"
+        ],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 1,
+        "response_bytes": 346,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 346,
+            "latency_ms": 1.159
+          }
+        ]
+      },
+      "threshold_pass": true,
+      "failures": []
+    },
+    {
+      "case_id": "unauthorized-05-confusable-skill",
+      "class": "unauthorized_candidate",
+      "expected_behavior": "empty",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.344,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.344
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [],
+        "relevant_fetched": [],
+        "forbidden_requested": [
+          "gist/skill/multi-capability-skill@workspace-alpha",
+          "gist/identity/user.create@workspace-alpha"
+        ],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 1,
+        "response_bytes": 350,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 350,
+            "latency_ms": 0.747
+          }
+        ]
+      },
+      "threshold_pass": true,
+      "failures": []
+    },
+    {
+      "case_id": "unauthorized-06-confusable-binding",
+      "class": "unauthorized_candidate",
+      "expected_behavior": "empty",
+      "observed_behavior": "empty",
+      "selection_required": false,
+      "selection_requested": false,
+      "candidates": [],
+      "relevant_rank": 0,
+      "top3_hit": false,
+      "forbidden_hits": [],
+      "unauthorized_refs": [],
+      "resolve_status": [],
+      "completed": true,
+      "round_trips": 1,
+      "response_bytes": 31,
+      "max_bytes": 4096,
+      "over_budget": false,
+      "token_estimate": 8,
+      "latency_ms": 1.029,
+      "calls": [
+        {
+          "boundary": "discover",
+          "status": 200,
+          "bytes": 31,
+          "latency_ms": 1.029
+        }
+      ],
+      "labeled_probe": {
+        "relevant_requested": [],
+        "relevant_fetched": [],
+        "forbidden_requested": [
+          "gist/github-mcp-server/communication-message-send@workspace-beta",
+          "gist/communication/message.send@workspace-beta"
+        ],
+        "forbidden_returned": [],
+        "resolve_status": [],
+        "round_trips": 1,
+        "response_bytes": 374,
+        "calls": [
+          {
+            "boundary": "probe-batch-get",
+            "status": 200,
+            "bytes": 374,
+            "latency_ms": 1.035
+          }
+        ]
+      },
+      "threshold_pass": true,
+      "failures": []
+    }
+  ]
+}
