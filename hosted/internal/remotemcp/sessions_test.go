@@ -41,7 +41,7 @@ func hasSession(h *Handler, id string) bool {
 
 func addSession(h *Handler, id string) {
 	h.mu.Lock()
-	h.addSessionLocked(id, testPrincipal)
+	h.addSessionLocked(id, testPrincipal, "workspace-a")
 	h.mu.Unlock()
 }
 
