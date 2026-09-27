@@ -189,7 +189,7 @@ fixes. Separate worktrees do not make overlapping writes permissible.
 | I: identity/OAuth | `hosted/internal/identity/`, `hosted/internal/oauth/` | No SQL/migration or module-file edits; ask B/C owners for changes. |
 | T: transports | `hosted/internal/rest/`, `hosted/internal/remotemcp/` | Consumes Q2 contracts; no business-policy copies. |
 | R: consumers | `hosted/acceptance/clients/`, `hosted/acceptance/runtimes/`, `docs/registry/clients/`, `docs/registry/runtime-contracts.md` | No consumer-repository writes or global client-config changes. |
-| O: operations | `deploy/registry/`, `.github/workflows/registry-{ci,release,preview}.yml`, `docs/registry/operations.md` | IaC and deployment workflow owner; never edits existing workflows. |
+| O: operations | `.github/workflows/registry-ci.yml`, `docs/registry/operations.md`; IaC in `sirerun/foundation` `pulumi/registry_aws*.go` (ADR 008) | IaC and deployment owner; never edits existing workflows. |
 | E: retrieval evaluation | `eval/registry/`, `hosted/acceptance/retrieval/` | Labels freeze before running results; independent from S ranking code. |
 | Q: integration/quality | `hosted/cmd/registry/`, `hosted/internal/app/`, `hosted/acceptance/wiring/`, `scripts/registry/`, `docs/registry/gates/`, this plan | Sole composition-root and milestone-report writer; reads all other lanes. |
 | X: external receipts | `docs/registry/dependencies/` | Only interface evidence, never external implementation files. |
@@ -757,10 +757,10 @@ Acceptance: preview OAuth/isolation gates precede production, every deployment
 uses IaC/release workflows, and delegated issuance passes the entire checklist.
 
 - [x] O1 Build M2a IaC and release workflow. Owner: O. Est: 90m per resource/workflow slice. kind: any. owning_lane: O. depends_on: [A4]. verifies: [infrastructure, UC-009].
-  - Files: create `deploy/registry/{Pulumi.yaml,requirements.txt,__main__.py,Containerfile,config.example.yaml}`, `.github/workflows/registry-{ci,release}.yml`, `docs/registry/operations.md`.
+  - Files: originally created the GCP Pulumi program, Containerfile and config example, `.github/workflows/registry-{ci,release}.yml`, and `docs/registry/operations.md`. IaC now lives in the private `sirerun/foundation` repo, Pulumi stack `registry-aws` (`pulumi/registry_aws*.go`), per ADR 008; the GCP program and its workflows were deleted from this repo on 2026-09-27.
   - Do: define ADR 007's Cloud Run/PostgreSQL/private-object-store surface through Pulumi with self-hosted state, or record a reviewed A-owned ADR amendment before changing surface. Add workload-identity provisioning, secret references, least-privilege service role, database migration job, readiness/liveness, logs/request correlation, latency/error metrics, backups/restore and rollback. Build images with Podman. Set explicit initial package/expansion/request/catalog/concurrency limits, byte budgets and SLOs from curated baseline; record configuration, not magic constants.
   - Acceptance: target-stack preview and tests prove no public object access or embedded secrets; CI runs both modules independently; release workflow performs migrations/deploy/live checks and emits immutable evidence. No production claim yet; Q5 must deploy and verify.
-  - Verification: `python3 scripts/registry/check.py iac`; `pulumi preview --cwd deploy/registry --stack production --diff` through reviewed CI with deployment configuration.
+  - Verification: originally the since-removed `check.py iac` gate and a GCP `pulumi preview`; production now uses `pulumi preview --stack registry-aws` in foundation (ADR 008 item 12).
   - acc: [The registry IaC preview defines an isolated service with private artifact storage and a release workflow that requires live verification.]
 
 - [x] A4 Settle deployment origin, issuer and preview ADR. Owner: A. Est: 90m. kind: agent. owning_lane: A. depends_on: [Q2]. delivers: [ADR 007 accepted before deployment and M2b].
@@ -770,10 +770,10 @@ uses IaC/release workflows, and delegated issuance passes the entire checklist.
   - Verification: `test -s docs/adr/007-registry-deployment.md`; review section 5/10/14/16 decisions against named ADR sections; `git diff --check`.
 
 - [ ] O2 Provision short-lived OAuth preview by IaC. Owner: O. Est: 90m. kind: any. owning_lane: O. depends_on: [Q5, A4, O1, X-W1, X-W2, X-W3, X-W4, X-W5]. verifies: [infrastructure, UC-009].
-  - Files: create `deploy/registry/preview.py`, `.github/workflows/registry-preview.yml`; modify `deploy/registry/{__main__.py,config.example.yaml}`, `docs/registry/operations.md`.
+  - Files: originally created the GCP preview program and `.github/workflows/registry-preview.yml`, and modified `docs/registry/operations.md`. IaC now lives in the private `sirerun/foundation` repo, Pulumi stack `registry-aws` (`pulumi/registry_aws*.go`), per ADR 008; the GCP program and its workflows were deleted from this repo on 2026-09-27.
   - Do: use an isolated public-origin stack with separate audience, redirects, synthetic workspaces, restricted secrets and mandatory TTL teardown. Add create/deploy/test/destroy workflow stages, target-stack preview approval and cleanup on failure. Never reuse production data or revive a dormant staging stack.
   - Acceptance: ingress reaches application challenges rather than infrastructure denial; preview tokens cannot access production; workflow records expiry/owner and schedules destruction. Gist code does not create external identity infrastructure.
-  - Verification: `python3 scripts/registry/check.py iac --preview`; `pulumi preview --cwd deploy/registry --stack preview --diff` through the workflow; Q6 verifies deployed routes.
+  - Verification: originally the since-removed `check.py iac --preview` gate and a GCP preview workflow; any preview stack now lives in foundation. Q6 verifies deployed routes.
   - acc: [An IaC-created isolated preview exposes the configured OAuth resource and has enforced teardown and a distinct audience.]
 
 - [x] I4 Implement built-in reference authorization server. Owner: I. Est: 90m per discovery/grant/session slice. kind: any. owning_lane: I. depends_on: [A4, O2, I3, B5]. verifies: [UC-009, UC-007].
@@ -802,17 +802,17 @@ uses IaC/release workflows, and delegated issuance passes the entire checklist.
   - acc: [Consent browser tests and multi-tenant OAuth boundary tests deny cross-workspace, replay and refresh-reuse attempts.]
 
 - [ ] O3 Release verified M2b to production. Owner: O. Est: 60m plus workflow time. kind: any. owning_lane: O. depends_on: [Q7]. verifies: [infrastructure, UC-009].
-  - Files: modify `docs/registry/operations.md`; create `deploy/registry/release-evidence.json`.
+  - Files: modify `docs/registry/operations.md`; create `docs/registry/gates/o3-release.json`.
   - Do: use reviewed IaC PR, CI, rebase merge, immutable release tag, deployment workflow and live checks. Reuse Q6's tested artifact; run migration/restore/rollback checks in isolated stores. Record deployment configuration hash, actual issuer checklist and redacted workflow evidence. No manual live infrastructure or database mutations.
   - Acceptance: production readiness, authorized retrieval and connector OAuth probes pass in sandboxed test workspaces; operator runbook gives rollback and backup/restore evidence. Failure stops release and executes workflow rollback.
   - Verification: `python3 scripts/registry/check.py release --milestone M2b`; `(cd hosted && GOWORK=off go test ./acceptance/wiring -tags=live -run TestM2b -count=1)`.
   - acc: [The release pipeline deploys the preview-tested artifact and live production authentication and retrieval checks pass.]
 
 - [ ] O4 Tear down the temporary preview. Owner: O. Est: 30m. kind: any. owning_lane: O. depends_on: [O3]. verifies: [infrastructure].
-  - Files: create `deploy/registry/preview-teardown.json`.
+  - Files: create `docs/registry/gates/o4-preview-teardown.json`.
   - Do: run the reviewed preview workflow's destroy stage and verify preview-only resources, DNS and test-secret references are removed; revoke preview clients/tokens through authorized interfaces. Preserve sanitized evidence, not token material. Failure cleanup also runs if Q6/O3 fails; this task records successful terminal cleanup.
   - Acceptance: IaC state/output shows preview resources absent; production resource identities unchanged; TTL cleanup remains available on abandoned runs.
-  - Verification: `python3 scripts/registry/check.py iac --teardown-evidence deploy/registry/preview-teardown.json` with workflow state evidence.
+  - Verification: `python3 scripts/registry/check.py release docs/registry/gates/o4-preview-teardown.json` with stack state evidence.
   - acc: [The preview stack is destroyed by its workflow and production resource identities are unchanged.]
 
 #### Section 10 authorization-server requirement checklist
