@@ -30,6 +30,15 @@ type Config struct {
 	// principal; at the cap that principal's own least recently used idle
 	// session is evicted, so one caller cannot push out another's sessions.
 	MaxSessionsPerPrincipal int
+	// MaxSessionsPerWorkspace caps live sessions for one workspace across all
+	// of its principals; at the cap that workspace's own least recently used
+	// idle session is evicted, so one tenant cannot push out another's.
+	MaxSessionsPerWorkspace int
+	// MaxConcurrentRequests caps requests in flight on the MCP endpoint. The
+	// slot is taken before authentication, so an unauthenticated flood cannot
+	// drive unbounded token verification. Zero uses Services.Limits.RateLimit,
+	// or defaultMaxConcurrentRequests when that is unset too.
+	MaxConcurrentRequests int
 }
 
 const (
@@ -37,6 +46,12 @@ const (
 	defaultMaxSessions = 10000
 	// defaultMaxSessionsPerPrincipal bounds one caller's share of the table.
 	defaultMaxSessionsPerPrincipal = 32
+	// defaultMaxSessionsPerWorkspace bounds one tenant's share of the table.
+	defaultMaxSessionsPerWorkspace = 2000
+	// defaultMaxConcurrentRequests matches the REST default in-flight cap.
+	defaultMaxConcurrentRequests = 100
+	// retryAfterSeconds is sent with a 429 when every request slot is taken.
+	retryAfterSeconds = "1"
 )
 
 type Handler struct {
@@ -48,17 +63,24 @@ type Handler struct {
 	lru *list.List
 	// byPrincipal orders each principal's sessions, most recent at the front.
 	byPrincipal map[string]*list.List
+	// byWorkspace orders each workspace's sessions, most recent at the front.
+	byWorkspace map[string]*list.List
 	calls       map[string]int // in-flight tools/call count per session
-	now         func() time.Time
+	// slots bounds requests in flight on this transport, authentication
+	// included; a full semaphore answers 429.
+	slots chan struct{}
+	now   func() time.Time
 }
 
 // session is one Mcp-Session-Id bound to the principal that created it.
 type session struct {
 	id        string
 	principal string
+	workspace string
 	last      time.Time
 	all       *list.Element // element in Handler.lru
 	own       *list.Element // element in Handler.byPrincipal[principal]
+	ws        *list.Element // element in Handler.byWorkspace[workspace]
 }
 
 func New(c Config) (*Handler, error) {
@@ -77,8 +99,20 @@ func New(c Config) (*Handler, error) {
 	if c.MaxSessionsPerPrincipal <= 0 {
 		c.MaxSessionsPerPrincipal = defaultMaxSessionsPerPrincipal
 	}
-	if c.MaxSessionsPerPrincipal > c.MaxSessions {
-		c.MaxSessionsPerPrincipal = c.MaxSessions
+	if c.MaxSessionsPerWorkspace <= 0 {
+		c.MaxSessionsPerWorkspace = defaultMaxSessionsPerWorkspace
+	}
+	if c.MaxSessionsPerWorkspace > c.MaxSessions {
+		c.MaxSessionsPerWorkspace = c.MaxSessions
+	}
+	if c.MaxSessionsPerPrincipal > c.MaxSessionsPerWorkspace {
+		c.MaxSessionsPerPrincipal = c.MaxSessionsPerWorkspace
+	}
+	if c.MaxConcurrentRequests <= 0 {
+		c.MaxConcurrentRequests = c.Services.Limits.RateLimit
+	}
+	if c.MaxConcurrentRequests <= 0 {
+		c.MaxConcurrentRequests = defaultMaxConcurrentRequests
 	}
 	rh, err := rest.New(c.Services)
 	if err != nil {
@@ -90,7 +124,9 @@ func New(c Config) (*Handler, error) {
 		sessions:    map[string]*session{},
 		lru:         list.New(),
 		byPrincipal: map[string]*list.List{},
+		byWorkspace: map[string]*list.List{},
 		calls:       map[string]int{},
+		slots:       make(chan struct{}, c.MaxConcurrentRequests),
 		now:         time.Now,
 	}, nil
 }
@@ -102,6 +138,19 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	if !h.originOK(r) {
 		http.Error(w, "Forbidden origin", http.StatusForbidden)
+		return
+	}
+	// The in-flight slot is taken before authentication, as on the REST
+	// routes, so a flood of unauthenticated requests cannot drive unbounded
+	// token verification.
+	select {
+	case h.slots <- struct{}{}:
+		defer func() { <-h.slots }()
+	default:
+		w.Header().Set("Retry-After", retryAfterSeconds)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusTooManyRequests)
+		_, _ = w.Write(marshal(map[string]any{"code": "rate_limited", "message": "Rate limit exceeded", "retryable": true}))
 		return
 	}
 	// Every request, initialize included, is authenticated with the same
@@ -135,11 +184,25 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if req.Method == "initialize" {
-		h.initialize(w, req, principalKey(principal))
+		h.initialize(w, req, principalKey(principal), principal.WorkspaceID)
 		return
 	}
 	if req.Method == "notifications/initialized" {
 		w.WriteHeader(http.StatusAccepted)
+		return
+	}
+	sid := r.Header.Get("Mcp-Session-Id")
+	if req.Method == "tools/call" {
+		// The session check and the in-flight increment happen under one
+		// lock acquisition, so the session cannot be evicted or expire
+		// between admission and the call.
+		admitted, limited := h.admitCall(sid, principalKey(principal))
+		if !admitted {
+			writeRPC(w, rpcErr(req.ID, -32000, "Session required", nil))
+			return
+		}
+		defer h.releaseCall(sid)
+		h.call(w, r, req.ID, req.Params, limited)
 		return
 	}
 	if !h.sessionOK(r, principalKey(principal)) {
@@ -149,8 +212,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch req.Method {
 	case "tools/list":
 		writeRPC(w, rpcOK(req.ID, map[string]any{"tools": toolDefinitions()}))
-	case "tools/call":
-		h.call(w, r, req.ID, req.Params)
 	default:
 		writeRPC(w, rpcErr(req.ID, -32601, "Method not found", nil))
 	}
@@ -169,7 +230,7 @@ func (h *Handler) initialize(w http.ResponseWriter, req struct {
 	ID      any             `json:"id"`
 	Method  string          `json:"method"`
 	Params  json.RawMessage `json:"params"`
-}, principal string) {
+}, principal, workspace string) {
 	var p struct {
 		ProtocolVersion string `json:"protocolVersion"`
 	}
@@ -179,7 +240,7 @@ func (h *Handler) initialize(w http.ResponseWriter, req struct {
 	}
 	id := newSession()
 	h.mu.Lock()
-	ok := h.addSessionLocked(id, principal)
+	ok := h.addSessionLocked(id, principal, workspace)
 	h.mu.Unlock()
 	if !ok {
 		writeRPC(w, rpcErr(req.ID, -32000, "Too many sessions", map[string]any{"retryable": true}))
@@ -203,13 +264,19 @@ func (h *Handler) sessionOK(r *http.Request, principal string) bool {
 	}
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	sess, ok := h.sessions[v]
+	return h.touchLocked(v, principal)
+}
+
+// touchLocked reports whether id names a live session owned by principal,
+// refreshing its recency. Callers hold h.mu.
+func (h *Handler) touchLocked(id, principal string) bool {
+	sess, ok := h.sessions[id]
 	if !ok || sess.principal != principal {
 		return false
 	}
 	now := h.now()
 	if now.Sub(sess.last) > h.cfg.SessionTTL {
-		if h.calls[v] == 0 {
+		if h.calls[id] == 0 {
 			h.removeLocked(sess)
 		}
 		return false
@@ -217,12 +284,42 @@ func (h *Handler) sessionOK(r *http.Request, principal string) bool {
 	sess.last = now
 	h.lru.MoveToFront(sess.all)
 	h.byPrincipal[principal].MoveToFront(sess.own)
+	h.byWorkspace[sess.workspace].MoveToFront(sess.ws)
 	return true
+}
+
+// admitCall validates the session and reserves an in-flight tools/call slot
+// on it in a single critical section, so eviction and expiry, which skip
+// sessions with calls in flight, cannot remove it before the call runs.
+// admitted is false when the session is not live for principal; limited
+// reports that the reservation exceeds MaxCalls. When admitted, the caller
+// must call releaseCall.
+func (h *Handler) admitCall(id, principal string) (admitted, limited bool) {
+	if id == "" {
+		return false, false
+	}
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if !h.touchLocked(id, principal) {
+		return false, false
+	}
+	h.calls[id]++
+	return true, h.calls[id] > h.cfg.MaxCalls
+}
+
+// releaseCall returns the in-flight slot admitCall reserved.
+func (h *Handler) releaseCall(id string) {
+	h.mu.Lock()
+	if h.calls[id]--; h.calls[id] <= 0 {
+		delete(h.calls, id)
+	}
+	h.mu.Unlock()
 }
 
 // addSessionLocked records a new session for principal. It first drops idle
 // expired sessions from the cold end of the LRU, then makes room under the
-// per-principal cap (evicting that principal's own LRU idle session) and the
+// per-principal cap (evicting that principal's own LRU idle session), the
+// per-workspace cap (evicting that workspace's own LRU idle session) and the
 // machine-wide cap (evicting the global LRU idle session). A session with a
 // tools/call in flight is never evicted; when no idle session can be evicted
 // the new session is refused. Callers hold h.mu.
@@ -230,11 +327,16 @@ func (h *Handler) sessionOK(r *http.Request, principal string) bool {
 // Each step walks from the cold end and stops at the first evictable
 // session, so the cost is O(1) amortized plus the number of sessions that
 // have calls in flight, never a scan of the whole table.
-func (h *Handler) addSessionLocked(id, principal string) bool {
+func (h *Handler) addSessionLocked(id, principal, workspace string) bool {
 	now := h.now()
 	h.sweepExpiredLocked(now)
 	if own := h.byPrincipal[principal]; own != nil && own.Len() >= h.cfg.MaxSessionsPerPrincipal {
 		if !h.evictIdleLocked(own) {
+			return false
+		}
+	}
+	if ws := h.byWorkspace[workspace]; ws != nil && ws.Len() >= h.cfg.MaxSessionsPerWorkspace {
+		if !h.evictIdleLocked(ws) {
 			return false
 		}
 	}
@@ -248,9 +350,15 @@ func (h *Handler) addSessionLocked(id, principal string) bool {
 		own = list.New()
 		h.byPrincipal[principal] = own
 	}
-	sess := &session{id: id, principal: principal, last: now}
+	ws := h.byWorkspace[workspace]
+	if ws == nil {
+		ws = list.New()
+		h.byWorkspace[workspace] = ws
+	}
+	sess := &session{id: id, principal: principal, workspace: workspace, last: now}
 	sess.all = h.lru.PushFront(sess)
 	sess.own = own.PushFront(sess)
+	sess.ws = ws.PushFront(sess)
 	h.sessions[id] = sess
 	return true
 }
@@ -295,24 +403,19 @@ func (h *Handler) removeLocked(sess *session) {
 			delete(h.byPrincipal, sess.principal)
 		}
 	}
+	if ws := h.byWorkspace[sess.workspace]; ws != nil {
+		ws.Remove(sess.ws)
+		if ws.Len() == 0 {
+			delete(h.byWorkspace, sess.workspace)
+		}
+	}
 	delete(h.sessions, sess.id)
 }
 
-func (h *Handler) call(w http.ResponseWriter, r *http.Request, id any, raw json.RawMessage) {
-	sid := r.Header.Get("Mcp-Session-Id")
-	// calls counts in-flight tools/call requests per session, so MaxCalls caps
-	// concurrency, not lifetime volume: the slot is released when the call returns.
-	h.mu.Lock()
-	h.calls[sid]++
-	limited := h.calls[sid] > h.cfg.MaxCalls
-	h.mu.Unlock()
-	defer func() {
-		h.mu.Lock()
-		if h.calls[sid]--; h.calls[sid] <= 0 {
-			delete(h.calls, sid)
-		}
-		h.mu.Unlock()
-	}()
+// call runs one admitted tools/call. calls counts in-flight tools/call
+// requests per session, so MaxCalls caps concurrency, not lifetime volume:
+// the slot admitCall reserved is released when the call returns.
+func (h *Handler) call(w http.ResponseWriter, r *http.Request, id any, raw json.RawMessage, limited bool) {
 	if limited {
 		writeRPC(w, rpcOK(id, map[string]any{"isError": true, "content": []map[string]any{{"type": "text", "text": `{"code":"rate_limited","message":"Rate limit exceeded","retryable":true}`}}}))
 		return
