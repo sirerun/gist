@@ -46,25 +46,26 @@ func (h *Handler) getArtifact(w http.ResponseWriter, r *http.Request, p ports.Pr
 	return h.writeJSON(w, json.RawMessage(rec.Metadata), budget(r, h.limits.MaxResponseBytes))
 }
 func (h *Handler) listVersions(w http.ResponseWriter, r *http.Request, p ports.Principal, id string) error {
-	if h.s.Search == nil {
+	if h.s.Versions == nil {
 		return appError("service_unavailable", "Service unavailable", 503, true)
 	}
 	ref := &ports.ArtifactRef{WorkspaceID: p.WorkspaceID, Kind: ports.KindSkill, ID: id}
 	if err := h.authorize(r.Context(), p, ports.ActionRead, ref); err != nil {
 		return err
 	}
-	q := ports.SearchQuery{Principal: p, Kinds: []ports.ArtifactKind{ports.KindSkill}, Limit: h.limits.MaxResults, MaxBytes: budget(r, h.limits.MaxResponseBytes)}
-	page, err := h.s.Search.Search(r.Context(), q)
+	// Fetch this id's versions directly. Filtering a catalog-wide search page
+	// dropped every version beyond the page's MaxResults cap.
+	records, err := h.s.Versions.ListVersions(r.Context(), *ref)
 	if err != nil {
 		return appError("service_unavailable", "Service unavailable", 503, true)
 	}
-	items := make([]ports.CatalogRecord, 0, len(page.Records))
-	for _, rec := range page.Records {
-		if rec.Ref.ID == id && rec.Ref.Kind == ports.KindSkill {
+	items := make([]ports.CatalogRecord, 0, len(records))
+	for _, rec := range records {
+		if rec.Ref.ID == id && rec.Ref.Kind == ports.KindSkill && rec.Ref.WorkspaceID == p.WorkspaceID {
 			items = append(items, rec)
 		}
 	}
-	return h.writeJSON(w, map[string]any{"items": items, "next_cursor": page.Next.ID}, q.MaxBytes)
+	return h.writeJSON(w, map[string]any{"items": items, "next_cursor": ""}, budget(r, h.limits.MaxResponseBytes))
 }
 func (h *Handler) discover(w http.ResponseWriter, r *http.Request, p ports.Principal) error {
 	var in struct {

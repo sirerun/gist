@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -87,7 +88,7 @@ func (testResolver) Resolve(context.Context, ports.Principal, []byte) ([]byte, e
 
 func testHandler(t *testing.T) *Handler {
 	t.Helper()
-	h, err := New(Services{Identity: testIdentity{}, Authorizer: testPolicy{}, Catalog: testCatalog{}, Search: testSearch{}, Artifacts: testArtifact{}, Connections: testConn{}, Events: testEvents{}, Publisher: testPublisher{}, Resolver: testResolver{}, Limits: Limits{MaxResponseBytes: 4096}})
+	h, err := New(Services{Identity: testIdentity{}, Authorizer: testPolicy{}, Catalog: testCatalog{}, Search: testSearch{}, Versions: newVersionsCatalog(), Artifacts: testArtifact{}, Connections: testConn{}, Events: testEvents{}, Publisher: testPublisher{}, Resolver: testResolver{}, Limits: Limits{MaxResponseBytes: 4096}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,14 +137,38 @@ type fixedClock struct{ now time.Time }
 
 func (c *fixedClock) Now() time.Time { return c.now }
 
-type versionsSearch struct{}
+// versionsCatalog models a catalog where unrelated records sort ahead of the
+// wanted artifact and outnumber the result cap. Search pages like the real
+// store (capped at Limit); ListVersions answers for one id.
+type versionsCatalog struct{ records []ports.CatalogRecord }
 
-func (versionsSearch) Search(context.Context, ports.SearchQuery) (ports.SearchPage, error) {
-	return ports.SearchPage{Records: []ports.CatalogRecord{
-		{Ref: ports.ArtifactRef{Kind: ports.KindSkill, ID: "wanted", Version: "1"}},
-		{Ref: ports.ArtifactRef{Kind: ports.KindSkill, ID: "other", Version: "1"}},
-		{Ref: ports.ArtifactRef{Kind: ports.KindSkill, ID: "wanted", Version: "2"}},
-	}}, nil
+func newVersionsCatalog() versionsCatalog {
+	var c versionsCatalog
+	for i := 0; i < 10; i++ {
+		c.records = append(c.records, ports.CatalogRecord{Ref: ports.ArtifactRef{WorkspaceID: "workspace-a", Kind: ports.KindSkill, ID: fmt.Sprintf("aaa-%02d", i), Version: "1"}})
+	}
+	for _, v := range []string{"1", "2", "3"} {
+		c.records = append(c.records, ports.CatalogRecord{Ref: ports.ArtifactRef{WorkspaceID: "workspace-a", Kind: ports.KindSkill, ID: "wanted", Version: v}})
+	}
+	return c
+}
+
+func (c versionsCatalog) Search(_ context.Context, q ports.SearchQuery) (ports.SearchPage, error) {
+	n := q.Limit
+	if n <= 0 || n > len(c.records) {
+		n = len(c.records)
+	}
+	return ports.SearchPage{Records: c.records[:n]}, nil
+}
+
+func (c versionsCatalog) ListVersions(_ context.Context, ref ports.ArtifactRef) ([]ports.CatalogRecord, error) {
+	var out []ports.CatalogRecord
+	for _, r := range c.records {
+		if r.Ref.WorkspaceID == ref.WorkspaceID && r.Ref.Kind == ref.Kind && r.Ref.ID == ref.ID {
+			out = append(out, r)
+		}
+	}
+	return out, nil
 }
 
 type errEvents struct {
@@ -158,7 +183,7 @@ func (e errEvents) Read(context.Context, ports.Cursor) (ports.EventPage, error) 
 
 func handlerWith(t *testing.T, mutate func(*Services)) *Handler {
 	t.Helper()
-	s := Services{Identity: testIdentity{}, Authorizer: testPolicy{}, Catalog: testCatalog{}, Search: testSearch{}, Artifacts: testArtifact{}, Connections: testConn{}, Events: testEvents{}, Publisher: testPublisher{}, Resolver: testResolver{}, Limits: Limits{MaxResponseBytes: 4096}}
+	s := Services{Identity: testIdentity{}, Authorizer: testPolicy{}, Catalog: testCatalog{}, Search: testSearch{}, Versions: newVersionsCatalog(), Artifacts: testArtifact{}, Connections: testConn{}, Events: testEvents{}, Publisher: testPublisher{}, Resolver: testResolver{}, Limits: Limits{MaxResponseBytes: 4096}}
 	mutate(&s)
 	h, err := New(s)
 	if err != nil {
@@ -256,9 +281,12 @@ func TestEventsWithoutCursorOpenerIs503(t *testing.T) {
 	}
 }
 
-// Regression: listVersions ignored the path id and returned every skill.
-func TestListVersionsFiltersByPathID(t *testing.T) {
-	h := handlerWith(t, func(s *Services) { s.Search = versionsSearch{} })
+// Regression: listVersions ignored the path id and returned every skill, and
+// then filtered one MaxResults-capped search page, dropping every version that
+// sorted beyond the cap.
+func TestListVersionsReturnsEveryVersionOfPathID(t *testing.T) {
+	c := newVersionsCatalog()
+	h := handlerWith(t, func(s *Services) { s.Search, s.Versions, s.Limits.MaxResults = c, c, 5 })
 	w := do(t, h, "GET", "/v1/skills/wanted/versions", "")
 	if w.Code != 200 {
 		t.Fatalf("status=%d body=%s", w.Code, w.Body.String())
@@ -267,13 +295,21 @@ func TestListVersionsFiltersByPathID(t *testing.T) {
 		Items []ports.CatalogRecord `json:"items"`
 	}
 	decodeJSON(t, w, &out)
-	if len(out.Items) != 2 {
-		t.Fatalf("items=%d want 2: %s", len(out.Items), w.Body.String())
+	if len(out.Items) != 3 {
+		t.Fatalf("items=%d want 3: %s", len(out.Items), w.Body.String())
 	}
 	for _, it := range out.Items {
 		if it.Ref.ID != "wanted" {
 			t.Fatalf("leaked item %+v", it.Ref)
 		}
+	}
+}
+
+func TestListVersionsWithoutVersionListerIs503(t *testing.T) {
+	h := handlerWith(t, func(s *Services) { s.Versions = nil })
+	w := do(t, h, "GET", "/v1/skills/wanted/versions", "")
+	if w.Code != 503 {
+		t.Fatalf("status=%d body=%s", w.Code, w.Body.String())
 	}
 }
 

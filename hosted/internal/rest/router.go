@@ -18,11 +18,20 @@ type Resolver interface {
 	Resolve(context.Context, ports.Principal, []byte) ([]byte, error)
 }
 
+// VersionLister returns every visible version of one artifact, identified by
+// workspace, kind and id (Version is ignored). Unlike a search it is not paged
+// by the catalog-wide result cap, so no version is dropped because unrelated
+// records filled a page. *storage.Postgres is the production implementation.
+type VersionLister interface {
+	ListVersions(context.Context, ports.ArtifactRef) ([]ports.CatalogRecord, error)
+}
+
 type Services struct {
 	Identity    ports.IdentityStore
 	Authorizer  ports.Authorizer
 	Catalog     ports.CatalogStore
 	Search      ports.LexicalSearcher
+	Versions    VersionLister
 	Artifacts   ports.ArtifactStore
 	Resolutions ports.ResolutionStore
 	Connections ports.ConnectionInitiator

@@ -99,6 +99,36 @@ func (s *Postgres) Search(ctx context.Context, q ports.SearchQuery) (ports.Searc
 	return page, nil
 }
 
+// ListVersions returns every published or deprecated version of one artifact
+// in the reference's workspace. It is not capped by the catalog-wide search
+// limit, so an artifact's versions are never truncated by unrelated records.
+func (s *Postgres) ListVersions(ctx context.Context, ref ports.ArtifactRef) ([]ports.CatalogRecord, error) {
+	if ref.WorkspaceID == "" || ref.Kind == "" || ref.ID == "" {
+		return nil, errors.New("storage: incomplete artifact reference")
+	}
+	var out []ports.CatalogRecord
+	err := WithTenant(ctx, s.pool, ref.WorkspaceID, func(ctx context.Context, tx pgx.Tx) error {
+		rows, err := tx.Query(ctx, `SELECT version, state, digest_algorithm, digest_value, manifest_digest_algorithm, manifest_digest_value, metadata FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND state IN ('published','deprecated') ORDER BY version`, ref.WorkspaceID, ref.Kind, ref.ID)
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var version, state, da, dv, mda, mdv string
+			var metadata []byte
+			if err := rows.Scan(&version, &state, &da, &dv, &mda, &mdv, &metadata); err != nil {
+				return err
+			}
+			out = append(out, ports.CatalogRecord{Ref: ports.ArtifactRef{WorkspaceID: ref.WorkspaceID, Kind: ref.Kind, ID: ref.ID, Version: version}, State: state, Digest: ports.Digest{Algorithm: da, Value: dv}, ManifestDigest: ports.Digest{Algorithm: mda, Value: mdv}, Metadata: append([]byte(nil), metadata...)})
+		}
+		return rows.Err()
+	})
+	if err != nil {
+		return nil, fmt.Errorf("list artifact versions: %w", err)
+	}
+	return out, nil
+}
+
 // Lookup reads an unrevoked workload identity. workload_identities is under
 // FORCE ROW LEVEL SECURITY keyed on registry.workspace_id, so the read runs
 // inside WithTenant for the caller's workspace; without that scope every row is

@@ -115,7 +115,7 @@ func newWithStores(cfg Config, pool *pgxpool.Pool, objects *storage.ObjectStore)
 	if broker != nil {
 		connections = broker
 	}
-	services := rest.Services{Identity: identityStore, Authorizer: policy, Catalog: catalog, Search: lexicalAdapter{service: search}, Artifacts: objects, Resolutions: resolutionStore, Connections: connections, Events: eventStoreAdapter{store: feed}, Publisher: publisher{pool: pool, objects: objects, limits: cfg}, Resolver: resolverAdapter{resolver: resolver, maxBytes: cfg.MaxResponseBytes}, Limits: cfg.RESTLimits(), Audience: cfg.ResourceAudience}
+	services := rest.Services{Identity: identityStore, Authorizer: policy, Catalog: catalog, Search: lexicalAdapter{service: search}, Versions: catalog, Artifacts: objects, Resolutions: resolutionStore, Connections: connections, Events: eventStoreAdapter{store: feed}, Publisher: publisher{pool: pool, objects: objects, limits: cfg}, Resolver: resolverAdapter{resolver: resolver, maxBytes: cfg.MaxResponseBytes}, Limits: cfg.RESTLimits(), Audience: cfg.ResourceAudience}
 	rh, err := rest.New(services)
 	if err != nil {
 		pool.Close()
