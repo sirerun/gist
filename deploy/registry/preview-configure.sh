@@ -19,7 +19,15 @@ if [[ "$STACK" != "preview" ]]; then
   exit 1
 fi
 
-pulumi login "gs://${PULUMI_STATE_BUCKET}"
+# PULUMI_BACKEND_URL outranks Pulumi.yaml and the stored login, so every job
+# reads and writes the same shared state (never runner-local files).
+backend="gs://${PULUMI_STATE_BUCKET}"
+if [[ -n "${PULUMI_BACKEND_URL:-}" && "$PULUMI_BACKEND_URL" != "$backend" ]]; then
+  echo "refusing to run: PULUMI_BACKEND_URL does not point at the shared preview state bucket" >&2
+  exit 1
+fi
+export PULUMI_BACKEND_URL="$backend"
+pulumi login "$backend"
 pulumi stack select "$STACK" --create --cwd "$PROGRAM_DIR"
 
 set_cfg() { pulumi config set --stack "$STACK" --cwd "$PROGRAM_DIR" "gist-registry:$1" "$2"; }
