@@ -33,12 +33,12 @@
     "docs/adr/004-registry-governance.md": "c97048abbdc542ae6d835ea95b81240e6839f45d09a097b1991d8fb408e682a6",
     "docs/adr/005-registry-authorization.md": "38be4c22e1ac6ef6a96ede72af62218218361a0cf8b291ef4c474aa261067c67",
     "docs/adr/006-hosted-module.md": "a04b3c19128d32124f1de578068df75478a728fbe93c6d41c5348d6bd5f605cf",
-    "contracts/registry/v1/lock.json": "4815e85a4e87145cfaf805e38ded8a1d305a18b012ff90d0b69fbff7313bcca7",
+    "contracts/registry/v1/lock.json": "cbb4d5d9db1a842b94ca67cc7a225d4f41e08787530ad2d19cfc485a327c063c",
     "catalog/registry/catalog.json": "c53f46cb06bcf9fb586950702479a98a464291dd8fae85dafb1784b728be9e0f",
     "catalog/registry/taxonomy.json": "a0aecfdd4131735b1fe1dc039b1198db9de8f30d4d5e855d3b5d580ff8b631de",
     "docs/registry/runtime-contracts.md": "17a91d703b9b0ae1f427d9a6ea3ff6c5514498d9bfdbec4f9dbff183afb518bf",
-    "hosted/go.mod": "ead3ffd9a682d2ffbf05b77f1388072021c626e40871c50dd5d8b9c3279e84e5",
-    "hosted/go.sum": "f388c494cc5e4a4f682590b959b467be0a7fa89870d9f16ca62eef271d797f4b"
+    "hosted/go.mod": "5becd1074a7e078dcae1ee1ca3b4e3af54876bdb6f8d48b63088ce060d95bffb",
+    "hosted/go.sum": "1800df407aacf59b38f18c81832fb56261d2547f685c3c26b7f2131e80efc1e8"
   },
   "skipped": false,
   "stale": false
