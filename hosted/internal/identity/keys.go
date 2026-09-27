@@ -113,3 +113,28 @@ func validateSigningKey(key SigningKey, requirePrivate bool) error {
 	}
 	return nil
 }
+
+// VerificationKey is the public half of a signing key, safe to publish.
+type VerificationKey struct {
+	KID       string
+	Algorithm string
+	Public    ed25519.PublicKey
+	NotAfter  time.Time
+}
+
+// VerificationKeys returns every key that can still verify a token, current
+// key first. It never exposes private key material, so a JWKS endpoint can
+// publish the result directly.
+func (k *KeySet) VerificationKeys() []VerificationKey {
+	now := k.clock.Now()
+	k.mu.RLock()
+	defer k.mu.RUnlock()
+	out := []VerificationKey{{KID: k.current.KID, Algorithm: k.current.Algorithm, Public: append(ed25519.PublicKey(nil), k.current.Public...), NotAfter: k.current.NotAfter}}
+	for kid, key := range k.keys {
+		if kid == k.current.KID || (!key.NotAfter.IsZero() && now.After(key.NotAfter)) {
+			continue
+		}
+		out = append(out, VerificationKey{KID: key.KID, Algorithm: key.Algorithm, Public: append(ed25519.PublicKey(nil), key.Public...), NotAfter: key.NotAfter})
+	}
+	return out
+}

@@ -36,6 +36,9 @@ type WorkloadRequest struct {
 	ParentSubject string
 	ParentScopes  []string
 	TTL           time.Duration
+	// SubjectType is "workload" (the default) or "human". OAuth grants made
+	// by a person through the reference authorization server use "human".
+	SubjectType string
 }
 
 type VerifiedToken struct {
@@ -68,6 +71,13 @@ func (i *WorkloadIssuer) Mint(ctx context.Context, req WorkloadRequest) (string,
 	}
 	if !containsAll(req.ParentScopes, req.Scopes) {
 		return "", fmt.Errorf("workload scopes exceed parent authority: %w", ErrUnauthorized)
+	}
+	switch req.SubjectType {
+	case "":
+		req.SubjectType = subjectWorkload
+	case subjectWorkload, subjectHuman:
+	default:
+		return "", fmt.Errorf("unsupported subject type: %w", ErrUnauthorized)
 	}
 	policy, err := i.cfg.Policy.CheckWorkload(ctx, req.Subject, req.WorkspaceID, req.Scopes, 0)
 	if err != nil {
@@ -102,7 +112,8 @@ func (i *WorkloadIssuer) Mint(ctx context.Context, req WorkloadRequest) (string,
 		Audience([]string{i.cfg.Audience}).JwtID(jti).IssuedAt(now).NotBefore(now).
 		Expiration(now.Add(ttl)).Claim("workspace_id", req.WorkspaceID).
 		Claim("scopes", normalizeScopes(req.Scopes)).Claim("policy_generation", policy.PolicyGeneration).
-		Claim("parent_sub", req.ParentSubject).Claim("parent_scopes", normalizeScopes(req.ParentScopes)).Build()
+		Claim("parent_sub", req.ParentSubject).Claim("parent_scopes", normalizeScopes(req.ParentScopes)).
+		Claim("subject_type", req.SubjectType).Build()
 	if err != nil {
 		return "", fmt.Errorf("build workload token: %w", err)
 	}
@@ -169,8 +180,31 @@ func (i *WorkloadIssuer) Verify(ctx context.Context, rawToken string) (VerifiedT
 	if !policy.Allowed || policy.Revoked || policy.PolicyGeneration != generation {
 		return VerifiedToken{}, ErrRevoked
 	}
+	subjectType, err := subjectTypeClaim(parsed)
+	if err != nil {
+		return VerifiedToken{}, fmt.Errorf("subject type claim: %w", ErrUnauthorized)
+	}
 	audience := parsed.Audience()
-	return VerifiedToken{Principal: ports.Principal{Issuer: parsed.Issuer(), Subject: parsed.Subject(), Audience: audience[0], WorkspaceID: workspace, Scopes: normalizeScopes(scopes), PolicyGeneration: generation, SubjectType: "workload"}, JTI: parsed.JwtID(), ExpiresAt: parsed.Expiration().UTC(), ParentSubject: parentSubject, ParentScopes: normalizeScopes(parentScopes)}, nil
+	return VerifiedToken{Principal: ports.Principal{Issuer: parsed.Issuer(), Subject: parsed.Subject(), Audience: audience[0], WorkspaceID: workspace, Scopes: normalizeScopes(scopes), PolicyGeneration: generation, SubjectType: subjectType}, JTI: parsed.JwtID(), ExpiresAt: parsed.Expiration().UTC(), ParentSubject: parentSubject, ParentScopes: normalizeScopes(parentScopes)}, nil
+}
+
+const (
+	subjectWorkload = "workload"
+	subjectHuman    = "human"
+)
+
+// subjectTypeClaim reads the optional subject_type claim. Tokens minted
+// before the claim existed carry none and are workload tokens.
+func subjectTypeClaim(token jwt.Token) (string, error) {
+	value, ok := token.Get("subject_type")
+	if !ok {
+		return subjectWorkload, nil
+	}
+	s, _ := value.(string)
+	if s != subjectWorkload && s != subjectHuman {
+		return "", ErrUnauthorized
+	}
+	return s, nil
 }
 
 func randomJTI() (string, error) {
