@@ -300,7 +300,9 @@ func TestWorkload(t *testing.T) {
 		} else {
 			_, err = probe.get(expiryCtx, "skill", artifactID, artifactVersion)
 		}
-		if err != nil && strings.Contains(err.Error(), "unauthorized") {
+		// The transport authenticates before initialize, so expiry surfaces
+		// either as an HTTP 401 on initialize or as unauthorized on a call.
+		if err != nil && (strings.Contains(err.Error(), "unauthorized") || strings.Contains(err.Error(), "HTTP status 401")) {
 			break
 		}
 		if time.Now().After(deadline) {
@@ -319,10 +321,13 @@ func TestWorkload(t *testing.T) {
 	revoked := &mcpClient{f.server.URL, token, f.server.Client(), ""}
 	revocationCtx, revocationCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer revocationCancel()
-	if err := revoked.initialize(revocationCtx); err != nil {
-		t.Fatal(err)
+	// The transport authenticates before initialize, so a revoked workload
+	// is refused either at initialize (HTTP 401) or on its first call.
+	err = revoked.initialize(revocationCtx)
+	if err == nil {
+		_, err = revoked.get(revocationCtx, "skill", artifactID, artifactVersion)
 	}
-	if _, err := revoked.get(revocationCtx, "skill", artifactID, artifactVersion); err == nil || !strings.Contains(err.Error(), "unauthorized") {
+	if err == nil || !(strings.Contains(err.Error(), "unauthorized") || strings.Contains(err.Error(), "HTTP status 401")) {
 		t.Fatalf("revoked workload was accepted: %v", err)
 	}
 }
