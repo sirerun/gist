@@ -286,22 +286,33 @@ type verifiedIdentity struct {
 }
 
 func (v verifiedIdentity) Lookup(ctx context.Context, token, audience string) (ports.IdentityRecord, error) {
-	got, err := v.issuer.Verify(ctx, token)
-	if err != nil || got.Principal.Audience != audience {
-		return ports.IdentityRecord{}, identity.ErrUnauthorized
+	_, rec, err := v.AuthenticateContext(ctx, token, audience)
+	return rec, err
+}
+
+// AuthenticateContext verifies the token like Lookup and also returns a
+// context carrying the verified identity.AuthContext, so workspace-bound
+// operations such as Revoke take the workspace from the verified token.
+func (v verifiedIdentity) AuthenticateContext(ctx context.Context, token, audience string) (context.Context, ports.IdentityRecord, error) {
+	if v.issuer == nil {
+		return ctx, ports.IdentityRecord{}, identity.ErrUnauthorized
+	}
+	authCtx, auth, err := identity.VerifyContext(ctx, v.issuer, token)
+	if err != nil || auth.Principal().Audience != audience {
+		return ctx, ports.IdentityRecord{}, identity.ErrUnauthorized
 	}
 	// A valid signature is not enough: the stored identity must still exist
 	// and be unrevoked. Storage filters revoked rows, so a revoked identity
 	// surfaces as not-found. Any storage failure fails closed.
 	if v.catalog == nil {
-		return ports.IdentityRecord{}, identity.ErrUnauthorized
+		return ctx, ports.IdentityRecord{}, identity.ErrUnauthorized
 	}
-	p := got.Principal
+	p := auth.Principal()
 	stored, err := v.catalog.Lookup(ctx, p.WorkspaceID, p.Issuer, p.Subject)
 	if err != nil || stored.WorkspaceID != p.WorkspaceID || stored.Issuer != p.Issuer || stored.Subject != p.Subject {
-		return ports.IdentityRecord{}, identity.ErrUnauthorized
+		return ctx, ports.IdentityRecord{}, identity.ErrUnauthorized
 	}
-	return ports.IdentityRecord{Issuer: p.Issuer, Subject: p.Subject, WorkspaceID: p.WorkspaceID, SubjectType: p.SubjectType, Scopes: p.Scopes, PolicyGeneration: p.PolicyGeneration, ExpiresAt: got.ExpiresAt.Unix()}, nil
+	return authCtx, ports.IdentityRecord{Issuer: p.Issuer, Subject: p.Subject, WorkspaceID: p.WorkspaceID, SubjectType: p.SubjectType, Scopes: p.Scopes, PolicyGeneration: p.PolicyGeneration, ExpiresAt: auth.ExpiresAt().Unix()}, nil
 }
 
 // Revoke revokes a workload identity in the caller's own workspace. The
@@ -311,7 +322,15 @@ func (v verifiedIdentity) Revoke(ctx context.Context, issuer, subject string) er
 	if !ok || auth.Principal().WorkspaceID == "" {
 		return identity.ErrUnauthorized
 	}
-	return v.catalog.Revoke(ctx, auth.Principal().WorkspaceID, issuer, subject)
+	if v.catalog == nil {
+		return identity.ErrUnauthorized
+	}
+	err := v.catalog.Revoke(ctx, auth.Principal().WorkspaceID, issuer, subject)
+	if errors.Is(err, storage.ErrNotFound) {
+		// Missing and foreign identities are indistinguishable (ADR 005).
+		return ports.ErrIdentityNotFound
+	}
+	return err
 }
 
 type lexicalAdapter struct{ service *discovery.Service }
@@ -415,3 +434,5 @@ func (b *broker) call(ctx context.Context, method, suffix string, p ports.Princi
 // Compile-time checks keep the app wiring honest when a frozen port changes.
 var _ http.Handler = requestContext{}
 var _ ports.ConnectionInitiator = (*broker)(nil)
+
+var _ rest.ContextAuthenticator = verifiedIdentity{}

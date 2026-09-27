@@ -3,6 +3,7 @@ package identity
 import (
 	"context"
 	"github.com/sirerun/gist/hosted/internal/ports"
+	"time"
 )
 
 type contextKey struct{}
@@ -12,14 +13,24 @@ type contextKey struct{}
 type AuthContext struct {
 	principal ports.Principal
 	jti       string
+	expiresAt time.Time
 }
 
-func VerifyContext(ctx context.Context, issuer *WorkloadIssuer, token string) (context.Context, AuthContext, error) {
+// TokenVerifier verifies a raw workload token. *WorkloadIssuer is the
+// production implementation.
+type TokenVerifier interface {
+	Verify(ctx context.Context, rawToken string) (VerifiedToken, error)
+}
+
+func VerifyContext(ctx context.Context, issuer TokenVerifier, token string) (context.Context, AuthContext, error) {
+	if issuer == nil {
+		return ctx, AuthContext{}, ErrUnauthorized
+	}
 	verified, err := issuer.Verify(ctx, token)
 	if err != nil {
 		return ctx, AuthContext{}, err
 	}
-	auth := AuthContext{principal: verified.Principal, jti: verified.JTI}
+	auth := AuthContext{principal: verified.Principal, jti: verified.JTI, expiresAt: verified.ExpiresAt}
 	return context.WithValue(ctx, contextKey{}, auth), auth, nil
 }
 
@@ -33,3 +44,6 @@ func (a AuthContext) Principal() ports.Principal {
 }
 
 func (a AuthContext) JTI() string { return a.jti }
+
+// ExpiresAt is the verified token's expiry.
+func (a AuthContext) ExpiresAt() time.Time { return a.expiresAt }

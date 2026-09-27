@@ -7,6 +7,9 @@ type Action string
 const (
 	ActionRead    Action = "catalog:read"
 	ActionPublish Action = "catalog:publish"
+	// ActionIdentityRevoke revokes a workload identity in the caller's own
+	// workspace. It requires the identity:revoke scope and the maintainer role.
+	ActionIdentityRevoke Action = "identity:revoke"
 )
 
 type Principal struct {

@@ -82,7 +82,7 @@ func (p *postgresPolicy) Decide(ctx context.Context, principal ports.Principal, 
 	}
 	for _, scope := range principal.Scopes {
 		if scope == string(action) {
-			if action == ports.ActionPublish && role != "maintainer" {
+			if (action == ports.ActionPublish || action == ports.ActionIdentityRevoke) && role != "maintainer" {
 				return ports.Decision{Status: 403, Reason: "maintainer role required"}, nil
 			}
 			return ports.Decision{Allowed: true, Status: 200}, nil
