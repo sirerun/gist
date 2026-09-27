@@ -175,7 +175,7 @@ func (s *memStore) RedeemCode(_ context.Context, ws string, hash []byte, check f
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.down {
-		return oauth.AuthCode{}, errStoreDown
+		return oauth.AuthCode{}, "", errStoreDown
 	}
 	c, ok := s.codes[hkey(hash)]
 	if !ok || c.code.WorkspaceID != ws {
