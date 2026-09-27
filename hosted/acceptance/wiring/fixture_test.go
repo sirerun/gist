@@ -191,6 +191,17 @@ func (f *fixture) seed(ctx context.Context) error {
 				if _, err := tx.Exec(ctx, `INSERT INTO workspace_memberships(workspace_id,issuer,subject,role,scopes,policy_generation) VALUES($1,$2,$3,'maintainer',$4,1) ON CONFLICT (workspace_id,issuer,subject) DO NOTHING`, workspace, f.baseURL, subject, []string{"catalog:read", "catalog:publish"}); err != nil {
 					return err
 				}
+				// Token verification also requires an unrevoked stored identity
+				// (0964d05). workload_identities is keyed by (issuer, subject), so
+				// each subject is registered in exactly one workspace: workload A
+				// in tenant A and workload B in tenant B, matching the tokens the
+				// suites mint.
+				if (workspace == "q3-tenant-a") != (subject == f.workA) {
+					continue
+				}
+				if _, err := tx.Exec(ctx, `INSERT INTO workload_identities(issuer,subject,subject_type,workspace_id,scopes,policy_generation,expires_at) VALUES($1,$2,'workload',$3,$4,1,now()+interval '1 hour') ON CONFLICT (issuer,subject) DO NOTHING`, f.baseURL, subject, workspace, []string{"catalog:read", "catalog:publish"}); err != nil {
+					return err
+				}
 			}
 			return nil
 		}); err != nil {
