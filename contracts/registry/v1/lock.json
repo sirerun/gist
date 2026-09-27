@@ -80,7 +80,7 @@
     },
     {
       "path": "contracts/registry/v1/fixtures/http-cases.json",
-      "sha256": "60676e66fe9414a8b36ce515fc9386dfb7388298c17ed579d2af1f8c71b98413"
+      "sha256": "ec72aee0ce3801da0896659da13d1ca04d7726e9eabbc633cf548e1dd4a9ec87"
     },
     {
       "path": "contracts/registry/v1/fixtures/wire-cases.json",
@@ -88,11 +88,11 @@
     },
     {
       "path": "contracts/registry/v1/openapi.yaml",
-      "sha256": "45c05bc1234fa27c450ff29949bb93b9d0a5828b5366301063984fe9d09cea15"
+      "sha256": "04490d7decec58e33bef3f3ef78132727f646dc75eef8bc1fe957bd6021005c0"
     },
     {
       "path": "contracts/registry/v1/route-matrix.json",
-      "sha256": "bb9b9f3df9de4a8903d6f0608d166284d1c76ce668e88b699f5b96cdc17af780"
+      "sha256": "e098b009bef0ac5781826eb95e0eaa33c8b2a6eb92481b34ed44eacd2ec17e04"
     },
     {
       "path": "hosted/go.mod",
