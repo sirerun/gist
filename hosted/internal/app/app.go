@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
@@ -134,18 +135,16 @@ func newWithStores(cfg Config, pool *pgxpool.Pool, objects *storage.ObjectStore)
 	// workload issuer (and so the same key set, issuer and audience) that
 	// verifies REST and MCP requests, and records each issued identity so the
 	// stored-identity check in verifiedIdentity accepts it.
-	sessionSecret := make([]byte, 32)
-	if _, err := rand.Read(sessionSecret); err != nil {
-		pool.Close()
-		return nil, fmt.Errorf("app: generate oauth session secret: %w", err)
-	}
+	// The consent and session keys are derived from the configured secret
+	// with domain separation, so every replica agrees on both.
+	sessionSecret, consentSecret := deriveKey(cfg.OAuthConsentSecret, "gist oauth session v1"), deriveKey(cfg.OAuthConsentSecret, "gist oauth consent v1")
 	sessions, err := oauth.NewCookieSessions(sessionSecret, clock)
 	if err != nil {
 		pool.Close()
 		return nil, err
 	}
 	minter := oauth.IssuerMinter{Issuers: map[string]*identity.WorkloadIssuer{cfg.ResourceAudience: issuer}, Record: recordIssued(catalog)}
-	as, err := oauth.New(oauth.Config{Issuer: cfg.PublicOrigin, Resources: []string{cfg.ResourceAudience}, ScopesSupported: []string{"catalog:read", "catalog:publish"}, Store: catalog.OAuth(), Minter: minter, Policy: policy, Sessions: sessions, Keys: keys, Clock: clock, LoginURL: cfg.OAuthLoginURL})
+	as, err := oauth.New(oauth.Config{Issuer: cfg.PublicOrigin, Resources: []string{cfg.ResourceAudience}, ScopesSupported: []string{"catalog:read", "catalog:publish"}, Store: catalog.OAuth(), Minter: minter, Policy: policy, Sessions: sessions, Keys: keys, Clock: clock, LoginURL: cfg.OAuthLoginURL, Secret: consentSecret})
 	if err != nil {
 		pool.Close()
 		return nil, err
@@ -153,6 +152,13 @@ func newWithStores(cfg Config, pool *pgxpool.Pool, objects *storage.ObjectStore)
 	prm := as.ProtectedResourceMetadataURL()
 	handler := requestContext{rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, ready: func(ctx context.Context) error { return pool.Ping(ctx) }}
 	return &App{cfg: cfg, pool: pool, objects: objects, issuer: issuer, identities: catalog, sessions: sessions, server: &http.Server{Addr: cfg.ListenAddress, Handler: handler, ReadHeaderTimeout: cfg.RequestTimeout}}, nil
+}
+
+// deriveKey derives a purpose-bound 32-byte key from the configured secret.
+func deriveKey(secret []byte, purpose string) []byte {
+	mac := hmac.New(sha256.New, secret)
+	mac.Write([]byte(purpose))
+	return mac.Sum(nil)
 }
 
 // recordIssued adapts the identity store to the OAuth minter. A revoked

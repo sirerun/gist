@@ -8,15 +8,18 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
+	"github.com/sirerun/gist/hosted/internal/oauth"
 	"github.com/sirerun/gist/hosted/internal/storage"
 )
 
@@ -254,6 +257,164 @@ func TestOAuthConsentRejectsNonMemberIntegration(t *testing.T) {
 	loc, _ := url.Parse(resp.Header.Get("Location"))
 	if resp.StatusCode != http.StatusFound || loc.Query().Get("error") != "access_denied" || loc.Query().Get("code") != "" {
 		t.Fatalf("non-member consent: %d %q", resp.StatusCode, resp.Header.Get("Location"))
+	}
+}
+
+// storeCode registers a throwaway client and saves one code for it directly
+// through the Postgres store.
+func storeCode(t *testing.T, store *storage.OAuthStore, workspace string) []byte {
+	t.Helper()
+	ctx := context.Background()
+	b := make([]byte, 16)
+	_, _ = rand.Read(b)
+	id := fmt.Sprintf("gc_it_%x", b)
+	now := time.Now().UTC()
+	if err := store.CreateClient(ctx, oauth.Client{ID: id, Name: "it", RedirectURIs: []string{oauthRedirect}, Scopes: []string{"catalog:read"}, Audience: "https://registry.example.invalid", CreatedAt: now}); err != nil {
+		t.Fatal(err)
+	}
+	_, _ = rand.Read(b)
+	sum := sha256.Sum256(b)
+	if err := store.SaveCode(ctx, oauth.AuthCode{Hash: sum[:], ClientID: id, Subject: "it-subject", WorkspaceID: workspace, RedirectURI: oauthRedirect, Resource: "https://registry.example.invalid", Scopes: []string{"catalog:read"}, Challenge: "x", IssuedAt: now, ExpiresAt: now.Add(time.Minute)}); err != nil {
+		t.Fatal(err)
+	}
+	return sum[:]
+}
+
+func refreshToken() oauth.RefreshToken {
+	b := make([]byte, 32)
+	_, _ = rand.Read(b)
+	sum := sha256.Sum256(b)
+	now := time.Now().UTC()
+	return oauth.RefreshToken{Hash: sum[:], IssuedAt: now, ExpiresAt: now.Add(time.Hour)}
+}
+
+func accept(oauth.AuthCode) error { return nil }
+
+// familyRevoked probes a family through its first refresh token.
+func familyRevoked(t *testing.T, store *storage.OAuthStore, workspace string, first oauth.RefreshToken) bool {
+	t.Helper()
+	_, err := store.RotateRefresh(context.Background(), workspace, first.Hash, func(oauth.RefreshFamily, oauth.RefreshToken) error { return errors.New("probe only") }, refreshToken())
+	switch {
+	case errors.Is(err, oauth.ErrFamilyRevoked):
+		return true
+	case err != nil && err.Error() == "probe only":
+		return false
+	default:
+		t.Fatalf("probe family: %v", err)
+		return false
+	}
+}
+
+// The family is created in the transaction that consumes the code, so a
+// replay blocked on the code's row lock during the first redemption revokes
+// the family once the first redemption commits.
+func TestOAuthCodeReplayRevokesFamilyUnderLockIntegration(t *testing.T) {
+	f := requireFixture(t)
+	store := mustPostgres(t, f).OAuth()
+	ctx := context.Background()
+	hash := storeCode(t, store, "q3-tenant-a")
+	first := refreshToken()
+	inCheck, release := make(chan struct{}), make(chan struct{})
+	winner := make(chan error, 1)
+	go func() {
+		_, _, err := store.RedeemCode(ctx, "q3-tenant-a", hash, func(oauth.AuthCode) error {
+			close(inCheck)
+			<-release
+			return nil
+		}, first)
+		winner <- err
+	}()
+	<-inCheck
+	replay := make(chan error, 1)
+	go func() {
+		_, _, err := store.RedeemCode(ctx, "q3-tenant-a", hash, accept, refreshToken())
+		replay <- err
+	}()
+	// Wait until the replay is actually queued on the code's row lock.
+	deadline := time.Now().Add(10 * time.Second)
+	for {
+		var waiting int
+		if err := f.pool.QueryRow(ctx, `SELECT count(*) FROM pg_stat_activity WHERE wait_event_type='Lock' AND query LIKE '%oauth_authorization_codes%FOR UPDATE%'`).Scan(&waiting); err != nil {
+			t.Fatal(err)
+		}
+		if waiting > 0 {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("replay never blocked on the code row lock")
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	close(release)
+	if err := <-winner; err != nil {
+		t.Fatalf("first redemption: %v", err)
+	}
+	if err := <-replay; !errors.Is(err, oauth.ErrGrantReused) {
+		t.Fatalf("replay: %v, want ErrGrantReused", err)
+	}
+	if !familyRevoked(t, store, "q3-tenant-a", first) {
+		t.Fatal("family issued to the first redeemer survived the replay")
+	}
+}
+
+// Concurrent redemptions: exactly one wins, and its family is revoked by
+// the others whatever the scheduling.
+func TestOAuthConcurrentCodeRedemptionIntegration(t *testing.T) {
+	f := requireFixture(t)
+	store := mustPostgres(t, f).OAuth()
+	hash := storeCode(t, store, "q3-tenant-a")
+	const n = 8
+	firsts := make([]oauth.RefreshToken, n)
+	errs := make([]error, n)
+	var wg sync.WaitGroup
+	for i := range firsts {
+		firsts[i] = refreshToken()
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			_, _, errs[i] = store.RedeemCode(context.Background(), "q3-tenant-a", hash, accept, firsts[i])
+		}(i)
+	}
+	wg.Wait()
+	won := -1
+	for i, err := range errs {
+		switch {
+		case err == nil && won < 0:
+			won = i
+		case err == nil:
+			t.Fatalf("two redemptions succeeded (%d and %d)", won, i)
+		case !errors.Is(err, oauth.ErrGrantReused):
+			t.Fatalf("redemption %d: %v", i, err)
+		}
+	}
+	if won < 0 {
+		t.Fatal("no redemption succeeded")
+	}
+	if !familyRevoked(t, store, "q3-tenant-a", firsts[won]) {
+		t.Fatal("winning family survived concurrent replays")
+	}
+}
+
+// A failed check commits the consumption: the correct presentation after a
+// wrong one is a replay, and no family exists.
+func TestOAuthFailedRedemptionInvalidatesCodeIntegration(t *testing.T) {
+	f := requireFixture(t)
+	store := mustPostgres(t, f).OAuth()
+	ctx := context.Background()
+	hash := storeCode(t, store, "q3-tenant-a")
+	wrong := errors.New("wrong verifier")
+	if _, _, err := store.RedeemCode(ctx, "q3-tenant-a", hash, func(oauth.AuthCode) error { return wrong }, refreshToken()); !errors.Is(err, wrong) {
+		t.Fatalf("failed redemption: %v", err)
+	}
+	if _, _, err := store.RedeemCode(ctx, "q3-tenant-a", hash, accept, refreshToken()); !errors.Is(err, oauth.ErrGrantReused) {
+		t.Fatalf("redemption after failed attempt: %v, want ErrGrantReused", err)
+	}
+	var families int
+	if err := f.pool.QueryRow(ctx, `SELECT count(*) FROM oauth_refresh_families WHERE code_hash=$1`, hash).Scan(&families); err != nil {
+		t.Fatal(err)
+	}
+	if families != 0 {
+		t.Fatalf("families from an invalidated code = %d", families)
 	}
 }
 

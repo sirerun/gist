@@ -117,9 +117,10 @@ func (f formValues) Has(key string) bool { _, ok := f[key]; return ok }
 
 // redeemCode exchanges an authorization code. The code must be unexpired,
 // unconsumed, issued to this client for this exact redirect URI and
-// resource, and the verifier must match its S256 challenge. A failed check
-// leaves the code unconsumed; a second redemption revokes every grant made
-// from it.
+// resource, and the verifier must match its S256 challenge. Any failed check
+// still consumes the code. The refresh family is created in the same store
+// transaction that consumes the code, so a replay at any later point revokes
+// it; a second redemption revokes every grant made from the code.
 func (s *Server) redeemCode(r *http.Request, form formValues, client Client) (tokenResponse, *grantError) {
 	raw, redirectURI, verifier := form.Get("code"), form.Get("redirect_uri"), form.Get("code_verifier")
 	if raw == "" || redirectURI == "" || verifier == "" {
@@ -137,7 +138,12 @@ func (s *Server) redeemCode(r *http.Request, form formValues, client Client) (to
 		return tokenResponse{}, invalidGrant("authorization code is invalid")
 	}
 	now := s.now()
-	code, err := s.cfg.Store.RedeemCode(r.Context(), workspace, hashSecret(raw), func(c AuthCode) error {
+	refresh, err := newOpaque(refreshPrefix, workspace)
+	if err != nil {
+		return tokenResponse{}, &grantError{http.StatusInternalServerError, "server_error", ""}
+	}
+	first := RefreshToken{Hash: hashSecret(refresh), IssuedAt: now, ExpiresAt: now.Add(s.cfg.RefreshTTL)}
+	code, familyID, err := s.cfg.Store.RedeemCode(r.Context(), workspace, hashSecret(raw), func(c AuthCode) error {
 		switch {
 		case c.WorkspaceID != workspace:
 			return invalidGrant("authorization code is invalid")
@@ -153,7 +159,7 @@ func (s *Server) redeemCode(r *http.Request, form formValues, client Client) (to
 			return &grantError{http.StatusBadRequest, "invalid_target", "resource does not match the authorization request"}
 		}
 		return nil
-	})
+	}, first)
 	if err != nil {
 		var ge *grantError
 		switch {
@@ -169,15 +175,9 @@ func (s *Server) redeemCode(r *http.Request, form formValues, client Client) (to
 	}
 	access, gerr := s.mint(r, code.Resource, code.Subject, code.WorkspaceID, code.Scopes)
 	if gerr != nil {
+		// The consent no longer holds: the family must not outlive it.
+		_ = s.cfg.Store.RevokeFamily(r.Context(), code.WorkspaceID, familyID)
 		return tokenResponse{}, gerr
-	}
-	refresh, err := newOpaque(refreshPrefix, code.WorkspaceID)
-	if err != nil {
-		return tokenResponse{}, &grantError{http.StatusInternalServerError, "server_error", ""}
-	}
-	family := RefreshFamily{ClientID: client.ID, Subject: code.Subject, WorkspaceID: code.WorkspaceID, Resource: code.Resource, Scopes: code.Scopes, CodeHash: code.Hash}
-	if _, err := s.cfg.Store.CreateFamily(r.Context(), family, RefreshToken{Hash: hashSecret(refresh), IssuedAt: now, ExpiresAt: now.Add(s.cfg.RefreshTTL)}); err != nil {
-		return tokenResponse{}, &grantError{http.StatusServiceUnavailable, "temporarily_unavailable", ""}
 	}
 	return s.tokenResponse(access, refresh, code.Scopes), nil
 }

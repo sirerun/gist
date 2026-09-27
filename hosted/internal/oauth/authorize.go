@@ -54,7 +54,7 @@ func (s *Server) handleAuthorize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	redirectURI := q.Get("redirect_uri")
-	if redirectURI == "" || !contains(client.RedirectURIs, redirectURI) {
+	if redirectURI == "" || !redirectRegistered(client.RedirectURIs, redirectURI) {
 		s.errorPage(w, http.StatusBadRequest, "The redirect URI is not registered for this client.")
 		return
 	}

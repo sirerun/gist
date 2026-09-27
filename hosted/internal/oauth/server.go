@@ -87,14 +87,14 @@ type Store interface {
 	CreateClient(ctx context.Context, c Client) error
 	GetClient(ctx context.Context, clientID string) (Client, error)
 	SaveCode(ctx context.Context, code AuthCode) error
-	// RedeemCode atomically consumes a code. check runs on the locked row; if
-	// it fails the code stays unconsumed and its error is returned. A code
-	// that was already consumed returns ErrGrantReused after every refresh
-	// family issued from it has been revoked.
-	RedeemCode(ctx context.Context, workspaceID string, hash []byte, check func(AuthCode) error) (AuthCode, error)
-	// CreateFamily stores a new refresh family with its first token and
-	// returns the family ID.
-	CreateFamily(ctx context.Context, f RefreshFamily, first RefreshToken) (string, error)
+	// RedeemCode atomically consumes a code and, when check passes, opens
+	// its refresh family with first as the family's first token, all in one
+	// transaction. It returns the code and the new family ID. check runs on
+	// the locked row; if it fails the code is still consumed (a code that
+	// was presented wrongly can never be redeemed) and check's error is
+	// returned. A code that was already consumed returns ErrGrantReused
+	// after every refresh family issued from it has been revoked.
+	RedeemCode(ctx context.Context, workspaceID string, hash []byte, check func(AuthCode) error, first RefreshToken) (AuthCode, string, error)
 	// RotateRefresh atomically consumes one refresh token and stores next in
 	// the same family. check runs on the family before anything changes. A
 	// token that was already consumed revokes the whole family and returns
@@ -142,7 +142,9 @@ type Config struct {
 	Keys            KeySource
 	Clock           identity.Clock
 	// Secret keys the HMAC that protects consent requests and CSRF tokens.
-	// A random per-process secret is generated when it is empty.
+	// It is required (at least 32 bytes) and must be the same on every
+	// replica and across restarts, or a consent page rendered by one
+	// process is rejected by the next.
 	Secret []byte
 	// LoginURL, when set, receives unauthenticated authorize requests with a
 	// return_to parameter. Without it the server answers 401.
@@ -218,12 +220,6 @@ func New(cfg Config) (*Server, error) {
 		cfg.MaxBodyBytes = defaultMaxBody
 	}
 	secret := append([]byte(nil), cfg.Secret...)
-	if len(secret) == 0 {
-		secret = make([]byte, 32)
-		if _, err := rand.Read(secret); err != nil {
-			return nil, fmt.Errorf("oauth: generate secret: %w", err)
-		}
-	}
 	if len(secret) < 32 {
 		return nil, errors.New("oauth: secret must be at least 32 bytes")
 	}

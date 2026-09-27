@@ -167,12 +167,12 @@ func (s *memStore) SaveCode(_ context.Context, c oauth.AuthCode) error {
 	return nil
 }
 
-func (s *memStore) RedeemCode(_ context.Context, ws string, hash []byte, check func(oauth.AuthCode) error) (oauth.AuthCode, error) {
+func (s *memStore) RedeemCode(_ context.Context, ws string, hash []byte, check func(oauth.AuthCode) error, first oauth.RefreshToken) (oauth.AuthCode, string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	c, ok := s.codes[hkey(hash)]
 	if !ok || c.code.WorkspaceID != ws {
-		return oauth.AuthCode{}, oauth.ErrNotFound
+		return oauth.AuthCode{}, "", oauth.ErrNotFound
 	}
 	if c.consumed {
 		for _, f := range s.families {
@@ -180,23 +180,31 @@ func (s *memStore) RedeemCode(_ context.Context, ws string, hash []byte, check f
 				f.revoked = true
 			}
 		}
-		return oauth.AuthCode{}, oauth.ErrGrantReused
-	}
-	if err := check(c.code); err != nil {
-		return oauth.AuthCode{}, err
+		return oauth.AuthCode{}, "", oauth.ErrGrantReused
 	}
 	c.consumed = true
-	return c.code, nil
-}
-
-func (s *memStore) CreateFamily(_ context.Context, f oauth.RefreshFamily, first oauth.RefreshToken) (string, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	if err := check(c.code); err != nil {
+		return oauth.AuthCode{}, "", err
+	}
 	s.seq++
-	f.ID = fmt.Sprintf("fam-%d", s.seq)
+	f := oauth.RefreshFamily{ID: fmt.Sprintf("fam-%d", s.seq), ClientID: c.code.ClientID, Subject: c.code.Subject, WorkspaceID: c.code.WorkspaceID, Resource: c.code.Resource, Scopes: c.code.Scopes, CodeHash: c.code.Hash}
 	s.families[f.ID] = &storedFamily{family: f}
 	s.tokens[hkey(first.Hash)] = &storedRefresh{token: first, familyID: f.ID}
-	return f.ID, nil
+	return c.code, f.ID, nil
+}
+
+// familiesFrom reports, for each family issued from a code, whether it is
+// revoked.
+func (s *memStore) familiesFrom(codeHash []byte) []bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var out []bool
+	for _, f := range s.families {
+		if bytes.Equal(f.family.CodeHash, codeHash) {
+			out = append(out, f.revoked)
+		}
+	}
+	return out
 }
 
 func (s *memStore) RotateRefresh(_ context.Context, ws string, hash []byte, check func(oauth.RefreshFamily, oauth.RefreshToken) error, next oauth.RefreshToken) (oauth.RefreshFamily, error) {
@@ -275,7 +283,26 @@ type harness struct {
 	identities *memIdentities
 	sessions   *oauth.CookieSessions
 	clock      *fakeClock
-	http       *http.Client
+	// beforeMint, when set, runs inside the token endpoint after the code
+	// is redeemed and before the access token is minted.
+	beforeMint    func()
+	cfg           oauth.Config
+	consentSecret []byte
+	http          *http.Client
+}
+
+// hookMinter lets a test pause the token endpoint between redemption and
+// minting, the window a concurrent code replay would land in.
+type hookMinter struct {
+	h     *harness
+	inner oauth.AccessMinter
+}
+
+func (m hookMinter) MintAccess(ctx context.Context, resource string, req identity.WorkloadRequest) (oauth.AccessToken, error) {
+	if m.h.beforeMint != nil {
+		m.h.beforeMint()
+	}
+	return m.inner.MintAccess(ctx, resource, req)
 }
 
 func newHarness(t *testing.T) *harness {
@@ -306,17 +333,21 @@ func newHarness(t *testing.T) *harness {
 	if err != nil {
 		t.Fatal(err)
 	}
-	h.as, err = oauth.New(oauth.Config{
+	h.consentSecret = make([]byte, 32)
+	_, _ = rand.Read(h.consentSecret)
+	h.cfg = oauth.Config{
 		Issuer:          h.origin,
 		Resources:       []string{h.origin, resourceB},
 		ScopesSupported: []string{"catalog:read", "catalog:publish"},
 		Store:           h.store,
-		Minter:          oauth.IssuerMinter{Issuers: map[string]*identity.WorkloadIssuer{h.origin: issuerA, resourceB: issuerB}, Record: h.identities.record},
+		Minter:          hookMinter{h: h, inner: oauth.IssuerMinter{Issuers: map[string]*identity.WorkloadIssuer{h.origin: issuerA, resourceB: issuerB}, Record: h.identities.record}},
 		Policy:          h.policy,
 		Sessions:        h.sessions,
 		Keys:            keys,
 		Clock:           clock,
-	})
+		Secret:          h.consentSecret,
+	}
+	h.as, err = oauth.New(h.cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -615,7 +646,11 @@ func TestDynamicClientRegistration(t *testing.T) {
 		code string
 	}{
 		{"http redirect", map[string]any{"redirect_uris": []string{"http://claude.example/cb"}}, "invalid_redirect_uri"},
-		{"loopback http redirect", map[string]any{"redirect_uris": []string{"http://127.0.0.1:8080/cb"}}, "invalid_redirect_uri"},
+		{"localhost http redirect", map[string]any{"redirect_uris": []string{"http://localhost:8080/cb"}}, "invalid_redirect_uri"},
+		{"other loopback address", map[string]any{"redirect_uris": []string{"http://127.0.0.2:8080/cb"}}, "invalid_redirect_uri"},
+		{"loopback port zero", map[string]any{"redirect_uris": []string{"http://127.0.0.1:0/cb"}}, "invalid_redirect_uri"},
+		{"loopback empty port", map[string]any{"redirect_uris": []string{"http://127.0.0.1:/cb"}}, "invalid_redirect_uri"},
+		{"mapped loopback", map[string]any{"redirect_uris": []string{"http://[::ffff:127.0.0.1]:8080/cb"}}, "invalid_redirect_uri"},
 		{"custom scheme", map[string]any{"redirect_uris": []string{"myapp://cb"}}, "invalid_redirect_uri"},
 		{"fragment", map[string]any{"redirect_uris": []string{"https://claude.example/cb#x"}}, "invalid_redirect_uri"},
 		{"relative", map[string]any{"redirect_uris": []string{"/cb"}}, "invalid_redirect_uri"},
@@ -637,6 +672,73 @@ func TestDynamicClientRegistration(t *testing.T) {
 }
 
 // ---- checklist row 3: authorization code + PKCE + consent ----------------
+
+// Native apps register a loopback http redirect and bind an ephemeral port
+// per request (OAuth 2.1, RFC 8252 section 7.3). Registration accepts
+// http://127.0.0.1 and http://[::1] only; authorize matches them on any
+// port; the token request must repeat the exact URI used at authorize.
+func TestLoopbackRedirectForNativeApps(t *testing.T) {
+	h := newHarness(t)
+	for _, tc := range []struct{ registered, requested string }{
+		{"http://127.0.0.1/cb", "http://127.0.0.1:53124/cb"},
+		{"http://127.0.0.1:8080/cb", "http://127.0.0.1:61000/cb"},
+		{"http://[::1]:9000/cb", "http://[::1]:53125/cb"},
+		{"http://[::1]/cb", "http://[::1]/cb"},
+	} {
+		status, m := h.register(map[string]any{"redirect_uris": []string{tc.registered}, "client_name": "Native"})
+		if status != http.StatusCreated {
+			t.Fatalf("register %s: %d %v", tc.registered, status, m)
+		}
+		clientID := m["client_id"].(string)
+		verifier, challenge := pkce()
+		cookie := h.session("alice", "ws-a")
+		code := h.code(authReq{clientID: clientID, redirect: tc.requested, challenge: challenge, resource: h.origin, scope: "catalog:read", state: "s"}, cookie, "ws-a")
+		if status, m := h.exchange(clientID, code, tc.registered+"x", verifier); status != http.StatusBadRequest || m["error"] != "invalid_grant" {
+			t.Fatalf("%s: token redirect differing from authorize: %d %v", tc.requested, status, m)
+		}
+		code = h.code(authReq{clientID: clientID, redirect: tc.requested, challenge: challenge, resource: h.origin, scope: "catalog:read", state: "s"}, cookie, "ws-a")
+		if status, m := h.exchange(clientID, code, tc.requested, verifier); status != http.StatusOK {
+			t.Fatalf("%s: exchange: %d %v", tc.requested, status, m)
+		}
+		// Only the port is free: address, scheme, path and query must match.
+		base, _ := url.Parse(tc.requested)
+		host := base.Hostname()
+		if strings.Contains(host, ":") {
+			host = "[" + host + "]"
+		}
+		port := ""
+		if base.Port() != "" {
+			port = ":" + base.Port()
+		}
+		for _, bad := range []string{
+			"http://localhost" + port + "/cb",
+			"http://127.0.0.2" + port + "/cb",
+			"https://" + host + port + "/cb",
+			"http://" + host + port + "/other",
+			"http://" + host + port + "/cb?x=1",
+			"http://" + otherLoopback(host) + port + "/cb",
+		} {
+			resp, _ := h.authorize(authReq{clientID: clientID, redirect: bad, challenge: challenge, resource: h.origin, scope: "catalog:read", state: "s"}, cookie)
+			if resp.StatusCode != http.StatusBadRequest || resp.Header.Get("Location") != "" {
+				t.Fatalf("registered %s, requested %s: %d location=%q", tc.registered, bad, resp.StatusCode, resp.Header.Get("Location"))
+			}
+		}
+	}
+	// A plain https client gains no port freedom.
+	clientID := h.client("https://connector.example/cb", "")
+	_, challenge := pkce()
+	resp, _ := h.authorize(authReq{clientID: clientID, redirect: "https://connector.example:8443/cb", challenge: challenge, resource: h.origin, scope: "catalog:read", state: "s"}, h.session("alice", "ws-a"))
+	if resp.StatusCode != http.StatusBadRequest || resp.Header.Get("Location") != "" {
+		t.Fatalf("https redirect on another port: %d %q", resp.StatusCode, resp.Header.Get("Location"))
+	}
+}
+
+func otherLoopback(host string) string {
+	if host == "127.0.0.1" {
+		return "[::1]"
+	}
+	return "127.0.0.1"
+}
 
 func TestAuthorizationCodeFlowIssuesBoundToken(t *testing.T) {
 	h := newHarness(t)
@@ -665,7 +767,7 @@ func TestAuthorizationCodeFlowIssuesBoundToken(t *testing.T) {
 		t.Fatal("store holds a raw code or refresh token")
 	}
 	sum := sha256.Sum256([]byte(code))
-	if _, err := h.store.RedeemCode(context.Background(), "ws-a", sum[:], func(oauth.AuthCode) error { return nil }); !errors.Is(err, oauth.ErrGrantReused) {
+	if _, _, err := h.store.RedeemCode(context.Background(), "ws-a", sum[:], func(oauth.AuthCode) error { return nil }, oauth.RefreshToken{Hash: []byte("probe")}); !errors.Is(err, oauth.ErrGrantReused) {
 		t.Fatalf("code is not stored as its SHA-256 hash: %v", err)
 	}
 }
@@ -702,10 +804,9 @@ func TestPKCEIsS256OnlyAndRequired(t *testing.T) {
 	wantError(t, status, m, 400, "invalid_grant")
 	status, m = h.token(url.Values{"grant_type": {"authorization_code"}, "client_id": {clientID}, "code": {code}, "redirect_uri": {redirect}})
 	wantError(t, status, m, 400, "invalid_request")
-	// A failed verifier does not burn the code for the real client.
-	if status, m := h.exchange(clientID, code, redirect, verifier); status != http.StatusOK {
-		t.Fatalf("legitimate exchange after failed attempt: %d %v", status, m)
-	}
+	// A wrong verifier burns the code: the correct verifier now fails too.
+	status, m = h.exchange(clientID, code, redirect, verifier)
+	wantError(t, status, m, 400, "invalid_grant")
 }
 
 func TestStolenCodeAndReplay(t *testing.T) {
@@ -716,16 +817,20 @@ func TestStolenCodeAndReplay(t *testing.T) {
 	verifier, challenge := pkce()
 	cookie := h.session("alice", "ws-a")
 	code := h.code(authReq{clientID: victim, redirect: redirect, challenge: challenge, resource: h.origin, scope: "catalog:read", state: "s"}, cookie, "ws-a")
+	fresh := func() string {
+		return h.code(authReq{clientID: victim, redirect: redirect, challenge: challenge, resource: h.origin, scope: "catalog:read", state: "s"}, cookie, "ws-a")
+	}
 	// The attacker holds the code but is a different client ...
-	status, m := h.exchange(attacker, code, "https://attacker.example/cb", verifier)
+	status, m := h.exchange(attacker, fresh(), "https://attacker.example/cb", verifier)
 	wantError(t, status, m, 400, "invalid_grant")
-	status, m = h.exchange(attacker, code, redirect, verifier)
+	status, m = h.exchange(attacker, fresh(), redirect, verifier)
 	wantError(t, status, m, 400, "invalid_grant")
 	// ... or lacks the verifier.
 	wrong, _ := pkce()
-	status, m = h.exchange(victim, code, redirect, wrong)
+	status, m = h.exchange(victim, fresh(), redirect, wrong)
 	wantError(t, status, m, 400, "invalid_grant")
-	// Forged or foreign-workspace codes are unknown.
+	// Forged or foreign-workspace codes are unknown, and do not touch the
+	// real code.
 	status, m = h.exchange(victim, strings.Replace(code, strings.Split(code, ".")[1], base64.RawURLEncoding.EncodeToString([]byte("ws-b")), 1), redirect, verifier)
 	wantError(t, status, m, 400, "invalid_grant")
 	status, m = h.exchange(victim, code, redirect, verifier)
@@ -768,12 +873,89 @@ func TestRedirectMismatch(t *testing.T) {
 		t.Fatalf("unknown client: %d %q", resp.StatusCode, resp.Header.Get("Location"))
 	}
 	code := h.code(authReq{clientID: clientID, redirect: redirect, challenge: challenge, resource: h.origin, scope: "catalog:read", state: "s"}, cookie, "ws-a")
-	// Redeeming with a different (even registered) redirect URI fails.
+	// Redeeming with a different (even registered) redirect URI fails, and
+	// burns the code.
 	status, m := h.exchange(clientID, code, redirect+"/alt", verifier)
 	wantError(t, status, m, 400, "invalid_grant")
+	status, m = h.exchange(clientID, code, redirect, verifier)
+	wantError(t, status, m, 400, "invalid_grant")
+	code = h.code(authReq{clientID: clientID, redirect: redirect, challenge: challenge, resource: h.origin, scope: "catalog:read", state: "s"}, cookie, "ws-a")
 	if status, m := h.exchange(clientID, code, redirect, verifier); status != http.StatusOK {
 		t.Fatalf("exact redirect exchange: %d %v", status, m)
 	}
+}
+
+// A failed redemption of any kind (wrong verifier, client or redirect URI)
+// invalidates the code for every later attempt, and issues no grant.
+func TestFailedRedemptionInvalidatesCode(t *testing.T) {
+	h := newHarness(t)
+	redirect := "https://connector.example/cb"
+	clientID := h.client(redirect, "")
+	other := h.client(redirect, "")
+	verifier, challenge := pkce()
+	cookie := h.session("alice", "ws-a")
+	wrong, _ := pkce()
+	attempts := map[string]func(code string) (int, map[string]any){
+		"verifier": func(code string) (int, map[string]any) { return h.exchange(clientID, code, redirect, wrong) },
+		"client":   func(code string) (int, map[string]any) { return h.exchange(other, code, redirect, verifier) },
+		"redirect": func(code string) (int, map[string]any) { return h.exchange(clientID, code, redirect+"/x", verifier) },
+	}
+	for name, attempt := range attempts {
+		code := h.code(authReq{clientID: clientID, redirect: redirect, challenge: challenge, resource: h.origin, scope: "catalog:read", state: "s"}, cookie, "ws-a")
+		status, m := attempt(code)
+		wantError(t, status, m, 400, "invalid_grant")
+		status, m = h.exchange(clientID, code, redirect, verifier)
+		if status != http.StatusBadRequest || m["error"] != "invalid_grant" {
+			t.Fatalf("%s: correct exchange after failed attempt = %d %v, want invalid_grant", name, status, m)
+		}
+		sum := sha256.Sum256([]byte(code))
+		if fams := h.store.familiesFrom(sum[:]); len(fams) != 0 {
+			t.Fatalf("%s: failed redemption created %d families", name, len(fams))
+		}
+	}
+}
+
+// A replay that lands after the first redemption commits but before the
+// first redeemer's response is written must still revoke the family that
+// redeemer receives. The first exchange is paused just before minting.
+func TestCodeReplayDuringExchangeRevokesItsFamily(t *testing.T) {
+	h := newHarness(t)
+	redirect := "https://connector.example/cb"
+	clientID := h.client(redirect, "")
+	verifier, challenge := pkce()
+	cookie := h.session("alice", "ws-a")
+	code := h.code(authReq{clientID: clientID, redirect: redirect, challenge: challenge, resource: h.origin, scope: "catalog:read", state: "s"}, cookie, "ws-a")
+	paused, release := make(chan struct{}), make(chan struct{})
+	var once sync.Once
+	h.beforeMint = func() {
+		once.Do(func() {
+			close(paused)
+			<-release
+		})
+	}
+	type result struct {
+		status int
+		body   map[string]any
+	}
+	first := make(chan result, 1)
+	go func() {
+		status, m := h.exchange(clientID, code, redirect, verifier)
+		first <- result{status, m}
+	}()
+	<-paused
+	status, m := h.exchange(clientID, code, redirect, verifier)
+	wantError(t, status, m, 400, "invalid_grant")
+	close(release)
+	r := <-first
+	if r.status != http.StatusOK {
+		t.Fatalf("first exchange: %d %v", r.status, r.body)
+	}
+	sum := sha256.Sum256([]byte(code))
+	if fams := h.store.familiesFrom(sum[:]); len(fams) != 1 || !fams[0] {
+		t.Fatalf("families from replayed code (revoked flags) = %v, want one revoked", fams)
+	}
+	status, m = h.refresh(clientID, r.body["refresh_token"].(string), nil)
+	wantError(t, status, m, 400, "invalid_grant")
 }
 
 func TestConsentDeniedIssuesNothing(t *testing.T) {
@@ -800,6 +982,51 @@ func TestConsentDeniedIssuesNothing(t *testing.T) {
 	}
 	if h.store.codeCount() != 0 {
 		t.Fatal("denied consent created a code")
+	}
+}
+
+// A consent page rendered by one replica is accepted by another that shares
+// the configured secret, and rejected by one that does not. A server without
+// a secret of at least 32 bytes does not start.
+func TestConsentSecretIsSharedAcrossReplicas(t *testing.T) {
+	for _, bad := range [][]byte{nil, make([]byte, 31)} {
+		cfg := newHarness(t).cfg
+		cfg.Secret = bad
+		if _, err := oauth.New(cfg); err == nil {
+			t.Fatalf("secret of %d bytes: want error", len(bad))
+		}
+	}
+	for _, tc := range []struct {
+		name   string
+		shared bool
+	}{{"shared secret", true}, {"different secret", false}} {
+		t.Run(tc.name, func(t *testing.T) {
+			h := newHarness(t)
+			redirect := "https://connector.example/cb"
+			clientID := h.client(redirect, "")
+			_, challenge := pkce()
+			cookie := h.session("alice", "ws-a")
+			resp, body := h.authorize(authReq{clientID: clientID, redirect: redirect, challenge: challenge, resource: h.origin, scope: "catalog:read", state: "s"}, cookie)
+			if resp.StatusCode != http.StatusOK {
+				t.Fatalf("authorize: %d %s", resp.StatusCode, body)
+			}
+			request, csrf := consentFields(t, body)
+			cfg := h.cfg
+			if !tc.shared {
+				cfg.Secret = make([]byte, 32)
+				_, _ = rand.Read(cfg.Secret)
+			}
+			replica, err := oauth.New(cfg)
+			if err != nil {
+				t.Fatal(err)
+			}
+			h.as = replica
+			resp, _ = h.consent(cookie, request, csrf, "ws-a", "allow", nil)
+			code := resp.StatusCode == http.StatusFound && strings.Contains(resp.Header.Get("Location"), "code=")
+			if code != tc.shared {
+				t.Fatalf("replica consent: %d location=%q, want code issued=%v", resp.StatusCode, resp.Header.Get("Location"), tc.shared)
+			}
+		})
 	}
 }
 
@@ -955,6 +1182,23 @@ func TestRefreshRejectsRevokedConsent(t *testing.T) {
 	wantError(t, status, m, 400, "invalid_grant")
 }
 
+// When minting fails because the consent no longer holds, the family the
+// redemption opened is revoked rather than left live.
+func TestExchangeWithLapsedConsentRevokesFamily(t *testing.T) {
+	h := newHarness(t)
+	redirect := "https://connector.example/cb"
+	clientID := h.client(redirect, "")
+	verifier, challenge := pkce()
+	code := h.code(authReq{clientID: clientID, redirect: redirect, challenge: challenge, resource: h.origin, scope: "catalog:read", state: "s"}, h.session("alice", "ws-a"), "ws-a")
+	h.policy.set("alice", "ws-a", []string{"catalog:read"}, false)
+	status, m := h.exchange(clientID, code, redirect, verifier)
+	wantError(t, status, m, 400, "invalid_grant")
+	sum := sha256.Sum256([]byte(code))
+	if fams := h.store.familiesFrom(sum[:]); len(fams) != 1 || !fams[0] {
+		t.Fatalf("families after failed mint (revoked flags) = %v, want one revoked", fams)
+	}
+}
+
 func TestRefreshExpires(t *testing.T) {
 	h := newHarness(t)
 	clientID, _, r0 := h.grant(h.origin, "catalog:read", "ws-a")
@@ -1066,6 +1310,9 @@ func TestResourceIndicatorBindsAudience(t *testing.T) {
 	code := h.code(authReq{clientID: clientID, redirect: redirect, challenge: challenge, resource: h.origin, scope: "catalog:read", state: "s"}, cookie, "ws-a")
 	status, m = h.token(url.Values{"grant_type": {"authorization_code"}, "client_id": {clientID}, "code": {code}, "redirect_uri": {redirect}, "code_verifier": {verifier}, "resource": {resourceB}})
 	wantError(t, status, m, 400, "invalid_target")
+	// The mismatched attempt burned that code; a fresh one naming the same
+	// resource redeems.
+	code = h.code(authReq{clientID: clientID, redirect: redirect, challenge: challenge, resource: h.origin, scope: "catalog:read", state: "s"}, cookie, "ws-a")
 	status, m = h.token(url.Values{"grant_type": {"authorization_code"}, "client_id": {clientID}, "code": {code}, "redirect_uri": {redirect}, "code_verifier": {verifier}, "resource": {h.origin}})
 	if status != http.StatusOK {
 		t.Fatalf("matching resource redemption: %d %v", status, m)

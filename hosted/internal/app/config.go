@@ -33,7 +33,16 @@ type Config struct {
 	// OAuthLoginURL is where the reference authorization server sends a
 	// person who has no session. Optional; without it authorize answers 401.
 	OAuthLoginURL string
+	// OAuthConsentSecret keys the reference authorization server's consent
+	// and session HMACs (GIST_OAUTH_CONSENT_SECRET). Every replica must share
+	// it and it must survive restarts, so it is required configuration of at
+	// least MinOAuthConsentSecretBytes bytes; test compositions pass their
+	// own explicitly.
+	OAuthConsentSecret []byte
 }
+
+// MinOAuthConsentSecretBytes is the shortest accepted OAuth consent secret.
+const MinOAuthConsentSecretBytes = 32
 
 func (c Config) Validate() error {
 	if c.PublicOrigin == "" {
@@ -51,6 +60,9 @@ func (c Config) Validate() error {
 	}
 	if c.ResourceAudience != c.PublicOrigin {
 		return errors.New("app: resource audience must equal public origin")
+	}
+	if len(c.OAuthConsentSecret) < MinOAuthConsentSecretBytes {
+		return fmt.Errorf("app: oauth consent secret (GIST_OAUTH_CONSENT_SECRET) must be at least %d bytes", MinOAuthConsentSecretBytes)
 	}
 	if c.DatabaseURL == "" {
 		return errors.New("app: database URL is required")

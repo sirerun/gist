@@ -101,7 +101,7 @@ func (s *Server) handleConsent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	client, err := s.cfg.Store.GetClient(r.Context(), req.ClientID)
-	if err != nil || !contains(client.RedirectURIs, req.RedirectURI) {
+	if err != nil || !redirectRegistered(client.RedirectURIs, req.RedirectURI) {
 		s.errorPage(w, http.StatusBadRequest, "The client is no longer registered.")
 		return
 	}
