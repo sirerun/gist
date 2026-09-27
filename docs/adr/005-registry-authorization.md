@@ -78,7 +78,7 @@ Lists omit inaccessible entries. A namespace collision is the sole generic
 | Operation | Required policy | Success | Private-denial oracle |
 | --- | --- | --- | --- |
 | `POST /v1/discover` | `catalog:read`; filter before rank/limit | 200 | empty authorized result; no foreign counts/snippets |
-| `GET /v1/skills/{id}/versions` | `catalog:read` | 200 | 404 for foreign/missing skill |
+| `GET /v1/skills/{id}/versions` | `catalog:read`; keyset-paged by `limit` and `cursor` | 200 | 404 for foreign/missing skill |
 | `GET /v1/skills/{id}/versions/{version}` | `catalog:read` | 200 | 404 |
 | `GET /v1/skills/{id}/versions/{version}/package` | `catalog:read` | 200 bytes | 404; no ETag/size leak |
 | `GET /v1/tools/{id}/versions/{version}` | `catalog:read` | 200 | 404 |
@@ -228,5 +228,38 @@ the same as `POST /v1/publish/revocations` (artifact revocation notices).
   return a uniform `404 not_found`.
 - A revoked identity fails authentication on its next request, because
   every request re-checks the stored identity row.
+
+The v1 lock and the gate hashes were refreshed for this amendment.
+
+### 2026-09-26: version paging, artifact revocation, and permanent identity revocation
+
+Three follow-up fixes changed or clarified v1 behavior.
+
+- `GET /v1/skills/{id}/versions` gains optional `limit` and `cursor` query
+  parameters. Before this, every version came back in one response with an
+  empty `next_cursor`, so an artifact with many versions exceeded
+  `max_bytes` and could not be listed. Versions are now keyset-paged in
+  SemVer 2.0.0 precedence order (`1.9.0` before `1.10.0`, a pre-release
+  below its release). `limit` defaults to, and is capped at, the server
+  result cap. `next_cursor` is opaque and is empty on the last page. A
+  malformed cursor or a `limit` below 1 fails with `422 validation_failed`.
+  Postgres stores the order as a generated `version_key` column (migration
+  006).
+- `POST /v1/publish/revocations` used to run the package publisher and
+  insert an ordinary catalog version. It now does what this ADR and ADR 004
+  specify: the publish body's `artifact` is exactly `{kind, id, version}`
+  plus an optional `reason`, naming an existing version in the caller's own
+  workspace. That version moves to the terminal `revoked` state with its
+  revocation time, and one `version_revoked` event is emitted. No catalog
+  version is created. A repeat returns the original notice, and a missing or
+  foreign target is a uniform `404`. After revocation, exact reads, package
+  download, batch-get items, and resolution of that version answer
+  `409 artifact_revoked` after authorization, and version lists and search
+  omit it.
+- Identity revocation (`POST /v1/identities/revoke`) is permanent for its
+  workspace, issuer, and subject. A revoked subject can never be minted
+  again in that workspace, even after its tokens expire. This is the safe
+  default, and there is no reinstatement API. A workload that needs access
+  again gets a new subject.
 
 The v1 lock and the gate hashes were refreshed for this amendment.

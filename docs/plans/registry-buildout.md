@@ -246,7 +246,7 @@ policy covers publication. A publish scope alone is not read authority.
 | Method and route | Boundary test required / source |
 | --- | --- |
 | `POST /v1/discover` | Authorized count/results, no-match, cursor binding, UTF-8 byte budget; section 9. |
-| `GET /v1/skills/{id}/versions` | Lifecycle listing and authorized new-version notice; section 9. |
+| `GET /v1/skills/{id}/versions` | Lifecycle listing and authorized new-version notice; section 9. Keyset-paged by `limit` and `cursor` in SemVer order; amendment in ADR 005. |
 | `GET /v1/skills/{id}/versions/{version}` | Full manifest, detached manifest integrity, exact instructions/references; section 9. |
 | `GET /v1/skills/{id}/versions/{version}/package` | Complete bytes, headers, digest, denied conditional GET; section 9. |
 | `GET /v1/tools/{id}/versions/{version}` | Full executable schema, canonical dialect, loss report; section 9. |
@@ -262,7 +262,7 @@ policy covers publication. A publish scope alone is not read authority.
 | `POST /v1/publish/providers` | 201 stable provider record; no network fetch; choice. |
 | `POST /v1/publish/bindings` | 201 exact-version binding with successful goldens; choice. |
 | `POST /v1/publish/taxonomies` | 201 edition with required attribution; choice. |
-| `POST /v1/publish/revocations` | 201 immutable revocation notice and event; repeats return existing notice; choice. |
+| `POST /v1/publish/revocations` | 201 immutable revocation notice and event; repeats return existing notice; choice. Revokes the named version in place and never creates a catalog version; amendment in ADR 005. |
 | `POST /v1/identities/revoke` | 200 revokes a workload identity in the caller's own workspace (`identity:revoke` + maintainer); repeats return 200; missing or foreign is uniform 404. Amendment in ADR 005. |
 | `GET /v1/events` | Authorized ordered notices, bound cursor, retention-gap recovery; section 9. |
 | `POST /v1/artifacts/batch-get` | Exact typed references, bounded complete items and per-item denial, no truncation; choice for section 8. |

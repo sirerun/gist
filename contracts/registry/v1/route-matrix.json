@@ -4,7 +4,7 @@
   "authentication":{"required":true,"read_scope":"catalog:read","publish_scope":"catalog:publish","publish_requires_maintainer_policy":true,"publish_scope_does_not_grant_read":true,"identity_revoke_scope":"identity:revoke","identity_revoke_requires_maintainer_policy":true,"identity_workspace_source":"authenticated principal only"},
   "routes":[
     {"method":"POST","path":"/v1/discover","scope":"catalog:read","success_status":200,"examples":[{"request":{"query":"x","max_bytes":1},"status":200}]},
-    {"method":"GET","path":"/v1/skills/{id}/versions","scope":"catalog:read","success_status":200,"examples":[{"status":200}]},
+    {"method":"GET","path":"/v1/skills/{id}/versions","scope":"catalog:read","success_status":200,"examples":[{"status":200},{"query":{"limit":2},"status":200,"order":"semver","next_cursor":"opaque"},{"status":422,"cursor":"malformed"}]},
     {"method":"GET","path":"/v1/skills/{id}/versions/{version}","scope":"catalog:read","success_status":200,"examples":[{"status":200}]},
     {"method":"GET","path":"/v1/skills/{id}/versions/{version}/package","scope":"catalog:read","success_status":200,"examples":[{"status":200,"content_type":"application/octet-stream"}]},
     {"method":"GET","path":"/v1/tools/{id}/versions/{version}","scope":"catalog:read","success_status":200,"examples":[{"status":200}]},
@@ -20,7 +20,7 @@
     {"method":"POST","path":"/v1/publish/providers","scope":"catalog:publish","requires_maintainer":true,"success_status":201,"examples":[{"status":201,"network_fetch":false}]},
     {"method":"POST","path":"/v1/publish/bindings","scope":"catalog:publish","requires_maintainer":true,"success_status":201,"examples":[{"status":201,"goldens":"passed"}]},
     {"method":"POST","path":"/v1/publish/taxonomies","scope":"catalog:publish","requires_maintainer":true,"success_status":201,"examples":[{"status":201,"attribution":true}]},
-    {"method":"POST","path":"/v1/publish/revocations","scope":"catalog:publish","requires_maintainer":true,"success_status":201,"examples":[{"status":201},{"status":201,"repeat":"existing_notice"}]},
+    {"method":"POST","path":"/v1/publish/revocations","scope":"catalog:publish","requires_maintainer":true,"success_status":201,"examples":[{"request":{"artifact":{"kind":"skill","id":"s","version":"1.0.0"},"max_bytes":4096,"idempotency_key":"k"},"status":201,"catalog_version_created":false},{"status":201,"repeat":"existing_notice"},{"status":404,"foreign":"uniform"}]},
     {"method":"POST","path":"/v1/identities/revoke","scope":"identity:revoke","requires_maintainer":true,"success_status":200,"examples":[{"request":{"issuer":"https://gist.example.com","subject":"workload-123"},"status":200,"revoked":true},{"status":200,"repeat":"idempotent"},{"status":404,"foreign":"uniform"},{"status":422,"body_workspace":"rejected"}]},
     {"method":"GET","path":"/v1/events","scope":"catalog:read","success_status":200,"examples":[{"status":200},{"status":409,"code":"cursor_expired"}]},
     {"method":"POST","path":"/v1/artifacts/batch-get","scope":"catalog:read","success_status":200,"examples":[{"status":200,"items_complete_or_error":true},{"status":413,"aggregate_over_budget":true}]}
