@@ -508,25 +508,25 @@ fidelity: executable
 Acceptance: Q2 freezes complete contracts, validated catalog, ADRs and runtime
 handoffs with every M1 condition in section 15 covered.
 
-- [ ] A1 Settle governance ADR. Owner: A. Est: 90m. kind: agent. owning_lane: A. depends_on: []. delivers: [ADR 004 accepted governance].
+- [x] A1 Settle governance ADR. Owner: A. Est: 90m. kind: agent. owning_lane: A. depends_on: []. delivers: [ADR 004 accepted governance].
   - Files: create `docs/adr/004-registry-governance.md`.
   - Do: materialize the embedded ADR 004, settle each proposed mechanism, and record owner/reviewer roles and alternatives. Cite sections 7/11 instead of duplicating their settled rules.
   - Acceptance: every required section above exists; namespace allocation, conformance disputes, screening, vocabulary classes/sensitivity and private-only trust are decided without an unresolved implementation choice.
   - Verification: `test -s docs/adr/004-registry-governance.md`; review against the ADR 004 checklist above; `git diff --check`.
 
-- [ ] A2 Settle authorization ADR. Owner: A. Est: 90m. kind: agent. owning_lane: A. depends_on: [A1]. delivers: [ADR 005 accepted authorization and route-policy matrix].
+- [x] A2 Settle authorization ADR. Owner: A. Est: 90m. kind: agent. owning_lane: A. depends_on: [A1]. delivers: [ADR 005 accepted authorization and route-policy matrix].
   - Files: create `docs/adr/005-registry-authorization.md`.
   - Do: materialize ADR 005, including the full route matrix above, failure table, TTLs, feed retention/recovery, cache-key fields, token selection and test vectors. Resolve the proposed error additions with C1.
   - Acceptance: every section 12 requirement has a chosen mechanism and falsifiable test; foreign and nonexistent private references share status/body shape; fail-closed behavior and issuer outage policy are explicit.
   - Verification: `test -s docs/adr/005-registry-authorization.md`; trace each section 12 bullet to a named ADR section; `git diff --check`.
 
-- [ ] A3 Settle module and encoding ADR. Owner: A. Est: 90m. kind: agent. owning_lane: A. depends_on: [A2]. delivers: [ADR 006 accepted module and digest mechanics].
+- [x] A3 Settle module and encoding ADR. Owner: A. Est: 90m. kind: agent. owning_lane: A. depends_on: [A2]. delivers: [ADR 006 accepted module and digest mechanics].
   - Files: create `docs/adr/006-hosted-module.md`.
   - Do: settle the embedded ADR 006, including the detached manifest hash, inventory canonical bytes, schema conversion policy and approved dependency versions. Compare nested vs sibling module and record consumer port signatures.
   - Acceptance: no digest self-reference; every required runtime-contract field has a source; root module remains untouched; schema/JOSE dependencies are version-pinned using current official evidence.
   - Verification: `test -s docs/adr/006-hosted-module.md`; manually recompute one documented digest vector independently; `git diff --check`.
 
-- [ ] C1 Enumerate the REST contract. Owner: C. Est: 90m. kind: any. owning_lane: C. depends_on: []. verifies: [UC-002, UC-003, UC-004, UC-005, UC-006, UC-007, UC-008, UC-011].
+- [x] C1 Enumerate the REST contract. Owner: C. Est: 90m. kind: any. owning_lane: C. depends_on: []. verifies: [UC-002, UC-003, UC-004, UC-005, UC-006, UC-007, UC-008, UC-011].
   - Files: create `contracts/registry/v1/openapi.yaml`, `contracts/registry/v1/route-matrix.json`.
   - Do: encode all 20 `/v1` method/path pairs above, statuses, scopes, canonical keys, max-byte semantics, and all eight baseline errors plus the four proposed additions. Mark open A2 choices pending C5, not silently accepted. Define batch results as complete items with per-item errors; aggregate encoded response exceeding budget fails 413.
   - Acceptance: every section 9 row has an operation and positive/negative examples; publish ellipsis is expanded; no execution operation; no taxonomy example-route drift.
@@ -540,7 +540,7 @@ handoffs with every M1 condition in section 15 covered.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/ports)`; `git diff --exit-code -- go.mod go.sum`.
   - acc: [The hosted module compiles independently and the root module dependency files are unchanged.]
 
-- [ ] C3 Encode packages and digest closure. Owner: C. Est: 90m. kind: any. owning_lane: C. depends_on: [C1, C2]. verifies: [UC-002, UC-004, UC-010].
+- [x] C3 Encode packages and digest closure. Owner: C. Est: 90m. kind: any. owning_lane: C. depends_on: [C1, C2]. verifies: [UC-002, UC-004, UC-010].
   - Files: create `contracts/registry/v1/{common,manifest,inventory}.schema.json`, `contracts/registry/v1/fixtures/digest-vectors.json`, `hosted/internal/contract/{package,digest,digest_test}.go`.
   - Do: implement the settled closure/envelope, Agent Skills metadata checks, complete inventory, publication-derived fields with unverified provenance, and immutable version validation. Do not execute scripts. Include changed manifest bytes, missing/extra file, duplicate/path-alias and encoding vectors.
   - Acceptance: valid bytes verify independently; tampering with any payload or detached manifest digest fails; Agent-Skills-only metadata is never guessed as verified.
@@ -554,28 +554,28 @@ handoffs with every M1 condition in section 15 covered.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/contract -run 'TestCompile|TestConversion|TestEffects|TestGolden')`.
   - acc: [A complete execution schema compiles to a runtime contract while every security-constraint-loss fixture is rejected.]
 
-- [ ] C5 Complete wire schemas and freeze error semantics. Owner: C. Est: 90m. kind: any. owning_lane: C. depends_on: [C4, A2]. verifies: [UC-003, UC-004, UC-005, UC-006, UC-007, UC-008, UC-009].
+- [x] C5 Complete wire schemas and freeze error semantics. Owner: C. Est: 90m. kind: any. owning_lane: C. depends_on: [C4, A2]. verifies: [UC-003, UC-004, UC-005, UC-006, UC-007, UC-008, UC-009].
   - Files: create `contracts/registry/v1/{discover,resolve,connection,event,publish,batch-get,error}.schema.json`, `contracts/registry/v1/fixtures/wire-cases.json`, `hosted/internal/contract/{wire,wire_test}.go`; modify `contracts/registry/v1/{openapi.yaml,route-matrix.json}`.
   - Do: finalize C1 against A2, including sizes, aliases-to-exact behavior, connection asserted/verified provenance, required vs optional capabilities, lease expiry, cursor binding and error retryability. Resolve the section 6 per-finding list vs section 8 `requires_gateway` gap by explicitly supporting `requires_gateway` at both finding and aggregate levels; explain this contract interpretation.
   - Acceptance: `ready` implies every required finding ready; no required file/schema truncation; every error has HTTP and MCP representation; runtime-owned connections never force a second consent flow.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/contract -run TestWire)`; `python3 scripts/registry/check.py contracts`.
   - acc: [Wire validation rejects partial-ready resolutions and maps every catalog error to its documented status and body.]
 
-- [ ] C6 Add independent M1 API-contract tests. Owner: C. Est: 90m. kind: any. owning_lane: C. depends_on: [C5, Q0]. verifies: [UC-002, UC-004, UC-005, UC-007].
+- [x] C6 Add independent M1 API-contract tests. Owner: C. Est: 90m. kind: any. owning_lane: C. depends_on: [C5, Q0]. verifies: [UC-002, UC-004, UC-005, UC-007].
   - Files: create `hosted/internal/contract/{http_contract_test,schema_validation_test}.go`, `contracts/registry/v1/fixtures/http-cases.json`.
   - Do: run every positive/negative wire example through the selected schema validator and a test-only HTTP contract server; assert status and body for every operation, bad scope/error shape, 413 and 409. This is specification testing only; T and Q must replace test-double evidence with production-handler evidence later.
   - Acceptance: fixture count is nonzero per route; deleting a required field or weakening a constraint makes the suite fail; no passing verdict based only on parsing JSON.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/contract -count=1)`.
   - acc: [All documented route fixtures are schema-validated and a deliberately invalid required-field fixture fails.]
 
-- [ ] C7 Freeze schemas and shared files. Owner: C. Est: 45m. kind: any. owning_lane: C. depends_on: [C6, A3]. verifies: [infrastructure].
+- [x] C7 Freeze schemas and shared files. Owner: C. Est: 45m. kind: any. owning_lane: C. depends_on: [C6, A3]. verifies: [infrastructure].
   - Files: create `contracts/registry/v1/lock.json`; modify only C-owned files listed in C1-C6 if formatting corrections are necessary.
   - Do: format C Go files, validate OpenAPI/schema references, record hashes of all contract files and shared ports plus hosted dependency versions. Issue a read-only contract handoff to other lanes.
   - Acceptance: full schema inventory exists, lint passes, lock lists every schema and port; changes after freeze require a C-owned amendment and waiting consumers.
   - Verification: `python3 scripts/registry/check.py contracts --freeze-check`; `(cd hosted && GOWORK=off go vet ./internal/contract ./internal/ports)`.
   - acc: [The contract lock covers every schema and shared port and matches their current bytes.]
 
-- [ ] D1 Choose launch providers and first capability families. Owner: D. Est: 90m. kind: agent. owning_lane: D. depends_on: []. delivers: [3-5-provider selection with scored alternatives].
+- [x] D1 Choose launch providers and first capability families. Owner: D. Est: 90m. kind: agent. owning_lane: D. depends_on: []. delivers: [3-5-provider selection with scored alternatives].
   - Files: create `docs/registry/catalog-selection.md`.
   - Do: score candidates for actual early workload demand, license/redistribution, immutable schema capture, safe fixture availability, explicit versions, effect/cost/credential metadata, semantic portability and maintenance burden. Select 3-5 with at least one aggregator (Composio-class is an example), one MCP server and one direct API. Keep aggregator/direct routes to the same service separate. Reject choices requiring gateway execution to prove registry correctness.
   - Acceptance: record selected names, public primary sources, scores, rejected alternatives and capture dates; cover taxonomy seed families `identity`, `communication`, `document`, `payment`, `case`, `approval`, `schedule`, `report`, `record`, `deploy` in a ranked shortlist. Recommend `identity`, `communication`, `document` for initial contracts when demand supports them; do not import every family merely for coverage.
@@ -609,56 +609,56 @@ fidelity: executable
 Acceptance: Q5 observes the hosted registry with workload tokens and one actual
 runtime in sandboxed production workspaces, with existing local behavior intact.
 
-- [ ] B1 Implement authoritative storage and tenancy migrations. Owner: B. Est: 90m per migration/test slice. kind: any. owning_lane: B. depends_on: [Q2]. verifies: [UC-002, UC-007, UC-008, UC-009].
+- [x] B1 Implement authoritative storage and tenancy migrations. Owner: B. Est: 90m per migration/test slice. kind: any. owning_lane: B. depends_on: [Q2]. verifies: [UC-002, UC-007, UC-008, UC-009].
   - Files: create `hosted/migrations/{001_catalog,002_policy,003_identity,004_events}.sql`, `hosted/internal/storage/{postgres,objects,transactions,storage_test}.go`.
   - Do: implement C2 ports for immutable metadata/object references, policies/reservations, workload identities, OAuth codes/refresh families, connection handles, bound cursors/resolutions and transactional event outbox. Configure forced RLS with a non-owner application role and transaction-local context. Use private immutable object keys; downloads remain policy-mediated.
   - Acceptance: two-workspace integration tests reject unscoped reads/writes; rollback exposes neither partial version nor orphan event; connection records cannot contain provider secrets; pooled connections cannot retain prior tenant context.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/storage -tags=integration -count=1)` with Q0's required PostgreSQL/object fixtures.
   - acc: [The application database role cannot read or write another workspace and failed transactions publish no version or event.]
 
-- [ ] B2 Implement package ingestion and review gate. Owner: B. Est: 90m per validation slice. kind: any. owning_lane: B. depends_on: [B1]. verifies: [UC-002, UC-004].
+- [x] B2 Implement package ingestion and review gate. Owner: B. Est: 90m per validation slice. kind: any. owning_lane: B. depends_on: [B1]. verifies: [UC-002, UC-004].
   - Files: create `hosted/internal/packages/{archive,validate,archive_test}.go`, `hosted/internal/publication/{review,publish,publish_test}.go`.
   - Do: consume uploaded bytes or an explicitly selected revision captured by an operator-side process, validate closure/Agent Skills/inventory/limits and screen package text per ADR 004. Reject traversal, absolute paths, links, decompression bombs, missing files and executable hooks. Publish all catalog artifact kinds atomically with review evidence and enqueue indexing.
   - Acceptance: immutable overwrite and unowned namespace return 409; failed review, unverified public distribution and unsafe archives never become visible; archive tests prove no code runs and no URL is fetched.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/packages ./internal/publication -count=1)`.
   - acc: [Unsafe or unreviewed packages are rejected before visibility and a published version cannot change bytes.]
 
-- [ ] B3 Implement exact retrieval and version lifecycle. Owner: B. Est: 90m. kind: any. owning_lane: B. depends_on: [B2]. verifies: [UC-004, UC-007, UC-011].
+- [x] B3 Implement exact retrieval and version lifecycle. Owner: B. Est: 90m. kind: any. owning_lane: B. depends_on: [B2]. verifies: [UC-004, UC-007, UC-011].
   - Files: create `hosted/internal/packages/{retrieve,retrieve_test}.go`, `hosted/internal/storage/{versions,taxonomies,versions_test}.go`.
   - Do: return full immutable manifest envelope, package bytes, tool/capability contract and version list; implement paginated taxonomy data with attribution. Canonicalize mutable aliases before response, never in a resolution. Apply policy before size/digest/ETag responses and enforce max_bytes without truncation.
   - Acceptance: exact retrieval works while indexing is delayed; revoked/private visibility policy follows ADR 005; a denied request never gets 304 or a signed public object URL.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/packages ./internal/storage -run 'TestRetrieve|TestVersions|TestTaxonomy')`.
   - acc: [Pinned package retrieval returns complete verified bytes despite index delay and rejects unauthorized conditional reads.]
 
-- [ ] B4 Implement lifecycle event delivery. Owner: B. Est: 90m. kind: any. owning_lane: B. depends_on: [B3]. verifies: [UC-008].
+- [x] B4 Implement lifecycle event delivery. Owner: B. Est: 90m. kind: any. owning_lane: B. depends_on: [B3]. verifies: [UC-008].
   - Files: create `hosted/internal/events/{outbox,feed,feed_test}.go`.
   - Do: expose the ADR 005 polling feed using transactional publication/revocation events and principal/workspace-bound opaque cursors. Implement retained-event cleanup and explicit gap recovery; duplicates are possible and documented. Do not build webhook delivery in this release.
   - Acceptance: no lost event between committed version and outbox; unauthorized entries never affect returned counts; expired cursors trigger resync, not a silent empty page.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/events -tags=integration -count=1)`.
   - acc: [Committed publication and revocation produce authorized resumable events and an expired cursor requires resynchronization.]
 
-- [ ] B5 Test storage, publication and revocation failure boundaries. Owner: B. Est: 90m. kind: any. owning_lane: B. depends_on: [B4]. verifies: [UC-002, UC-004, UC-007, UC-008].
+- [x] B5 Test storage, publication and revocation failure boundaries. Owner: B. Est: 90m. kind: any. owning_lane: B. depends_on: [B4]. verifies: [UC-002, UC-004, UC-007, UC-008].
   - Files: create `hosted/internal/storage/isolation_test.go`, `hosted/internal/publication/failures_test.go`, `hosted/internal/events/recovery_test.go`.
   - Do: test concurrent same-version publication, transaction crashes, replayed cursors, policy-store outage, index lag, duplicate notices and artifact corruption using real backing stores. Assert no success from unavailable policy or fabricated state.
   - Acceptance: each failure yields the contract outcome and no leak; tests fail when tenant scoping or outbox atomicity is deliberately broken in an isolated test change, then pass after restoration.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/storage ./internal/publication ./internal/events -tags=integration -count=1)`.
   - acc: [Cross-tenant and crash-recovery tests reject leaks and preserve publication-event atomicity.]
 
-- [ ] S1 Implement authorized lexical discovery. Owner: S. Est: 90m per ranking/query slice. kind: any. owning_lane: S. depends_on: [Q2]. verifies: [UC-003, UC-007, UC-011].
+- [x] S1 Implement authorized lexical discovery. Owner: S. Est: 90m per ranking/query slice. kind: any. owning_lane: S. depends_on: [Q2]. verifies: [UC-003, UC-007, UC-011].
   - Files: create `hosted/internal/discovery/{index,search,cache,search_test}.go`.
   - Do: wrap reusable lexical components behind C2 ports; scope sources, vocabulary, queries and cache keys before ranking/limiting. Use deterministic tie-breaks and metadata filters. Keep authoritative revocation filtering on asynchronous index results. Empty/no-match is a successful empty result, never forced similarity.
   - Acceptance: hidden high-scoring candidates alter neither visible results nor counts; UTF-8 serialized output honors max_bytes; pinned retrieval is independent of this index; no shared unscoped local Store.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/discovery -count=1)`.
   - acc: [Discovery ranks only authorized candidates and returns a valid empty result for no-match queries.]
 
-- [ ] S2 Implement complete resolution and connection delegation. Owner: S. Est: 90m per resolver/connection slice. kind: any. owning_lane: S. depends_on: [S1]. verifies: [UC-005, UC-006, UC-008, UC-010].
+- [x] S2 Implement complete resolution and connection delegation. Owner: S. Est: 90m per resolver/connection slice. kind: any. owning_lane: S. depends_on: [S1]. verifies: [UC-005, UC-006, UC-008, UC-010].
   - Files: create `hosted/internal/resolution/{resolve,connections,lease,resolve_test}.go`.
   - Do: evaluate every required capability against exact bindings/runtime requirements; store principal/workspace-bound resolutions and lease. Implement all six findings, explicit selection and trust disclosures. A runtime-owned connection assertion uses its existing lifecycle and remains client-asserted. For runtime-less clients, initiate only through an operator-configured external connection broker port returning a URL/opaque status; validate completion from that broker, never accept a model boolean as proof.
   - Acceptance: no second runtime consent flow; no provider-token custody, provider calls or gateway execution. If no connection broker is configured, connection initiation returns explicit service-unavailable and the capability stays unresolved. `gist_gateway` bindings report `requires_gateway`.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/resolution -count=1)`.
   - acc: [Resolution reports every requirement honestly and distinguishes broker-verified connections from runtime assertions without storing provider credentials.]
 
-- [ ] S3 Test resolver and search authorization regressions. Owner: S. Est: 90m. kind: any. owning_lane: S. depends_on: [S2]. verifies: [UC-003, UC-005, UC-007, UC-008].
+- [x] S3 Test resolver and search authorization regressions. Owner: S. Est: 90m. kind: any. owning_lane: S. depends_on: [S2]. verifies: [UC-003, UC-005, UC-007, UC-008].
   - Files: create `hosted/internal/discovery/isolation_test.go`, `hosted/internal/resolution/policy_test.go`.
   - Do: test all finding aggregates, stale policy generation, swapped subject/workspace, cached revoked bindings, index/policy outages, selection ambiguity and unsupported local execution/filesystem needs.
   - Acceptance: partial resolution never ready; cache hits rerun policy; policy failure never degrades to allow; required metadata cannot be omitted to fit budget.
@@ -672,14 +672,14 @@ runtime in sandboxed production workspaces, with existing local behavior intact.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/identity -run 'TestWorkload|TestPolicy|TestKeys')`.
   - acc: [Only unexpired audience-bound workload tokens with current workspace membership and sufficient scope authorize registry operations.]
 
-- [ ] I2 Add shared auth context and oracle controls. Owner: I. Est: 90m. kind: any. owning_lane: I. depends_on: [I1]. verifies: [UC-007, UC-009].
+- [x] I2 Add shared auth context and oracle controls. Owner: I. Est: 90m. kind: any. owning_lane: I. depends_on: [I1]. verifies: [UC-007, UC-009].
   - Files: create `hosted/internal/identity/{context,authorize,authorize_test}.go`.
   - Do: supply the shared principal context consumed by both transports and all cache/store calls; implement ADR 005 route decisions, uniform private denial and no client-supplied tenant authority. Emit safe correlated audit decisions without tokens/credentials.
   - Acceptance: same principal requesting same operation via REST or MCP yields same policy decision; membership revoked during a token lifetime is denied; denied existing/missing resources share a response shape.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/identity -run TestAuthorize)`.
   - acc: [Authorization ignores caller-supplied workspace IDs and makes identical private-denial decisions for both transports.]
 
-- [ ] I3 Test workload revocation and outage cases. Owner: I. Est: 60m. kind: any. owning_lane: I. depends_on: [I2]. verifies: [UC-007, UC-008, UC-009].
+- [x] I3 Test workload revocation and outage cases. Owner: I. Est: 60m. kind: any. owning_lane: I. depends_on: [I2]. verifies: [UC-007, UC-008, UC-009].
   - Files: create `hosted/internal/identity/revocation_test.go`.
   - Do: exercise token/key rotation, unknown keys, unavailable policy/issuer checks, scope escalation, replay at another audience and two-workspace selection. Use controllable clocks instead of sleeps.
   - Acceptance: no acceptance beyond key/lease/token freshness bounds; outage matrix exactly matches ADR 005.
@@ -693,14 +693,14 @@ runtime in sandboxed production workspaces, with existing local behavior intact.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/rest -count=1)`.
   - acc: [Every frozen REST operation responds through shared service ports with tested success and denial envelopes.]
 
-- [ ] T2 Implement negotiated remote MCP. Owner: T. Est: 90m per negotiation/tool slice. kind: any. owning_lane: T. depends_on: [T1, R1]. verifies: [UC-003, UC-004, UC-005, UC-006, UC-009].
+- [x] T2 Implement negotiated remote MCP. Owner: T. Est: 90m per negotiation/tool slice. kind: any. owning_lane: T. depends_on: [T1, R1]. verifies: [UC-003, UC-004, UC-005, UC-006, UC-009].
   - Files: create `hosted/internal/remotemcp/{transport,negotiate,tools,errors,transport_test}.go`.
   - Do: implement Streamable HTTP and pin supported revisions using current official spec and R1's target builds. Offer only `gist_discover`, `gist_get`, `gist_resolve`, `gist_connect`; `gist_get` supports the frozen bounded batch option. Separate HTTP authentication challenges from negotiated tool errors. Validate origins, sessions, body sizes, connection/rate limits and reject unsupported versions.
   - Acceptance: initialize/list/call/reconnect tests hit real HTTP; tools produce the same service results as REST; schema subset losses disclosed; local stdio initialization untouched; no tool-result-as-install or native hydration claim.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/remotemcp -count=1)`.
   - acc: [Remote MCP negotiates a supported revision and serves all four catalog tools with explicit unsupported-version errors.]
 
-- [ ] T3 Add cross-transport route/error parity tests. Owner: T. Est: 90m. kind: any. owning_lane: T. depends_on: [T2]. verifies: [UC-003, UC-004, UC-005, UC-007, UC-009].
+- [x] T3 Add cross-transport route/error parity tests. Owner: T. Est: 90m. kind: any. owning_lane: T. depends_on: [T2]. verifies: [UC-003, UC-004, UC-005, UC-007, UC-009].
   - Files: create `hosted/internal/rest/contract_test.go`, `hosted/internal/remotemcp/parity_test.go`.
   - Do: replay C6's frozen boundary cases against production handlers, comparing application outcomes across transports. Cover conditional reads, expired cursors/resolutions, malformed request IDs, scope denial, oversize required content and throttling.
   - Acceptance: no operation/error omitted; test-only contract server evidence is superseded by actual handlers; protocol errors use the correct layer.
@@ -714,20 +714,20 @@ fidelity: executable
 Acceptance: R3 supplies M2a runtime evidence; R4 supplies M2b connector evidence;
 R5 supplies the complete M3 client/archetype matrix.
 
-- [ ] R1 Map runtime contracts and identify clients. Owner: R. Est: 90m, including 30m spike. kind: agent. owning_lane: R. depends_on: []. delivers: [runtime handoff contracts and named-build target matrix].
+- [x] R1 Map runtime contracts and identify clients. Owner: R. Est: 90m, including 30m spike. kind: agent. owning_lane: R. depends_on: []. delivers: [runtime handoff contracts and named-build target matrix].
   - Files: create `docs/registry/runtime-contracts.md`, `docs/registry/clients/{targets,grok-bot-spike}.md`.
   - Do: map section 13's two archetypes to fields, call sequence, error cases and evidence receipts. Policy-gated runtime: exact tool URI/version grants, parent bounds, spending policy separate, source references, dispatch recheck and event consumption. Import runtime: fetch/verify then existing upload/validate/evaluate/bind lifecycle, explicit update, no second install path. Both retain existing protected-effects machinery.
   - Acceptance: name actual public product/build targets for Codex, Claude Code, Cursor, Claude.ai and selected runtime products; choose one policy-gated runtime for M2a. Time-box Grok Bot vendor/transport/OAuth identification to 30 minutes; record unsupported/unidentified and exclude from acceptance unless evidence qualifies it. No bridge implementation assumed.
   - Verification: `test -s docs/registry/runtime-contracts.md`; `test -s docs/registry/clients/grok-bot-spike.md`; review every section 13 requirement against a handoff row.
 
-- [ ] R2 Build runtime contract probes and installation fixtures. Owner: R. Est: 90m per archetype. kind: any. owning_lane: R. depends_on: [Q2, R1]. verifies: [UC-004, UC-005, UC-008, UC-010].
+- [x] R2 Build runtime contract probes and installation fixtures. Owner: R. Est: 90m per archetype. kind: any. owning_lane: R. depends_on: [Q2, R1]. verifies: [UC-004, UC-005, UC-008, UC-010].
   - Files: create `hosted/acceptance/runtimes/{policy_test,import_test,connections_test,events_test}.go`.
   - Do: create Gist-side probes for external runtime adapters, consuming receipts X-R1/X-R2 when available. Verify exact URIs/versions, no wildcard taxonomy grants, parent/spend separation, complete package verification, no silent update, runtime-owned connection challenge reuse, submission-key/timeout/effect-class mapping and revocation dispatch recheck. Do not implement the external adapters here.
   - Acceptance: probes reject bypassing either runtime's existing lifecycle or protected-effects engine; offline contract fixtures are labeled contract-only, never live runtime acceptance.
   - Verification: `(cd hosted && GOWORK=off go test ./acceptance/runtimes -run TestContract -count=1)`.
   - acc: [Runtime contract probes detect lost package assets, widened tool grants and bypassed connection or protected-effects lifecycles.]
 
-- [ ] R3 Exercise the M2a runtime and coding clients. Owner: R. Est: 90m. kind: any. owning_lane: R. depends_on: [R2, Q3, X-R1]. verifies: [UC-009, UC-010, UC-004].
+- [x] R3 Exercise the M2a runtime and coding clients. Owner: R. Est: 90m. kind: any. owning_lane: R. depends_on: [R2, Q3, X-R1]. verifies: [UC-009, UC-010, UC-004].
   - Files: create `hosted/acceptance/clients/workload_test.go`, `docs/registry/clients/m2a.json`.
   - Do: prepare executable remote-MCP acceptance for pinned Codex/Claude Code builds and the selected policy-gated runtime with short-lived workload credentials; Q5 runs it against the deployed service. Record remote vs explicit local bridge and schema subset, token expiry, exact retrieval, errors and revocation evidence.
   - Acceptance: tests require configured targets and fail if absent; actual client/runtime build evidence is required at Q5, not just a generic HTTP client. No global client configuration changes. Production-observed completion is inherited from Q5.
@@ -755,14 +755,14 @@ fidelity: executable
 Acceptance: preview OAuth/isolation gates precede production, every deployment
 uses IaC/release workflows, and delegated issuance passes the entire checklist.
 
-- [ ] O1 Build M2a IaC and release workflow. Owner: O. Est: 90m per resource/workflow slice. kind: any. owning_lane: O. depends_on: [A4]. verifies: [infrastructure, UC-009].
+- [x] O1 Build M2a IaC and release workflow. Owner: O. Est: 90m per resource/workflow slice. kind: any. owning_lane: O. depends_on: [A4]. verifies: [infrastructure, UC-009].
   - Files: create `deploy/registry/{Pulumi.yaml,requirements.txt,__main__.py,Containerfile,config.example.yaml}`, `.github/workflows/registry-{ci,release}.yml`, `docs/registry/operations.md`.
   - Do: define ADR 007's Cloud Run/PostgreSQL/private-object-store surface through Pulumi with self-hosted state, or record a reviewed A-owned ADR amendment before changing surface. Add workload-identity provisioning, secret references, least-privilege service role, database migration job, readiness/liveness, logs/request correlation, latency/error metrics, backups/restore and rollback. Build images with Podman. Set explicit initial package/expansion/request/catalog/concurrency limits, byte budgets and SLOs from curated baseline; record configuration, not magic constants.
   - Acceptance: target-stack preview and tests prove no public object access or embedded secrets; CI runs both modules independently; release workflow performs migrations/deploy/live checks and emits immutable evidence. No production claim yet; Q5 must deploy and verify.
   - Verification: `python3 scripts/registry/check.py iac`; `pulumi preview --cwd deploy/registry --stack production --diff` through reviewed CI with deployment configuration.
   - acc: [The registry IaC preview defines an isolated service with private artifact storage and a release workflow that requires live verification.]
 
-- [ ] A4 Settle deployment origin, issuer and preview ADR. Owner: A. Est: 90m. kind: agent. owning_lane: A. depends_on: [Q2]. delivers: [ADR 007 accepted before deployment and M2b].
+- [x] A4 Settle deployment origin, issuer and preview ADR. Owner: A. Est: 90m. kind: agent. owning_lane: A. depends_on: [Q2]. delivers: [ADR 007 accepted before deployment and M2b].
   - Files: create `docs/adr/007-registry-deployment.md`.
   - Do: materialize the embedded ADR 007 using the curated-catalog baseline and the external interface contracts (receipts may still be pending). Choose built-in reference AS as default before M2a and leave delegation disabled until I5 passes. Resolve actual configurable final origin, resource audience, redirects/migration, reference-AS ownership, key storage, human login/session integration and preview teardown owner. Recommend a deployment-supplied authenticated identity session with explicit membership checks, CSRF protection and session binding; the reference AS owns consent and grants, not a new password database.
   - Acceptance: no unspecified domain/issuer/session mechanism remains when I4 starts; section 10 checklist is present; public documentation uses configuration variable names rather than private deployment values; residency/subprocessor disclosure recorded.
@@ -830,7 +830,7 @@ fidelity: executable
 Acceptance: E3 passes before Q10; this is a small labeled smoke gate, not M4's
 full evaluation or a token-savings marketing claim.
 
-- [ ] E1 Freeze smoke labels, corpus and release thresholds. Owner: E. Est: 90m. kind: any. owning_lane: E. depends_on: [Q2]. verifies: [UC-003, UC-005, UC-007].
+- [x] E1 Freeze smoke labels, corpus and release thresholds. Owner: E. Est: 90m. kind: any. owning_lane: E. depends_on: [Q2]. verifies: [UC-003, UC-005, UC-007].
   - Files: create `eval/registry/{cases.jsonl,corpus.json,thresholds.json,README.md}`.
   - Do: define 24 deterministic cases: six exact/relevant intents, six no-match, six ambiguous intents and six unauthorized-candidate adversaries. Each JSONL row has case ID, query, principal/workspace fixture key, eligible/relevant exact artifact IDs, expected empty/ambiguous/ready behavior, forbidden IDs and max_bytes. Use at least two workspaces and confusable public descriptions. Human-review relevance independently of S's ranking; freeze hashes before running E2.
   - Acceptance: proposed smoke targets are explicit test targets, not observed results: zero unauthorized leakage, all no-match empty, all ambiguity cases avoid false ready and request selection where eligible bindings compete, all exact-target cases retrieve their labeled item in top 3. Report all 24 rows; do not tune labels to make results pass.
@@ -940,7 +940,7 @@ tests, fixtures and document checks alone cannot close a hosted milestone.
   - Verification: `python3 scripts/registry/check.py evidence --milestone M1`; `(cd hosted && GOWORK=off go test ./internal/contract ./internal/seed -count=1)`.
   - acc: [M1's complete package-to-binding-to-runtime-contract chain passes every declared milestone gate.]
 
-- [ ] Q3 Compose the hosted service and test actual boundaries. Owner: Q. Est: 90m per composition/test slice. kind: any. owning_lane: Q. depends_on: [B5, S3, I3, T3, R2, O1]. verifies: [UC-002, UC-003, UC-004, UC-005, UC-006, UC-007, UC-008, UC-009].
+- [x] Q3 Compose the hosted service and test actual boundaries. Owner: Q. Est: 90m per composition/test slice. kind: any. owning_lane: Q. depends_on: [B5, S3, I3, T3, R2, O1]. verifies: [UC-002, UC-003, UC-004, UC-005, UC-006, UC-007, UC-008, UC-009].
   - Files: create `hosted/cmd/registry/main.go`, `hosted/internal/app/{app,config,app_test}.go`, `hosted/acceptance/wiring/{m2a_test,isolation_test,boundaries_test}.go`.
   - Do: wire real PostgreSQL/object store, scoped lexical indexing, policy, workload issuer verification, resolver, connection-broker adapter and both transports. Set explicit limits, graceful cancellation/readiness and request correlation. Replay every C1 route/error case against actual HTTP handlers and backing services; include two-tenant oracle timing distributions with a documented tolerance and equal logical work (no arbitrary sleeps).
   - Acceptance: no production stubs; health distinguishes policy/store outages; connection initiation and polling work with a configured external broker without secret custody; absent broker reports explicit failure. Every endpoint has status/body tests and policy-before-rank/cache/304 coverage.
