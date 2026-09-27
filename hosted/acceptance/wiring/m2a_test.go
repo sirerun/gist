@@ -46,13 +46,17 @@ func TestM2aWiringAgainstConfiguredService(t *testing.T) {
 	resp = f.do(t, "POST", "/v1/resolve", read, `{"skill":{"kind":"skill","id":"q3-fixture-skill","version":"1.0.0"},"runtime_id":"go","local_execution":true,"max_bytes":4096}`)
 	body, _ = io.ReadAll(resp.Body)
 	resp.Body.Close()
-	if resp.StatusCode != 503 {
+	if resp.StatusCode != 200 {
 		t.Fatalf("resolve status=%d body=%s", resp.StatusCode, body)
 	}
+	// The fixture skill declares no required capabilities, so every
+	// requirement resolves and the stored resolution reports ready.
 	var resolved struct {
-		Code string `json:"code"`
+		ID       string            `json:"resolution_id"`
+		Status   string            `json:"status"`
+		Findings []json.RawMessage `json:"findings"`
 	}
-	if json.Unmarshal(body, &resolved) != nil || resolved.Code != "service_unavailable" {
+	if json.Unmarshal(body, &resolved) != nil || resolved.ID == "" || resolved.Status != "ready" || len(resolved.Findings) != 0 {
 		t.Fatalf("resolve body=%s", body)
 	}
 	// The configured loopback broker is opaque to the registry and returns no
