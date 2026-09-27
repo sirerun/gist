@@ -160,7 +160,7 @@ func (s *Postgres) Revoke(ctx context.Context, workspaceID, issuer, subject stri
 	}
 	var affected int64
 	err := WithTenant(ctx, s.pool, workspaceID, func(ctx context.Context, tx pgx.Tx) error {
-		command, err := tx.Exec(ctx, `UPDATE workload_identities SET revoked_at=now() WHERE workspace_id=$1 AND issuer=$2 AND subject=$3`, workspaceID, issuer, subject)
+		command, err := tx.Exec(ctx, `UPDATE workload_identities SET revoked_at=COALESCE(revoked_at, now()) WHERE workspace_id=$1 AND issuer=$2 AND subject=$3`, workspaceID, issuer, subject)
 		affected = command.RowsAffected()
 		return err
 	})
