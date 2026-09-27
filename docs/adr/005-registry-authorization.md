@@ -95,6 +95,7 @@ Lists omit inaccessible entries. A namespace collision is the sole generic
 | `POST /v1/publish/bindings` | `catalog:publish` + maintainer + owned records | 201 | 403/404 as applicable |
 | `POST /v1/publish/taxonomies` | `catalog:publish` + maintainer | 201 | 403 |
 | `POST /v1/publish/revocations` | `catalog:publish` + owner/maintainer | 201 | 403/404 |
+| `POST /v1/identities/revoke` | `identity:revoke` + maintainer; workspace from the principal only | 200, repeatable | uniform 404 for missing or foreign identity |
 | `GET /v1/events` | `catalog:read` and cursor binding | 200 | 404 for foreign cursor |
 | `POST /v1/artifacts/batch-get` | `catalog:read` per item | 200 | complete per-item 404, no foreign metadata |
 
@@ -194,7 +195,7 @@ policy.
 - Token vectors cover wrong issuer, audience, signature algorithm/key, expiry,
   workspace claim, scope, policy generation, and a two-workspace principal;
   all fail closed as specified.
-- Route tests exercise all 20 operations with valid, missing, foreign, and
+- Route tests exercise all 21 operations with valid, missing, foreign, and
   nonexistent references. Foreign and nonexistent private references have
   identical status, safe body shape, headers, and bounded timing.
 - PostgreSQL tests prove forced RLS, role separation, transaction-local
@@ -204,3 +205,28 @@ policy.
 - Failure tests cover policy/issuer/index/artifact outages, integrity errors,
   revocation, retention gaps, duplicate events, cache hits, ETag/304, and
   `max_bytes`; no test accepts a fabricated `ready` result.
+
+## Amendments
+
+### 2026-09-26: identity revocation route
+
+Approved by David. Nothing in the v1 contract could revoke a workload
+identity, so a compromised or retired workload kept its access until its
+token expired. The contract adds `POST /v1/identities/revoke`, which is not
+the same as `POST /v1/publish/revocations` (artifact revocation notices).
+
+- The body is exactly `{issuer, subject}`. Unknown fields, including any
+  workspace field, fail with `422 validation_failed`. The workspace comes only
+  from the verified token, so a caller can revoke identities only in its own
+  workspace.
+- The route needs the new `identity:revoke` scope plus the `maintainer` role,
+  the same scope-plus-role shape as publication. Scope and role are checked
+  before the identity is looked up.
+- Success is `200` with `{issuer, subject, revoked: true}`. Revoking an
+  identity that is already revoked also returns `200` and keeps the original
+  revocation time. A missing identity and one in another workspace both
+  return a uniform `404 not_found`.
+- A revoked identity fails authentication on its next request, because
+  every request re-checks the stored identity row.
+
+The v1 lock and the gate hashes were refreshed for this amendment.

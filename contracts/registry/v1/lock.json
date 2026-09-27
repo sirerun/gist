@@ -80,7 +80,7 @@
     },
     {
       "path": "contracts/registry/v1/fixtures/http-cases.json",
-      "sha256": "0f9b3b5a0a9bba4a77a73af52d9b19414fc65b3b621c9d8bd2fb1ad8c412d319"
+      "sha256": "60676e66fe9414a8b36ce515fc9386dfb7388298c17ed579d2af1f8c71b98413"
     },
     {
       "path": "contracts/registry/v1/fixtures/wire-cases.json",
@@ -88,11 +88,11 @@
     },
     {
       "path": "contracts/registry/v1/openapi.yaml",
-      "sha256": "8e4bb338b935eda74917e28cbacc3c2ae6d662f6ece364f81aac5100737b614b"
+      "sha256": "45c05bc1234fa27c450ff29949bb93b9d0a5828b5366301063984fe9d09cea15"
     },
     {
       "path": "contracts/registry/v1/route-matrix.json",
-      "sha256": "2a7867d857780077ed3ec37f9264607b2c1c8fd8d0f51a53e2196eb35c8473f8"
+      "sha256": "bb9b9f3df9de4a8903d6f0608d166284d1c76ce668e88b699f5b96cdc17af780"
     },
     {
       "path": "hosted/go.mod",
@@ -124,11 +124,11 @@
     },
     {
       "path": "hosted/internal/ports/identity.go",
-      "sha256": "b161875da38a8534b9dd606632e71e9f557f6ec63bd699331d9e8af854737270"
+      "sha256": "32595f93e92a7caf359a0f401dfa9a07482bbbf15da6d60ae7db3156dcd51ac4"
     },
     {
       "path": "hosted/internal/ports/policy.go",
-      "sha256": "5f5441131e80d6cc95fe8fa1c69f3eb71be3f1e4d1789aafba4c01b185a00f48"
+      "sha256": "c8d48048915984054c8851e5d628f3a94025fcac686e0ca5c3b04e296fb9f972"
     },
     {
       "path": "hosted/internal/ports/search.go",

@@ -30,6 +30,7 @@ paths:
   /v1/publish/bindings: {post: {$ref: '#/components/x-operations/publishBinding'}}
   /v1/publish/taxonomies: {post: {$ref: '#/components/x-operations/publishTaxonomy'}}
   /v1/publish/revocations: {post: {$ref: '#/components/x-operations/publishRevocation'}}
+  /v1/identities/revoke: {post: {$ref: '#/components/x-operations/revokeIdentity'}}
   /v1/events: {get: {$ref: '#/components/x-operations/listEvents'}}
   /v1/artifacts/batch-get: {post: {$ref: '#/components/x-operations/batchGet'}}
 components:
@@ -92,12 +93,14 @@ components:
     publishBinding: {$ref: '#/components/x-operations/publishBase', operationId: publishBinding, summary: Publish exact-version binding}
     publishTaxonomy: {$ref: '#/components/x-operations/publishBase', operationId: publishTaxonomy, summary: Publish attributed taxonomy edition}
     publishRevocation: {$ref: '#/components/x-operations/publishBase', operationId: publishRevocation, summary: Publish immutable revocation notice}
+    revokeIdentity: {operationId: revokeIdentity, summary: Revoke a workload identity in the caller's own workspace, description: 'The workspace comes only from the authenticated principal and is never read from the body. Requires identity:revoke plus the maintainer role. Revoking an existing identity again returns 200; a missing or foreign identity is a uniform 404.', security: [{bearerAuth: [identity:revoke]}], requestBody: {$ref: '#/components/x-requestBodies/revokeIdentity'}, responses: {$ref: '#/components/x-responses/standardRead'} }
     listEvents: {operationId: listEvents, parameters: [{$ref: '#/components/parameters/MaxBytes'}], security: [{bearerAuth: [catalog:read]}], responses: {$ref: '#/components/x-responses/standardRead'} }
     batchGet: {operationId: batchGet, summary: Batch retrieval of complete typed artifacts, security: [{bearerAuth: [catalog:read]}], requestBody: {$ref: '#/components/x-requestBodies/budgeted'}, responses: {$ref: '#/components/x-responses/batch'} }
     publishBase: {security: [{bearerAuth: [catalog:publish]}], requestBody: {$ref: '#/components/x-requestBodies/budgeted'}, responses: {$ref: '#/components/x-responses/created'} }
   x-requestBodies:
     budgeted: {required: true, content: {application/json: {schema: {type: object, required: [max_bytes], properties: {max_bytes: {type: integer, minimum: 1, maximum: 100000000}, token_estimate: {type: integer, minimum: 0}}, additionalProperties: true}, example: {max_bytes: 6000}}}}
     discover: {required: true, content: {application/json: {schema: {type: object, required: [query, max_bytes], properties: {query: {type: string, minLength: 1}, max_results: {type: integer, minimum: 1}, max_bytes: {type: integer, minimum: 1}, token_estimate: {type: integer, minimum: 0}}, additionalProperties: true}, example: {query: Onboard an engineer, max_results: 3, max_bytes: 6000}}}}
+    revokeIdentity: {required: true, content: {application/json: {schema: {type: object, required: [issuer, subject], properties: {issuer: {type: string, minLength: 1, maxLength: 512}, subject: {type: string, minLength: 1, maxLength: 512}}, additionalProperties: false}, example: {issuer: 'https://gist.example.com', subject: workload-123}}}}
   x-responses:
     standardRead:
       '200': {description: Complete authorized JSON response, content: {application/json: {schema: {$ref: '#/components/schemas/Generic'}}}}
