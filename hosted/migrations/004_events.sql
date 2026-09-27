@@ -25,7 +25,9 @@ ALTER TABLE event_outbox ENABLE ROW LEVEL SECURITY;
 ALTER TABLE event_outbox FORCE ROW LEVEL SECURITY;
 ALTER TABLE event_cursors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE event_cursors FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS event_tenant_isolation ON event_outbox;
 CREATE POLICY event_tenant_isolation ON event_outbox USING (registry_workspace_visible(workspace_id)) WITH CHECK (registry_workspace_visible(workspace_id));
+DROP POLICY IF EXISTS cursor_tenant_isolation ON event_cursors;
 CREATE POLICY cursor_tenant_isolation ON event_cursors USING (registry_workspace_visible(workspace_id)) WITH CHECK (registry_workspace_visible(workspace_id));
 
 CREATE OR REPLACE FUNCTION purge_registry_events(retention interval DEFAULT interval '7 days')
