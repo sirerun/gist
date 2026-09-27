@@ -123,20 +123,15 @@ func (s *postgresResolutionStore) Put(ctx context.Context, r ports.Resolution) e
 }
 
 // resolutionPrincipalHash binds a stored resolution to the principal that
-// produced it. It is the hex SHA-256 of the JSON-encoded issuer, subject,
-// audience and workspace: JSON string encoding keeps the field boundaries
-// unambiguous, and the hex digest is valid text. (A raw NUL separator is
-// rejected by PostgreSQL text columns, which failed every resolve with 503.)
-func resolutionPrincipalHash(p ports.Principal) string {
-	b, _ := json.Marshal([4]string{p.Issuer, p.Subject, p.Audience, p.WorkspaceID})
-	sum := sha256.Sum256(b)
-	return hex.EncodeToString(sum[:])
-}
+// produced it; Get only returns a resolution to that same principal.
+func resolutionPrincipalHash(p ports.Principal) string { return ports.PrincipalHash(p) }
 
+// Get returns the resolution only when c.PrincipalHash is ports.PrincipalHash
+// of the principal that stored it; an empty or foreign hash matches nothing.
 func (s *postgresResolutionStore) Get(ctx context.Context, c ports.Cursor) (ports.Resolution, error) {
 	var raw []byte
 	err := storage.WithTenant(ctx, s.pool, c.WorkspaceID, func(ctx context.Context, tx pgx.Tx) error {
-		return tx.QueryRow(ctx, `SELECT payload FROM resolutions WHERE id=$1 AND workspace_id=$2 AND expires_at>now()`, c.ID, c.WorkspaceID).Scan(&raw)
+		return tx.QueryRow(ctx, `SELECT payload FROM resolutions WHERE id=$1 AND workspace_id=$2 AND principal_hash=$3 AND expires_at>now()`, c.ID, c.WorkspaceID, c.PrincipalHash).Scan(&raw)
 	})
 	if err != nil {
 		return ports.Resolution{}, err

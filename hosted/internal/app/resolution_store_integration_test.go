@@ -6,6 +6,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"os"
 	"path/filepath"
 	"sort"
@@ -110,9 +111,18 @@ func TestPostgresResolutionStoreRoundTrip(t *testing.T) {
 	if err := store.Put(ctx, want); err != nil {
 		t.Fatalf("put resolution: %v", err)
 	}
-	got, err := store.Get(ctx, ports.Cursor{ID: want.ID, WorkspaceID: workspace})
+	got, err := store.Get(ctx, ports.Cursor{ID: want.ID, WorkspaceID: workspace, PrincipalHash: ports.PrincipalHash(want.Principal)})
 	if err != nil {
 		t.Fatalf("get resolution: %v", err)
+	}
+	// Another principal in the same workspace, or a caller with no binding,
+	// must not read the resolution even with its ID.
+	other := want.Principal
+	other.Subject = "agent-2"
+	for name, hash := range map[string]string{"foreign principal": ports.PrincipalHash(other), "empty binding": ""} {
+		if _, err := store.Get(ctx, ports.Cursor{ID: want.ID, WorkspaceID: workspace, PrincipalHash: hash}); !errors.Is(err, pgx.ErrNoRows) {
+			t.Fatalf("%s: get returned err=%v, want pgx.ErrNoRows", name, err)
+		}
 	}
 	if got.ID != want.ID || got.Skill != want.Skill || len(got.Findings) != 1 || got.Findings[0] != want.Findings[0] {
 		t.Fatalf("round trip mismatch: got %+v want %+v", got, want)
