@@ -182,9 +182,7 @@ func randomID() (string, error) {
 	}
 	return base64.RawURLEncoding.EncodeToString(b), nil
 }
-func principalHash(p ports.Principal) string {
-	return p.Issuer + "\x00" + p.Subject + "\x00" + p.Audience + "\x00" + p.WorkspaceID
-}
+func principalHash(p ports.Principal) string { return ports.PrincipalHash(p) }
 
 type realClock struct{}
 
