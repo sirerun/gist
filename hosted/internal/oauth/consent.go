@@ -43,7 +43,10 @@ func pageHeaders(w http.ResponseWriter) {
 	h.Set("Cache-Control", "no-store")
 	h.Set("X-Frame-Options", "DENY")
 	h.Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'")
-	h.Set("Referrer-Policy", "no-referrer")
+	// Not no-referrer: under it browsers send "Origin: null" on the consent
+	// form's own POST, which sameOrigin must refuse. same-origin still keeps
+	// the authorize query off every cross-origin request.
+	h.Set("Referrer-Policy", "same-origin")
 	h.Set("X-Content-Type-Options", "nosniff")
 }
 
