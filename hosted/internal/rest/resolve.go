@@ -33,5 +33,3 @@ func (h *Handler) resolve(w http.ResponseWriter, r *http.Request, p ports.Princi
 	_, err = w.Write(out)
 	return err
 }
-
-var _ = http.StatusOK

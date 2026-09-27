@@ -34,6 +34,3 @@ func (h *Handler) batch(w http.ResponseWriter, r *http.Request, p ports.Principa
 	}
 	return h.writeJSON(w, map[string]any{"items": items}, in.MaxBytes)
 }
-func _batchStatus(w http.ResponseWriter, s int) { w.WriteHeader(s) }
-
-var _ = http.StatusOK
