@@ -20,6 +20,7 @@ import (
 	"github.com/sirerun/gist/hosted/internal/discovery"
 	"github.com/sirerun/gist/hosted/internal/events"
 	"github.com/sirerun/gist/hosted/internal/identity"
+	"github.com/sirerun/gist/hosted/internal/oauth"
 	"github.com/sirerun/gist/hosted/internal/ports"
 	"github.com/sirerun/gist/hosted/internal/remotemcp"
 	"github.com/sirerun/gist/hosted/internal/resolution"
@@ -34,8 +35,10 @@ type App struct {
 	issuer  *identity.WorkloadIssuer
 	// identities records the stored identity behind every minted token.
 	identities issuedIdentityRecorder
-	server     *http.Server
-	closeOnce  sync.Once
+	// sessions issues reference authorization-server session cookies.
+	sessions  *oauth.CookieSessions
+	server    *http.Server
+	closeOnce sync.Once
 }
 
 // New opens the real pgx pool and filesystem-backed object store. It pings
@@ -127,7 +130,57 @@ func newWithStores(cfg Config, pool *pgxpool.Pool, objects *storage.ObjectStore)
 		pool.Close()
 		return nil, err
 	}
-	return &App{cfg: cfg, pool: pool, objects: objects, issuer: issuer, identities: catalog, server: &http.Server{Addr: cfg.ListenAddress, Handler: requestContext{rest: rh, mcp: mcp, ready: func(ctx context.Context) error { return pool.Ping(ctx) }}, ReadHeaderTimeout: cfg.RequestTimeout}}, nil
+	// The reference authorization server issues access tokens with the same
+	// workload issuer (and so the same key set, issuer and audience) that
+	// verifies REST and MCP requests, and records each issued identity so the
+	// stored-identity check in verifiedIdentity accepts it.
+	sessionSecret := make([]byte, 32)
+	if _, err := rand.Read(sessionSecret); err != nil {
+		pool.Close()
+		return nil, fmt.Errorf("app: generate oauth session secret: %w", err)
+	}
+	sessions, err := oauth.NewCookieSessions(sessionSecret, clock)
+	if err != nil {
+		pool.Close()
+		return nil, err
+	}
+	minter := oauth.IssuerMinter{Issuers: map[string]*identity.WorkloadIssuer{cfg.ResourceAudience: issuer}, Record: recordIssued(catalog)}
+	as, err := oauth.New(oauth.Config{Issuer: cfg.PublicOrigin, Resources: []string{cfg.ResourceAudience}, ScopesSupported: []string{"catalog:read", "catalog:publish"}, Store: catalog.OAuth(), Minter: minter, Policy: policy, Sessions: sessions, Keys: keys, Clock: clock, LoginURL: cfg.OAuthLoginURL})
+	if err != nil {
+		pool.Close()
+		return nil, err
+	}
+	prm := as.ProtectedResourceMetadataURL()
+	handler := requestContext{rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, ready: func(ctx context.Context) error { return pool.Ping(ctx) }}
+	return &App{cfg: cfg, pool: pool, objects: objects, issuer: issuer, identities: catalog, sessions: sessions, server: &http.Server{Addr: cfg.ListenAddress, Handler: handler, ReadHeaderTimeout: cfg.RequestTimeout}}, nil
+}
+
+// recordIssued adapts the identity store to the OAuth minter. A revoked
+// stored identity refuses issuance, so its token is discarded.
+func recordIssued(store issuedIdentityRecorder) oauth.IdentityRecorder {
+	return func(ctx context.Context, r ports.IdentityRecord) error {
+		if store == nil {
+			return errors.New("app: identity store is unavailable")
+		}
+		if err := store.RecordIssued(ctx, r); err != nil {
+			if errors.Is(err, storage.ErrIdentityRevoked) {
+				return identity.ErrUnauthorized
+			}
+			return fmt.Errorf("app: record workload identity: %w", err)
+		}
+		return nil
+	}
+}
+
+// IssueOAuthSession returns a reference authorization-server session cookie
+// for a person the deployment's login flow has already authenticated. It is
+// the seam acceptance fixtures use in place of an interactive login; the
+// consent step still checks live workspace membership.
+func (a *App) IssueOAuthSession(subject string, workspaces []string) (*http.Cookie, error) {
+	if a == nil || a.sessions == nil {
+		return nil, errors.New("app: oauth sessions are unavailable")
+	}
+	return a.sessions.Issue(subject, workspaces, time.Hour)
 }
 
 func (a *App) Handler() http.Handler { return a.server.Handler }
@@ -140,30 +193,15 @@ func (a *App) MintWorkloadToken(ctx context.Context, req identity.WorkloadReques
 	if a == nil || a.issuer == nil {
 		return "", errors.New("app: workload issuer is unavailable")
 	}
-	token, err := a.issuer.Mint(ctx, req)
+	// Token verification requires an unrevoked stored identity, so issuance
+	// records one from the claims read back out of the signed token. The
+	// token is returned only after the row is written; a revoked identity
+	// gets no token. The OAuth server mints through the same path.
+	minted, err := oauth.IssuerMinter{Issuers: map[string]*identity.WorkloadIssuer{a.cfg.ResourceAudience: a.issuer}, Record: recordIssued(a.identities)}.MintAccess(ctx, a.cfg.ResourceAudience, req)
 	if err != nil {
 		return "", err
 	}
-	// Token verification requires an unrevoked stored identity, so issuance
-	// must record one. Read the claims back from the signed token so the row
-	// matches exactly what Lookup will be asked about. The token is returned
-	// only after the row is written; a revoked identity gets no token.
-	got, err := a.issuer.Verify(ctx, token)
-	if err != nil {
-		return "", fmt.Errorf("app: verify minted workload token: %w", err)
-	}
-	if a.identities == nil {
-		return "", errors.New("app: identity store is unavailable")
-	}
-	p := got.Principal
-	record := ports.IdentityRecord{Issuer: p.Issuer, Subject: p.Subject, WorkspaceID: p.WorkspaceID, SubjectType: p.SubjectType, Scopes: p.Scopes, PolicyGeneration: p.PolicyGeneration, ExpiresAt: got.ExpiresAt.Unix()}
-	if err := a.identities.RecordIssued(ctx, record); err != nil {
-		if errors.Is(err, storage.ErrIdentityRevoked) {
-			return "", identity.ErrUnauthorized
-		}
-		return "", fmt.Errorf("app: record workload identity: %w", err)
-	}
-	return token, nil
+	return minted.Token, nil
 }
 
 // SeedAcceptanceArtifact installs a complete artifact into the same
@@ -204,8 +242,8 @@ func (a *App) Shutdown(ctx context.Context) error {
 }
 
 type requestContext struct {
-	rest, mcp http.Handler
-	ready     func(context.Context) error
+	rest, mcp, oauth http.Handler
+	ready            func(context.Context) error
 }
 
 func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -214,6 +252,10 @@ func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if _, err := rand.Read(b[:]); err == nil {
 			r.Header.Set("X-Request-ID", fmt.Sprintf("req_%x", b))
 		}
+	}
+	if h.oauth != nil && oauth.Handles(r.URL.Path) {
+		h.oauth.ServeHTTP(w, r)
+		return
 	}
 	if r.URL.Path == "/mcp" {
 		h.mcp.ServeHTTP(w, r)

@@ -30,6 +30,9 @@ type Config struct {
 	MaxConcurrentRequests int
 	MaxDiscoveryResults   int
 	RetryAfter            int
+	// OAuthLoginURL is where the reference authorization server sends a
+	// person who has no session. Optional; without it authorize answers 401.
+	OAuthLoginURL string
 }
 
 func (c Config) Validate() error {
