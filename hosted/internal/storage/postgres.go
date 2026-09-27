@@ -98,16 +98,23 @@ func (s *Postgres) Search(ctx context.Context, q ports.SearchQuery) (ports.Searc
 	return page, nil
 }
 
-// ListVersions returns every published or deprecated version of one artifact
-// in the reference's workspace. It is not capped by the catalog-wide search
-// limit, so an artifact's versions are never truncated by unrelated records.
-func (s *Postgres) ListVersions(ctx context.Context, ref ports.ArtifactRef) ([]ports.CatalogRecord, error) {
+// ListVersions returns one page of the published or deprecated versions of
+// one artifact in the reference's workspace, in SemVer precedence order
+// (registry_semver_key, migration 006; ties on build metadata break on the
+// version text). after is the last version of the previous page, or "" for
+// the first page, and limit caps the page. It is not capped by the
+// catalog-wide search limit, so an artifact's versions are never truncated by
+// unrelated records.
+func (s *Postgres) ListVersions(ctx context.Context, ref ports.ArtifactRef, after string, limit int) ([]ports.CatalogRecord, error) {
 	if ref.WorkspaceID == "" || ref.Kind == "" || ref.ID == "" {
 		return nil, errors.New("storage: incomplete artifact reference")
 	}
+	if limit <= 0 {
+		return nil, errors.New("storage: version page limit must be positive")
+	}
 	var out []ports.CatalogRecord
 	err := WithTenant(ctx, s.pool, ref.WorkspaceID, func(ctx context.Context, tx pgx.Tx) error {
-		rows, err := tx.Query(ctx, `SELECT version, state, digest_algorithm, digest_value, manifest_digest_algorithm, manifest_digest_value, metadata FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND state IN ('published','deprecated') ORDER BY version`, ref.WorkspaceID, ref.Kind, ref.ID)
+		rows, err := tx.Query(ctx, `SELECT version, state, digest_algorithm, digest_value, manifest_digest_algorithm, manifest_digest_value, metadata FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND state IN ('published','deprecated') AND ($4 = '' OR (version_key, version COLLATE "C") > (registry_semver_key($4), $4 COLLATE "C")) ORDER BY version_key, version COLLATE "C" LIMIT $5`, ref.WorkspaceID, ref.Kind, ref.ID, after, limit)
 		if err != nil {
 			return err
 		}

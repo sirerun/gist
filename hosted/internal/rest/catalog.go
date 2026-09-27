@@ -2,6 +2,7 @@ package rest
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -53,9 +54,14 @@ func (h *Handler) listVersions(w http.ResponseWriter, r *http.Request, p ports.P
 	if err := h.authorize(r.Context(), p, ports.ActionRead, ref); err != nil {
 		return err
 	}
+	limit, after, err := h.versionPage(r)
+	if err != nil {
+		return err
+	}
 	// Fetch this id's versions directly. Filtering a catalog-wide search page
-	// dropped every version beyond the page's MaxResults cap.
-	records, err := h.s.Versions.ListVersions(r.Context(), *ref)
+	// dropped every version beyond the page's MaxResults cap. One extra row
+	// tells whether another page follows.
+	records, err := h.s.Versions.ListVersions(r.Context(), *ref, after, limit+1)
 	if err != nil {
 		return appError("service_unavailable", "Service unavailable", 503, true)
 	}
@@ -65,8 +71,43 @@ func (h *Handler) listVersions(w http.ResponseWriter, r *http.Request, p ports.P
 			items = append(items, rec)
 		}
 	}
-	return h.writeJSON(w, map[string]any{"items": items, "next_cursor": ""}, budget(r, h.limits.MaxResponseBytes))
+	next := ""
+	if len(items) > limit {
+		items = items[:limit]
+		next = base64.RawURLEncoding.EncodeToString([]byte(items[limit-1].Ref.Version))
+	}
+	return h.writeJSON(w, map[string]any{"items": items, "next_cursor": next}, budget(r, h.limits.MaxResponseBytes))
 }
+
+// versionPage reads the keyset paging parameters of GET
+// /v1/skills/{id}/versions: limit (1..MaxResults, default MaxResults) and the
+// opaque cursor a previous page returned as next_cursor.
+func (h *Handler) versionPage(r *http.Request) (int, string, error) {
+	q := r.URL.Query()
+	limit := h.limits.MaxResults
+	if raw := q.Get("limit"); raw != "" {
+		n, err := strconv.Atoi(raw)
+		if err != nil || n < 1 {
+			return 0, "", appError("validation_failed", "Invalid request", 422, false)
+		}
+		if n < limit {
+			limit = n
+		}
+	}
+	after := ""
+	if raw := q.Get("cursor"); raw != "" {
+		b, err := base64.RawURLEncoding.DecodeString(raw)
+		if err != nil || len(b) == 0 || len(b) > maxVersionLength {
+			return 0, "", appError("validation_failed", "Invalid request", 422, false)
+		}
+		after = string(b)
+	}
+	return limit, after, nil
+}
+
+// maxVersionLength matches the contract's Version path parameter bound.
+const maxVersionLength = 128
+
 func (h *Handler) discover(w http.ResponseWriter, r *http.Request, p ports.Principal) error {
 	var in struct {
 		Query      string `json:"query"`

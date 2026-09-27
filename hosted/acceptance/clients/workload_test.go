@@ -374,7 +374,7 @@ func startClientFixture(t *testing.T) *clientFixture {
 	if err != nil {
 		t.Fatalf("open fixture pool: %v", err)
 	}
-	for _, name := range []string{"001_catalog.sql", "002_policy.sql", "003_identity.sql", "004_events.sql", "005_identity_workspace_key.sql"} {
+	for _, name := range []string{"001_catalog.sql", "002_policy.sql", "003_identity.sql", "004_events.sql", "005_identity_workspace_key.sql", "006_catalog_version_order.sql"} {
 		raw, readErr := os.ReadFile(filepath.Join("..", "..", "migrations", name))
 		if readErr != nil {
 			t.Fatalf("read migration %s: %v", name, readErr)

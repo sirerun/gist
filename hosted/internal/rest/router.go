@@ -18,12 +18,14 @@ type Resolver interface {
 	Resolve(context.Context, ports.Principal, []byte) ([]byte, error)
 }
 
-// VersionLister returns every visible version of one artifact, identified by
-// workspace, kind and id (Version is ignored). Unlike a search it is not paged
-// by the catalog-wide result cap, so no version is dropped because unrelated
-// records filled a page. *storage.Postgres is the production implementation.
+// VersionLister returns one page of the visible versions of one artifact,
+// identified by workspace, kind and id (Version is ignored). Versions come in
+// SemVer precedence order; after is the last version of the previous page
+// ("" for the first page) and limit caps the page size. It is not paged by the
+// catalog-wide search cap, so no version is dropped because unrelated records
+// filled a page. *storage.Postgres is the production implementation.
 type VersionLister interface {
-	ListVersions(context.Context, ports.ArtifactRef) ([]ports.CatalogRecord, error)
+	ListVersions(ctx context.Context, ref ports.ArtifactRef, after string, limit int) ([]ports.CatalogRecord, error)
 }
 
 type Services struct {
