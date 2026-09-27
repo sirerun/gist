@@ -39,6 +39,7 @@ type Services struct {
 	Connections ports.ConnectionInitiator
 	Events      ports.EventStore
 	Publisher   Publisher
+	Revocations ArtifactRevoker
 	Resolver    Resolver
 	Limits      Limits
 	Audience    string
@@ -128,6 +129,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		routeErr = h.batch(w, r, p)
 	case r.Method == "POST" && path == "v1/identities/revoke":
 		routeErr = h.revokeIdentity(w, r, p)
+	case r.Method == "POST" && path == "v1/publish/revocations":
+		routeErr = h.publishRevocation(w, r, p)
 	case r.Method == "POST" && len(parts) == 3 && parts[0] == "v1" && parts[1] == "publish":
 		routeErr = h.publish(w, r, p, parts[2])
 	default:

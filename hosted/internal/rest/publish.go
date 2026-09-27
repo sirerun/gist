@@ -37,9 +37,9 @@ func (h *Handler) publish(w http.ResponseWriter, r *http.Request, p ports.Princi
 	switch k {
 	case ports.KindSkill, ports.KindCapability, ports.KindTool, ports.KindProvider, ports.KindBinding, ports.KindTaxonomy:
 	default:
-		if kind != "revocations" {
-			return appError("validation_failed", "Invalid request", 422, false)
-		}
+		// Revocations are routed to publishRevocation: they record a
+		// revocation for an existing version, never a new catalog version.
+		return appError("validation_failed", "Invalid request", 422, false)
 	}
 	out, err := h.s.Publisher.Publish(r.Context(), p, k, raw)
 	if err != nil {

@@ -23,6 +23,10 @@ func (h *Handler) record(ctx context.Context, p ports.Principal, kind ports.Arti
 	if err != nil {
 		return ports.CatalogRecord{}, appError("not_found", "Not found", 404, false)
 	}
+	// Revocation detail is disclosed only after authorization (ADR 005).
+	if r.State == "revoked" {
+		return ports.CatalogRecord{}, ErrArtifactRevoked
+	}
 	return r, nil
 }
 func (h *Handler) writeJSON(w http.ResponseWriter, v any, max int) error {
@@ -140,6 +144,9 @@ func (h *Handler) download(w http.ResponseWriter, r *http.Request, p ports.Princ
 	}
 	if h.s.Artifacts == nil || h.s.Catalog == nil {
 		return appError("service_unavailable", "Service unavailable", 503, true)
+	}
+	if rec, e := h.s.Catalog.Get(r.Context(), ref); e == nil && rec.State == "revoked" {
+		return ErrArtifactRevoked
 	}
 	a, err := h.s.Artifacts.Open(r.Context(), ref)
 	if err != nil {
