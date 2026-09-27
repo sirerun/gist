@@ -776,7 +776,8 @@ uses IaC/release workflows, and delegated issuance passes the entire checklist.
   - Verification: `python3 scripts/registry/check.py iac --preview`; `pulumi preview --cwd deploy/registry --stack preview --diff` through the workflow; Q6 verifies deployed routes.
   - acc: [An IaC-created isolated preview exposes the configured OAuth resource and has enforced teardown and a distinct audience.]
 
-- [ ] I4 Implement built-in reference authorization server. Owner: I. Est: 90m per discovery/grant/session slice. kind: any. owning_lane: I. depends_on: [A4, O2, I3, B5]. verifies: [UC-009, UC-007].
+- [x] I4 Implement built-in reference authorization server. Owner: I. Est: 90m per discovery/grant/session slice. kind: any. owning_lane: I. depends_on: [A4, O2, I3, B5]. verifies: [UC-009, UC-007].
+  - Done (2026-09-27): merged in #31 (atomic code redemption, shared consent secret). Local acceptance only; live preview verification remains with O2/Q6.
   - Waiver (David, 2026-09-27): the formal dependency on O2 is waived for implementation and local acceptance. Live preview verification still requires O2.
   - Files: create `hosted/internal/oauth/{server,metadata,registration,authorize,consent,token,refresh,revoke,jwks,session,oauth_test}.go`, `hosted/internal/oauth/consent.html`.
   - Do: implement the entire section 10 requirement checklist below using reviewed maintained primitives; attach to configured authenticated identity session, explicit workspace selection and consent. B1 supplies all persistence; no hidden migration edits. PKCE S256 only, codes hashed/single-use, client+redirect+resource bound, scope reject-not-downgrade; rotate refresh tokens and revoke family on reuse; never persist raw refresh/code values.
@@ -784,14 +785,16 @@ uses IaC/release workflows, and delegated issuance passes the entire checklist.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/oauth -count=1)`.
   - acc: [The reference AS passes every metadata, registration, PKCE, refresh, PRM and resource-audience requirement without an external issuer.]
 
-- [ ] I5 Qualify optional delegated issuer and reject partial compliance. Owner: I. Est: 90m. kind: any. owning_lane: I. depends_on: [I4, X-W5]. verifies: [UC-009].
+- [x] I5 Qualify optional delegated issuer and reject partial compliance. Owner: I. Est: 90m. kind: any. owning_lane: I. depends_on: [I4, X-W5]. verifies: [UC-009].
+  - Done (2026-09-27): merged in #33. Checklist probes run against the local reference AS only; the external-issuer probe needs X-W5 and runs in Q6. Delegation stays disabled until then.
   - Files: create `hosted/internal/oauth/{delegated,checklist_test}.go`, `hosted/internal/oauth/issuer-checklist.json`.
   - Do: run identical conformance probes for built-in and configured external issuers, recording each checklist row per deployment/build. Require W1-W5 interface evidence plus complete runtime test results. Configure an explicit issuer allowlist; failed delegation configuration selects the built-in strategy during deployment, never silently accepts both issuers or downgrades a live session.
   - Acceptance: any missing checklist line blocks delegation; refresh preserves audience/scopes/workspace bounds; wrong-resource tokens get bearer invalid_token; no inference that W receipts alone prove compliance.
   - Verification: `(cd hosted && GOWORK=off go test ./internal/oauth -run TestIssuerChecklist -count=1)` against the local reference-AS HTTP server and the selected external test issuer; Q6 repeats the reference deployment probes in preview.
   - acc: [Delegated issuance is enabled only when every required issuer conformance probe passes.]
 
-- [ ] I6 Test multi-tenant OAuth and consent in a browser. Owner: I. Est: 90m. kind: any. owning_lane: I. depends_on: [I5]. verifies: [UC-007, UC-009].
+- [x] I6 Test multi-tenant OAuth and consent in a browser. Owner: I. Est: 90m. kind: any. owning_lane: I. depends_on: [I5]. verifies: [UC-007, UC-009].
+  - Done (2026-09-27): merged in #33. Browser tests use agent-browser rather than Playwright, per the repo rule; 4 tests pass (golden path per tenant, denial, CSRF, cross-tenant). Also fixed consent under Referrer-Policy no-referrer (Origin: null).
   - Files: create `hosted/internal/oauth/{isolation_test.go,consent.spec.ts,package.json,package-lock.json,playwright.config.ts}`.
   - Do: automate real consent UI golden path and at least denial/CSRF/workspace-switch edges with pinned Playwright; test refresh reuse, revoked consent, missing membership, resource mix-up, issuer outage and cross-session replay at actual HTTP boundaries. No production data in browser fixtures.
   - Acceptance: all browser/API assertions pass against the real AS at an isolated HTTP test origin; Q6 repeats them after preview composition. No model field counts as authenticated human consent; live completion remains gated by Q8.
@@ -839,7 +842,8 @@ full evaluation or a token-savings marketing claim.
   - Verification: `python3 scripts/registry/check.py eval --labels-only`.
   - acc: [The frozen smoke set contains all 24 labeled cases with explicit forbidden IDs and non-vacuous release thresholds.]
 
-- [ ] E2 Implement reproducible retrieval smoke runner. Owner: E. Est: 90m. kind: any. owning_lane: E. depends_on: [E1, Q5]. verifies: [UC-003, UC-005, UC-007].
+- [x] E2 Implement reproducible retrieval smoke runner. Owner: E. Est: 90m. kind: any. owning_lane: E. depends_on: [E1, Q5]. verifies: [UC-003, UC-005, UC-007].
+  - Done (2026-09-27): merged in #32, fixes in #34 (exact recall and ambiguous selection 0/6 to 6/6). Local composition only; the production run is E3.
   - Waiver (David, 2026-09-27): the formal dependency on Q5 is waived for implementation against the local composition. The production run remains E3.
   - Files: create `hosted/acceptance/retrieval/{smoke_test,metrics_test}.go`, `eval/registry/baseline.json`.
   - Do: call actual discover/get/resolve boundaries using the frozen corpus; record top-k recall, no-match accuracy, ambiguity handling, leak count, completion, bytes, labeled token estimates, p50/p95 and network round trips with client/build/config/corpus hashes. Include a deliberately unauthorized high-score candidate and negative-control run that makes the checker fail. Compare only matched catalogs/configurations.
