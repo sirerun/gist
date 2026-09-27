@@ -24,3 +24,27 @@ config:
     errorRatePercent: 1.0
     backupRetentionDays: 14
     previewTtlHours: 24
+
+# ---------------------------------------------------------------------------
+# Short-lived OAuth preview (task O2, ADR 007 section 4). Stack name: preview.
+# The preview workflow sets these per run from GitHub environment secrets;
+# this block documents the shape only. Values are non-secret examples.
+# ---------------------------------------------------------------------------
+# config:
+#   gist-registry:deploymentMode: preview
+#   gist-registry:project: example-preview-project
+#   gist-registry:region: us-central1
+#   gist-registry:publicOrigin: https://preview-r42.registry-preview.example.invalid
+#   gist-registry:resourceAudience: https://preview-r42.registry-preview.example.invalid
+#   gist-registry:productionOrigin: https://registry.example.invalid
+#   gist-registry:containerImage: us-central1-docker.pkg.dev/example-preview-project/registry/hosted@sha256:REPLACE_WITH_IMAGE_DIGEST
+#   gist-registry:stateBucket: gs://REPLACE_WITH_PRIVATE_PULUMI_STATE_BUCKET
+#   gist-registry:previewRunId: r42
+#   gist-registry:previewOwner: example-owner
+#   gist-registry:previewExpiresAt: "2026-09-27T12:00:00Z"   # at most previewTtlHours (<= 24) away
+#   gist-registry:previewDnsZone: registry-preview-zone      # existing Cloud DNS managed zone
+#   gist-registry:previewDnsProject: example-dns-project
+#   gist-registry:oauthRedirectUris: '["https://client.example.invalid/oauth/callback"]'
+#   gist-registry:databasePasswordSecret: gist-registry-preview-database-password
+#   gist-registry:issuerSecret: gist-registry-preview-oauth-issuer
+#   gist-registry:signingKeySecret: gist-registry-preview-workload-signing-key

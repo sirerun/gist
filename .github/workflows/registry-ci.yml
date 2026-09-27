@@ -53,5 +53,10 @@ jobs:
                   yaml.safe_load(stream)
           PY
       - run: python3 scripts/registry/check.py iac deploy/registry/iac-evidence.json
+      - run: python -m py_compile deploy/registry/preview.py
+      - name: Preview IaC unit tests (Pulumi mocks, no login or cloud access)
+        run: python -m unittest discover -s deploy/registry/tests -v
+      - run: python3 scripts/registry/check.py iac --preview
+      - run: for script in deploy/registry/preview-*.sh; do bash -n "$script"; done
       - run: podman build --file deploy/registry/Containerfile --tag gist-registry:ci .
 
