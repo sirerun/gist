@@ -121,6 +121,11 @@ func (s *ObjectStore) Open(ctx context.Context, ref ports.ArtifactRef) (ports.Ar
 	if digest.Algorithm != "sha256" {
 		return nil, errors.New("objects: unsupported digest")
 	}
+	// digest.Value may come from the catalog row, so it is checked before it
+	// becomes a path component: only a sha256 hex name can address an object.
+	if !validSHA256Hex(digest.Value) {
+		return nil, errors.New("objects: invalid digest")
+	}
 	b, err := os.ReadFile(filepath.Join(s.root, digest.Value))
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, ErrNotFound
@@ -139,3 +144,17 @@ type readSeekCloser struct{ *bytes.Reader }
 func (r *readSeekCloser) Close() error { return nil }
 
 var _ ports.ArtifactStore = (*ObjectStore)(nil)
+
+// validSHA256Hex reports whether v is exactly 64 lowercase hex characters.
+func validSHA256Hex(v string) bool {
+	if len(v) != 64 {
+		return false
+	}
+	for i := 0; i < len(v); i++ {
+		c := v[i]
+		if (c < '0' || c > '9') && (c < 'a' || c > 'f') {
+			return false
+		}
+	}
+	return true
+}
