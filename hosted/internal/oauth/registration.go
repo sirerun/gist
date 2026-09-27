@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -127,8 +128,8 @@ func validRedirectURI(uri string) error {
 	if err != nil || !u.IsAbs() {
 		return fmt.Errorf("redirect_uri must be an absolute URI")
 	}
-	if u.Scheme != "https" {
-		return fmt.Errorf("redirect_uri must use https")
+	if u.Scheme != "https" && !isLoopbackHTTP(u) {
+		return fmt.Errorf("redirect_uri must use https, or http on the 127.0.0.1 or [::1] loopback")
 	}
 	if u.Host == "" || u.Hostname() == "" || strings.Contains(u.Hostname(), "*") {
 		return fmt.Errorf("redirect_uri must name a host")
@@ -140,4 +141,52 @@ func validRedirectURI(uri string) error {
 		return fmt.Errorf("redirect_uri contains whitespace")
 	}
 	return nil
+}
+
+// isLoopbackHTTP reports an OAuth 2.1 / RFC 8252 section 7.3 native-app
+// redirect: plain http to the IPv4 or IPv6 loopback literal, on any port.
+// The name localhost is deliberately excluded (it can be resolved away from
+// the loopback interface), as is every other http host.
+func isLoopbackHTTP(u *url.URL) bool {
+	if u.Scheme != "http" {
+		return false
+	}
+	host, port := u.Host, u.Port()
+	if port != "" {
+		host = strings.TrimSuffix(host, ":"+port)
+		if n, err := strconv.Atoi(port); err != nil || n < 1 || n > 65535 {
+			return false
+		}
+	} else if strings.HasSuffix(host, ":") {
+		return false
+	}
+	return host == "127.0.0.1" || host == "[::1]"
+}
+
+// redirectRegistered matches a requested redirect URI against a client's
+// registrations. Matching is exact, except that a loopback http redirect
+// matches a registered loopback redirect on the same address, path and query
+// with any port, because native apps bind an ephemeral port per request
+// (RFC 8252 section 7.3).
+func redirectRegistered(registered []string, uri string) bool {
+	if contains(registered, uri) {
+		return true
+	}
+	if validRedirectURI(uri) != nil {
+		return false
+	}
+	req, err := url.Parse(uri)
+	if err != nil || !isLoopbackHTTP(req) {
+		return false
+	}
+	for _, r := range registered {
+		reg, err := url.Parse(r)
+		if err != nil || !isLoopbackHTTP(reg) {
+			continue
+		}
+		if reg.Hostname() == req.Hostname() && reg.EscapedPath() == req.EscapedPath() && reg.RawQuery == req.RawQuery && reg.ForceQuery == req.ForceQuery {
+			return true
+		}
+	}
+	return false
 }

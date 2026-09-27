@@ -8,7 +8,7 @@ import (
 )
 
 func validConfig() Config {
-	return Config{PublicOrigin: "https://registry.example.invalid", ResourceAudience: "https://registry.example.invalid", DatabaseURL: "postgres://registry@127.0.0.1:5432/registry", ObjectStoreRoot: "/tmp/registry-objects", RequestTimeout: 30 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 100000, MaxConcurrentRequests: 80, MaxDiscoveryResults: 50}
+	return Config{PublicOrigin: "https://registry.example.invalid", ResourceAudience: "https://registry.example.invalid", DatabaseURL: "postgres://registry@127.0.0.1:5432/registry", ObjectStoreRoot: "/tmp/registry-objects", RequestTimeout: 30 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 100000, MaxConcurrentRequests: 80, MaxDiscoveryResults: 50, OAuthConsentSecret: []byte(strings.Repeat("s", MinOAuthConsentSecretBytes))}
 }
 
 func TestConfigRequiresExactOriginAndExplicitLimits(t *testing.T) {
@@ -29,6 +29,18 @@ func TestConfigRequiresExactOriginAndExplicitLimits(t *testing.T) {
 				t.Fatalf("error=%v want substring %q", err, tc.want)
 			}
 		})
+	}
+}
+
+// Every replica must share the consent secret, so startup refuses a missing
+// or short one instead of generating a per-process key.
+func TestConfigRequiresOAuthConsentSecret(t *testing.T) {
+	for _, secret := range [][]byte{nil, []byte(strings.Repeat("s", MinOAuthConsentSecretBytes-1))} {
+		c := validConfig()
+		c.OAuthConsentSecret = secret
+		if err := c.Validate(); err == nil || !strings.Contains(err.Error(), "GIST_OAUTH_CONSENT_SECRET") {
+			t.Fatalf("secret of %d bytes: error=%v", len(secret), err)
+		}
 	}
 }
 

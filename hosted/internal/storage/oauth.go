@@ -60,11 +60,18 @@ func (o *OAuthStore) SaveCode(ctx context.Context, c oauth.AuthCode) error {
 	})
 }
 
-func (o *OAuthStore) RedeemCode(ctx context.Context, workspaceID string, hash []byte, check func(oauth.AuthCode) error) (oauth.AuthCode, error) {
-	if workspaceID == "" || len(hash) == 0 || check == nil {
-		return oauth.AuthCode{}, oauth.ErrNotFound
+// RedeemCode consumes the code and opens its refresh family in one
+// transaction, so a concurrent replay either sees an unconsumed code (and
+// waits on the row lock) or sees a consumed code whose family already exists
+// and revokes it. A failed check still commits the consumption: a code that
+// has been presented with a wrong verifier, client or redirect URI is dead.
+func (o *OAuthStore) RedeemCode(ctx context.Context, workspaceID string, hash []byte, check func(oauth.AuthCode) error, first oauth.RefreshToken) (oauth.AuthCode, string, error) {
+	if workspaceID == "" || len(hash) == 0 || check == nil || len(first.Hash) == 0 {
+		return oauth.AuthCode{}, "", oauth.ErrNotFound
 	}
 	var code oauth.AuthCode
+	var familyID string
+	var checkErr error
 	reused := false
 	err := WithTenant(ctx, o.s.pool, workspaceID, func(ctx context.Context, tx pgx.Tx) error {
 		var consumed *time.Time
@@ -84,38 +91,30 @@ func (o *OAuthStore) RedeemCode(ctx context.Context, workspaceID string, hash []
 			}
 			return nil
 		}
-		if err := check(code); err != nil {
-			return err
-		}
 		if _, err := tx.Exec(ctx, `UPDATE oauth_authorization_codes SET consumed_at=now() WHERE code_hash=$1`, hash); err != nil {
 			return fmt.Errorf("consume authorization code: %w", err)
 		}
-		return nil
-	})
-	if err != nil {
-		return oauth.AuthCode{}, err
-	}
-	if reused {
-		return oauth.AuthCode{}, oauth.ErrGrantReused
-	}
-	return code, nil
-}
-
-func (o *OAuthStore) CreateFamily(ctx context.Context, f oauth.RefreshFamily, first oauth.RefreshToken) (string, error) {
-	if f.WorkspaceID == "" || len(first.Hash) == 0 {
-		return "", errors.New("storage: incomplete refresh family")
-	}
-	var id string
-	err := WithTenant(ctx, o.s.pool, f.WorkspaceID, func(ctx context.Context, tx pgx.Tx) error {
-		if err := tx.QueryRow(ctx, `INSERT INTO oauth_refresh_families(client_id,subject,workspace_id,resource,scope,code_hash) VALUES($1,$2,$3,$4,$5,$6) RETURNING family_id::text`, f.ClientID, f.Subject, f.WorkspaceID, f.Resource, f.Scopes, f.CodeHash).Scan(&id); err != nil {
+		if checkErr = check(code); checkErr != nil {
+			// Commit the consumption; the redemption itself fails below.
+			return nil
+		}
+		if err := tx.QueryRow(ctx, `INSERT INTO oauth_refresh_families(client_id,subject,workspace_id,resource,scope,code_hash) VALUES($1,$2,$3,$4,$5,$6) RETURNING family_id::text`, code.ClientID, code.Subject, code.WorkspaceID, code.Resource, code.Scopes, code.Hash).Scan(&familyID); err != nil {
 			return fmt.Errorf("create refresh family: %w", err)
 		}
-		if _, err := tx.Exec(ctx, `INSERT INTO oauth_refresh_tokens(token_hash,family_id,issued_at,expires_at) VALUES($1,$2::uuid,$3,$4)`, first.Hash, id, first.IssuedAt, first.ExpiresAt); err != nil {
+		if _, err := tx.Exec(ctx, `INSERT INTO oauth_refresh_tokens(token_hash,family_id,issued_at,expires_at) VALUES($1,$2::uuid,$3,$4)`, first.Hash, familyID, first.IssuedAt, first.ExpiresAt); err != nil {
 			return fmt.Errorf("create refresh token: %w", err)
 		}
 		return nil
 	})
-	return id, err
+	switch {
+	case err != nil:
+		return oauth.AuthCode{}, "", err
+	case reused:
+		return oauth.AuthCode{}, "", oauth.ErrGrantReused
+	case checkErr != nil:
+		return oauth.AuthCode{}, "", checkErr
+	}
+	return code, familyID, nil
 }
 
 func (o *OAuthStore) RotateRefresh(ctx context.Context, workspaceID string, hash []byte, check func(oauth.RefreshFamily, oauth.RefreshToken) error, next oauth.RefreshToken) (oauth.RefreshFamily, error) {

@@ -156,7 +156,7 @@ func startFixture() (*fixture, error) {
 		}
 		w.WriteHeader(http.StatusNotFound)
 	}))
-	appCfg := app.Config{ListenAddress: placeholder.Listener.Addr().String(), PublicOrigin: origin, ResourceAudience: origin, DatabaseURL: dsn, ObjectStoreRoot: artifact, BrokerURL: broker.URL, BrokerClient: broker.Client(), RequestTimeout: 5 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 10000, MaxConcurrentRequests: 20, MaxDiscoveryResults: 50, RetryAfter: 1}
+	appCfg := app.Config{ListenAddress: placeholder.Listener.Addr().String(), PublicOrigin: origin, ResourceAudience: origin, DatabaseURL: dsn, ObjectStoreRoot: artifact, BrokerURL: broker.URL, BrokerClient: broker.Client(), RequestTimeout: 5 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 10000, MaxConcurrentRequests: 20, MaxDiscoveryResults: 50, RetryAfter: 1, OAuthConsentSecret: []byte("acceptance-only-oauth-consent-secret-0123456789")}
 	a, err := app.New(ctx, appCfg)
 	if err != nil {
 		broker.Close()
