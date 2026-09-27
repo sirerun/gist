@@ -32,10 +32,10 @@
     "Q5 (CI/cloud credential runs) not covered here; blocked on founder credentials."
   ],
   "source_hash": "c53f46cb06bcf9fb586950702479a98a464291dd8fae85dafb1784b728be9e0f",
-  "contract_hash": "5b932b15755c5e690185440e2619de838c05f8005cb518d54de762aeaa8b1808",
+  "contract_hash": "59467046708ba3b15aecb312b7d64c00712085e4b218467cec53d75a6cd3c79a",
   "config_hash": "17a91d703b9b0ae1f427d9a6ea3ff6c5514498d9bfdbec4f9dbff183afb518bf",
   "hashes": {
-    "contracts/registry/v1/lock.json": "5b932b15755c5e690185440e2619de838c05f8005cb518d54de762aeaa8b1808",
+    "contracts/registry/v1/lock.json": "59467046708ba3b15aecb312b7d64c00712085e4b218467cec53d75a6cd3c79a",
     "catalog/registry/catalog.json": "c53f46cb06bcf9fb586950702479a98a464291dd8fae85dafb1784b728be9e0f",
     "docs/registry/runtime-contracts.md": "17a91d703b9b0ae1f427d9a6ea3ff6c5514498d9bfdbec4f9dbff183afb518bf",
     "hosted/go.mod": "ead3ffd9a682d2ffbf05b77f1388072021c626e40871c50dd5d8b9c3279e84e5",

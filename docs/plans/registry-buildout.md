@@ -263,6 +263,7 @@ policy covers publication. A publish scope alone is not read authority.
 | `POST /v1/publish/bindings` | 201 exact-version binding with successful goldens; choice. |
 | `POST /v1/publish/taxonomies` | 201 edition with required attribution; choice. |
 | `POST /v1/publish/revocations` | 201 immutable revocation notice and event; repeats return existing notice; choice. |
+| `POST /v1/identities/revoke` | 200 revokes a workload identity in the caller's own workspace (`identity:revoke` + maintainer); repeats return 200; missing or foreign is uniform 404. Amendment in ADR 005. |
 | `GET /v1/events` | Authorized ordered notices, bound cursor, retention-gap recovery; section 9. |
 | `POST /v1/artifacts/batch-get` | Exact typed references, bounded complete items and per-item denial, no truncation; choice for section 8. |
 
