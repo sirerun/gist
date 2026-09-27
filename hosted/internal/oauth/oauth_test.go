@@ -305,7 +305,10 @@ func (m hookMinter) MintAccess(ctx context.Context, resource string, req identit
 	return m.inner.MintAccess(ctx, resource, req)
 }
 
-func newHarness(t *testing.T) *harness {
+// newHarness starts the reference AS and two protected resources at an
+// isolated local TLS origin. Each wrap decorates the whole origin's handler,
+// which the issuer-checklist tests use to build fake non-compliant issuers.
+func newHarness(t *testing.T, wraps ...func(http.Handler) http.Handler) *harness {
 	t.Helper()
 	clock := &fakeClock{now: time.Date(2026, 9, 26, 12, 0, 0, 0, time.UTC)}
 	key, err := identity.GenerateSigningKey("k1", clock.Now())
@@ -354,13 +357,17 @@ func newHarness(t *testing.T) *harness {
 	mux := http.NewServeMux()
 	mux.Handle("/resource-a", oauth.WithChallenge(protected(issuerA), h.as.ProtectedResourceMetadataURL()))
 	mux.Handle("/resource-b", oauth.WithChallenge(protected(issuerB), resourceB+oauth.PathPRMetadata))
-	h.srv.Config.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if oauth.Handles(r.URL.Path) {
 			h.as.ServeHTTP(w, r)
 			return
 		}
 		mux.ServeHTTP(w, r)
 	})
+	for _, wrap := range wraps {
+		handler = wrap(handler)
+	}
+	h.srv.Config.Handler = handler
 	h.srv.StartTLS()
 	t.Cleanup(h.srv.Close)
 	h.http = h.srv.Client()
