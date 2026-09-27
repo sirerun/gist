@@ -28,12 +28,14 @@ import (
 )
 
 type App struct {
-	cfg       Config
-	pool      *pgxpool.Pool
-	objects   *storage.ObjectStore
-	issuer    *identity.WorkloadIssuer
-	server    *http.Server
-	closeOnce sync.Once
+	cfg     Config
+	pool    *pgxpool.Pool
+	objects *storage.ObjectStore
+	issuer  *identity.WorkloadIssuer
+	// identities records the stored identity behind every minted token.
+	identities issuedIdentityRecorder
+	server     *http.Server
+	closeOnce  sync.Once
 }
 
 // New opens the real pgx pool and filesystem-backed object store. It pings
@@ -124,7 +126,7 @@ func newWithStores(cfg Config, pool *pgxpool.Pool, objects *storage.ObjectStore)
 		pool.Close()
 		return nil, err
 	}
-	return &App{cfg: cfg, pool: pool, objects: objects, issuer: issuer, server: &http.Server{Addr: cfg.ListenAddress, Handler: requestContext{rest: rh, mcp: mcp, ready: func(ctx context.Context) error { return pool.Ping(ctx) }}, ReadHeaderTimeout: cfg.RequestTimeout}}, nil
+	return &App{cfg: cfg, pool: pool, objects: objects, issuer: issuer, identities: catalog, server: &http.Server{Addr: cfg.ListenAddress, Handler: requestContext{rest: rh, mcp: mcp, ready: func(ctx context.Context) error { return pool.Ping(ctx) }}, ReadHeaderTimeout: cfg.RequestTimeout}}, nil
 }
 
 func (a *App) Handler() http.Handler { return a.server.Handler }
@@ -137,7 +139,30 @@ func (a *App) MintWorkloadToken(ctx context.Context, req identity.WorkloadReques
 	if a == nil || a.issuer == nil {
 		return "", errors.New("app: workload issuer is unavailable")
 	}
-	return a.issuer.Mint(ctx, req)
+	token, err := a.issuer.Mint(ctx, req)
+	if err != nil {
+		return "", err
+	}
+	// Token verification requires an unrevoked stored identity, so issuance
+	// must record one. Read the claims back from the signed token so the row
+	// matches exactly what Lookup will be asked about. The token is returned
+	// only after the row is written; a revoked identity gets no token.
+	got, err := a.issuer.Verify(ctx, token)
+	if err != nil {
+		return "", fmt.Errorf("app: verify minted workload token: %w", err)
+	}
+	if a.identities == nil {
+		return "", errors.New("app: identity store is unavailable")
+	}
+	p := got.Principal
+	record := ports.IdentityRecord{Issuer: p.Issuer, Subject: p.Subject, WorkspaceID: p.WorkspaceID, SubjectType: p.SubjectType, Scopes: p.Scopes, PolicyGeneration: p.PolicyGeneration, ExpiresAt: got.ExpiresAt.Unix()}
+	if err := a.identities.RecordIssued(ctx, record); err != nil {
+		if errors.Is(err, storage.ErrIdentityRevoked) {
+			return "", identity.ErrUnauthorized
+		}
+		return "", fmt.Errorf("app: record workload identity: %w", err)
+	}
+	return token, nil
 }
 
 // SeedAcceptanceArtifact installs a complete artifact into the same
@@ -241,6 +266,12 @@ var _ rest.EventCursorOpener = eventStoreAdapter{}
 type identityCatalog interface {
 	Lookup(ctx context.Context, workspaceID, issuer, subject string) (ports.IdentityRecord, error)
 	Revoke(ctx context.Context, workspaceID, issuer, subject string) error
+}
+
+// issuedIdentityRecorder persists the stored identity behind a minted token.
+// It must refuse, with storage.ErrIdentityRevoked, to revive a revoked row.
+type issuedIdentityRecorder interface {
+	RecordIssued(ctx context.Context, r ports.IdentityRecord) error
 }
 
 // tokenVerifier verifies a workload token's signature, audience binding and
