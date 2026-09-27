@@ -1,0 +1,277 @@
+{
+  "schema": "gist.issuer-checklist/v1",
+  "requirement_source": "docs/rfc-002.md section 10; docs/plans/registry-buildout.md Section 10 authorization-server requirement checklist",
+  "deployments": [
+    {
+      "deployment": "local-reference",
+      "build": "local-test",
+      "selection": {
+        "selected_strategy": "built-in",
+        "selected_issuer": "built-in reference AS at an isolated local TLS test origin",
+        "rejected_rows": [
+          "rfc8414-discovery",
+          "rfc7591-registration",
+          "authorization-code-pkce-consent",
+          "refresh-rotation-reuse",
+          "rfc9728-protected-resource-metadata",
+          "rfc8707-resource-audience"
+        ],
+        "reasons": [
+          "interface receipt W1 is missing (external evidence pending)",
+          "interface receipt W2 is missing (external evidence pending)",
+          "interface receipt W3 is missing (external evidence pending)",
+          "interface receipt W4 is missing (external evidence pending)",
+          "interface receipt W5 is missing (external evidence pending)",
+          "checklist row rfc8414-discovery pending: runtime probes not run: W1-W5 interface receipts are absent and X-W5 external connector evidence is pending",
+          "checklist row rfc7591-registration pending: runtime probes not run: W1-W5 interface receipts are absent and X-W5 external connector evidence is pending",
+          "checklist row authorization-code-pkce-consent pending: runtime probes not run: W1-W5 interface receipts are absent and X-W5 external connector evidence is pending",
+          "checklist row refresh-rotation-reuse pending: runtime probes not run: W1-W5 interface receipts are absent and X-W5 external connector evidence is pending",
+          "checklist row rfc9728-protected-resource-metadata pending: runtime probes not run: W1-W5 interface receipts are absent and X-W5 external connector evidence is pending",
+          "checklist row rfc8707-resource-audience pending: runtime probes not run: W1-W5 interface receipts are absent and X-W5 external connector evidence is pending"
+        ]
+      },
+      "qualifications": [
+        {
+          "deployment": "local-reference",
+          "build": "local-test",
+          "strategy": "built-in",
+          "issuer": "built-in reference AS at an isolated local TLS test origin",
+          "status": "qualified",
+          "rows": [
+            {
+              "id": "rfc8414-discovery",
+              "requirement": "RFC 8414 AS discovery: metadata locates actual authorize/token/register/revoke endpoints and supported S256/resource behavior",
+              "status": "pass",
+              "probes": [
+                {
+                  "name": "metadata-served",
+                  "passed": true
+                },
+                {
+                  "name": "issuer-matches",
+                  "passed": true
+                },
+                {
+                  "name": "endpoints-https",
+                  "passed": true
+                },
+                {
+                  "name": "endpoints-live",
+                  "passed": true
+                },
+                {
+                  "name": "pkce-s256-only",
+                  "passed": true
+                },
+                {
+                  "name": "code-and-refresh-grants",
+                  "passed": true
+                },
+                {
+                  "name": "resource-advertised",
+                  "passed": true
+                }
+              ]
+            },
+            {
+              "id": "rfc7591-registration",
+              "requirement": "RFC 7591 DCR: HTTPS-only redirect URIs; invalid or excess scopes are rejected, never downgraded",
+              "status": "pass",
+              "probes": [
+                {
+                  "name": "https-redirect-registered",
+                  "passed": true
+                },
+                {
+                  "name": "http-redirect-rejected",
+                  "passed": true
+                },
+                {
+                  "name": "unknown-scope-rejected-not-downgraded",
+                  "passed": true
+                },
+                {
+                  "name": "excess-scope-rejected-not-downgraded",
+                  "passed": true
+                }
+              ]
+            },
+            {
+              "id": "authorization-code-pkce-consent",
+              "requirement": "Authorization code + PKCE + consent: S256 only; code single-use and bound to client, redirect and consent; denial issues no grant",
+              "status": "pass",
+              "probes": [
+                {
+                  "name": "client-registered",
+                  "passed": true
+                },
+                {
+                  "name": "pkce-plain-rejected",
+                  "passed": true
+                },
+                {
+                  "name": "pkce-challenge-required",
+                  "passed": true
+                },
+                {
+                  "name": "consent-denial-issues-no-grant",
+                  "passed": true
+                },
+                {
+                  "name": "wrong-verifier-rejected",
+                  "passed": true
+                },
+                {
+                  "name": "redirect-mismatch-rejected",
+                  "passed": true
+                },
+                {
+                  "name": "stolen-code-other-client-rejected",
+                  "passed": true
+                },
+                {
+                  "name": "code-single-use",
+                  "passed": true
+                }
+              ]
+            },
+            {
+              "id": "refresh-rotation-reuse",
+              "requirement": "Refresh rotation and reuse containment: rotates once, preserves bounds; reuse revokes the family; revoked consent is rejected",
+              "status": "pass",
+              "probes": [
+                {
+                  "name": "grant-issued",
+                  "passed": true
+                },
+                {
+                  "name": "refresh-rotates-and-preserves-bounds",
+                  "passed": true
+                },
+                {
+                  "name": "refresh-rejects-widening",
+                  "passed": true
+                },
+                {
+                  "name": "reused-refresh-rejected",
+                  "passed": true
+                },
+                {
+                  "name": "reuse-revokes-family",
+                  "passed": true
+                },
+                {
+                  "name": "revoked-consent-rejected",
+                  "passed": true
+                }
+              ]
+            },
+            {
+              "id": "rfc9728-protected-resource-metadata",
+              "requirement": "RFC 9728 PRM: real document with resource, authorization servers and catalog scopes; 401 challenge points to PRM",
+              "status": "pass",
+              "probes": [
+                {
+                  "name": "challenge-points-to-prm",
+                  "passed": true
+                },
+                {
+                  "name": "prm-document",
+                  "passed": true
+                },
+                {
+                  "name": "as-discoverable-from-prm",
+                  "passed": true
+                }
+              ]
+            },
+            {
+              "id": "rfc8707-resource-audience",
+              "requirement": "RFC 8707 resource/audience: resource bound at authorize, redemption and refresh; token for A rejected by B",
+              "status": "pass",
+              "probes": [
+                {
+                  "name": "unknown-resource-rejected",
+                  "passed": true
+                },
+                {
+                  "name": "token-accepted-at-bound-resource",
+                  "passed": true
+                },
+                {
+                  "name": "token-rejected-at-other-resource",
+                  "passed": true
+                },
+                {
+                  "name": "other-resource-token-rejected-here",
+                  "passed": true
+                },
+                {
+                  "name": "redemption-resource-bound",
+                  "passed": true
+                },
+                {
+                  "name": "refresh-resource-bound",
+                  "passed": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "deployment": "local-reference",
+          "build": "local-test",
+          "strategy": "delegated",
+          "issuer": "external delegated issuer (not yet selected)",
+          "status": "pending",
+          "failing_rows": [
+            "rfc8414-discovery",
+            "rfc7591-registration",
+            "authorization-code-pkce-consent",
+            "refresh-rotation-reuse",
+            "rfc9728-protected-resource-metadata",
+            "rfc8707-resource-audience"
+          ],
+          "rows": [
+            {
+              "id": "rfc8414-discovery",
+              "requirement": "RFC 8414 AS discovery: metadata locates actual authorize/token/register/revoke endpoints and supported S256/resource behavior",
+              "status": "pending",
+              "reason": "runtime probes not run: W1-W5 interface receipts are absent and X-W5 external connector evidence is pending"
+            },
+            {
+              "id": "rfc7591-registration",
+              "requirement": "RFC 7591 DCR: HTTPS-only redirect URIs; invalid or excess scopes are rejected, never downgraded",
+              "status": "pending",
+              "reason": "runtime probes not run: W1-W5 interface receipts are absent and X-W5 external connector evidence is pending"
+            },
+            {
+              "id": "authorization-code-pkce-consent",
+              "requirement": "Authorization code + PKCE + consent: S256 only; code single-use and bound to client, redirect and consent; denial issues no grant",
+              "status": "pending",
+              "reason": "runtime probes not run: W1-W5 interface receipts are absent and X-W5 external connector evidence is pending"
+            },
+            {
+              "id": "refresh-rotation-reuse",
+              "requirement": "Refresh rotation and reuse containment: rotates once, preserves bounds; reuse revokes the family; revoked consent is rejected",
+              "status": "pending",
+              "reason": "runtime probes not run: W1-W5 interface receipts are absent and X-W5 external connector evidence is pending"
+            },
+            {
+              "id": "rfc9728-protected-resource-metadata",
+              "requirement": "RFC 9728 PRM: real document with resource, authorization servers and catalog scopes; 401 challenge points to PRM",
+              "status": "pending",
+              "reason": "runtime probes not run: W1-W5 interface receipts are absent and X-W5 external connector evidence is pending"
+            },
+            {
+              "id": "rfc8707-resource-audience",
+              "requirement": "RFC 8707 resource/audience: resource bound at authorize, redemption and refresh; token for A rejected by B",
+              "status": "pending",
+              "reason": "runtime probes not run: W1-W5 interface receipts are absent and X-W5 external connector evidence is pending"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
