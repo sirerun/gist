@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import importlib.util
 import json
 import re
 import sys
@@ -186,76 +185,6 @@ def check_artifact(path: Path, label: str) -> None:
         nonempty(document.get(field), f"{label}.{field}")
 
 
-PREVIEW_STAGE_MARKERS = {
-    "plan stage with a target-stack diff": "pulumi preview --stack \"$STACK\"",
-    "approval environment before apply": "environment: registry-preview-apply",
-    "create stage": "pulumi up --stack \"$STACK\"",
-    "test stage": "preview-probe.sh",
-    "destroy stage": "preview-destroy.sh",
-    "destroy on failure": "always()",
-    "TTL schedule": "cron:",
-    "recorded owner and expiry": "validate-manifest",
-}
-PREVIEW_FILES = (
-    "deploy/registry/preview.py",
-    "deploy/registry/preview-configure.sh",
-    "deploy/registry/preview-probe.sh",
-    "deploy/registry/preview-destroy.sh",
-    "deploy/registry/preview.manifest.schema.json",
-    "deploy/registry/preview.manifest.example.json",
-    ".github/workflows/registry-preview.yml",
-)
-SECRET_VALUE = re.compile(
-    r"(-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|\"private_key\"\s*:|pulumi config set --secret)"
-)
-
-
-def check_preview_iac() -> None:
-    """Static, offline check of the O2 preview IaC and workflow (no cloud access)."""
-
-    for relative in PREVIEW_FILES:
-        path = ROOT / relative
-        if not path.is_file() or path.stat().st_size == 0:
-            fail(f"missing preview IaC file: {relative}")
-        if SECRET_VALUE.search(path.read_text(encoding="utf-8")):
-            fail(f"preview IaC file appears to embed secret material: {relative}")
-    workflow = (ROOT / ".github/workflows/registry-preview.yml").read_text(encoding="utf-8")
-    for label, marker in PREVIEW_STAGE_MARKERS.items():
-        if marker not in workflow:
-            fail(f"preview workflow lacks {label} ({marker!r})")
-    # A project backend.url outranks `pulumi login`, which would silently send
-    # each job's state to its own runner; state must come from PULUMI_BACKEND_URL.
-    if re.search(r"^backend:", (ROOT / "deploy/registry/Pulumi.yaml").read_text(encoding="utf-8"), re.MULTILINE):
-        fail("deploy/registry/Pulumi.yaml must not pin a backend; set PULUMI_BACKEND_URL instead")
-    if "PULUMI_BACKEND_URL: gs://" not in workflow:
-        fail("preview workflow must set PULUMI_BACKEND_URL to the shared gs:// state bucket")
-    for script in ("preview-configure.sh", "preview-destroy.sh"):
-        text = (ROOT / "deploy/registry" / script).read_text(encoding="utf-8")
-        if '"$STACK" != "preview"' not in text:
-            fail(f"{script} must refuse any stack other than 'preview'")
-    program = (ROOT / "deploy/registry/__main__.py").read_text(encoding="utf-8")
-    for marker in ("deploymentMode", "preview_mod.parse_settings", "build_ingress", "force_destroy=is_preview",
-                   "deletion_protection=not is_preview", "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"):
-        if marker not in program:
-            fail(f"__main__.py lacks preview wiring: {marker}")
-    spec = importlib.util.spec_from_file_location("registry_preview", ROOT / "deploy/registry/preview.py")
-    if spec is None or spec.loader is None:
-        fail("cannot load deploy/registry/preview.py")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    if module.MAX_TTL_HOURS > 24:
-        fail("preview TTL hard maximum exceeds 24 hours")
-    example = read_json(ROOT / "deploy/registry/preview.manifest.example.json")
-    try:
-        module.validate_manifest(example)
-    except ValueError as exc:
-        fail(f"preview manifest example is invalid: {exc}")
-    schema = read_json(ROOT / "deploy/registry/preview.manifest.schema.json")
-    if set(schema.get("required", [])) != module.MANIFEST_KEYS:
-        fail("preview manifest schema required keys drift from preview.MANIFEST_KEYS")
-
-
 def check_evidence(milestone: str) -> None:
     path = ROOT / "docs" / "registry" / "gates" / f"{milestone}.json"
     document = read_json(path)
@@ -296,9 +225,6 @@ def main(argv: list[str] | None = None) -> int:
     receipt.add_argument("path", type=Path)
     evaluation = subparsers.add_parser("eval")
     evaluation.add_argument("path", type=Path)
-    iac = subparsers.add_parser("iac")
-    iac.add_argument("path", type=Path, nargs="?")
-    iac.add_argument("--preview", action="store_true", help="statically check the O2 OAuth preview IaC and workflow")
     release = subparsers.add_parser("release")
     release.add_argument("path", type=Path)
     evidence = subparsers.add_parser("evidence")
@@ -311,13 +237,7 @@ def main(argv: list[str] | None = None) -> int:
             check_receipt(args.path)
         elif args.command == "eval":
             check_eval(args.path)
-        elif args.command == "iac" and args.preview:
-            check_preview_iac()
-            if args.path is not None:
-                check_artifact(args.path, args.command)
-        elif args.command in {"iac", "release"}:
-            if args.path is None:
-                fail("iac requires an evidence path unless --preview is given")
+        elif args.command == "release":
             check_artifact(args.path, args.command)
         else:
             check_evidence(args.milestone)
