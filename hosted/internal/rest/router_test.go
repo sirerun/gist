@@ -161,12 +161,21 @@ func (c versionsCatalog) Search(_ context.Context, q ports.SearchQuery) (ports.S
 	return ports.SearchPage{Records: c.records[:n]}, nil
 }
 
-func (c versionsCatalog) ListVersions(_ context.Context, ref ports.ArtifactRef) ([]ports.CatalogRecord, error) {
+func (c versionsCatalog) ListVersions(_ context.Context, ref ports.ArtifactRef, after string, limit int) ([]ports.CatalogRecord, error) {
 	var out []ports.CatalogRecord
+	skipping := after != ""
 	for _, r := range c.records {
-		if r.Ref.WorkspaceID == ref.WorkspaceID && r.Ref.Kind == ref.Kind && r.Ref.ID == ref.ID {
-			out = append(out, r)
+		if r.Ref.WorkspaceID != ref.WorkspaceID || r.Ref.Kind != ref.Kind || r.Ref.ID != ref.ID {
+			continue
 		}
+		if skipping {
+			skipping = r.Ref.Version != after
+			continue
+		}
+		if len(out) == limit {
+			break
+		}
+		out = append(out, r)
 	}
 	return out, nil
 }
