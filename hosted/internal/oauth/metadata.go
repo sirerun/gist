@@ -81,6 +81,11 @@ func writeMetadata(w http.ResponseWriter, v any) {
 
 // prmURL derives the RFC 9728 section 3.1 metadata URL: the well-known
 // segment is inserted between the host and any resource path.
+//
+// This assumes the resource identifier equals the registry origin (app
+// config enforces ResourceAudience == PublicOrigin), so the metadata is
+// served by this same process. A resource with a path, or on another origin,
+// would yield a URL this server does not route; revisit before allowing one.
 func prmURL(resource string) string {
 	u, err := url.Parse(resource)
 	if err != nil {
