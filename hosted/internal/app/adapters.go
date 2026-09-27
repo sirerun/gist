@@ -117,10 +117,22 @@ func (s *postgresResolutionStore) Put(ctx context.Context, r ports.Resolution) e
 		return err
 	}
 	return storage.WithTenantPrincipal(ctx, s.pool, storage.Tenant{Issuer: r.Principal.Issuer, Subject: r.Principal.Subject, Audience: r.Principal.Audience, WorkspaceID: r.Principal.WorkspaceID, Scopes: r.Principal.Scopes, PolicyGeneration: r.Principal.PolicyGeneration}, func(ctx context.Context, tx pgx.Tx) error {
-		_, err := tx.Exec(ctx, `INSERT INTO resolutions (id,workspace_id,issuer,subject,audience,principal_hash,policy_generation,skill_id,skill_version,expires_at,payload) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,to_timestamp($10),$11)`, r.ID, r.Principal.WorkspaceID, r.Principal.Issuer, r.Principal.Subject, r.Principal.Audience, r.Principal.Subject+"\x00"+r.Principal.WorkspaceID, r.Principal.PolicyGeneration, r.Skill.ID, r.Skill.Version, r.ExpiresAt, payload)
+		_, err := tx.Exec(ctx, `INSERT INTO resolutions (id,workspace_id,issuer,subject,audience,principal_hash,policy_generation,skill_id,skill_version,expires_at,payload) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,to_timestamp($10),$11)`, r.ID, r.Principal.WorkspaceID, r.Principal.Issuer, r.Principal.Subject, r.Principal.Audience, resolutionPrincipalHash(r.Principal), r.Principal.PolicyGeneration, r.Skill.ID, r.Skill.Version, r.ExpiresAt, payload)
 		return err
 	})
 }
+
+// resolutionPrincipalHash binds a stored resolution to the principal that
+// produced it. It is the hex SHA-256 of the JSON-encoded issuer, subject,
+// audience and workspace: JSON string encoding keeps the field boundaries
+// unambiguous, and the hex digest is valid text. (A raw NUL separator is
+// rejected by PostgreSQL text columns, which failed every resolve with 503.)
+func resolutionPrincipalHash(p ports.Principal) string {
+	b, _ := json.Marshal([4]string{p.Issuer, p.Subject, p.Audience, p.WorkspaceID})
+	sum := sha256.Sum256(b)
+	return hex.EncodeToString(sum[:])
+}
+
 func (s *postgresResolutionStore) Get(ctx context.Context, c ports.Cursor) (ports.Resolution, error) {
 	var raw []byte
 	err := storage.WithTenant(ctx, s.pool, c.WorkspaceID, func(ctx context.Context, tx pgx.Tx) error {
