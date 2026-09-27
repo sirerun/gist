@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/sirerun/gist/hosted/internal/lexical"
 	"github.com/sirerun/gist/hosted/internal/ports"
 )
 
@@ -52,6 +54,15 @@ func (s *Postgres) Get(ctx context.Context, ref ports.ArtifactRef) (ports.Catalo
 	return record, nil
 }
 
+// Search generates lexical discovery candidates inside the principal's
+// workspace. The read runs under WithTenant, so row-level security confines
+// both the scanned rows and every term statistic to that workspace; revoked
+// and draft versions never become candidates. With query text, every live
+// record in the workspace (bounded by the catalog-entry limit) is scored with
+// the shared lexical model, non-matching records are dropped, and the rest are
+// ranked before the limit is applied, so a record can never be cut by an
+// alphabetical LIMIT ahead of a better match. Ties break on kind, artifact ID
+// and version, giving a total, deterministic order.
 func (s *Postgres) Search(ctx context.Context, q ports.SearchQuery) (ports.SearchPage, error) {
 	if q.Principal.WorkspaceID == "" {
 		return ports.SearchPage{}, errors.New("storage: search principal has no workspace")
@@ -60,12 +71,12 @@ func (s *Postgres) Search(ctx context.Context, q ports.SearchQuery) (ports.Searc
 	if limit <= 0 || limit > 100 {
 		limit = 100
 	}
-	args := []any{q.Principal.WorkspaceID, limit}
-	where := []string{"workspace_id=$1", "state IN ('published','deprecated')"}
-	if q.Text != "" {
-		args = append(args, "%"+strings.ToLower(q.Text)+"%")
-		where = append(where, "lower(artifact_id) LIKE $"+fmt.Sprint(len(args)))
+	terms := lexical.Query(q.Text)
+	if strings.TrimSpace(q.Text) != "" && len(terms) == 0 {
+		return ports.SearchPage{}, nil // stopwords only: nothing to match, never forced similarity
 	}
+	args := []any{q.Principal.WorkspaceID}
+	where := []string{"workspace_id=$1", "state IN ('published','deprecated')"}
 	if len(q.Kinds) > 0 {
 		vals := make([]string, len(q.Kinds))
 		for i, kind := range q.Kinds {
@@ -74,8 +85,17 @@ func (s *Postgres) Search(ctx context.Context, q ports.SearchQuery) (ports.Searc
 		args = append(args, vals)
 		where = append(where, "kind = ANY($"+fmt.Sprint(len(args))+"::text[])")
 	}
-	query := `SELECT kind, artifact_id, version, state, digest_algorithm, digest_value, manifest_digest_algorithm, manifest_digest_value, metadata FROM catalog_versions WHERE ` + strings.Join(where, " AND ") + ` ORDER BY artifact_id, version LIMIT $2`
-	page := ports.SearchPage{}
+	scan := limit
+	if len(terms) > 0 {
+		scan = maxSearchScan
+	}
+	args = append(args, scan)
+	query := `SELECT kind, artifact_id, version, state, digest_algorithm, digest_value, manifest_digest_algorithm, manifest_digest_value, metadata FROM catalog_versions WHERE ` + strings.Join(where, " AND ") + ` ORDER BY kind, artifact_id, version LIMIT $` + fmt.Sprint(len(args))
+	type ranked struct {
+		record ports.CatalogRecord
+		match  lexical.Match
+	}
+	var hits []ranked
 	err := WithTenant(ctx, s.pool, q.Principal.WorkspaceID, func(ctx context.Context, tx pgx.Tx) error {
 		rows, err := tx.Query(ctx, query, args...)
 		if err != nil {
@@ -88,14 +108,50 @@ func (s *Postgres) Search(ctx context.Context, q ports.SearchQuery) (ports.Searc
 			if err := rows.Scan(&kind, &id, &version, &state, &da, &dv, &mda, &mdv, &metadata); err != nil {
 				return err
 			}
-			page.Records = append(page.Records, ports.CatalogRecord{Ref: ports.ArtifactRef{WorkspaceID: q.Principal.WorkspaceID, Kind: ports.ArtifactKind(kind), ID: id, Version: version}, State: state, Digest: ports.Digest{Algorithm: da, Value: dv}, ManifestDigest: ports.Digest{Algorithm: mda, Value: mdv}, Metadata: append([]byte(nil), metadata...)})
+			record := ports.CatalogRecord{Ref: ports.ArtifactRef{WorkspaceID: q.Principal.WorkspaceID, Kind: ports.ArtifactKind(kind), ID: id, Version: version}, State: state, Digest: ports.Digest{Algorithm: da, Value: dv}, ManifestDigest: ports.Digest{Algorithm: mda, Value: mdv}, Metadata: append([]byte(nil), metadata...)}
+			var match lexical.Match
+			if len(terms) > 0 {
+				doc, err := lexical.DocumentFromMetadata(kind, id, metadata)
+				if err != nil {
+					return fmt.Errorf("decode search metadata %s: %w", id, err)
+				}
+				if match = lexical.NewIndex(doc).Score(terms); !match.Matched() {
+					continue
+				}
+			}
+			hits = append(hits, ranked{record: record, match: match})
 		}
 		return rows.Err()
 	})
 	if err != nil {
 		return ports.SearchPage{}, fmt.Errorf("search catalog: %w", err)
 	}
+	sort.SliceStable(hits, func(i, j int) bool {
+		if c := hits[i].match.Better(hits[j].match); c != 0 {
+			return c > 0
+		}
+		return refLess(hits[i].record.Ref, hits[j].record.Ref)
+	})
+	page := ports.SearchPage{}
+	for i := 0; i < len(hits) && i < limit; i++ {
+		page.Records = append(page.Records, hits[i].record)
+	}
 	return page, nil
+}
+
+// maxSearchScan bounds the rows one text search scores, so a single query
+// has a fixed worst-case cost. A workspace's live catalog up to this size is
+// ranked in full rather than as a lexicographic prefix.
+const maxSearchScan = 10000
+
+func refLess(a, b ports.ArtifactRef) bool {
+	if a.Kind != b.Kind {
+		return a.Kind < b.Kind
+	}
+	if a.ID != b.ID {
+		return a.ID < b.ID
+	}
+	return a.Version < b.Version
 }
 
 // ListVersions returns one page of the published or deprecated versions of

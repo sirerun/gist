@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sirerun/gist/hosted/internal/lexical"
 	"github.com/sirerun/gist/hosted/internal/ports"
 )
 
@@ -104,7 +105,9 @@ func (s *Service) Search(ctx context.Context, req Request) (Response, error) {
 
 	// Authorization is intentionally before ranking and limiting. A hidden
 	// record must not influence order, counts, snippets, or budget decisions.
-	visible := make([]Candidate, 0, len(records))
+	terms := lexical.Query(req.Query)
+	textQuery := strings.TrimSpace(req.Query) != ""
+	visible := make([]rankedCandidate, 0, len(records))
 	for _, record := range records {
 		ref := record.Ref
 		decision, err := s.auth.Decide(ctx, req.Principal, ports.ActionRead, &ref)
@@ -118,24 +121,42 @@ func (s *Service) Search(ctx context.Context, req Request) (Response, error) {
 		if err != nil {
 			return Response{}, fmt.Errorf("decode discovery metadata %s: %w", ref.ID, err)
 		}
-		if !matches(candidate, req) {
+		if !matchesFilters(candidate, req) {
 			continue
 		}
-		visible = append(visible, candidate)
+		var match lexical.Match
+		if textQuery {
+			doc, err := lexical.DocumentFromMetadata(string(ref.Kind), ref.ID, record.Metadata)
+			if err != nil {
+				return Response{}, fmt.Errorf("decode discovery metadata %s: %w", ref.ID, err)
+			}
+			// Empty or no-match is a valid result; never force similarity.
+			if match = lexical.NewIndex(doc).Score(terms); !match.Matched() {
+				continue
+			}
+		}
+		visible = append(visible, rankedCandidate{Candidate: candidate, match: match})
 	}
 	sort.SliceStable(visible, func(i, j int) bool {
-		si, sj := score(req.Query, visible[i]), score(req.Query, visible[j])
-		if si != sj {
-			return si > sj
+		if c := visible[i].match.Better(visible[j].match); c != 0 {
+			return c > 0
 		}
-		return visible[i].ID < visible[j].ID
+		a, b := visible[i].Candidate, visible[j].Candidate
+		if a.Kind != b.Kind {
+			return a.Kind < b.Kind
+		}
+		if a.ID != b.ID {
+			return a.ID < b.ID
+		}
+		return a.Version < b.Version
 	})
 
 	result := Response{Candidates: make([]Candidate, 0, min(req.Limit, len(visible)))}
 	if next.ID != "" {
 		result.NextCursor = &next
 	}
-	for _, candidate := range visible {
+	for _, ranked := range visible {
+		candidate := ranked.Candidate
 		if len(result.Candidates) == req.Limit {
 			break
 		}
@@ -180,21 +201,15 @@ func candidateFromRecord(r ports.CatalogRecord) (Candidate, error) {
 	return Candidate{Ref: r.Ref, Kind: r.Ref.Kind, ID: r.Ref.ID, Version: r.Ref.Version, LogicalName: m.LogicalName, Summary: m.Summary, Trust: m.Trust, Tags: m.Tags, RequiredCapabilityCount: len(m.RequiredCapabilities), ResolutionRequired: len(m.RequiredCapabilities) > 0, EstimatedBytes: m.EstimatedBytes}, nil
 }
 
-func matches(c Candidate, req Request) bool {
-	query := strings.TrimSpace(strings.ToLower(req.Query))
-	if query != "" {
-		text := strings.ToLower(c.ID + " " + c.LogicalName + " " + c.Summary)
-		matched := false
-		for _, word := range strings.Fields(query) {
-			if strings.Contains(text, word) {
-				matched = true
-				break
-			}
-		}
-		if !matched {
-			return false
-		}
-	}
+// rankedCandidate carries a visible candidate's lexical match for ranking.
+type rankedCandidate struct {
+	Candidate
+	match lexical.Match
+}
+
+// matchesFilters applies the metadata filters (kind and tags). Query text is
+// matched separately by the shared lexical model.
+func matchesFilters(c Candidate, req Request) bool {
 	if len(req.Kinds) > 0 {
 		found := false
 		for _, k := range req.Kinds {
@@ -231,27 +246,6 @@ func principalHash(p ports.Principal) string {
 	}{p.Issuer, p.Subject, p.Audience, p.WorkspaceID, p.PolicyGeneration, scopes})
 	h := sha256.Sum256(b)
 	return hex.EncodeToString(h[:])
-}
-
-func score(q string, c Candidate) int {
-	q = strings.ToLower(strings.TrimSpace(q))
-	if q == "" {
-		return 0
-	}
-	text := strings.ToLower(c.ID + " " + c.LogicalName + " " + c.Summary)
-	if text == q {
-		return 1000
-	}
-	if strings.Contains(text, q) {
-		return 100
-	}
-	count := 0
-	for _, word := range strings.Fields(q) {
-		if strings.Contains(text, word) {
-			count++
-		}
-	}
-	return count
 }
 
 func cacheKey(r Request, version string) string {
