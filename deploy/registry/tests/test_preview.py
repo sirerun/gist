@@ -41,6 +41,7 @@ BASE = {
     "databasePasswordSecret": "gist-registry-preview-database-password",
     "issuerSecret": "gist-registry-preview-oauth-issuer",
     "signingKeySecret": "gist-registry-preview-workload-signing-key",
+    "consentSecretSecret": "gist-registry-preview-oauth-consent-secret",
 }
 
 

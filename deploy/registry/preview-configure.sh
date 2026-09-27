@@ -48,6 +48,7 @@ set_cfg previewDnsProject "$DNS_PROJECT"
 set_cfg databasePasswordSecret gist-registry-preview-database-password
 set_cfg issuerSecret gist-registry-preview-oauth-issuer
 set_cfg signingKeySecret gist-registry-preview-workload-signing-key
+set_cfg consentSecretSecret gist-registry-preview-oauth-consent-secret
 # A JSON array string; the program reads it with Config.get_object.
 jq -e 'type == "array" and all(.[]; type == "string")' <<<"$REDIRECT_URIS" >/dev/null \
   || { echo "GIST_PREVIEW_OAUTH_REDIRECT_URIS must be a JSON array of exact HTTPS URIs" >&2; exit 1; }
