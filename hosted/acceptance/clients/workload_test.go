@@ -266,8 +266,9 @@ func TestWorkload(t *testing.T) {
 		})
 	}
 
-	// An unsupported resolution is surfaced as an MCP tool error, never treated
-	// as a successful runtime installation or execution grant.
+	// Resolution over MCP reports the stored result honestly. The fixture
+	// skill has no required capabilities, so it is ready with no findings; a
+	// resolution is a report, never a runtime installation or execution grant.
 	client := &mcpClient{f.server.URL, token, f.server.Client(), ""}
 	if err := client.initialize(ctx); err != nil {
 		t.Fatal(err)
@@ -276,8 +277,13 @@ func TestWorkload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !reply.Result.IsError || !strings.Contains(reply.Result.Text(), "service_unavailable") {
-		t.Fatalf("unsupported resolution was not explicit: %+v", reply.Result)
+	var resolved struct {
+		ID       string            `json:"resolution_id"`
+		Status   string            `json:"status"`
+		Findings []json.RawMessage `json:"findings"`
+	}
+	if reply.Result.IsError || json.Unmarshal([]byte(reply.Result.Text()), &resolved) != nil || resolved.ID == "" || resolved.Status != "ready" || len(resolved.Findings) != 0 {
+		t.Fatalf("resolution was not reported as ready: %+v", reply.Result)
 	}
 
 	// Expiry is observed at the protected-resource boundary.
