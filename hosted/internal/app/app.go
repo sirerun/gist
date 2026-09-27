@@ -105,7 +105,7 @@ func newWithStores(cfg Config, pool *pgxpool.Pool, objects *storage.ObjectStore)
 		return nil, err
 	}
 	resolutionStore := &postgresResolutionStore{pool: pool}
-	resolver, err := resolution.NewResolver(catalog, policy, resolutionStore, clock, nil)
+	resolver, err := resolution.NewResolver(unrevokedCatalog{CatalogStore: catalog}, policy, resolutionStore, clock, nil)
 	if err != nil {
 		pool.Close()
 		return nil, err
@@ -116,7 +116,7 @@ func newWithStores(cfg Config, pool *pgxpool.Pool, objects *storage.ObjectStore)
 	if broker != nil {
 		connections = broker
 	}
-	services := rest.Services{Identity: identityStore, Authorizer: policy, Catalog: catalog, Search: lexicalAdapter{service: search}, Versions: catalog, Artifacts: objects, Resolutions: resolutionStore, Connections: connections, Events: eventStoreAdapter{store: feed}, Publisher: publisher{pool: pool, objects: objects, limits: cfg}, Resolver: resolverAdapter{resolver: resolver, maxBytes: cfg.MaxResponseBytes}, Limits: cfg.RESTLimits(), Audience: cfg.ResourceAudience}
+	services := rest.Services{Identity: identityStore, Authorizer: policy, Catalog: catalog, Search: lexicalAdapter{service: search}, Versions: catalog, Artifacts: objects, Resolutions: resolutionStore, Connections: connections, Events: eventStoreAdapter{store: feed}, Publisher: publisher{pool: pool, objects: objects, limits: cfg}, Revocations: artifactRevoker{catalog: catalog, feed: eventStoreAdapter{store: feed}}, Resolver: resolverAdapter{resolver: resolver, maxBytes: cfg.MaxResponseBytes}, Limits: cfg.RESTLimits(), Audience: cfg.ResourceAudience}
 	rh, err := rest.New(services)
 	if err != nil {
 		pool.Close()
@@ -376,6 +376,9 @@ func (r resolverAdapter) Resolve(ctx context.Context, p ports.Principal, raw []b
 		in.MaxBytes = r.maxBytes
 	}
 	got, err := r.resolver.Resolve(ctx, resolution.Request{Principal: p, Skill: in.Skill, RuntimeID: in.RuntimeID, LocalExecution: in.LocalExecution, OwnedConnections: in.OwnedConnections, SelectedBindings: in.SelectedBindings, MaxBytes: in.MaxBytes})
+	if errors.Is(err, storage.ErrRevoked) {
+		return nil, rest.ErrArtifactRevoked
+	}
 	if err != nil {
 		return nil, err
 	}

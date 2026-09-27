@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -15,6 +16,7 @@ import (
 	"github.com/sirerun/gist/hosted/internal/identity"
 	"github.com/sirerun/gist/hosted/internal/packages"
 	"github.com/sirerun/gist/hosted/internal/ports"
+	"github.com/sirerun/gist/hosted/internal/rest"
 	"github.com/sirerun/gist/hosted/internal/storage"
 )
 
@@ -185,3 +187,55 @@ func (r *byteReader) Read(p []byte) (int, error) { return r.r.Read(p) }
 
 var _ ports.Authorizer = (*postgresPolicy)(nil)
 var _ ports.ResolutionStore = (*postgresResolutionStore)(nil)
+
+// artifactRevoker records artifact revocations (POST /v1/publish/revocations)
+// in the catalog row's revoked state and emits version_revoked on the feed.
+// It never inserts a catalog version.
+type artifactRevoker struct {
+	catalog *storage.Postgres
+	feed    ports.EventStore
+}
+
+func (a artifactRevoker) RevokeArtifact(ctx context.Context, p ports.Principal, ref ports.ArtifactRef) (rest.RevocationNotice, error) {
+	rev, err := a.catalog.RevokeVersion(ctx, ref)
+	if errors.Is(err, storage.ErrNotFound) {
+		return rest.RevocationNotice{}, rest.ErrNotFound
+	}
+	if err != nil {
+		return rest.RevocationNotice{}, err
+	}
+	if rev.Created && a.feed != nil {
+		id, err := eventID()
+		if err != nil {
+			return rest.RevocationNotice{}, err
+		}
+		// The revocation is already committed; a feed failure must not
+		// report it as not revoked, and consumers recover from a missed
+		// event by resynchronizing (ADR 005).
+		_ = a.feed.Append(ctx, ports.Event{ID: id, WorkspaceID: ref.WorkspaceID, Type: ports.EventVersionRevoked, Subject: ref, OccurredAt: rev.RevokedAt.Unix(), PolicyGeneration: p.PolicyGeneration})
+	}
+	return rest.RevocationNotice{Ref: rev.Ref, RevokedAt: rev.RevokedAt.Unix()}, nil
+}
+
+func eventID() (string, error) {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		return "", fmt.Errorf("event id: %w", err)
+	}
+	return "evt_" + hex.EncodeToString(b), nil
+}
+
+// unrevokedCatalog hides revoked versions from resolution: a revoked pinned
+// record yields storage.ErrRevoked, so it can never be selected or resolved.
+type unrevokedCatalog struct{ ports.CatalogStore }
+
+func (c unrevokedCatalog) Get(ctx context.Context, ref ports.ArtifactRef) (ports.CatalogRecord, error) {
+	rec, err := c.CatalogStore.Get(ctx, ref)
+	if err != nil {
+		return rec, err
+	}
+	if rec.State == "revoked" {
+		return ports.CatalogRecord{}, storage.ErrRevoked
+	}
+	return rec, nil
+}

@@ -30,6 +30,10 @@ func (h *Handler) batch(w http.ResponseWriter, r *http.Request, p ports.Principa
 			items = append(items, map[string]any{"reference": ref.ID, "kind": string(ref.Kind), "complete": true, "error": Error{Code: "not_found", Message: "Not found", RequestID: "batch", Retryable: false}})
 			continue
 		}
+		if rec.State == "revoked" {
+			items = append(items, map[string]any{"reference": ref.ID, "kind": string(ref.Kind), "complete": true, "error": errorBody(ErrArtifactRevoked, "batch")})
+			continue
+		}
 		items = append(items, map[string]any{"reference": ref.ID, "kind": string(ref.Kind), "complete": true, "artifact": rec})
 	}
 	return h.writeJSON(w, map[string]any{"items": items}, in.MaxBytes)
