@@ -42,7 +42,8 @@ type App struct {
 	closeOnce sync.Once
 }
 
-// New opens the real pgx pool and filesystem-backed object store. It pings
+// New opens the real pgx pool and the object store GIST_OBJECT_STORE_ROOT
+// names (a directory, or s3://bucket/prefix). It pings
 // PostgreSQL before returning, so a missing integration fixture is an actual
 // failure rather than a test skip.
 func New(ctx context.Context, cfg Config) (*App, error) {
@@ -60,7 +61,7 @@ func New(ctx context.Context, cfg Config) (*App, error) {
 		pool.Close()
 		return nil, fmt.Errorf("app: ping postgres: %w", err)
 	}
-	objects, err := storage.NewObjectStore(cfg.ObjectStoreRoot)
+	objects, err := storage.OpenObjectStore(ctx, cfg.ObjectStoreRoot)
 	if err != nil {
 		pool.Close()
 		return nil, err
