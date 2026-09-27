@@ -67,19 +67,22 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
+	// The in-flight slot is taken before authentication so a flood of
+	// unauthenticated requests is bounded by the same cap as everything else.
+	// The cap is global, not per tenant.
+	select {
+	case h.slots <- struct{}{}:
+		defer func() { <-h.slots }()
+	default:
+		writeError(w, appErrorWithRetry("rate_limited", "Rate limit exceeded", 429, true, h.limits.RetryAfter), id)
+		return
+	}
 	ctx, p, err := h.authenticate(r)
 	if err != nil {
 		if statusFor(err) == 401 {
 			w.Header().Set("WWW-Authenticate", `Bearer realm="gist"`)
 		}
 		writeError(w, err, id)
-		return
-	}
-	select {
-	case h.slots <- struct{}{}:
-		defer func() { <-h.slots }()
-	default:
-		writeError(w, appErrorWithRetry("rate_limited", "Rate limit exceeded", 429, true, h.limits.RetryAfter), id)
 		return
 	}
 	if r.ContentLength > h.limits.MaxBodyBytes {
@@ -141,6 +144,13 @@ type ContextAuthenticator interface {
 	AuthenticateContext(ctx context.Context, token, audience string) (context.Context, ports.IdentityRecord, error)
 }
 
+// Authenticate resolves the bearer token on r to a principal with the same
+// identity check the REST routes use. Other transports (remote MCP) call it
+// before allocating any per-client state.
+func (h *Handler) Authenticate(r *http.Request) (ports.Principal, error) {
+	_, p, err := h.authenticate(r)
+	return p, err
+}
 func (h *Handler) authenticate(r *http.Request) (context.Context, ports.Principal, error) {
 	ctx := r.Context()
 	a := r.Header.Get("Authorization")
