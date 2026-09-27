@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/sirerun/gist/hosted/internal/ports"
 	"github.com/sirerun/gist/hosted/internal/rest"
@@ -20,13 +21,24 @@ type Config struct {
 	AllowedOrigins map[string]bool
 	MaxBodyBytes   int64
 	MaxCalls       int
+	// SessionTTL expires a session that has not been used for this long.
+	SessionTTL time.Duration
+	// MaxSessions caps live sessions; the least recently used is evicted.
+	MaxSessions int
 }
+
+const (
+	defaultSessionTTL  = time.Hour
+	defaultMaxSessions = 10000
+)
+
 type Handler struct {
 	rest     *rest.Handler
 	cfg      Config
 	mu       sync.Mutex
-	sessions map[string]bool
-	calls    map[string]int // in-flight tools/call count per session
+	sessions map[string]time.Time // session id -> last use
+	calls    map[string]int       // in-flight tools/call count per session
+	now      func() time.Time
 }
 
 func New(c Config) (*Handler, error) {
@@ -36,11 +48,17 @@ func New(c Config) (*Handler, error) {
 	if c.MaxCalls <= 0 {
 		c.MaxCalls = 100
 	}
+	if c.SessionTTL <= 0 {
+		c.SessionTTL = defaultSessionTTL
+	}
+	if c.MaxSessions <= 0 {
+		c.MaxSessions = defaultMaxSessions
+	}
 	rh, err := rest.New(c.Services)
 	if err != nil {
 		return nil, err
 	}
-	return &Handler{rest: rh, cfg: c, sessions: map[string]bool{}, calls: map[string]int{}}, nil
+	return &Handler{rest: rh, cfg: c, sessions: map[string]time.Time{}, calls: map[string]int{}, now: time.Now}, nil
 }
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
@@ -121,7 +139,7 @@ func (h *Handler) initialize(w http.ResponseWriter, r *http.Request, req struct 
 	}
 	id := newSession()
 	h.mu.Lock()
-	h.sessions[id] = true
+	h.addSessionLocked(id)
 	h.mu.Unlock()
 	w.Header().Set("Mcp-Session-Id", id)
 	writeRPC(w, rpcOK(req.ID, map[string]any{"protocolVersion": SupportedProtocolVersion, "capabilities": map[string]any{"tools": map[string]any{"listChanged": false}}, "serverInfo": map[string]any{"name": "gist-registry", "version": "1"}}))
@@ -135,7 +153,39 @@ func (h *Handler) sessionOK(r *http.Request) bool {
 	v := r.Header.Get("Mcp-Session-Id")
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	return v != "" && h.sessions[v]
+	last, ok := h.sessions[v]
+	if v == "" || !ok {
+		return false
+	}
+	now := h.now()
+	if now.Sub(last) > h.cfg.SessionTTL {
+		delete(h.sessions, v)
+		return false
+	}
+	h.sessions[v] = now
+	return true
+}
+
+// addSessionLocked records a new session, first dropping idle sessions and
+// then, if still at capacity, the least recently used one. Callers hold h.mu.
+func (h *Handler) addSessionLocked(id string) {
+	now := h.now()
+	if len(h.sessions) >= h.cfg.MaxSessions {
+		oldestID, oldest := "", now
+		for sid, last := range h.sessions {
+			if now.Sub(last) > h.cfg.SessionTTL {
+				delete(h.sessions, sid)
+				continue
+			}
+			if oldestID == "" || last.Before(oldest) {
+				oldestID, oldest = sid, last
+			}
+		}
+		if len(h.sessions) >= h.cfg.MaxSessions && oldestID != "" {
+			delete(h.sessions, oldestID)
+		}
+	}
+	h.sessions[id] = now
 }
 func (h *Handler) call(w http.ResponseWriter, r *http.Request, id any, raw json.RawMessage) {
 	sid := r.Header.Get("Mcp-Session-Id")
