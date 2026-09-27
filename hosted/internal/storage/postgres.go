@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -226,13 +225,6 @@ func validateRef(ref ports.ArtifactRef) error {
 		return errors.New("storage: incomplete artifact reference")
 	}
 	return nil
-}
-func decodeMetadata(raw []byte) (map[string]any, error) {
-	var v map[string]any
-	if err := json.Unmarshal(raw, &v); err != nil {
-		return nil, fmt.Errorf("decode metadata: %w", err)
-	}
-	return v, nil
 }
 
 var _ ports.CatalogStore = (*Postgres)(nil)

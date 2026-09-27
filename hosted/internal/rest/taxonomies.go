@@ -18,6 +18,3 @@ func (h *Handler) listByKind(w http.ResponseWriter, r *http.Request, p ports.Pri
 	}
 	return h.writeJSON(w, map[string]any{"items": page.Records, "next_cursor": page.Next.ID}, budget(r, h.limits.MaxResponseBytes))
 }
-func (h *Handler) _taxonomyStatus(w http.ResponseWriter, status int) { w.WriteHeader(status) }
-
-var _ = http.StatusOK
