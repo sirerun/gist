@@ -135,7 +135,22 @@ func (h *Handler) discover(w http.ResponseWriter, r *http.Request, p ports.Princ
 	if err != nil {
 		return appError("service_unavailable", "Service unavailable", 503, true)
 	}
-	return h.writeJSON(w, map[string]any{"items": page.Records, "next_cursor": page.Next.ID}, in.MaxBytes)
+	// Budgets reduce the candidate count; they never fail a discovery that fits
+	// with fewer candidates (RFC-002 §8). Records are ranked, so dropping from
+	// the tail keeps the best matches. The discovery service budgets its own
+	// encoding, which is smaller than this envelope, so trim here as well.
+	records := page.Records
+	for len(records) > 0 {
+		b, err := json.Marshal(map[string]any{"items": records, "next_cursor": page.Next.ID})
+		if err != nil {
+			return appError("service_unavailable", "Service unavailable", 503, true)
+		}
+		if len(b) <= in.MaxBytes {
+			break
+		}
+		records = records[:len(records)-1]
+	}
+	return h.writeJSON(w, map[string]any{"items": records, "next_cursor": page.Next.ID}, in.MaxBytes)
 }
 func (h *Handler) download(w http.ResponseWriter, r *http.Request, p ports.Principal, id, version string) error {
 	ref := ports.ArtifactRef{WorkspaceID: p.WorkspaceID, Kind: ports.KindSkill, ID: id, Version: version}
