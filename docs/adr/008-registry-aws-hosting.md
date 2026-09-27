@@ -30,6 +30,9 @@ David made each choice below on 2026-09-27.
    `sirerun/foundation/pulumi`, gated in `main.go` like `staging-aws` and
    `postiz`, in region `us-west-1`. State lives in Pulumi Cloud. The GCP
    program in `deploy/registry` stays but is not used for production.
+   *Update (2026-09-27):* the GCP program was deleted from this repository;
+   the registry Containerfile and CodeBuild buildspec live in foundation
+   alongside `pulumi/registry_aws*.go`.
 4. **Network.** A new VPC with two public subnets (`us-west-1a`,
    `us-west-1c`) and no NAT. Tasks get public IPs for egress. Security
    groups admit inbound traffic only from the ALB, and the database admits
