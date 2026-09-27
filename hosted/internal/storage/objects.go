@@ -8,19 +8,19 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/sirerun/gist/hosted/internal/ports"
 )
 
-// ObjectStore keeps content-addressed blobs on disk. The ref->digest index is
-// an in-memory cache filled by Bind at publish time; the durable record of that
-// mapping is the catalog (CatalogRecord.Digest), which Open consults on a cache
-// miss when UseCatalog has been called, so bindings survive a restart.
+// ObjectStore keeps content-addressed blobs in a blobBackend: a directory on
+// disk (NewObjectStore) or an S3 bucket (OpenObjectStore with an s3:// root).
+// The ref->digest index is an in-memory cache filled by Bind at publish time;
+// the durable record of that mapping is the catalog (CatalogRecord.Digest),
+// which Open consults on a cache miss when UseCatalog has been called, so
+// bindings survive a restart.
 type ObjectStore struct {
-	root    string
+	blobs   blobBackend
 	mu      sync.RWMutex
 	refs    map[string]ports.Digest
 	catalog ports.CatalogStore
@@ -33,14 +33,41 @@ func (s *ObjectStore) UseCatalog(c ports.CatalogStore) {
 	s.catalog = c
 }
 
+// blobBackend stores immutable blobs under their sha256 hex name. Callers
+// validate the name and the content before either method is reached.
+type blobBackend interface {
+	// put stores b under name. A name that is already present is left as it
+	// is and reported as success, and a failed put leaves nothing visible.
+	put(ctx context.Context, name string, b []byte) error
+	// get returns the blob, or ErrNotFound when name is absent.
+	get(ctx context.Context, name string) ([]byte, error)
+}
+
+// NewObjectStore opens a filesystem object store rooted at root.
 func NewObjectStore(root string) (*ObjectStore, error) {
-	if root == "" {
-		return nil, errors.New("objects: empty root")
+	fs, err := newFSBackend(root)
+	if err != nil {
+		return nil, err
 	}
-	if err := os.MkdirAll(root, 0o700); err != nil {
-		return nil, fmt.Errorf("create object root: %w", err)
+	return newObjectStore(fs), nil
+}
+
+// OpenObjectStore selects the backend from root: an s3://bucket/prefix value
+// opens an S3 store with the default AWS credential chain, and anything else
+// is a filesystem directory.
+func OpenObjectStore(ctx context.Context, root string) (*ObjectStore, error) {
+	if !isS3Root(root) {
+		return NewObjectStore(root)
 	}
-	return &ObjectStore{root: root, refs: make(map[string]ports.Digest)}, nil
+	s3b, err := newS3BackendFromEnv(ctx, root)
+	if err != nil {
+		return nil, err
+	}
+	return newObjectStore(s3b), nil
+}
+
+func newObjectStore(b blobBackend) *ObjectStore {
+	return &ObjectStore{blobs: b, refs: make(map[string]ports.Digest)}
 }
 
 func (s *ObjectStore) Put(ctx context.Context, digest ports.Digest, r io.Reader, size int64) error {
@@ -64,31 +91,7 @@ func (s *ObjectStore) Put(ctx context.Context, digest ports.Digest, r io.Reader,
 	if hex.EncodeToString(sum[:]) != digest.Value {
 		return errors.New("object digest mismatch")
 	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	path := filepath.Join(s.root, digest.Value)
-	if _, err := os.Stat(path); err == nil {
-		return nil
-	} else if !errors.Is(err, os.ErrNotExist) {
-		return fmt.Errorf("stat object: %w", err)
-	}
-	tmp, err := os.CreateTemp(s.root, ".upload-")
-	if err != nil {
-		return fmt.Errorf("create object temp: %w", err)
-	}
-	name := tmp.Name()
-	defer os.Remove(name)
-	if _, err = tmp.Write(b); err != nil {
-		_ = tmp.Close()
-		return fmt.Errorf("write object: %w", err)
-	}
-	if err = tmp.Close(); err != nil {
-		return fmt.Errorf("close object: %w", err)
-	}
-	if err = os.Rename(name, path); err != nil && !errors.Is(err, os.ErrExist) {
-		return fmt.Errorf("commit object: %w", err)
-	}
-	return nil
+	return s.blobs.put(ctx, digest.Value, b)
 }
 
 func (s *ObjectStore) Bind(ref ports.ArtifactRef, digest ports.Digest) error {
@@ -126,12 +129,9 @@ func (s *ObjectStore) Open(ctx context.Context, ref ports.ArtifactRef) (ports.Ar
 	if !validSHA256Hex(digest.Value) {
 		return nil, errors.New("objects: invalid digest")
 	}
-	b, err := os.ReadFile(filepath.Join(s.root, digest.Value))
-	if errors.Is(err, os.ErrNotExist) {
-		return nil, ErrNotFound
-	}
+	b, err := s.blobs.get(ctx, digest.Value)
 	if err != nil {
-		return nil, fmt.Errorf("read object: %w", err)
+		return nil, err
 	}
 	return &readSeekCloser{Reader: bytes.NewReader(b)}, nil
 }
