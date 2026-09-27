@@ -34,7 +34,8 @@ func (s *VersionStore) Add(v Version) error {
 		}
 	}
 	s.versions[key] = append(s.versions[key], v)
-	sort.Slice(s.versions[key], func(i, j int) bool { return s.versions[key][i].Ref.Version < s.versions[key][j].Ref.Version })
+	list := s.versions[key]
+	sort.SliceStable(list, func(i, j int) bool { return compareSemver(list[i].Ref.Version, list[j].Ref.Version) < 0 })
 	return nil
 }
 func (s *VersionStore) List(workspace string, kind ports.ArtifactKind, id string) []Version {
