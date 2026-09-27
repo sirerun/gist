@@ -41,14 +41,21 @@ on:
     # TTL sweeper: destroy an expired or abandoned preview.
     - cron: "17 * * * *"
 
+# Least privilege: only the jobs that exchange a GitHub OIDC token for cloud
+# credentials (plan, create, destroy, ttl-sweep) add id-token: write.
 permissions:
   contents: read
-  id-token: write
   actions: read
 
-# One preview at a time; never cancel a running destroy.
+# Separate groups per trigger. GitHub keeps only ONE pending run per group, so a
+# shared group would let an hourly sweep replace (cancel) a queued manual
+# destroy. Every manual destroy gets its own group and is never replaced;
+# a queued create can only be replaced by a newer create, a sweep by a newer sweep.
+# Concurrent stack mutations are serialized by the state backend's stack lock.
 concurrency:
-  group: registry-preview
+  group: >-
+    registry-preview-${{ github.event_name == 'schedule' && 'ttl-sweep' ||
+    (inputs.action == 'destroy' && format('destroy-{0}', github.run_id) || 'create') }}
   cancel-in-progress: false
 
 env:
@@ -57,6 +64,9 @@ env:
   REPOSITORY: registry
   IMAGE_NAME: hosted
   PROGRAM_DIR: deploy/registry
+  # Lock the stack in the self-managed backend so overlapping runs fail instead
+  # of racing.
+  PULUMI_SELF_MANAGED_STATE_LOCKING: "1"
 
 jobs:
   offline-checks:
@@ -77,11 +87,21 @@ jobs:
     needs: offline-checks
     runs-on: ubuntu-latest
     environment: registry-preview
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    env:
+      # Outranks Pulumi.yaml and any stored login: state is always the shared bucket.
+      PULUMI_BACKEND_URL: gs://${{ secrets.PULUMI_STATE_BUCKET }}
+    # Never export a value derived from a secret: GitHub silently drops such job
+    # outputs. The origin (built from GIST_PREVIEW_BASE_DOMAIN) and the image
+    # reference (built from GCP_PREVIEW_PROJECT) are recomputed in each job from
+    # these secret-free parts.
     outputs:
       run_id: ${{ steps.meta.outputs.run_id }}
-      origin: ${{ steps.meta.outputs.origin }}
       expires_at: ${{ steps.meta.outputs.expires_at }}
-      image_ref: ${{ steps.image.outputs.image_ref }}
+      image_digest: ${{ steps.image.outputs.image_digest }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -108,9 +128,9 @@ jobs:
           expires_at="$(python3 "$PROGRAM_DIR/preview.py" expiry "$TTL_HOURS")"
           {
             echo "run_id=$run_id"
-            echo "origin=https://preview-${run_id}.${PREVIEW_DOMAIN}"
             echo "expires_at=$expires_at"
           } >> "$GITHUB_OUTPUT"
+          echo "ORIGIN=https://preview-${run_id}.${PREVIEW_DOMAIN}" >> "$GITHUB_ENV"
       - name: Build immutable image with Podman
         id: image
         env:
@@ -119,9 +139,11 @@ jobs:
           base="${REGION}-docker.pkg.dev/${GCP_PROJECT}/${REPOSITORY}/${IMAGE_NAME}"
           gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
           podman build --file deploy/registry/Containerfile --tag "${base}:preview-${GITHUB_SHA}" .
-          podman push "${base}:preview-${GITHUB_SHA}"
-          digest="$(gcloud artifacts docker images describe "${base}:preview-${GITHUB_SHA}" --format='value(image_summary.digest)')"
-          echo "image_ref=${base}@${digest}" >> "$GITHUB_OUTPUT"
+          podman push --digestfile "$RUNNER_TEMP/image-digest" "${base}:preview-${GITHUB_SHA}"
+          image_digest="$(cat "$RUNNER_TEMP/image-digest")"
+          [[ "$image_digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          echo "image_digest=${image_digest}" >> "$GITHUB_OUTPUT"
+          echo "IMAGE_REF=${base}@${image_digest}" >> "$GITHUB_ENV"
       - name: Configure the preview stack
         env:
           PULUMI_STATE_BUCKET: ${{ secrets.PULUMI_STATE_BUCKET }}
@@ -131,10 +153,8 @@ jobs:
           DNS_ZONE: ${{ secrets.GIST_PREVIEW_DNS_ZONE }}
           DNS_PROJECT: ${{ secrets.GIST_PREVIEW_DNS_PROJECT }}
           REDIRECT_URIS: ${{ secrets.GIST_PREVIEW_OAUTH_REDIRECT_URIS }}
-          ORIGIN: ${{ steps.meta.outputs.origin }}
           RUN_ID: ${{ steps.meta.outputs.run_id }}
           EXPIRES_AT: ${{ steps.meta.outputs.expires_at }}
-          IMAGE_REF: ${{ steps.image.outputs.image_ref }}
           OWNER: ${{ github.actor }}
         run: bash deploy/registry/preview-configure.sh
       - name: Target-stack preview (review artifact)
@@ -142,7 +162,7 @@ jobs:
           PULUMI_STATE_BUCKET: ${{ secrets.PULUMI_STATE_BUCKET }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_PREVIEW_CONFIG_PASSPHRASE }}
         run: |
-          pulumi login "gs://${PULUMI_STATE_BUCKET}"
+          pulumi login "$PULUMI_BACKEND_URL"
           pulumi preview --stack "$STACK" --cwd "$PROGRAM_DIR" --diff --non-interactive | tee preview-diff.txt
       - uses: actions/upload-artifact@v4
         with:
@@ -156,6 +176,13 @@ jobs:
     runs-on: ubuntu-latest
     # Required reviewers on this environment approve the plan job's diff before apply.
     environment: registry-preview-apply
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    env:
+      # Outranks Pulumi.yaml and any stored login: state is always the shared bucket.
+      PULUMI_BACKEND_URL: gs://${{ secrets.PULUMI_STATE_BUCKET }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -170,11 +197,24 @@ jobs:
         with:
           pulumi-version: 3.x
       - run: python -m pip install --requirement deploy/registry/requirements.txt
+      - name: Recompute origin and image reference
+        env:
+          PREVIEW_DOMAIN: ${{ secrets.GIST_PREVIEW_BASE_DOMAIN }}
+          GCP_PROJECT: ${{ secrets.GCP_PREVIEW_PROJECT }}
+          RUN_ID: ${{ needs.plan.outputs.run_id }}
+          IMAGE_DIGEST: ${{ needs.plan.outputs.image_digest }}
+        run: |
+          test -n "$PREVIEW_DOMAIN" && test -n "$GCP_PROJECT"
+          [[ "$RUN_ID" =~ ^r[0-9]{1,11}$ ]]
+          [[ "$IMAGE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          {
+            echo "ORIGIN=https://preview-${RUN_ID}.${PREVIEW_DOMAIN}"
+            echo "IMAGE_REF=${REGION}-docker.pkg.dev/${GCP_PROJECT}/${REPOSITORY}/${IMAGE_NAME}@${IMAGE_DIGEST}"
+          } >> "$GITHUB_ENV"
       - name: Record owner and expiry before any resource exists
         env:
           PRODUCTION_ORIGIN: ${{ secrets.GIST_PUBLIC_ORIGIN }}
           RUN_ID: ${{ needs.plan.outputs.run_id }}
-          ORIGIN: ${{ needs.plan.outputs.origin }}
           EXPIRES_AT: ${{ needs.plan.outputs.expires_at }}
           OWNER: ${{ github.actor }}
         run: |
@@ -202,10 +242,8 @@ jobs:
           DNS_ZONE: ${{ secrets.GIST_PREVIEW_DNS_ZONE }}
           DNS_PROJECT: ${{ secrets.GIST_PREVIEW_DNS_PROJECT }}
           REDIRECT_URIS: ${{ secrets.GIST_PREVIEW_OAUTH_REDIRECT_URIS }}
-          ORIGIN: ${{ needs.plan.outputs.origin }}
           RUN_ID: ${{ needs.plan.outputs.run_id }}
           EXPIRES_AT: ${{ needs.plan.outputs.expires_at }}
-          IMAGE_REF: ${{ needs.plan.outputs.image_ref }}
           OWNER: ${{ github.actor }}
         run: bash deploy/registry/preview-configure.sh
       - name: Apply
@@ -213,7 +251,7 @@ jobs:
           PULUMI_STATE_BUCKET: ${{ secrets.PULUMI_STATE_BUCKET }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_PREVIEW_CONFIG_PASSPHRASE }}
         run: |
-          pulumi login "gs://${PULUMI_STATE_BUCKET}"
+          pulumi login "$PULUMI_BACKEND_URL"
           pulumi up --stack "$STACK" --cwd "$PROGRAM_DIR" --yes --non-interactive
       - name: Run database migrations
         env:
@@ -228,11 +266,21 @@ jobs:
     name: Test preview ingress and OAuth resource
     needs: [plan, create]
     runs-on: ubuntu-latest
+    # Read-only probe: no cloud credentials, so no id-token. The environment
+    # only supplies the base domain needed to recompute the origin.
+    environment: registry-preview
     steps:
       - uses: actions/checkout@v4
+      - name: Recompute origin
+        env:
+          PREVIEW_DOMAIN: ${{ secrets.GIST_PREVIEW_BASE_DOMAIN }}
+          RUN_ID: ${{ needs.plan.outputs.run_id }}
+        run: |
+          test -n "$PREVIEW_DOMAIN"
+          [[ "$RUN_ID" =~ ^r[0-9]{1,11}$ ]]
+          echo "ORIGIN=https://preview-${RUN_ID}.${PREVIEW_DOMAIN}" >> "$GITHUB_ENV"
       - name: Wait for managed TLS and probe the application
         env:
-          ORIGIN: ${{ needs.plan.outputs.origin }}
           REQUIRE_PRM: ${{ inputs.require_protected_resource_metadata }}
         run: bash deploy/registry/preview-probe.sh
 
@@ -246,6 +294,13 @@ jobs:
        (inputs.keep_after_test == false || needs.test.result != 'success')))
     runs-on: ubuntu-latest
     environment: registry-preview-destroy
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    env:
+      # Outranks Pulumi.yaml and any stored login: state is always the shared bucket.
+      PULUMI_BACKEND_URL: gs://${{ secrets.PULUMI_STATE_BUCKET }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -265,6 +320,8 @@ jobs:
           PULUMI_STATE_BUCKET: ${{ secrets.PULUMI_STATE_BUCKET }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_PREVIEW_CONFIG_PASSPHRASE }}
           REASON: ${{ inputs.action == 'destroy' && 'manual' || 'end-of-run' }}
+          # This run created the stack, so a missing stack is a failure, not a no-op.
+          EXPECT_STACK: ${{ needs.create.result != 'skipped' && inputs.action == 'create' }}
         run: bash deploy/registry/preview-destroy.sh
       - uses: actions/upload-artifact@v4
         if: always()
@@ -279,6 +336,13 @@ jobs:
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
     environment: registry-preview-destroy
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    env:
+      # Outranks Pulumi.yaml and any stored login: state is always the shared bucket.
+      PULUMI_BACKEND_URL: gs://${{ secrets.PULUMI_STATE_BUCKET }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
