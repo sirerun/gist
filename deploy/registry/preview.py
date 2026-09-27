@@ -181,6 +181,7 @@ def parse_settings(
         "databasePassword": str(need("databasePasswordSecret")),
         "issuer": str(need("issuerSecret")),
         "signingKey": str(need("signingKeySecret")),
+        "consentSecret": str(need("consentSecretSecret")),
     }
     for key, name in secret_names.items():
         if not _SECRET_ID.fullmatch(name) or not name.startswith(PREVIEW_SECRET_PREFIX):

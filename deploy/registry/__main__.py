@@ -146,6 +146,7 @@ secret_names = {
     "databasePassword": cfg.get("databasePasswordSecret") or "gist-registry-database-password",
     "issuer": cfg.get("issuerSecret") or "gist-registry-oauth-issuer",
     "signingKey": cfg.get("signingKeySecret") or "gist-registry-workload-signing-key",
+    "consentSecret": cfg.get("consentSecretSecret") or "gist-registry-oauth-consent-secret",
 }
 if is_preview:
     # Preview secrets are pre-created, preview-only entries referenced by name.
@@ -180,7 +181,7 @@ env = [
     gcp.cloudrunv2.ServiceTemplateContainerEnvArgs(name="GIST_DATABASE_USER", value=db_user.name),
     gcp.cloudrunv2.ServiceTemplateContainerEnvArgs(name="GIST_LIMITS_JSON", value=json.dumps(limits, sort_keys=True)),
 ]
-for key, env_name in (("databasePassword", "GIST_DATABASE_PASSWORD"), ("issuer", "GIST_OAUTH_ISSUER"), ("signingKey", "GIST_WORKLOAD_SIGNING_KEY")):
+for key, env_name in (("databasePassword", "GIST_DATABASE_PASSWORD"), ("issuer", "GIST_OAUTH_ISSUER"), ("signingKey", "GIST_WORKLOAD_SIGNING_KEY"), ("consentSecret", "GIST_OAUTH_CONSENT_SECRET")):
     env.append(gcp.cloudrunv2.ServiceTemplateContainerEnvArgs(
         name=env_name,
         value_source=gcp.cloudrunv2.ServiceTemplateContainerEnvValueSourceArgs(

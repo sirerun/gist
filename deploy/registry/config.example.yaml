@@ -10,6 +10,7 @@ config:
   gist-registry:databasePasswordSecret: gist-registry-database-password
   gist-registry:issuerSecret: gist-registry-oauth-issuer
   gist-registry:signingKeySecret: gist-registry-workload-signing-key
+  gist-registry:consentSecretSecret: gist-registry-oauth-consent-secret
   gist-registry:limits:
     maxPackageBytes: 10485760
     maxExpandedPackageBytes: 52428800
@@ -48,3 +49,4 @@ config:
 #   gist-registry:databasePasswordSecret: gist-registry-preview-database-password
 #   gist-registry:issuerSecret: gist-registry-preview-oauth-issuer
 #   gist-registry:signingKeySecret: gist-registry-preview-workload-signing-key
+#   gist-registry:consentSecretSecret: gist-registry-preview-oauth-consent-secret

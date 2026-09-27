@@ -162,7 +162,9 @@ foundation repo):
   limited to the preview project and the preview DNS zone.
 - Secret Manager entries `gist-registry-preview-database-password`,
   `gist-registry-preview-oauth-issuer` and
-  `gist-registry-preview-workload-signing-key` holding preview-only values.
+  `gist-registry-preview-workload-signing-key` and
+  `gist-registry-preview-oauth-consent-secret` (at least 32 random bytes; read as
+  `GIST_OAUTH_CONSENT_SECRET`) holding preview-only values.
 - A Cloud DNS managed zone for the preview base domain, delegated from its
   parent domain.
 
