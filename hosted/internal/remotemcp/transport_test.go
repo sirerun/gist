@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/sirerun/gist/hosted/internal/ports"
@@ -15,8 +17,13 @@ import (
 
 type identity struct{}
 
-func (identity) Lookup(context.Context, string, string) (ports.IdentityRecord, error) {
-	return ports.IdentityRecord{WorkspaceID: "workspace-a", Subject: "s"}, nil
+// Lookup accepts any token except those starting with "bad"; the token is
+// the subject, so distinct tokens are distinct principals.
+func (identity) Lookup(_ context.Context, token, _ string) (ports.IdentityRecord, error) {
+	if strings.HasPrefix(token, "bad") {
+		return ports.IdentityRecord{}, errors.New("invalid token")
+	}
+	return ports.IdentityRecord{WorkspaceID: "workspace-a", Subject: token}, nil
 }
 func (identity) Revoke(context.Context, string, string) error { return nil }
 
