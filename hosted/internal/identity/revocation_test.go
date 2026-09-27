@@ -84,3 +84,26 @@ func TestRevocationOutlivesLeaseTTLUntilTokenExpiry(t *testing.T) {
 		t.Fatal("revocation dropped before token expiry")
 	}
 }
+
+func TestRotateRetiresPreviousKeyAfterMaxTokenAge(t *testing.T) {
+	issuer, clock, _ := newTestIssuer(t)
+	keys := issuer.cfg.Keys
+	prevKID := keys.current.KID
+	next, err := GenerateSigningKey("k-next", clock.now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := keys.Rotate(next); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := keys.verifyKey(prevKID, clock.now); err != nil {
+		t.Fatalf("previous key should verify inside the retirement window: %v", err)
+	}
+	later := clock.now.Add(defaultMaxTokenAge + maxClockSkew + time.Second)
+	if _, err := keys.verifyKey(prevKID, later); err == nil {
+		t.Fatal("previous key must stop verifying after max token age plus skew")
+	}
+	if _, err := keys.verifyKey("k-next", later); err != nil {
+		t.Fatalf("current key must keep verifying: %v", err)
+	}
+}

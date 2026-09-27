@@ -68,6 +68,15 @@ func (k *KeySet) Rotate(next SigningKey) error {
 	}
 	k.mu.Lock()
 	defer k.mu.Unlock()
+	if prev := k.current; prev.KID != next.KID {
+		// The retired key only needs to verify tokens minted before rotation,
+		// and those cannot outlive defaultMaxTokenAge plus clock skew.
+		retireAt := k.clock.Now().Add(defaultMaxTokenAge + maxClockSkew)
+		if prev.NotAfter.IsZero() || prev.NotAfter.After(retireAt) {
+			prev.NotAfter = retireAt
+			k.keys[prev.KID] = prev
+		}
+	}
 	k.current = next
 	k.keys[next.KID] = next
 	return nil
