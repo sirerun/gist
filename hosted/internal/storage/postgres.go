@@ -143,6 +143,47 @@ func (s *Postgres) Revoke(ctx context.Context, workspaceID, issuer, subject stri
 	return nil
 }
 
+// ErrIdentityRevoked reports that an issuance was refused because the stored
+// identity for that workspace, issuer and subject has been revoked.
+var ErrIdentityRevoked = errors.New("registry identity revoked")
+
+// RecordIssued persists or refreshes the stored identity behind a freshly
+// minted workload token, under the token workspace's RLS scope. The upsert
+// never clears revoked_at: when the existing row is revoked the conflict
+// update matches nothing and RecordIssued returns ErrIdentityRevoked, so the
+// caller must discard the token. expires_at only moves forward, so a
+// shorter-lived mint never shortens the record of an outstanding token.
+func (s *Postgres) RecordIssued(ctx context.Context, r ports.IdentityRecord) error {
+	if err := validateIdentityKey(r.WorkspaceID, r.Issuer, r.Subject); err != nil {
+		return err
+	}
+	if r.SubjectType == "" || r.ExpiresAt <= 0 {
+		return errors.New("storage: incomplete identity record")
+	}
+	scopes := append([]string{}, r.Scopes...)
+	tenant := Tenant{Issuer: r.Issuer, Subject: r.Subject, WorkspaceID: r.WorkspaceID, Scopes: scopes, PolicyGeneration: r.PolicyGeneration}
+	var affected int64
+	err := WithTenantPrincipal(ctx, s.pool, tenant, func(ctx context.Context, tx pgx.Tx) error {
+		command, err := tx.Exec(ctx, `INSERT INTO workload_identities(issuer,subject,subject_type,workspace_id,scopes,policy_generation,expires_at)
+VALUES($1,$2,$3,$4,$5,$6,to_timestamp($7))
+ON CONFLICT (workspace_id,issuer,subject) DO UPDATE SET
+    subject_type=EXCLUDED.subject_type,
+    scopes=EXCLUDED.scopes,
+    policy_generation=EXCLUDED.policy_generation,
+    expires_at=GREATEST(workload_identities.expires_at, EXCLUDED.expires_at)
+WHERE workload_identities.revoked_at IS NULL`, r.Issuer, r.Subject, r.SubjectType, r.WorkspaceID, scopes, int64(r.PolicyGeneration), r.ExpiresAt)
+		affected = command.RowsAffected()
+		return err
+	})
+	if err != nil {
+		return fmt.Errorf("record issued identity: %w", err)
+	}
+	if affected == 0 {
+		return ErrIdentityRevoked
+	}
+	return nil
+}
+
 func validateIdentityKey(workspaceID, issuer, subject string) error {
 	if workspaceID == "" || issuer == "" || subject == "" {
 		return errors.New("storage: incomplete identity key")

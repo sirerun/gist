@@ -369,7 +369,7 @@ func startClientFixture(t *testing.T) *clientFixture {
 	if err != nil {
 		t.Fatalf("open fixture pool: %v", err)
 	}
-	for _, name := range []string{"001_catalog.sql", "002_policy.sql", "003_identity.sql", "004_events.sql"} {
+	for _, name := range []string{"001_catalog.sql", "002_policy.sql", "003_identity.sql", "004_events.sql", "005_identity_workspace_key.sql"} {
 		raw, readErr := os.ReadFile(filepath.Join("..", "..", "migrations", name))
 		if readErr != nil {
 			t.Fatalf("read migration %s: %v", name, readErr)
@@ -417,12 +417,6 @@ func seedClientFixture(ctx context.Context, f *clientFixture) error {
 			return err
 		}
 		_, err := tx.Exec(ctx, `INSERT INTO workspace_memberships(workspace_id,issuer,subject,role,scopes,policy_generation) VALUES($1,$2,$3,'maintainer',$4,1) ON CONFLICT (workspace_id,issuer,subject) DO NOTHING`, clientWorkspace, f.issuer, clientSubject, []string{"catalog:read"})
-		if err != nil {
-			return err
-		}
-		// Token verification also requires an unrevoked stored identity
-		// (0964d05).
-		_, err = tx.Exec(ctx, `INSERT INTO workload_identities(issuer,subject,subject_type,workspace_id,scopes,policy_generation,expires_at) VALUES($1,$2,'workload',$3,$4,1,now()+interval '1 hour') ON CONFLICT (issuer,subject) DO NOTHING`, f.issuer, clientSubject, clientWorkspace, []string{"catalog:read"})
 		return err
 	}); err != nil {
 		return err
