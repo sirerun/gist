@@ -97,6 +97,7 @@ func newWithStores(cfg Config, pool *pgxpool.Pool, objects *storage.ObjectStore)
 		pool.Close()
 		return nil, err
 	}
+	objects.UseCatalog(catalog)
 	identityStore.catalog = catalog
 	search, err := discovery.New(catalog, policy)
 	if err != nil {

@@ -15,10 +15,22 @@ import (
 	"github.com/sirerun/gist/hosted/internal/ports"
 )
 
+// ObjectStore keeps content-addressed blobs on disk. The ref->digest index is
+// an in-memory cache filled by Bind at publish time; the durable record of that
+// mapping is the catalog (CatalogRecord.Digest), which Open consults on a cache
+// miss when UseCatalog has been called, so bindings survive a restart.
 type ObjectStore struct {
-	root string
-	mu   sync.RWMutex
-	refs map[string]ports.Digest
+	root    string
+	mu      sync.RWMutex
+	refs    map[string]ports.Digest
+	catalog ports.CatalogStore
+}
+
+// UseCatalog makes the catalog the durable fallback for ref->digest lookups.
+func (s *ObjectStore) UseCatalog(c ports.CatalogStore) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.catalog = c
 }
 
 func NewObjectStore(root string) (*ObjectStore, error) {
@@ -94,9 +106,17 @@ func (s *ObjectStore) Open(ctx context.Context, ref ports.ArtifactRef) (ports.Ar
 	}
 	s.mu.RLock()
 	digest, ok := s.refs[refKey(ref)]
+	catalog := s.catalog
 	s.mu.RUnlock()
 	if !ok {
-		return nil, ErrNotFound
+		if catalog == nil {
+			return nil, ErrNotFound
+		}
+		record, err := catalog.Get(ctx, ref)
+		if err != nil {
+			return nil, fmt.Errorf("objects: resolve %s from catalog: %w", refKey(ref), err)
+		}
+		digest = record.Digest
 	}
 	if digest.Algorithm != "sha256" {
 		return nil, errors.New("objects: unsupported digest")
