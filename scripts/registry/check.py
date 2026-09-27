@@ -223,6 +223,12 @@ def check_preview_iac() -> None:
     for label, marker in PREVIEW_STAGE_MARKERS.items():
         if marker not in workflow:
             fail(f"preview workflow lacks {label} ({marker!r})")
+    # A project backend.url outranks `pulumi login`, which would silently send
+    # each job's state to its own runner; state must come from PULUMI_BACKEND_URL.
+    if re.search(r"^backend:", (ROOT / "deploy/registry/Pulumi.yaml").read_text(encoding="utf-8"), re.MULTILINE):
+        fail("deploy/registry/Pulumi.yaml must not pin a backend; set PULUMI_BACKEND_URL instead")
+    if "PULUMI_BACKEND_URL: gs://" not in workflow:
+        fail("preview workflow must set PULUMI_BACKEND_URL to the shared gs:// state bucket")
     for script in ("preview-configure.sh", "preview-destroy.sh"):
         text = (ROOT / "deploy/registry" / script).read_text(encoding="utf-8")
         if '"$STACK" != "preview"' not in text:
