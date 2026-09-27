@@ -44,6 +44,9 @@ type Services struct {
 type Handler struct {
 	s      Services
 	limits Limits
+	// slots caps in-flight requests at limits.RateLimit (fed from
+	// Config.MaxConcurrentRequests); a full semaphore answers 429 rate_limited.
+	slots chan struct{}
 }
 
 func New(s Services) (*Handler, error) {
@@ -51,7 +54,7 @@ func New(s Services) (*Handler, error) {
 		return nil, errors.New("rest: identity and authorizer are required")
 	}
 	s.Limits = s.Limits.withDefaults()
-	return &Handler{s: s, limits: s.Limits}, nil
+	return &Handler{s: s, limits: s.Limits, slots: make(chan struct{}, s.Limits.RateLimit)}, nil
 }
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	id, err := requestID(r)
@@ -70,6 +73,13 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("WWW-Authenticate", `Bearer realm="gist"`)
 		}
 		writeError(w, err, id)
+		return
+	}
+	select {
+	case h.slots <- struct{}{}:
+		defer func() { <-h.slots }()
+	default:
+		writeError(w, appErrorWithRetry("rate_limited", "Rate limit exceeded", 429, true, h.limits.RetryAfter), id)
 		return
 	}
 	if r.ContentLength > h.limits.MaxBodyBytes {
