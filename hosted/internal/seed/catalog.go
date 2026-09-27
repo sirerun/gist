@@ -4,8 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
-	"os"
 	"path/filepath"
 	"runtime"
 )
@@ -35,17 +33,6 @@ type catalogBinding struct {
 func registryRoot() string {
 	_, file, _, _ := runtime.Caller(0)
 	return filepath.Clean(filepath.Join(filepath.Dir(file), "..", "..", "..", "catalog", "registry"))
-}
-
-func readRegistryJSON(name string, dst any) error {
-	b, err := os.ReadFile(filepath.Join(registryRoot(), name))
-	if err != nil {
-		return fmt.Errorf("read registry %s: %w", name, err)
-	}
-	if err := json.Unmarshal(b, dst); err != nil {
-		return fmt.Errorf("decode registry %s: %w", name, err)
-	}
-	return nil
 }
 
 func canonicalDigest(v any) (string, error) {
