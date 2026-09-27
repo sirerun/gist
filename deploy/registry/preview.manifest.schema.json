@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sirerun/gist/deploy/registry/preview.manifest.schema.json",
+  "title": "Gist registry OAuth preview run record",
+  "description": "Per-run record the preview workflow emits (ADR 007 section 4). Sanitized: never carries tokens, keys or secret payloads.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["stack", "run_id", "owner", "expires_at", "origin", "audience", "protected_resource_metadata_url", "production_origin", "commit", "config_hash", "status"],
+  "properties": {
+    "stack": {"const": "preview"},
+    "run_id": {"type": "string", "pattern": "^[a-z0-9]{1,12}$"},
+    "owner": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"},
+    "expires_at": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"},
+    "destroyed_at": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"},
+    "origin": {"type": "string", "pattern": "^https://[a-z0-9.-]+$"},
+    "audience": {"type": "string", "pattern": "^https://[a-z0-9.-]+$"},
+    "protected_resource_metadata_url": {"type": "string", "pattern": "^https://[a-z0-9.-]+/\\.well-known/oauth-protected-resource$"},
+    "production_origin": {"type": "string", "pattern": "^https://[a-z0-9.-]+$"},
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "config_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "status": {"enum": ["created", "tested", "destroyed", "destroy_failed", "create_failed"]},
+    "evidence": {"type": "object"}
+  }
+}
