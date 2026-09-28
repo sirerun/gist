@@ -160,13 +160,13 @@ gofmt, go vet and its package tests; G4.5 runs the full gate.
 fidelity: executable
 Acceptance: David has signed off the amended RFC, the threat model and ADR 010.
 
-- [ ] G0.1 Review RFC-003 and amend it  Owner: opus  Est: 90m  verifies: [infrastructure]  lane: agent  acc: [docs/rfc-003.md states the two approval sources, KMS custody, the separate gateway contract and gist_invoke, and every review finding is resolved or listed as deferred]
+- [x] G0.1 Review RFC-003 and amend it  Owner: opus  Est: 90m  verifies: [infrastructure]  lane: agent  acc: [docs/rfc-003.md states the two approval sources, KMS custody, the separate gateway contract and gist_invoke, and every review finding is resolved or listed as deferred]
   - Do: review RFC-003 against RFC-002 and the Discovery Summary. Amend sections 3, 4, 8, 9 and 10 per ADR 009. Record findings and their dispositions in the PR.
   - Acceptance: status line reads "Reviewed 2026-09-xx"; no contradiction with ADR 009 or RFC-002 sections 6, 9-12.
-- [ ] G0.2 Write the threat model  Owner: opus  Est: 90m  verifies: [infrastructure]  lane: agent  acc: [the private threat model maps each RFC-003 section 7 threat and each ADR 009 addition to a named control and a named test in G4.1]
+- [x] G0.2 Write the threat model  Owner: opus  Est: 90m  verifies: [infrastructure]  lane: agent  acc: [the private threat model maps each RFC-003 section 7 threat and each ADR 009 addition to a named control and a named test in G4.1]
   - Do: in `sirerun/foundation` (private; `security/gist-gateway-threat-model.md`, since foundation ignores `docs/`). Add to section 7: approval-page phishing and CSRF; authority key compromise and rotation; KMS key misuse and cross-workspace data keys; DNS rebinding and redirect SSRF; confused deputy across connections; MCP provider tool-result injection.
   - Acceptance: every threat names its control, its test ID, and its residual risk.
-- [ ] G0.3 Write ADR 010, the M-G1 technical design  Owner: opus  Est: 90m  verifies: [infrastructure]  lane: agent  deps: [G0.1]  acc: [ADR 010 fixes the outcome and request-sent enums, the execution state machine, the approval evidence format and the idempotency binding, each with an example]
+- [x] G0.3 Write ADR 010, the M-G1 technical design  Owner: opus  Est: 90m  verifies: [infrastructure]  lane: agent  deps: [G0.1]  acc: [ADR 010 fixes the outcome and request-sent enums, the execution state machine, the approval evidence format and the idempotency binding, each with an example]
   - Fix: outcome confirmation enum (success, failure, accepted_unconfirmed, nonexecution, unknown) and request-sent enum (no, yes, unknown); execution states and transitions; approval evidence (JWS, algorithms, claims: authority, workspace, execution binding hash, jti, exp); single-use rule; idempotency binding (tenant, principal, binding, connection, payload hash); `execution:invoke` scope; `contracts/gateway/v1` layout; event kinds `connection_revoked`, `binding_revoked`; provider adapter interface.
 - [ ] G0.4 David signs off G0.1 to G0.3  Owner: David  Est: 30m  kind: human  verifies: [infrastructure]  deps: [G0.1, G0.2, G0.3]  acc: [sign-off recorded in the ADR 010 status and the threat model header]
   - Done as multiple-choice cards per document. Any "revise" answer loops back to its task.
