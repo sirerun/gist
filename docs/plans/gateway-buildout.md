@@ -43,6 +43,23 @@ live. This plan starts with that review.
 - Lanes run as cloud Claude agents (Sonnet); Opus reviews and re-verifies
   locally before each merge.
 
+### Banked product direction: dynamic tool-use skills (2026-10-01)
+
+David endorsed task-specific tool-use guides assembled from validated
+capability metadata, maintained usage recipes, and the caller's authorized
+resolution. Authored craft skills remain separate. The goal is fewer provider
+search/schema-discovery exchanges: a fully resolved supported workflow should
+need no further provider-tool discovery during execution. Measure discovery
+calls and model turns alongside correctness; no improvement is yet measured.
+See [RFC-002](../rfc-002.md#dynamic-tool-use-skills-founder-direction-2026-10-01)
+and [RFC-003 §11](../rfc-003.md#11-dynamic-tool-use-guidance-founder-direction-2026-10-01).
+
+Follow-up planning must define the guide delivery contract, source/version
+provenance, selection and assembly method, freshness and invalidation, and
+acceptance fixtures. Decide release placement before expanding the task graph;
+this note does not modify registry v1 or clear G0.4. The conversation's broader
+approval and MCP-generation changes still require their own design amendment.
+
 ### Objectives
 
 1. A reviewed, amended RFC-003 and a signed-off threat model.
