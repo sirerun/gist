@@ -1,7 +1,7 @@
 # Official provider-source preflight
 
-Date: 2026-10-04  
-Scope: T-GR-SCOPE.10 source preflight only  
+Date: 2026-10-04
+Scope: T-GR-SCOPE.10 source preflight only
 Disposition: neither candidate is admitted for execution; no live provider action was attempted.
 
 ## Finding
