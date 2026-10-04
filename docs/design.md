@@ -87,3 +87,11 @@ Two implementations:
 - Proposal: `docs/proposal.md`
 - Plan: `docs/plan.md`
 - Repository: `github.com/sirerun/gist`
+
+## Hosted registry recovery planning reference — 2026-10-04
+
+Hosted architecture remains governed by RFC-002 and ADR004-008; managed gateway remains RFC-003 and ADR009-010. The [registry recovery delivery plan](plans/registry-recovery.md) addresses enrollment, persistent signing identity, canonical wire composition, durable events and real action artifacts. Caller execution/authority remains owned by the consuming protected-effects runtime. Detailed new key/enrollment/transaction choices are proposals pending reviewed disposition, not accepted architecture supplied by this planning edit.
+
+## Canonical AWS production boundary — 2026-10-04
+
+[ADR011](adr/011-gist-production-canonical-origin.md) records the founder-selected canonical origin https://gist.sire.run on the accepted AWS architecture and confirmed registry/caller-owned scope. It supersedes ADR008's earlier origin only. Exact origin/audience/issuer/redirect migration follows ADR007; DNS/ACM/ALB, task config and callback consent require reviewed migration, not a wildcard alias. Registry artifact identity is unchanged. [The production plan](plans/registry-recovery.md) tracks code, private infrastructure owner receipts, qualified release/cutover, full registry/client/provider acceptance and operations through one terminal production predicate. Managed gateway remains separate.
