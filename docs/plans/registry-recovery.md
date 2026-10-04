@@ -62,7 +62,7 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ## Checkable Work Breakdown
 
-### E-GR-SCOPE -- Requirements and preflight -> E-GR-SCOPE-requirements-and-preflight.md (4/11)
+### E-GR-SCOPE -- Requirements and preflight -> E-GR-SCOPE-requirements-and-preflight.md (5/11)
 
 ### E-GR-AUTH -- Enrollment and grants -> E-GR-AUTH-enrollment-and-grants.md (0/7)
 
@@ -141,8 +141,10 @@ Official deployment references used for this planning refinement: ALB HTTPS requ
 
 Tooling observation for this refinement: aws, pulumi and gh binaries are available; no Cloudflare MCP function was exposed in the current tool inventory. T-GR-SCOPE.11 must qualify the configured binding before DNS writes. This is a real execution-capability prerequisite, not permission to use a generic connector/browser or change organization OAuth restrictions. No AWS authentication, stack apply or DNS mutation was attempted here.
 
-Final planning validation (2026-10-04): 128 open active tasks in 14 epics; default docs/plan.md parses those tasks once alongside 18 unchanged historical completed tasks (146 total). All 127 other active tasks are ancestors of terminal T-GR-PROD.9. Unique IDs, resolved acyclic dependencies, owner/acceptance/wave coverage, all six supported code stages, independent-review dependencies, guarded merges, split TOC counts and whitespace checks passed. All 77 prior recovery IDs/statuses are retained: 76 remain active and the unchanged optional gateway trigger is preserved in its deferred file. Prior plan/design/devlog contents remain byte-identical prefixes; ADR008 and the original gateway plan are unchanged. These are planning-artifact checks only; no application test or execution was run.
+Historical planning-only validation (2026-10-04, before shipping started): 128 open active tasks in 14 epics; default docs/plan.md parses those tasks once alongside 18 unchanged historical completed tasks (146 total). All 127 other active tasks are ancestors of terminal T-GR-PROD.9. Unique IDs, resolved acyclic dependencies, owner/acceptance/wave coverage, all six supported code stages, independent-review dependencies, guarded merges, split TOC counts and whitespace checks passed. All 77 prior recovery IDs/statuses are retained: 76 remain active and the unchanged optional gateway trigger is preserved in its deferred file. Prior plan/design/devlog contents remain byte-identical prefixes; ADR008 and the original gateway plan are unchanged. These are planning-artifact checks only; no application test or execution was run.
 
 ## Shipping checkpoint — 2026-10-04
 
 User invoked /ship. T-GR-SCOPE.1/.2/.6/.8 have source-only receipts in docs/receipts; component contracts await independent T-GR-SCOPE.3 disposition before engineering admission. Four slots are occupied by one coordinator and three explicitly requested GPT-6-Luna workers, with isolated external-SSD ownership. Engineering builds are held while one-minute host load exceeds 10; no build lease is bypassed. Production bindings are partially qualified but blocked by AWS session/stack-account mismatch and absent configured Cloudflare MCP. Enrollment and provider targets/caps are pending a decision brief requested by the founder. No production_done, code/lifecycle admission, CI pass, release or live acceptance is asserted. Read-only preflights are not application acceptance.
+
+Current shipping validation: 128 total active production tasks, five source-only preflights checked and 123 open; deferred gateway is outside that count. Founder identity/pilot choices remain pending. Consumer owner reports its actual runtime/header/funding qualifications are not yet admitted; T-GR-SCOPE.7 stays blocked rather than accepting its planning PR as runtime evidence. Exact source review findings R1 (open-PR accuracy) and R2 (historical/current count distinction) were corrected in this candidate; fresh independent review is still required.

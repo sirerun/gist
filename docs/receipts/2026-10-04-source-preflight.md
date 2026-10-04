@@ -3,7 +3,7 @@
 Date: 2026-10-04. Coordinator source-only receipt; no code or live acceptance.
 
 - Local, fetched and remote main: `84e14128565058419a9b90619f27fa517ba4f494`.
-- Open pull requests: none at inspection. GitHub authentication succeeds. Main rules and CI policy are independently inspected by T-GR-SCOPE.8.
+- Fresh explicit `gh --repo sirerun/gist` snapshot: PR #47, head `bdd7d3e4f2186cfcd7aba8b708b8099539bf99e6`, banks a separate dynamic-tool/gateway documentation direction; it is preserved outside this registry implementation scope. This delivery subsequently opened PR #48. GitHub authentication succeeds. Main rules and CI policy are independently inspected by T-GR-SCOPE.8. The earlier no-open-PR observation is superseded by this verified snapshot.
 - Original checkout has preexisting CLAUDE.md type change plus the authored planning/assessment documents; all are preserved. New isolated coordinator and three read-only worker branches start from exact remote main on the mounted external SSD.
 - Native workers: gist_capacity owns only capacity receipt; gist_ci owns only CI receipt; gist_providers owns only provider receipt. Coordinator owns plan/requirements/design/contracts and joins receipts. Each worker has its own atomic task claim.
 - Other live project sessions were identified through process IDs and their working directories; none besides this session was found in Gist. Private process paths/identifiers stay outside the public receipt.

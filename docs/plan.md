@@ -517,4 +517,4 @@ The March plan above is preserved as historical completed work. The active bound
 
 The founder selected registry plus caller-owned integrations, with completion only when https://gist.sire.run is running qualified AWS production. The included plan below is the canonical new work graph and supersedes earlier recovery-only closure/model assumptions; all March authored text and checked tasks above remain historical. Read [the production owner plan](plans/registry-recovery.md) for GPT-6-Luna pool limits, ownership, qualified operation routing and the final production predicate. No local merge/initial rollout/planning checkpoint completes this delivery. All stages and external authority are enforced from its task dependencies and evidence; /plan itself executes nothing.
 
-### E-GR-PRODUCTION -- Full SDLC to canonical AWS production -> plans/registry-recovery.md (4/128)
+### E-GR-PRODUCTION -- Full SDLC to canonical AWS production -> plans/registry-recovery.md (5/128)
