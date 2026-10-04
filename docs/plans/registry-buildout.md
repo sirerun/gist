@@ -1115,3 +1115,7 @@ policy-gated runtimes retain exact grants and their own protected-effects engine
 - [RFC-003 sections 2-5 and 8](../rfc-003.md): follow-on boundary and compatible hooks, not implementation work in this plan.
 - [Taxonomy edition 1 and "Seeding core capability families"](../taxonomy/gist-activities-1.md): attribution, provenance and initial-family prioritization input.
 - [Existing design](../design.md), [March plan](../plan.md), and [ADR 002](../adr/002-token-first-stats.md): preserve local interfaces and truthful byte metrics.
+
+## Recovery refinement — 2026-10-04
+
+[Registry recovery and caller integration](registry-recovery.md) is the active follow-on for AUTH-1/AUTH-2/WIRE-1/EVENT-1 and real provider artifacts. It preserves all original IDs, checked status, evidence and waivers here. The September single-file planning constraint and dispatch model prose remain historical; the current founder requests split first-class SDLC items and maximum safe GPT-6-Luna workers. Q5 is not closed by this refinement, and caller-owned recovery does not require gateway G0.4 approval. No implementation, release or deployment is authorized by this draft.
