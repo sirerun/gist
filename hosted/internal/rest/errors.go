@@ -15,6 +15,13 @@ type Error struct {
 	RetryAfter int    `json:"retry_after,omitempty"`
 }
 
+// These errors keep adapter failures within the public error contract without
+// exposing parser input, private metadata or internal implementation details.
+var (
+	ErrBudgetExceeded   = appError("budget_exceeded", "Response exceeds the requested byte budget", http.StatusRequestEntityTooLarge, false)
+	ErrValidationFailed = appError("validation_failed", "Invalid request", http.StatusUnprocessableEntity, false)
+)
+
 func (e Error) Error() string { return e.Code + ": " + e.Message }
 
 func appError(code, message string, status int, retryable bool) error {

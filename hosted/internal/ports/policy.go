@@ -47,7 +47,20 @@ type Resolution struct {
 	Findings  []Finding
 }
 
-type Finding struct{ CapabilityID, Status, ConnectURL string }
+// ArtifactPin is the immutable artifact identity retained with a resolution.
+type ArtifactPin struct {
+	Ref            ArtifactRef
+	Digest         Digest
+	ManifestDigest Digest
+}
+
+type Finding struct {
+	CapabilityID, Status, ConnectURL string
+	BindingRef                       ArtifactRef
+	Closure                          []ArtifactPin
+	Required                         bool
+	Provenance                       string
+}
 
 type ResolutionStore interface {
 	Put(context.Context, Resolution) error

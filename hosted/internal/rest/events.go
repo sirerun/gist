@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"time"
@@ -15,6 +16,17 @@ type EventCursorOpener interface {
 	NewCursor(ports.Principal, time.Duration) (ports.Cursor, error)
 }
 
+// ContextEventCursorOpener supports durable stores with request cancellation.
+type ContextEventCursorOpener interface {
+	NewEventCursor(context.Context, ports.Principal, time.Duration) (ports.Cursor, error)
+}
+
+// BudgetedEventReader checks the exact response budget before committing cursor
+// advancement or eviction and binds the read to the current authenticated policy.
+type BudgetedEventReader interface {
+	ReadEventPageForPrincipal(context.Context, ports.Principal, ports.Cursor, int) (ports.EventPage, error)
+}
+
 func (h *Handler) events(w http.ResponseWriter, r *http.Request, p ports.Principal) error {
 	if h.s.Events == nil {
 		return appError("service_unavailable", "Service unavailable", 503, true)
@@ -26,13 +38,22 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request, p ports.Princip
 	if err != nil {
 		return err
 	}
-	page, err := h.s.Events.Read(r.Context(), cursor)
+	var page ports.EventPage
+	if reader, ok := h.s.Events.(BudgetedEventReader); ok {
+		page, err = reader.ReadEventPageForPrincipal(r.Context(), p, cursor, budget(r, h.limits.MaxResponseBytes))
+	} else {
+		page, err = h.s.Events.Read(r.Context(), cursor)
+	}
 	switch {
 	case page.RetentionGap, errors.Is(err, events.ErrCursorExpired), errors.Is(err, events.ErrCursorBinding):
 		// An expired, purged, unknown, or foreign cursor all require the
 		// client to resynchronize; a foreign cursor is not disclosed as such.
 		return appError("cursor_expired", "Cursor expired; resync required", 409, false)
 	case err != nil:
+		var budgetError interface{ BudgetExceeded() bool }
+		if errors.As(err, &budgetError) && budgetError.BudgetExceeded() {
+			return ErrBudgetExceeded
+		}
 		return appError("service_unavailable", "Service unavailable", 503, true)
 	}
 	return h.writeJSON(w, map[string]any{"events": page.Events, "next_cursor": page.Next.ID}, budget(r, h.limits.MaxResponseBytes))
@@ -43,6 +64,13 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request, p ports.Princip
 func (h *Handler) eventCursor(r *http.Request, p ports.Principal) (ports.Cursor, error) {
 	if id := r.URL.Query().Get("cursor"); id != "" {
 		return ports.Cursor{ID: id, PrincipalHash: events.PrincipalHash(p), WorkspaceID: p.WorkspaceID}, nil
+	}
+	if opener, ok := h.s.Events.(ContextEventCursorOpener); ok {
+		c, err := opener.NewEventCursor(r.Context(), p, 0)
+		if err != nil {
+			return ports.Cursor{}, appError("service_unavailable", "Service unavailable", 503, true)
+		}
+		return c, nil
 	}
 	opener, ok := h.s.Events.(EventCursorOpener)
 	if !ok {
