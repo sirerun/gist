@@ -5,6 +5,8 @@ Acceptance: A reviewed, landed composed registry passes meaningful local integra
 
 Sole writer for hosted/internal/app/app.go, app/config.go, shared ports/store bootstrap, publisher/revoker composition, shared catalog indexes, final assigned migrations and joined acceptance fixtures. Integrator reconciles component interfaces rather than guessing unavailable adapters. Consumer code remains externally owned.
 
+Speculative dependency: source preparation of shared interfaces and integration fixtures may start after T-GR-SCOPE.9 against admitted component candidate interfaces. This is preparatory work within T-GR-INTEGRATE.0/.1; the existing landed-component dependencies must still pass before completing these rows or activating a final composed candidate. No trust selection, external provider capture or production change is implied.
+
 #### Wave 2: Composition and interoperability SDLC
 
 - [ ] T-GR-INTEGRATE.0 Reconcile landed interfaces and integration design  Owner: luna-integrator  Est: TBD  kind: agent  stage: preflight  verifies: [UC-002, UC-003, UC-004, UC-005, UC-007, UC-008, UC-009, UC-010]  blocked-by: [T-GR-AUTH.6, T-GR-KEYS.6, T-GR-WIRE.6, T-GR-EVENT.6, T-GR-TREG.6, T-GR-COMPOSIO.6]  acc: [Record actual landed components and merged dependency graph, key/identity/event transaction contracts, real captures and immutable closure; re-read current main and reserve all shared files; no placeholder component is wired as success]
