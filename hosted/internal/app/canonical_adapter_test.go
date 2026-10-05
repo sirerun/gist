@@ -35,7 +35,7 @@ func (canonicalAuth) Decide(context.Context, ports.Principal, ports.Action, *por
 
 type canonicalStore struct{}
 
-func (canonicalStore) Put(context.Context, ports.Resolution) error { return nil }
+func (canonicalStore) PutPinnedResolution(context.Context, ports.PinnedResolution) error { return nil }
 
 type canonicalClock struct{}
 

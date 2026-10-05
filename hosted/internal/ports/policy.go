@@ -43,7 +43,6 @@ type Resolution struct {
 	ID        string
 	Principal Principal
 	Skill     ArtifactRef
-	SkillPin  ArtifactPin
 	ExpiresAt int64
 	Findings  []Finding
 }

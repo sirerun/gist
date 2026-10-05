@@ -31,7 +31,7 @@ type Authorizer interface {
 	Decide(context.Context, ports.Principal, ports.Action, *ports.ArtifactRef) (ports.Decision, error)
 }
 type ResolutionStore interface {
-	Put(context.Context, ports.Resolution) error
+	PutPinnedResolution(context.Context, ports.PinnedResolution) error
 }
 type Clock interface{ Now() time.Time }
 
@@ -501,9 +501,9 @@ func (r *Resolver) persist(ctx context.Context, req Request, skill ArtifactPin, 
 		return Result{}, fmt.Errorf("resolution requires %d bytes, budget is %d: %w", len(encoded), req.MaxBytes, ErrBudgetExceeded)
 	}
 	expires := leaseExpiry(r.clock.Now(), req.Lease).Unix()
-	pfindings := make([]ports.Finding, len(findings))
+	pfindings := make([]ports.PinnedFinding, len(findings))
 	for i, finding := range findings {
-		pfindings[i] = ports.Finding{CapabilityID: finding.CapabilityID, Status: finding.Status, Required: finding.Required, Provenance: finding.Provenance}
+		pfindings[i] = ports.PinnedFinding{CapabilityID: finding.CapabilityID, Status: finding.Status, Required: finding.Required, Provenance: finding.Provenance}
 		if finding.Binding != nil {
 			pfindings[i].BindingRef = portRef(req.Principal.WorkspaceID, *finding.Binding)
 		}
@@ -513,7 +513,7 @@ func (r *Resolver) persist(ctx context.Context, req Request, skill ArtifactPin, 
 		}
 	}
 	rootPin := ports.ArtifactPin{Ref: portRef(req.Principal.WorkspaceID, skill), Digest: ports.Digest{Algorithm: skill.Digest.Algorithm, Value: skill.Digest.Value}, ManifestDigest: ports.Digest{Algorithm: skill.ManifestDigest.Algorithm, Value: skill.ManifestDigest.Value}}
-	if err := r.store.Put(ctx, ports.Resolution{ID: id, Principal: req.Principal, Skill: req.Skill, SkillPin: rootPin, ExpiresAt: expires, Findings: pfindings}); err != nil {
+	if err := r.store.PutPinnedResolution(ctx, ports.PinnedResolution{ID: id, Principal: req.Principal, Skill: req.Skill, SkillPin: rootPin, ExpiresAt: expires, Findings: pfindings}); err != nil {
 		return Result{}, fmt.Errorf("store resolution %s: %w", id, err)
 	}
 	return result, nil
