@@ -38,3 +38,35 @@ assigned the single-package slot, an immediate check reported `9.84 10.16
 9.43`. `GOWORK=off` identity package tests passed using external SSD Go cache
 and temp directories. The next load check reported `15.14 11.38 9.89`, so
 scoped vet and race checks were held. No build/lint pass is claimed.
+
+## Independent review fixes (follow-up)
+
+The coordinator's exact-head review of the initial candidate identified three
+loader gaps. The follow-up change regenerates the entire Ed25519 private key
+from its 32-byte seed and constant-time compares all 64 bytes, rejects
+duplicate JSON object fields recursively before struct decoding, and caps
+`retired_at` at `clock.Now()+defaultMaxTokenAge+maxClockSkew`. Retired keys
+already past their retirement instant load as public-only entries that are
+immediately denied. `verifyKey` and verification-key publication now deny at
+the exact retirement instant.
+
+Regression coverage now includes a changed seed with the old public suffix,
+duplicate and case-variant fields at current and nested retired-key levels,
+unknown key IDs, a real token minted under an independently loaded old key
+and verified after rotation reload, overlap at the maximum bound, denial at
+and after the exact retirement instant, already-expired retirement, and
+rejection beyond the bound. The owned source scope also includes
+`hosted/internal/identity/keys.go` for exact-boundary expiry behavior.
+
+Against original candidate `6e8097cba2863a2f123e57ee3997edcff01f2b16`, the
+new regression tests failed for the corrupt seed, duplicate current and
+nested fields, excessive retirement overlap, and exact-boundary expiry. The
+fixed candidate passed `GOWORK=off GOMAXPROCS=2 go test -p=2
+./internal/identity -count=1`, `go test -p=2 -race ./internal/identity
+-count=1`, and scoped `go vet -p=2 ./internal/identity`, using Go cache and
+temporary directories on the external SSD. `gofmt`, `goimports`, and
+`git diff --check` are clean. Native `golangci-lint` config loading failed:
+installed version 2.13.2 rejects the repository config's empty/unsupported
+version. With the coordinator-qualified migrated config and an external SSD
+lint cache, `golangci-lint run --concurrency=2 ./internal/identity` reported
+zero issues. The coordinator's independent fix review remains required.
