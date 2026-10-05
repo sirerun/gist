@@ -5,12 +5,14 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/sirerun/gist/hosted/internal/ports"
 	"github.com/sirerun/gist/hosted/internal/resolution"
+	"github.com/sirerun/gist/hosted/internal/rest"
 )
 
 type canonicalCatalog struct{ skill ports.CatalogRecord }
@@ -54,12 +56,18 @@ func TestCanonicalAdapterRejectsLegacyUnknownAndDuplicateFields(t *testing.T) {
 	principal := ports.Principal{Subject: "caller", WorkspaceID: "workspace"}
 	for _, body := range []string{
 		`{"skill":{"id":"skill/demo"},"runtime_id":"client","max_bytes":1024}`,
+		`{"SKILL_REF":"skill/demo@1.0.0","runtime":{"id":"client"},"max_bytes":1024}`,
+		`{"skill_ref":"skill/demo@1.0.0","runtime":{"ID":"client"},"max_bytes":1024}`,
 		`{"skill_ref":"skill/demo@1.0.0","runtime":{"id":"client"},"max_bytes":1024,"workspace_id":"foreign"}`,
 		`{"skill_ref":"skill/demo@1.0.0","runtime":{"id":"client","owned_connections":null},"max_bytes":1024}`,
 		`{"skill_ref":"skill/demo@1.0.0","skill_ref":"skill/other@1.0.0","runtime":{"id":"client"},"max_bytes":1024}`,
 	} {
 		if _, err := adapter.Resolve(context.Background(), principal, []byte(body)); err == nil {
 			t.Fatalf("accepted invalid request %s", body)
+		} else if strings.Contains(body, "SKILL_REF") || strings.Contains(body, `"ID"`) {
+			if !errors.Is(err, rest.ErrValidationFailed) {
+				t.Fatalf("noncanonical required field did not map to validation failure: %v", err)
+			}
 		}
 	}
 }

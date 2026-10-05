@@ -46,6 +46,9 @@ func (a canonicalResolverAdapter) Resolve(ctx context.Context, principal ports.P
 	if err := rejectDuplicateJSONKeys(raw); err != nil {
 		return nil, rest.ErrValidationFailed
 	}
+	if err := rejectNonCanonicalRequestFields(raw); err != nil {
+		return nil, rest.ErrValidationFailed
+	}
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.DisallowUnknownFields()
 	var input canonicalResolveRequest
@@ -102,6 +105,37 @@ func (a canonicalResolverAdapter) Resolve(ctx context.Context, principal ports.P
 		return nil, rest.ErrBudgetExceeded
 	}
 	return encoded, nil
+}
+
+func rejectNonCanonicalRequestFields(raw []byte) error {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	if err := rejectFieldCaseVariants(fields, "skill_ref", "runtime", "max_bytes"); err != nil {
+		return err
+	}
+	if runtimeRaw, ok := fields["runtime"]; ok {
+		var runtimeFields map[string]json.RawMessage
+		if err := json.Unmarshal(runtimeRaw, &runtimeFields); err != nil {
+			return err
+		}
+		if err := rejectFieldCaseVariants(runtimeFields, "id", "owned_connections"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func rejectFieldCaseVariants(fields map[string]json.RawMessage, canonical ...string) error {
+	for key := range fields {
+		for _, name := range canonical {
+			if strings.EqualFold(key, name) && key != name {
+				return fmt.Errorf("noncanonical request field %q", key)
+			}
+		}
+	}
+	return nil
 }
 
 func validArtifactID(value string) bool {
