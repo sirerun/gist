@@ -73,6 +73,9 @@ func (testEvents) Read(context.Context, ports.Cursor) (ports.EventPage, error) {
 func (testEvents) ReadEventPageForPrincipal(context.Context, ports.Principal, ports.Cursor, int) (ports.EventPage, error) {
 	return ports.EventPage{}, nil
 }
+func (testEvents) OpenEventPageForPrincipal(context.Context, ports.Principal, int) (ports.EventPage, error) {
+	return ports.EventPage{Next: ports.Cursor{ID: "next"}}, nil
+}
 func (testEvents) NewCursor(ports.Principal, time.Duration) (ports.Cursor, error) {
 	return ports.Cursor{ID: "cur"}, nil
 }

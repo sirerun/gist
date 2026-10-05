@@ -11,7 +11,7 @@ import (
 )
 
 // EventCursorOpener is implemented by event stores that can open a new cursor
-// bound to a principal. GET /v1/events without a cursor parameter opens one.
+// bound to a principal. HTTP opening instead requires AtomicEventPageOpener.
 type EventCursorOpener interface {
 	NewCursor(ports.Principal, time.Duration) (ports.Cursor, error)
 }
@@ -27,6 +27,12 @@ type BudgetedEventReader interface {
 	ReadEventPageForPrincipal(context.Context, ports.Principal, ports.Cursor, int) (ports.EventPage, error)
 }
 
+// AtomicEventPageOpener qualifies the first page budget and creates its cursor
+// in one transaction. Failed responses must not leave cursors or evict clients.
+type AtomicEventPageOpener interface {
+	OpenEventPageForPrincipal(context.Context, ports.Principal, int) (ports.EventPage, error)
+}
+
 func (h *Handler) events(w http.ResponseWriter, r *http.Request, p ports.Principal) error {
 	if h.s.Events == nil {
 		return appError("service_unavailable", "Service unavailable", 503, true)
@@ -40,11 +46,19 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request, p ports.Princip
 		// Refuse it before opening or mutating any cursor.
 		return appError("service_unavailable", "Service unavailable", 503, true)
 	}
-	cursor, err := h.eventCursor(r, p)
-	if err != nil {
-		return err
+	var page ports.EventPage
+	var err error
+	maxBytes := budget(r, h.limits.MaxResponseBytes)
+	if id := r.URL.Query().Get("cursor"); id != "" {
+		cursor := ports.Cursor{ID: id, PrincipalHash: events.PrincipalHash(p), WorkspaceID: p.WorkspaceID}
+		page, err = reader.ReadEventPageForPrincipal(r.Context(), p, cursor, maxBytes)
+	} else {
+		opener, ok := h.s.Events.(AtomicEventPageOpener)
+		if !ok {
+			return appError("service_unavailable", "Service unavailable", 503, true)
+		}
+		page, err = opener.OpenEventPageForPrincipal(r.Context(), p, maxBytes)
 	}
-	page, err := reader.ReadEventPageForPrincipal(r.Context(), p, cursor, budget(r, h.limits.MaxResponseBytes))
 	switch {
 	case page.RetentionGap, errors.Is(err, events.ErrCursorExpired), errors.Is(err, events.ErrCursorBinding):
 		// An expired, purged, unknown, or foreign cursor all require the
@@ -58,28 +72,4 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request, p ports.Princip
 		return appError("service_unavailable", "Service unavailable", 503, true)
 	}
 	return h.writeJSON(w, map[string]any{"events": page.Events, "next_cursor": page.Next.ID}, budget(r, h.limits.MaxResponseBytes))
-}
-
-// eventCursor resumes the client-supplied cursor bound to p, or opens a new
-// one when the request carries no cursor.
-func (h *Handler) eventCursor(r *http.Request, p ports.Principal) (ports.Cursor, error) {
-	if id := r.URL.Query().Get("cursor"); id != "" {
-		return ports.Cursor{ID: id, PrincipalHash: events.PrincipalHash(p), WorkspaceID: p.WorkspaceID}, nil
-	}
-	if opener, ok := h.s.Events.(ContextEventCursorOpener); ok {
-		c, err := opener.NewEventCursor(r.Context(), p, 0)
-		if err != nil {
-			return ports.Cursor{}, appError("service_unavailable", "Service unavailable", 503, true)
-		}
-		return c, nil
-	}
-	opener, ok := h.s.Events.(EventCursorOpener)
-	if !ok {
-		return ports.Cursor{}, appError("service_unavailable", "Service unavailable", 503, true)
-	}
-	c, err := opener.NewCursor(p, 0)
-	if err != nil {
-		return ports.Cursor{}, appError("service_unavailable", "Service unavailable", 503, true)
-	}
-	return c, nil
 }
