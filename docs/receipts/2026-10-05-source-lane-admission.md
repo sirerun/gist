@@ -1,0 +1,15 @@
+# Source lane admission — 2026-10-05
+
+Base: 235b1f3f86c66d6f943a910369688be46291e1d6. PR48 landed the accepted contracts; the independent exact-head design approval is recorded in the adjacent October 4 receipt. This satisfies SCOPE.3 and SCOPE.9 for the three source lanes below. No required trust or provider decision is inferred.
+
+| Lane | Ownership and interface | New-capability/defect criterion | Mandatory negative fixtures | Independent review route |
+| --- | --- | --- | --- | --- |
+| KEYS | New identity/keyring.go and keyring_test.go; strict explicit configuration to KeySet; coordinator owns CLI/config/app wiring | Startup-generated identity cannot survive independent instances; provisioned configuration must interoperate | Duplicate/reused kid, mismatched private/public, unknown fields, malformed keys, retired/unknown key, secret-free errors | EVENT author or other nonauthor at final head/base, T-GR-KEYS.4 |
+| WIRE | resolution package and new app/canonical_adapter.go plus tests; coordinator extracts legacy adapter | Legacy adapter consumes incompatible fields and invents binding version; canonical frozen v1 must resolve actual immutable pins and complete closures | Private, revoked, incompatible, incomplete, budget, actual non-1.0.0 binding, REST/MCP parity | KEYS author or other nonauthor at final head/base, T-GR-WIRE.4 |
+| EVENT | storage/events.go and event tests, storage/revocations.go; migration008 if004 insufficient; context-aware cursor interface returned to coordinator | In-memory feed and non-atomic revocation event cannot survive restart/replica | Real PostgreSQL RLS/isolation, sliding TTL, retention floor,16 cap,100 page, rollback, unavailable store, no lost over-budget page | WIRE author or other nonauthor at final head/base, T-GR-EVENT.4 |
+
+Workers own per-lane preflight before source authoring. Generated test keys and local fixture databases are source qualification, not operator secret provisioning or provider execution. No cloud secret, database or DNS mutation is admitted here. Shared app/config/ports remain coordinator-owned. Frozen v1 baselines remain immutable.
+
+The host one-minute load at dispatch was10.88, above the10 limit. Source authoring and gofmt may proceed; Go build/test/lint verification remains held pending a qualified load and the shared lease for multipackage commands. No RED run or passing test is claimed before execution. No implementation completion, review gate, merge or landed status follows merely from authoring. Real database fixtures are mandatory; absent fixtures are a verification blocker, never a skipped pass.
+
+AUTH waits for enrollment trust/custody selection. TREG and COMPOSIO wait for approved action/account/version/license and numerical live authority. Consumer runtime/custody and registry AWS operator/DNS bindings remain unresolved. These gates do not prevent the qualified source lanes above. UpCloud workers wait for shared credit/quota reservations and a subscription-authenticated Luna image; no paid model fallback.
