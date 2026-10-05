@@ -9,6 +9,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strings"
 	"testing"
@@ -143,5 +144,53 @@ func TestPostgresResolutionStoreRoundTrip(t *testing.T) {
 	b := resolutionPrincipalHash(ports.Principal{Issuer: "i", Subject: "a", WorkspaceID: "bc"})
 	if a == b {
 		t.Fatal("principal hash is ambiguous across the subject/workspace boundary")
+	}
+}
+
+func TestPostgresPinnedResolutionRoundTripAndPrincipalBinding(t *testing.T) {
+	pool := resolutionTestPool(t)
+	ctx := context.Background()
+	const workspace = "pinned-resolution-ws"
+	if err := storage.WithTenant(ctx, pool, workspace, func(ctx context.Context, tx pgx.Tx) error {
+		_, err := tx.Exec(ctx, `INSERT INTO workspaces(id,name) VALUES($1,$1)`, workspace)
+		return err
+	}); err != nil {
+		t.Fatalf("seed workspace: %v", err)
+	}
+	principal := ports.Principal{Issuer: "https://issuer.example.invalid", Subject: "agent-1", Audience: "https://registry.example.invalid", WorkspaceID: workspace, Scopes: []string{"catalog:read", "catalog:resolve"}, PolicyGeneration: 1}
+	skill := ports.ArtifactRef{WorkspaceID: workspace, Kind: ports.KindSkill, ID: "gist/skill/root", Version: "1.2.0"}
+	pin := func(kind ports.ArtifactKind, id, version, digest, manifest string) ports.ArtifactPin {
+		return ports.ArtifactPin{Ref: ports.ArtifactRef{WorkspaceID: workspace, Kind: kind, ID: id, Version: version}, Digest: ports.Digest{Algorithm: "sha256", Value: digest}, ManifestDigest: ports.Digest{Algorithm: "sha256", Value: manifest}}
+	}
+	root := pin(ports.KindSkill, skill.ID, skill.Version, strings.Repeat("a", 64), strings.Repeat("b", 64))
+	want := ports.PinnedResolution{ID: "pin-" + strings.Repeat("c", 8), Principal: principal, Skill: skill, SkillPin: root, ExpiresAt: time.Now().Add(time.Hour).Unix(), Findings: []ports.PinnedFinding{{CapabilityID: "gist/document/parse@1.0.0", Status: "ready", BindingRef: ports.ArtifactRef{WorkspaceID: workspace, Kind: ports.KindCapability, ID: "gist/document/parse", Version: "1.0.0"}, Required: true, Provenance: "declared", Closure: []ports.ArtifactPin{root, pin(ports.KindCapability, "gist/document/parse", "1.0.0", strings.Repeat("d", 64), strings.Repeat("e", 64)), pin(ports.KindTool, "gist/tool/parse", "2.0.0", strings.Repeat("f", 64), strings.Repeat("1", 64))}}}}
+	store := &postgresResolutionStore{pool: pool}
+	if err := store.PutPinnedResolution(ctx, want); err != nil {
+		t.Fatalf("put pinned resolution: %v", err)
+	}
+	cursor := ports.Cursor{ID: want.ID, WorkspaceID: workspace, PrincipalHash: ports.PrincipalHash(principal)}
+	got, err := store.GetPinnedResolution(ctx, cursor)
+	if err != nil {
+		t.Fatalf("get pinned resolution: %v", err)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("pinned round trip mismatch: got %+v want %+v", got, want)
+	}
+	other := principal
+	other.Subject = "agent-2"
+	if _, err := store.GetPinnedResolution(ctx, ports.Cursor{ID: want.ID, WorkspaceID: workspace, PrincipalHash: ports.PrincipalHash(other)}); !errors.Is(err, storage.ErrNotFound) {
+		t.Fatalf("wrong principal returned %v, want not found", err)
+	}
+	if _, err := store.GetPinnedResolution(ctx, ports.Cursor{ID: want.ID, WorkspaceID: "other-workspace", PrincipalHash: ports.PrincipalHash(principal)}); !errors.Is(err, storage.ErrNotFound) {
+		t.Fatalf("wrong workspace returned %v, want not found", err)
+	}
+	expired := want
+	expired.ID = "expired-" + strings.Repeat("d", 8)
+	expired.ExpiresAt = time.Now().Add(-time.Minute).Unix()
+	if err := store.PutPinnedResolution(ctx, expired); err != nil {
+		t.Fatalf("put expired resolution: %v", err)
+	}
+	if _, err := store.GetPinnedResolution(ctx, ports.Cursor{ID: expired.ID, WorkspaceID: workspace, PrincipalHash: ports.PrincipalHash(principal)}); !errors.Is(err, storage.ErrNotFound) {
+		t.Fatalf("expired row returned %v, want not found", err)
 	}
 }

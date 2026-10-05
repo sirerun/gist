@@ -48,9 +48,12 @@ func (p policyDouble) Decide(_ context.Context, _ ports.Principal, _ ports.Actio
 	return ports.Decision{Allowed: p.allowed}, nil
 }
 
-type resolutionDouble struct{ value ports.Resolution }
+type resolutionDouble struct{ value ports.PinnedResolution }
 
-func (s *resolutionDouble) Put(_ context.Context, r ports.Resolution) error { s.value = r; return nil }
+func (s *resolutionDouble) PutPinnedResolution(_ context.Context, r ports.PinnedResolution) error {
+	s.value = r
+	return nil
+}
 
 type clockDouble struct{ now time.Time }
 
