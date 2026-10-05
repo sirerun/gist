@@ -263,3 +263,8 @@ Three follow-up fixes changed or clarified v1 behavior.
   again gets a new subject.
 
 The v1 lock and the gate hashes were refreshed for this amendment.
+
+
+## October5 source implementation clarification
+
+GET events requires a principal-bound budget-aware reader. A legacy reader that could consume cursor state before response serialization is unavailable (503) until safe storage composition is supplied. Byte-budget failure must not consume a page or evict a cursor. This source change remains subject to final exact-head review and app/store integration; it does not assert deployed durability.
