@@ -45,32 +45,34 @@ func resolutionTestPool(t *testing.T) *pgxpool.Pool {
 		t.Fatalf("connect to postgres (set GIST_DATABASE_URL): %v", err)
 	}
 	defer admin.Close(context.Background())
-	suffix := make([]byte, 6)
-	if _, err := rand.Read(suffix); err != nil {
-		t.Fatal(err)
-	}
-	dbName := "gist_registry_resolution_" + hex.EncodeToString(suffix)
+	dbName := "gist_registry_resolution_" + postgresTestSuffix(t)
 	if _, err := admin.Exec(ctx, `CREATE DATABASE "`+dbName+`"`); err != nil {
 		t.Fatalf("create database: %v", err)
 	}
+	var pool *pgxpool.Pool
+	t.Cleanup(func() {
+		if pool != nil {
+			pool.Close()
+		}
+		drop, err := pgx.ConnectConfig(context.Background(), adminCfg)
+		if err != nil {
+			t.Errorf("connect to PostgreSQL for owned database cleanup: %v", err)
+			return
+		}
+		defer drop.Close(context.Background())
+		if _, err := drop.Exec(context.Background(), `DROP DATABASE "`+dbName+`" WITH (FORCE)`); err != nil {
+			t.Errorf("drop owned test database %q: %v", dbName, err)
+		}
+	})
 	cfg, err := pgxpool.ParseConfig(base)
 	if err != nil {
 		t.Fatal(err)
 	}
 	cfg.ConnConfig.Database = dbName
-	pool, err := pgxpool.NewWithConfig(ctx, cfg)
+	pool, err = pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
 		t.Fatalf("open pool: %v", err)
 	}
-	t.Cleanup(func() {
-		pool.Close()
-		drop, err := pgx.ConnectConfig(context.Background(), adminCfg)
-		if err != nil {
-			return
-		}
-		defer drop.Close(context.Background())
-		_, _ = drop.Exec(context.Background(), `DROP DATABASE IF EXISTS "`+dbName+`" WITH (FORCE)`)
-	})
 	files, err := filepath.Glob(filepath.Join("..", "..", "migrations", "*.sql"))
 	if err != nil || len(files) == 0 {
 		t.Fatalf("find migrations: %v (%d files)", err, len(files))
@@ -86,6 +88,15 @@ func resolutionTestPool(t *testing.T) *pgxpool.Pool {
 		}
 	}
 	return pool
+}
+
+func postgresTestSuffix(t *testing.T) string {
+	t.Helper()
+	suffix := make([]byte, 8)
+	if _, err := rand.Read(suffix); err != nil {
+		t.Fatalf("generate unique PostgreSQL test resource name: %v", err)
+	}
+	return hex.EncodeToString(suffix)
 }
 
 // TestPostgresResolutionStoreRoundTrip stores and reads back a resolution
@@ -157,20 +168,29 @@ func TestPostgresPinnedResolutionRoundTripAndPrincipalBinding(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("seed workspace: %v", err)
 	}
-	roleName := "gist_resolution_rls_" + strings.ToLower(strings.ReplaceAll(t.Name(), "/", "_"))
-	roleName = "gist_rls_" + strings.TrimPrefix(roleName, "gist_resolution_rls_")
-	roleName = strings.Map(func(r rune) rune {
-		if r >= 'a' && r <= 'z' || r >= '0' && r <= '9' || r == '_' {
-			return r
-		}
-		return '_'
-	}, roleName)
-	if len(roleName) > 60 {
-		roleName = roleName[:60]
-	}
+	roleName := "gist_wire_rls_" + postgresTestSuffix(t)
 	if _, err := pool.Exec(ctx, `CREATE ROLE "`+roleName+`" NOSUPERUSER NOBYPASSRLS NOLOGIN`); err != nil {
 		t.Fatalf("create restricted role: %v", err)
 	}
+	var restrictedPool *pgxpool.Pool
+	t.Cleanup(func() {
+		if restrictedPool != nil {
+			restrictedPool.Close()
+		}
+		cleanupCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if _, err := pool.Exec(cleanupCtx, `DROP OWNED BY "`+roleName+`"`); err != nil {
+			t.Errorf("drop owned grants for test role %q: %v", roleName, err)
+			return
+		}
+		if _, err := pool.Exec(cleanupCtx, `REVOKE "`+roleName+`" FROM CURRENT_USER`); err != nil {
+			t.Errorf("revoke owned test role %q: %v", roleName, err)
+			return
+		}
+		if _, err := pool.Exec(cleanupCtx, `DROP ROLE "`+roleName+`"`); err != nil {
+			t.Errorf("drop owned test role %q: %v", roleName, err)
+		}
+	})
 	if _, err := pool.Exec(ctx, `GRANT "`+roleName+`" TO CURRENT_USER`); err != nil {
 		t.Fatalf("grant restricted role: %v", err)
 	}
@@ -192,10 +212,6 @@ func TestPostgresPinnedResolutionRoundTripAndPrincipalBinding(t *testing.T) {
 	if err != nil {
 		t.Fatalf("connect with restricted role: %v", err)
 	}
-	t.Cleanup(func() {
-		restrictedPool.Close()
-		_, _ = pool.Exec(context.Background(), `DROP ROLE IF EXISTS "`+roleName+`"`)
-	})
 	var isSuper, canBypass bool
 	if err := restrictedPool.QueryRow(ctx, `SELECT rolsuper,rolbypassrls FROM pg_roles WHERE rolname=current_user`).Scan(&isSuper, &canBypass); err != nil {
 		t.Fatal(err)
