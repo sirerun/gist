@@ -115,13 +115,18 @@ func newWithStores(cfg Config, pool *pgxpool.Pool, objects *storage.ObjectStore)
 		pool.Close()
 		return nil, err
 	}
+	canonicalResolver, err := NewCanonicalResolver(resolver, cfg.MaxResponseBytes)
+	if err != nil {
+		pool.Close()
+		return nil, err
+	}
 	feed := events.NewStore(clock)
 	broker := newBroker(cfg.BrokerURL, cfg.RequestTimeout, cfg.BrokerClient)
 	var connections ports.ConnectionInitiator
 	if broker != nil {
 		connections = broker
 	}
-	services := rest.Services{Identity: identityStore, Authorizer: policy, Catalog: catalog, Search: lexicalAdapter{service: search}, Versions: catalog, Artifacts: objects, Resolutions: resolutionStore, Connections: connections, Events: eventStoreAdapter{store: feed}, Publisher: publisher{pool: pool, objects: objects, limits: cfg}, Revocations: artifactRevoker{catalog: catalog, feed: eventStoreAdapter{store: feed}}, Resolver: resolverAdapter{resolver: resolver, maxBytes: cfg.MaxResponseBytes}, Limits: cfg.RESTLimits(), Audience: cfg.ResourceAudience}
+	services := rest.Services{Identity: identityStore, Authorizer: policy, Catalog: catalog, Search: lexicalAdapter{service: search}, Versions: catalog, Artifacts: objects, Resolutions: resolutionStore, Connections: connections, Events: eventStoreAdapter{store: feed}, Publisher: publisher{pool: pool, objects: objects, limits: cfg}, Revocations: artifactRevoker{catalog: catalog, feed: eventStoreAdapter{store: feed}}, Resolver: canonicalResolver, Limits: cfg.RESTLimits(), Audience: cfg.ResourceAudience}
 	rh, err := rest.New(services)
 	if err != nil {
 		pool.Close()
@@ -399,39 +404,6 @@ func (s lexicalAdapter) Search(ctx context.Context, q ports.SearchQuery) (ports.
 		out.Next = *got.NextCursor
 	}
 	return out, nil
-}
-
-type resolverAdapter struct {
-	resolver *resolution.Resolver
-	maxBytes int
-}
-
-func (r resolverAdapter) Resolve(ctx context.Context, p ports.Principal, raw []byte) ([]byte, error) {
-	var in struct {
-		Skill            ports.ArtifactRef `json:"skill"`
-		RuntimeID        string            `json:"runtime_id"`
-		LocalExecution   bool              `json:"local_execution"`
-		OwnedConnections bool              `json:"owned_connections"`
-		SelectedBindings map[string]string `json:"selected_bindings"`
-		MaxBytes         int               `json:"max_bytes"`
-	}
-	if err := json.Unmarshal(raw, &in); err != nil {
-		return nil, fmt.Errorf("decode resolution request: %w", err)
-	}
-	if in.Skill.WorkspaceID == "" {
-		in.Skill.WorkspaceID = p.WorkspaceID
-	}
-	if in.MaxBytes <= 0 {
-		in.MaxBytes = r.maxBytes
-	}
-	got, err := r.resolver.Resolve(ctx, resolution.Request{Principal: p, Skill: in.Skill, RuntimeID: in.RuntimeID, LocalExecution: in.LocalExecution, OwnedConnections: in.OwnedConnections, SelectedBindings: in.SelectedBindings, MaxBytes: in.MaxBytes})
-	if errors.Is(err, storage.ErrRevoked) {
-		return nil, rest.ErrArtifactRevoked
-	}
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(got)
 }
 
 type broker struct {

@@ -16,6 +16,7 @@ import (
 	"github.com/sirerun/gist/hosted/internal/identity"
 	"github.com/sirerun/gist/hosted/internal/packages"
 	"github.com/sirerun/gist/hosted/internal/ports"
+	"github.com/sirerun/gist/hosted/internal/resolution"
 	"github.com/sirerun/gist/hosted/internal/rest"
 	"github.com/sirerun/gist/hosted/internal/storage"
 )
@@ -238,11 +239,14 @@ type unrevokedCatalog struct{ ports.CatalogStore }
 
 func (c unrevokedCatalog) Get(ctx context.Context, ref ports.ArtifactRef) (ports.CatalogRecord, error) {
 	rec, err := c.CatalogStore.Get(ctx, ref)
+	if errors.Is(err, storage.ErrNotFound) {
+		return ports.CatalogRecord{}, resolution.ErrArtifactNotFound
+	}
+	if errors.Is(err, storage.ErrRevoked) || err == nil && rec.State == "revoked" {
+		return ports.CatalogRecord{}, resolution.ErrArtifactRevoked
+	}
 	if err != nil {
 		return rec, err
-	}
-	if rec.State == "revoked" {
-		return ports.CatalogRecord{}, storage.ErrRevoked
 	}
 	return rec, nil
 }
