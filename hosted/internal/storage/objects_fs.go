@@ -28,7 +28,7 @@ func newFSBackend(root string) (*fsBackend, error) {
 	return &fsBackend{root: root}, nil
 }
 
-func (f *fsBackend) put(_ context.Context, name string, b []byte) error {
+func (f *fsBackend) put(_ context.Context, name string, b []byte) (returnErr error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	path := filepath.Join(f.root, name)
@@ -48,7 +48,7 @@ func (f *fsBackend) put(_ context.Context, name string, b []byte) error {
 	}
 	defer func() {
 		if cleanupErr := removeTemp(tmpName); cleanupErr != nil && !errors.Is(cleanupErr, os.ErrNotExist) {
-			err = errors.Join(err, fmt.Errorf("remove temporary object: %w", cleanupErr))
+			returnErr = errors.Join(returnErr, fmt.Errorf("remove temporary object: %w", cleanupErr))
 		}
 	}()
 	if _, err = tmp.Write(b); err != nil {
