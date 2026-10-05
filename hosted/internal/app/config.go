@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sirerun/gist/hosted/internal/identity"
 	"github.com/sirerun/gist/hosted/internal/rest"
 )
 
@@ -39,6 +40,11 @@ type Config struct {
 	// least MinOAuthConsentSecretBytes bytes; test compositions pass their
 	// own explicitly.
 	OAuthConsentSecret []byte
+	// SigningKeyConfig is operator-supplied strict key-set JSON. Every replica
+	// must receive the same custody-approved source; it is never generated.
+	SigningKeyConfig []byte
+	// Every retained workspace needs an explicitly bound existing maintainer.
+	EventMaintenanceTargets []MaintenanceTarget
 }
 
 // MinOAuthConsentSecretBytes is the shortest accepted OAuth consent secret.
@@ -64,6 +70,9 @@ func (c Config) Validate() error {
 	if len(c.OAuthConsentSecret) < MinOAuthConsentSecretBytes {
 		return fmt.Errorf("app: oauth consent secret (GIST_OAUTH_CONSENT_SECRET) must be at least %d bytes", MinOAuthConsentSecretBytes)
 	}
+	if _, err := identity.LoadKeySet(c.SigningKeyConfig, identityClock{}); err != nil {
+		return fmt.Errorf("app: GIST_SIGNING_KEY_CONFIG is required and must be valid: %w", err)
+	}
 	if c.DatabaseURL == "" {
 		return errors.New("app: database URL is required")
 	}
@@ -72,6 +81,16 @@ func (c Config) Validate() error {
 	}
 	if c.RequestTimeout <= 0 || c.MaxPackageBytes <= 0 || c.MaxExpandedBytes <= 0 || c.MaxRequestBytes <= 0 || c.MaxResponseBytes <= 0 || c.MaxCatalogEntries <= 0 || c.MaxDiscoveryResults <= 0 || c.MaxConcurrentRequests <= 0 {
 		return errors.New("app: request timeout and all request limits are required")
+	}
+	if len(c.EventMaintenanceTargets) == 0 || len(c.EventMaintenanceTargets) > 100 {
+		return errors.New("app: one to one hundred explicit event maintenance targets are required")
+	}
+	seen := map[string]bool{}
+	for _, target := range c.EventMaintenanceTargets {
+		if target.WorkspaceID == "" || target.Subject == "" || seen[target.WorkspaceID] {
+			return errors.New("app: event maintenance targets require unique workspaces and subjects")
+		}
+		seen[target.WorkspaceID] = true
 	}
 	return nil
 }
