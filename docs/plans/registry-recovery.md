@@ -66,11 +66,11 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ### E-GR-AUTH -- Enrollment and grants -> E-GR-AUTH-enrollment-and-grants.md (0/7)
 
-### E-GR-KEYS -- Persistent signing keys -> E-GR-KEYS-persistent-signing-keys.md (0/13)
+### E-GR-KEYS -- Persistent signing keys -> E-GR-KEYS-persistent-signing-keys.md (8/13)
 
 ### E-GR-INTERFACE -- Shared component interfaces -> E-GR-INTERFACE-shared-component-interfaces.md (1/10)
 
-### E-GR-WIRE -- Canonical registry wire -> E-GR-WIRE-canonical-registry-wire.md (0/10)
+### E-GR-WIRE -- Canonical registry wire -> E-GR-WIRE-canonical-registry-wire.md (0/11)
 
 ### E-GR-EVENT -- Durable revocation feed -> E-GR-EVENT-durable-revocation-feed.md (0/10)
 
