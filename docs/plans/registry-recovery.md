@@ -80,7 +80,7 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ### E-GR-PUBLISH -- Canonical publication -> E-GR-PUBLISH-canonical-publication.md (0/9)
 
-### E-GR-CORE -- Startup and event composition -> E-GR-CORE-startup-and-event-composition.md (0/31)
+### E-GR-CORE -- Startup and event composition -> E-GR-CORE-startup-and-event-composition.md (0/34)
 
 ### E-GR-INTEGRATE -- Composition and interoperability -> E-GR-INTEGRATE-composition-and-interoperability.md (0/7)
 
@@ -159,3 +159,6 @@ Current shipping validation: 128 total active production tasks, five source-only
 ## October5 source delivery continuation
 
 PR48 landed the original reviewed production graph. KEYS/WIRE/EVENT are admitted source components; trust, live pilot and AWS/DNS operator bindings remain held. KEYS has three accepted loader findings tracked as7/8/9, with independent re-review required. Shared-interface source delivery is now a separate prerequisite so dependent components can land without completing the held final app composition. Graph rows retain one terminal production gate and the same registry/caller scope.
+
+
+2026-10-05 CORE-R9 source-preparation assignment: existing retrieval, wiring and named-client acceptance constructors predate strict key configuration and startup maintenance qualification. The designated fixture author owns only their local startup helper files in an isolated worktree; dedicated test-only maintenance grants must precede actual New without broadening original reader or client authority. Numeric fix/verify/independent-review rows join the core merge gate. This records prepared compatibility work, not passing application or production acceptance.
