@@ -50,7 +50,7 @@ below.
 
 ## Follow-up verification after the lint fix
 
-Source head: `0e250fb` (`test(retrieval): remove unused workspace denial
+Source head: `0e250fbbba2cfbd7521e6a1c829bcea06b848e0a` (`test(retrieval): remove unused workspace denial
 assignment`), following the owned fixture and receipt commits. I cherry-picked
 the coordinator's one-line test-only cleanup; it does not change assertions or
 production code.
@@ -83,19 +83,19 @@ response budget still allowed publication on the pre-fix source.
 
 The corrected implementation is
 `08f9b012967f251b434768c2c214512b1daad573`, with overlay
-`fe8cda3486e02b8561ea7ceb06b98fa351d30c7b`. The coordinator reports that the
-corrected PostgreSQL case passed twice and records its associated race, vet,
-and lint results. In addition, I ran the same exact named test against the
+`fe8cda3486e02b8561ea7ceb06b98fa351d30c7b`. I ran the same exact named test against the
 corrected current source at `d6d65da87484a958031281438917ce8c7461c898`:
 `go test -count=1 -tags=integration -run '^TestPublisherCatalogAndOutboxShareTransaction$' -p=2 ./internal/app`
 passed against the local PostgreSQL fixture. The integration test file's git
 blob is identical to the overlay file from `fe8cda3`. The RED and this
-corrected-source PASS are direct results; the previously reported repeated
-checks remain coordinator-attributed evidence.
+corrected-source PASS are direct results. No earlier repeated check is needed
+for this finding disposition.
 
-The coordinator reports that its final physical-blob test on source
-`bd5` passed all eight PostgreSQL tests. That result is separate from this
-fixture lane and is recorded only as coordinator-supplied evidence.
+The separate author-verifier receipt records the final eight PostgreSQL app
+and publisher tests, including the physical staged-blob boundary, at
+`bd5d4d9c88cea35425a1d306cde5f424f6a42e90`. App and CLI files are byte-identical
+to the composed candidate; this attribution is to that verifier, not to this
+fixture lane.
 
 ## Scope boundary
 
