@@ -310,3 +310,58 @@ func TestCanonicalResolveTransportFailClosedParity(t *testing.T) {
 		t.Fatalf("revoked binding returned MCP success: %s", mw.Body.String())
 	}
 }
+
+// Duplicate canonical fields must survive both transport layers so the strict
+// resolver can reject them before allocating a pinned resolution.
+func TestCanonicalResolveTransportRejectsDuplicateKeys(t *testing.T) {
+	services := rest.Services{Identity: transportIdentity{}, Authorizer: canonicalAuth{}, Resolver: testCanonicalAdapter(t, 4096)}
+	rh, err := rest.New(services)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mh, err := remotemcp.New(remotemcp.Config{Services: services, AllowedOrigins: map[string]bool{"https://client.example": true}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	init := httptest.NewRequest(http.MethodPost, "/mcp", strings.NewReader(`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}`))
+	init.Header.Set("Authorization", "Bearer caller")
+	init.Header.Set("Origin", "https://client.example")
+	iw := httptest.NewRecorder()
+	mh.ServeHTTP(iw, init)
+	sid := iw.Header().Get("Mcp-Session-Id")
+	if iw.Code != 200 || sid == "" {
+		t.Fatalf("initialize: %d %s", iw.Code, iw.Body.String())
+	}
+	cases := map[string]string{
+		"skill_ref":  `{"skill_ref":"skill/demo@1.0.0","skill_ref":"skill/demo@1.0.0","runtime":{"id":"runtime.example","owned_connections":true},"max_bytes":2048}`,
+		"runtime_id": `{"skill_ref":"skill/demo@1.0.0","runtime":{"id":"runtime.example","id":"runtime.example","owned_connections":true},"max_bytes":2048}`,
+		"max_bytes":  `{"skill_ref":"skill/demo@1.0.0","runtime":{"id":"runtime.example","owned_connections":true},"max_bytes":2048,"max_bytes":2048}`,
+	}
+	for name, raw := range cases {
+		t.Run(name+"/REST", func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/v1/resolve", strings.NewReader(raw))
+			req.Header.Set("Authorization", "Bearer caller")
+			w := httptest.NewRecorder()
+			rh.ServeHTTP(w, req)
+			if w.Code != http.StatusUnprocessableEntity {
+				t.Fatalf("duplicate accepted: status=%d body=%s", w.Code, w.Body.String())
+			}
+		})
+		t.Run(name+"/MCP", func(t *testing.T) {
+			body := `{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"gist_resolve","arguments":` + raw + `}}`
+			req := httptest.NewRequest(http.MethodPost, "/mcp", strings.NewReader(body))
+			req.Header.Set("Authorization", "Bearer caller")
+			req.Header.Set("Origin", "https://client.example")
+			req.Header.Set("Mcp-Session-Id", sid)
+			w := httptest.NewRecorder()
+			mh.ServeHTTP(w, req)
+			var envelope rpcEnvelope
+			if err := json.Unmarshal(w.Body.Bytes(), &envelope); err != nil {
+				t.Fatal(err)
+			}
+			if w.Code != http.StatusOK || !envelope.Result.IsError || len(envelope.Result.Content) != 1 || !strings.Contains(envelope.Result.Content[0].Text, "validation_failed") {
+				t.Fatalf("duplicate accepted: status=%d body=%s", w.Code, w.Body.String())
+			}
+		})
+	}
+}
