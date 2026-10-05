@@ -43,25 +43,11 @@ type Resolution struct {
 	ID        string
 	Principal Principal
 	Skill     ArtifactRef
-	SkillPin  ArtifactPin
 	ExpiresAt int64
 	Findings  []Finding
 }
 
-// ArtifactPin is the immutable artifact identity retained with a resolution.
-type ArtifactPin struct {
-	Ref            ArtifactRef
-	Digest         Digest
-	ManifestDigest Digest
-}
-
-type Finding struct {
-	CapabilityID, Status, ConnectURL string
-	BindingRef                       ArtifactRef
-	Closure                          []ArtifactPin
-	Required                         bool
-	Provenance                       string
-}
+type Finding struct{ CapabilityID, Status, ConnectURL string }
 
 type ResolutionStore interface {
 	Put(context.Context, Resolution) error
