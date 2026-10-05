@@ -7,19 +7,19 @@ import (
 )
 
 func (h *Handler) resolve(w http.ResponseWriter, r *http.Request, p ports.Principal) error {
-	var in map[string]any
-	if err := decodeBody(r, h.limits.MaxBodyBytes, &in); err != nil {
+	raw, err := readBody(r, h.limits.MaxBodyBytes)
+	if err != nil {
 		return err
+	}
+	// Preserve the original object for canonical duplicate-field validation.
+	if !json.Valid(raw) {
+		return appError("validation_failed", "Invalid request", 422, false)
 	}
 	if h.s.Resolver == nil {
 		return appError("service_unavailable", "Resolution service unavailable", 503, true)
 	}
 	if err := h.authorize(r.Context(), p, ports.ActionRead, nil); err != nil {
 		return err
-	}
-	raw, err := json.Marshal(in)
-	if err != nil {
-		return appError("validation_failed", "Invalid request", 422, false)
 	}
 	out, err := h.s.Resolver.Resolve(r.Context(), p, raw)
 	if err != nil {

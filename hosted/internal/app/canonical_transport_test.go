@@ -365,3 +365,20 @@ func TestCanonicalResolveTransportRejectsDuplicateKeys(t *testing.T) {
 		})
 	}
 }
+
+func TestCanonicalResolveRESTRejectsTrailingJSON(t *testing.T) {
+	h, err := rest.New(rest.Services{Identity: transportIdentity{}, Authorizer: canonicalAuth{}, Resolver: testCanonicalAdapter(t, 4096)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, suffix := range []string{` {}`, ` null`, ` trailing`} {
+		raw := `{"skill_ref":"skill/demo@1.0.0","runtime":{"id":"runtime.example"},"max_bytes":2048}` + suffix
+		req := httptest.NewRequest(http.MethodPost, "/v1/resolve", strings.NewReader(raw))
+		req.Header.Set("Authorization", "Bearer caller")
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, req)
+		if w.Code != http.StatusUnprocessableEntity {
+			t.Fatalf("trailing JSON accepted: status=%d body=%s", w.Code, w.Body.String())
+		}
+	}
+}
