@@ -98,7 +98,7 @@ func (k *KeySet) verifyKey(kid string, now time.Time) (SigningKey, error) {
 	if !ok || key.Algorithm != "EdDSA" || len(key.Public) != ed25519.PublicKeySize {
 		return SigningKey{}, fmt.Errorf("unknown signing key")
 	}
-	if !key.NotAfter.IsZero() && now.After(key.NotAfter) {
+	if !key.NotAfter.IsZero() && !now.Before(key.NotAfter) {
 		return SigningKey{}, fmt.Errorf("signing key freshness exceeded")
 	}
 	return key, nil
@@ -131,7 +131,7 @@ func (k *KeySet) VerificationKeys() []VerificationKey {
 	defer k.mu.RUnlock()
 	out := []VerificationKey{{KID: k.current.KID, Algorithm: k.current.Algorithm, Public: append(ed25519.PublicKey(nil), k.current.Public...), NotAfter: k.current.NotAfter}}
 	for kid, key := range k.keys {
-		if kid == k.current.KID || (!key.NotAfter.IsZero() && now.After(key.NotAfter)) {
+		if kid == k.current.KID || (!key.NotAfter.IsZero() && !now.Before(key.NotAfter)) {
 			continue
 		}
 		out = append(out, VerificationKey{KID: key.KID, Algorithm: key.Algorithm, Public: append(ed25519.PublicKey(nil), key.Public...), NotAfter: key.NotAfter})
