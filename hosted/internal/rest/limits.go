@@ -53,7 +53,7 @@ func requestID(r *http.Request) (string, error) {
 	return "req_" + hex.EncodeToString(b), nil
 }
 func budget(r *http.Request, fallback int) int {
-	if n, err := strconv.Atoi(r.URL.Query().Get("max_bytes")); err == nil && n > 0 {
+	if n, err := strconv.Atoi(r.URL.Query().Get("max_bytes")); err == nil && n > 0 && n < fallback {
 		return n
 	}
 	return fallback
