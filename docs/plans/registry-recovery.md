@@ -58,7 +58,7 @@ Each named task below is a planning task record, not a minted external-service t
 
 The founder explicitly requested the entire SDLC as first-class items, so the known recovery deliverables include all stage obligations now, including gated release/live/operations rows. Those rows state verifiable outcomes rather than inventing a deployment design; their preflights revalidate actual landed inputs and authority. The user now explicitly requires full registry production completion. Known M2b/M3 obligations are therefore first-class stages with a receipt-driven planning refresh before dispatch; genuinely new unknown epics stay outlines with one triggered planning task. The unselected managed gateway stays outline and never blocks this completion. The split epic files contain the machine-readable wave assignments and task dependencies. Wave labels describe the horizon; they do not forbid pipelining independent verified candidates. Merge mutations to main are serialized by the coordinator, but unmerged branch work and disjoint reviews remain parallel. Real shared interface dependence requires landed receipts; speculate only with explicitly recorded immutable inputs and no delivery authority. Estimates remain TBD pending bounded preflight sizing, rather than inventing dates from unresolved scope.
 
-Every candidate chain is preflight -> implement -> behavior/quality verify -> independent review -> guarded merge -> verify-landed. Accepted findings allocate stable suffix IDs such as T-GR-KEYS.1.F1 and T-GR-KEYS.4.R2 with implement/verify/review markers and exact dependencies. Fixes depend on the finding/handoff, not successful completion of the failed review, preventing deadlock. The merge row waits on latest successful independent review; head/base/interface changes invalidate affected checks/review. Preserve original IDs and findings history; no automatic checkbox resets erase evidence.
+Every candidate chain is preflight -> implement -> behavior/quality verify -> independent review -> guarded merge -> verify-landed. Accepted findings keep stable finding labels such as KEYS-R4 and allocate parser-supported numeric task IDs for explicit implement/verify/review successors and exact dependencies. Fixes depend on the finding/handoff, not successful completion of the failed review, preventing deadlock. The merge row waits on latest successful independent review; head/base/interface changes invalidate affected checks/review. Preserve original IDs and findings history; no automatic checkbox resets erase evidence.
 
 ## Checkable Work Breakdown
 
@@ -68,7 +68,7 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ### E-GR-KEYS -- Persistent signing keys -> E-GR-KEYS-persistent-signing-keys.md (12/13)
 
-### E-GR-INTERFACE -- Shared component interfaces -> E-GR-INTERFACE-shared-component-interfaces.md (3/13)
+### E-GR-INTERFACE -- Shared component interfaces -> E-GR-INTERFACE-shared-component-interfaces.md (5/16)
 
 ### E-GR-WIRE -- Canonical registry wire -> E-GR-WIRE-canonical-registry-wire.md (0/11)
 
