@@ -94,7 +94,8 @@ func request() Request {
 
 func TestResolveUsesActualImmutableBindingAndCompleteClosure(t *testing.T) {
 	store := &resolutionDouble{}
-	got, err := newResolver(t, fixture("2.3.4"), policyDouble{allowed: true}, store).Resolve(context.Background(), request())
+	c := fixture("2.3.4")
+	got, err := newResolver(t, c, policyDouble{allowed: true}, store).Resolve(context.Background(), request())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -110,8 +111,24 @@ func TestResolveUsesActualImmutableBindingAndCompleteClosure(t *testing.T) {
 	if got.Skill.Digest.Algorithm != "sha256" || got.Findings[0].Closure[0].ManifestDigest.Value == "" {
 		t.Fatalf("missing digest closure: %+v", got)
 	}
-	if store.value.Skill.Version != "1.2.0" || store.value.Findings[0].Status != StatusReady || store.value.Findings[0].BindingRef.Version != "2.3.4" || len(store.value.Findings[0].Closure) != 4 {
+	root := c.records[key(ref(ports.KindSkill, "skill/demo", "1.2.0"))]
+	if store.value.Skill.Version != "1.2.0" || store.value.SkillPin.Ref != root.Ref || store.value.SkillPin.Digest != root.Digest || store.value.SkillPin.ManifestDigest != root.ManifestDigest || store.value.Findings[0].Status != StatusReady || store.value.Findings[0].BindingRef.Version != "2.3.4" || len(store.value.Findings[0].Closure) != 4 {
 		t.Fatalf("resolution persistence missing: %+v", store.value)
+	}
+}
+
+func TestResolveRejectsCaseVariantDuplicateBindingFields(t *testing.T) {
+	c := fixture("2.3.4")
+	binding := c.bindings[0]
+	binding.Metadata = []byte(`{"id":"bind/demo","version":"2.3.4","capability_ref":"cap/demo@2.0.0","CAPABILITY_REF":"attacker@9.9.9","tool_ref":"tool/demo@3.1.0","provider_ref":"provider/demo@4.0.0","adapter_version":"adapter.8","fixture_digest":{"algorithm":"sha256","value":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},"conformance":"passed","exact_versions":true}`)
+	c.bindings[0] = binding
+	c.records[key(binding.Ref)] = binding
+	got, err := newResolver(t, c, policyDouble{allowed: true}, &resolutionDouble{}).Resolve(context.Background(), request())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Status == StatusReady || got.Findings[0].Reason != "binding metadata is invalid" {
+		t.Fatalf("case-variant duplicate binding field was accepted: %+v", got)
 	}
 }
 func TestResolveFailsClosedForAmbiguousBinding(t *testing.T) {

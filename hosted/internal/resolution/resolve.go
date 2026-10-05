@@ -141,7 +141,7 @@ func (r *Resolver) Resolve(ctx context.Context, req Request) (Result, error) {
 		return Result{}, fmt.Errorf("load skill %s: %w", req.Skill.ID, err)
 	}
 	var sm skillMetadata
-	if err := json.Unmarshal(skill.Metadata, &sm); err != nil {
+	if err := decodeJSONMetadata(skill.Metadata, &sm); err != nil {
 		return Result{}, fmt.Errorf("decode skill requirements: %w", err)
 	}
 	if sm.ID != req.Skill.ID || sm.Version != req.Skill.Version {
@@ -192,7 +192,7 @@ func (r *Resolver) resolveCapability(ctx context.Context, req Request, requireme
 		return finding, nil
 	}
 	var cm capabilityMetadata
-	if err := json.Unmarshal(capability.Metadata, &cm); err != nil {
+	if err := decodeJSONMetadata(capability.Metadata, &cm); err != nil {
 		return Finding{}, fmt.Errorf("decode capability %s: %w", capID, err)
 	}
 	if cm.ID != capRef.ID || cm.Version != capRef.Version {
@@ -332,14 +332,14 @@ func (r *Resolver) resolveCapability(ctx context.Context, req Request, requireme
 			Scopes []string `json:"scopes"`
 		} `json:"credentials"`
 	}
-	if err := json.Unmarshal(tool.Metadata, &toolContract); err != nil || (toolContract.ExecutionLocation != "client" && toolContract.ExecutionLocation != "runtime" && toolContract.ExecutionLocation != "gist_gateway") || toolContract.ID != toolRef.ID || toolContract.Version != toolRef.Version || (toolContract.Lifecycle != "published" && toolContract.Lifecycle != "deprecated") || toolContract.ProviderAction.ID != providerRef.ID || toolContract.ProviderAction.Version != providerRef.Version {
+	if err := decodeJSONMetadata(tool.Metadata, &toolContract); err != nil || (toolContract.ExecutionLocation != "client" && toolContract.ExecutionLocation != "runtime" && toolContract.ExecutionLocation != "gist_gateway") || toolContract.ID != toolRef.ID || toolContract.Version != toolRef.Version || (toolContract.Lifecycle != "published" && toolContract.Lifecycle != "deprecated") || toolContract.ProviderAction.ID != providerRef.ID || toolContract.ProviderAction.Version != providerRef.Version {
 		finding.Reason = "execution schema is incompatible or incomplete"
 		return finding, nil
 	}
 	var providerContract struct {
 		SupportState string `json:"support_state"`
 	}
-	if err := json.Unmarshal(provider.Metadata, &providerContract); err != nil || (providerContract.SupportState != "resolvable" && providerContract.SupportState != "executable") {
+	if err := decodeJSONMetadata(provider.Metadata, &providerContract); err != nil || (providerContract.SupportState != "resolvable" && providerContract.SupportState != "executable") {
 		finding.Reason = "provider is not admitted for resolution"
 		return finding, nil
 	}
@@ -375,15 +375,91 @@ func (r *Resolver) resolveCapability(ctx context.Context, req Request, requireme
 }
 
 func decodeBinding(raw []byte, out *bindingMetadata) error {
+	return decodeMetadata(raw, out)
+}
+
+func decodeJSONMetadata(raw []byte, out any) error {
+	if err := rejectDuplicateJSONFields(raw); err != nil {
+		return err
+	}
+	return json.Unmarshal(raw, out)
+}
+
+func decodeMetadata(raw []byte, out any) error {
+	if err := rejectDuplicateJSONFields(raw); err != nil {
+		return err
+	}
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(out); err != nil {
 		return err
 	}
 	if err := decoder.Decode(new(any)); err != io.EOF {
-		return fmt.Errorf("trailing binding data")
+		return fmt.Errorf("trailing JSON data")
 	}
 	return nil
+}
+
+// rejectDuplicateJSONFields rejects duplicate object keys case-insensitively,
+// matching encoding/json's case-insensitive struct-field matching behavior.
+func rejectDuplicateJSONFields(raw []byte) error {
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	if err := consumeJSONValue(decoder); err != nil {
+		return err
+	}
+	if _, err := decoder.Token(); err != io.EOF {
+		if err == nil {
+			return fmt.Errorf("trailing JSON data")
+		}
+		return err
+	}
+	return nil
+}
+
+func consumeJSONValue(decoder *json.Decoder) error {
+	token, err := decoder.Token()
+	if err != nil {
+		return err
+	}
+	delimiter, ok := token.(json.Delim)
+	if !ok {
+		return nil
+	}
+	switch delimiter {
+	case '{':
+		seen := make([]string, 0)
+		for decoder.More() {
+			keyToken, err := decoder.Token()
+			if err != nil {
+				return err
+			}
+			key, ok := keyToken.(string)
+			if !ok {
+				return fmt.Errorf("invalid JSON object key")
+			}
+			for _, previous := range seen {
+				if strings.EqualFold(previous, key) {
+					return fmt.Errorf("duplicate JSON field %q", key)
+				}
+			}
+			seen = append(seen, key)
+			if err := consumeJSONValue(decoder); err != nil {
+				return err
+			}
+		}
+		_, err = decoder.Token()
+		return err
+	case '[':
+		for decoder.More() {
+			if err := consumeJSONValue(decoder); err != nil {
+				return err
+			}
+		}
+		_, err = decoder.Token()
+		return err
+	default:
+		return fmt.Errorf("invalid JSON delimiter")
+	}
 }
 
 func (r *Resolver) getAdmitted(ctx context.Context, ref ports.ArtifactRef) (ports.CatalogRecord, error) {
@@ -436,7 +512,8 @@ func (r *Resolver) persist(ctx context.Context, req Request, skill ArtifactPin, 
 			pfindings[i].Closure = append(pfindings[i].Closure, ports.ArtifactPin{Ref: portRef(req.Principal.WorkspaceID, item), Digest: ports.Digest{Algorithm: item.Digest.Algorithm, Value: item.Digest.Value}, ManifestDigest: ports.Digest{Algorithm: item.ManifestDigest.Algorithm, Value: item.ManifestDigest.Value}})
 		}
 	}
-	if err := r.store.Put(ctx, ports.Resolution{ID: id, Principal: req.Principal, Skill: req.Skill, ExpiresAt: expires, Findings: pfindings}); err != nil {
+	rootPin := ports.ArtifactPin{Ref: portRef(req.Principal.WorkspaceID, skill), Digest: ports.Digest{Algorithm: skill.Digest.Algorithm, Value: skill.Digest.Value}, ManifestDigest: ports.Digest{Algorithm: skill.ManifestDigest.Algorithm, Value: skill.ManifestDigest.Value}}
+	if err := r.store.Put(ctx, ports.Resolution{ID: id, Principal: req.Principal, Skill: req.Skill, SkillPin: rootPin, ExpiresAt: expires, Findings: pfindings}); err != nil {
 		return Result{}, fmt.Errorf("store resolution %s: %w", id, err)
 	}
 	return result, nil
