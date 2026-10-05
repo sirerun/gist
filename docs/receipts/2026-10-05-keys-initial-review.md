@@ -8,4 +8,4 @@ KEYS-R2: retired_at accepts arbitrary future overlap, contrary to the bounded to
 
 KEYS-R3: standard JSON decoding accepts duplicate fields and silently selects the last current configuration. Reject ambiguous duplicate members recursively, without parser/key contents in errors.
 
-Fixes are owned by the original author under T-GR-KEYS.R1, followed by affected verification and independent final-head re-review. Loader component verification remains distinct from composed API startup acceptance in INTEGRATE.2.
+Fixes are owned by the original author under T-GR-KEYS.7, followed by affected verification and independent final-head re-review. Loader component verification remains distinct from composed API startup acceptance in INTEGRATE.2.
