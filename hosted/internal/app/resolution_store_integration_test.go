@@ -157,6 +157,52 @@ func TestPostgresPinnedResolutionRoundTripAndPrincipalBinding(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("seed workspace: %v", err)
 	}
+	roleName := "gist_resolution_rls_" + strings.ToLower(strings.ReplaceAll(t.Name(), "/", "_"))
+	roleName = "gist_rls_" + strings.TrimPrefix(roleName, "gist_resolution_rls_")
+	roleName = strings.Map(func(r rune) rune {
+		if r >= 'a' && r <= 'z' || r >= '0' && r <= '9' || r == '_' {
+			return r
+		}
+		return '_'
+	}, roleName)
+	if len(roleName) > 60 {
+		roleName = roleName[:60]
+	}
+	if _, err := pool.Exec(ctx, `CREATE ROLE "`+roleName+`" NOSUPERUSER NOBYPASSRLS NOLOGIN`); err != nil {
+		t.Fatalf("create restricted role: %v", err)
+	}
+	if _, err := pool.Exec(ctx, `GRANT "`+roleName+`" TO CURRENT_USER`); err != nil {
+		t.Fatalf("grant restricted role: %v", err)
+	}
+	if _, err := pool.Exec(ctx, `GRANT USAGE ON SCHEMA public TO "`+roleName+`"`); err != nil {
+		t.Fatalf("grant schema usage: %v", err)
+	}
+	if _, err := pool.Exec(ctx, `GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public TO "`+roleName+`"`); err != nil {
+		t.Fatalf("grant table privileges: %v", err)
+	}
+	if _, err := pool.Exec(ctx, `GRANT USAGE,SELECT ON ALL SEQUENCES IN SCHEMA public TO "`+roleName+`"`); err != nil {
+		t.Fatalf("grant sequence privileges: %v", err)
+	}
+	restrictedCfg := pool.Config().Copy()
+	restrictedCfg.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
+		_, err := conn.Exec(ctx, `SET ROLE "`+roleName+`"`)
+		return err
+	}
+	restrictedPool, err := pgxpool.NewWithConfig(ctx, restrictedCfg)
+	if err != nil {
+		t.Fatalf("connect with restricted role: %v", err)
+	}
+	t.Cleanup(func() {
+		restrictedPool.Close()
+		_, _ = pool.Exec(context.Background(), `DROP ROLE IF EXISTS "`+roleName+`"`)
+	})
+	var isSuper, canBypass bool
+	if err := restrictedPool.QueryRow(ctx, `SELECT rolsuper,rolbypassrls FROM pg_roles WHERE rolname=current_user`).Scan(&isSuper, &canBypass); err != nil {
+		t.Fatal(err)
+	}
+	if isSuper || canBypass {
+		t.Fatalf("integration role bypasses RLS: superuser=%t bypassrls=%t", isSuper, canBypass)
+	}
 	principal := ports.Principal{Issuer: "https://issuer.example.invalid", Subject: "agent-1", Audience: "https://registry.example.invalid", WorkspaceID: workspace, Scopes: []string{"catalog:read", "catalog:resolve"}, PolicyGeneration: 1}
 	skill := ports.ArtifactRef{WorkspaceID: workspace, Kind: ports.KindSkill, ID: "gist/skill/root", Version: "1.2.0"}
 	pin := func(kind ports.ArtifactKind, id, version, digest, manifest string) ports.ArtifactPin {
@@ -164,7 +210,7 @@ func TestPostgresPinnedResolutionRoundTripAndPrincipalBinding(t *testing.T) {
 	}
 	root := pin(ports.KindSkill, skill.ID, skill.Version, strings.Repeat("a", 64), strings.Repeat("b", 64))
 	want := ports.PinnedResolution{ID: "pin-" + strings.Repeat("c", 8), Principal: principal, Skill: skill, SkillPin: root, ExpiresAt: time.Now().Add(time.Hour).Unix(), Findings: []ports.PinnedFinding{{CapabilityID: "gist/document/parse@1.0.0", Status: "ready", BindingRef: ports.ArtifactRef{WorkspaceID: workspace, Kind: ports.KindCapability, ID: "gist/document/parse", Version: "1.0.0"}, Required: true, Provenance: "declared", Closure: []ports.ArtifactPin{root, pin(ports.KindCapability, "gist/document/parse", "1.0.0", strings.Repeat("d", 64), strings.Repeat("e", 64)), pin(ports.KindTool, "gist/tool/parse", "2.0.0", strings.Repeat("f", 64), strings.Repeat("1", 64))}}}}
-	store := &postgresResolutionStore{pool: pool}
+	store := &postgresResolutionStore{pool: restrictedPool}
 	if err := store.PutPinnedResolution(ctx, want); err != nil {
 		t.Fatalf("put pinned resolution: %v", err)
 	}
