@@ -3,7 +3,6 @@ package app
 import (
 	"bytes"
 	"context"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -163,12 +162,22 @@ func (p publisher) Publish(ctx context.Context, principal ports.Principal, kind 
 	sum := sha256.Sum256(raw)
 	digest := ports.Digest{Algorithm: "sha256", Value: hex.EncodeToString(sum[:])}
 	ref := ports.ArtifactRef{WorkspaceID: principal.WorkspaceID, Kind: kind, ID: pack.Manifest.ID, Version: pack.Manifest.Version}
+	out, err := json.Marshal(map[string]any{"ref": ref, "reviewer": review})
+	if err != nil {
+		return nil, fmt.Errorf("serialize publication response: %w", err)
+	}
+	if p.limits.MaxResponseBytes <= 0 || len(out) > p.limits.MaxResponseBytes {
+		return nil, rest.ErrBudgetExceeded
+	}
 	if err := p.objects.Put(ctx, digest, bytesReader(raw), int64(len(raw))); err != nil {
 		return nil, err
 	}
 	err = storage.WithTenantPrincipal(ctx, p.pool, storage.Tenant{Issuer: principal.Issuer, Subject: principal.Subject, Audience: principal.Audience, WorkspaceID: principal.WorkspaceID, Scopes: principal.Scopes, PolicyGeneration: principal.PolicyGeneration}, func(ctx context.Context, tx pgx.Tx) error {
 		_, err := tx.Exec(ctx, `INSERT INTO catalog_versions (workspace_id,kind,artifact_id,version,state,digest_algorithm,digest_value,manifest_digest_algorithm,manifest_digest_value,metadata,package_key,owner_id) VALUES ($1,$2,$3,$4,'published',$5,$6,'sha256',$7,$8,$6,$9)`, ref.WorkspaceID, ref.Kind, ref.ID, ref.Version, digest.Algorithm, digest.Value, pack.ManifestDigest, pack.ManifestBytes, principal.Subject)
-		return err
+		if err != nil {
+			return err
+		}
+		return storage.AppendEventInTransaction(ctx, tx, ports.Event{WorkspaceID: principal.WorkspaceID, Type: ports.EventVersionPublished, Subject: ref, PolicyGeneration: principal.PolicyGeneration})
 	})
 	if err != nil {
 		return nil, err
@@ -176,7 +185,7 @@ func (p publisher) Publish(ctx context.Context, principal ports.Principal, kind 
 	if err := p.objects.Bind(ref, digest); err != nil {
 		return nil, err
 	}
-	return json.Marshal(map[string]any{"ref": ref, "reviewer": review})
+	return out, nil
 }
 func packagesReview(p packages.Package, reviewer string) (string, error) {
 	if err := packages.ScreenText(p); err != nil {
@@ -201,36 +210,17 @@ var _ ports.ResolutionStore = (*postgresResolutionStore)(nil)
 // It never inserts a catalog version.
 type artifactRevoker struct {
 	catalog *storage.Postgres
-	feed    ports.EventStore
 }
 
 func (a artifactRevoker) RevokeArtifact(ctx context.Context, p ports.Principal, ref ports.ArtifactRef) (rest.RevocationNotice, error) {
-	rev, err := a.catalog.RevokeVersion(ctx, ref)
+	rev, err := a.catalog.RevokeVersionForPrincipal(ctx, p, ref)
 	if errors.Is(err, storage.ErrNotFound) {
 		return rest.RevocationNotice{}, rest.ErrNotFound
 	}
 	if err != nil {
 		return rest.RevocationNotice{}, err
 	}
-	if rev.Created && a.feed != nil {
-		id, err := eventID()
-		if err != nil {
-			return rest.RevocationNotice{}, err
-		}
-		// The revocation is already committed; a feed failure must not
-		// report it as not revoked, and consumers recover from a missed
-		// event by resynchronizing (ADR 005).
-		_ = a.feed.Append(ctx, ports.Event{ID: id, WorkspaceID: ref.WorkspaceID, Type: ports.EventVersionRevoked, Subject: ref, OccurredAt: rev.RevokedAt.Unix(), PolicyGeneration: p.PolicyGeneration})
-	}
 	return rest.RevocationNotice{Ref: rev.Ref, RevokedAt: rev.RevokedAt.Unix()}, nil
-}
-
-func eventID() (string, error) {
-	b := make([]byte, 16)
-	if _, err := rand.Read(b); err != nil {
-		return "", fmt.Errorf("event id: %w", err)
-	}
-	return "evt_" + hex.EncodeToString(b), nil
 }
 
 // unrevokedCatalog hides revoked versions from resolution: a revoked pinned

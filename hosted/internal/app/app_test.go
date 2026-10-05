@@ -2,13 +2,16 @@ package app
 
 import (
 	"context"
+	"crypto/ed25519"
+	"encoding/json"
+	"github.com/sirerun/gist/hosted/internal/identity"
 	"strings"
 	"testing"
 	"time"
 )
 
 func validConfig() Config {
-	return Config{PublicOrigin: "https://registry.example.invalid", ResourceAudience: "https://registry.example.invalid", DatabaseURL: "postgres://registry@127.0.0.1:5432/registry", ObjectStoreRoot: "/tmp/registry-objects", RequestTimeout: 30 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 100000, MaxConcurrentRequests: 80, MaxDiscoveryResults: 50, OAuthConsentSecret: []byte(strings.Repeat("s", MinOAuthConsentSecretBytes))}
+	return Config{PublicOrigin: "https://registry.example.invalid", ResourceAudience: "https://registry.example.invalid", DatabaseURL: "postgres://registry@127.0.0.1:5432/registry", ObjectStoreRoot: "/tmp/registry-objects", RequestTimeout: 30 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 100000, MaxConcurrentRequests: 80, MaxDiscoveryResults: 50, OAuthConsentSecret: []byte(strings.Repeat("s", MinOAuthConsentSecretBytes)), SigningKeyConfig: fixtureSigningConfig(), EventMaintenanceTargets: []MaintenanceTarget{{WorkspaceID: "fixture-workspace", Subject: "fixture-maintainer"}}}
 }
 
 func TestConfigRequiresExactOriginAndExplicitLimits(t *testing.T) {
@@ -57,5 +60,35 @@ func TestNewFailsWhenPostgresFixtureIsAbsent(t *testing.T) {
 	defer cancel()
 	if _, err := New(ctx, c); err == nil {
 		t.Fatal("expected missing PostgreSQL fixture to fail")
+	}
+}
+
+// This deterministic key is test-only; deployment supplies independently held keys.
+func fixtureSigningConfig() []byte {
+	key := ed25519.NewKeyFromSeed(make([]byte, ed25519.SeedSize))
+	raw, err := json.Marshal(identity.KeySetConfig{Current: identity.KeyConfig{KID: "fixture-signing", Algorithm: "EdDSA", Private: key, Public: key.Public().(ed25519.PublicKey)}})
+	if err != nil {
+		panic(err)
+	}
+	return raw
+}
+func TestConfigRequiresExplicitPersistentSigningKeys(t *testing.T) {
+	for _, raw := range [][]byte{nil, []byte(`{"current":{"private_key":"private-marker"}}`)} {
+		c := validConfig()
+		c.SigningKeyConfig = raw
+		err := c.Validate()
+		if err == nil || !strings.Contains(err.Error(), "GIST_SIGNING_KEY_CONFIG") || strings.Contains(err.Error(), "private-marker") {
+			t.Fatalf("unsafe key configuration accepted or leaked: %v", err)
+		}
+	}
+}
+
+func TestConfigRequiresBoundedUniqueMaintenanceTargets(t *testing.T) {
+	for _, targets := range [][]MaintenanceTarget{nil, {{WorkspaceID: "w"}}, {{WorkspaceID: "w", Subject: "s"}, {WorkspaceID: "w", Subject: "other"}}, make([]MaintenanceTarget, 101)} {
+		c := validConfig()
+		c.EventMaintenanceTargets = targets
+		if c.Validate() == nil {
+			t.Fatal("unsafe maintenance target set accepted")
+		}
 	}
 }

@@ -19,7 +19,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirerun/gist/hosted/internal/discovery"
-	"github.com/sirerun/gist/hosted/internal/events"
 	"github.com/sirerun/gist/hosted/internal/identity"
 	"github.com/sirerun/gist/hosted/internal/oauth"
 	"github.com/sirerun/gist/hosted/internal/ports"
@@ -37,9 +36,15 @@ type App struct {
 	// identities records the stored identity behind every minted token.
 	identities issuedIdentityRecorder
 	// sessions issues reference authorization-server session cookies.
-	sessions  *oauth.CookieSessions
-	server    *http.Server
-	closeOnce sync.Once
+	sessions       *oauth.CookieSessions
+	server         *http.Server
+	closeOnce      sync.Once
+	shutdownDone   chan struct{}
+	shutdownErr    error
+	janitorCancel  context.CancelFunc
+	janitorDone    chan struct{}
+	maintenanceMu  sync.Mutex
+	maintenanceErr error
 }
 
 // New opens the real pgx pool and the object store GIST_OBJECT_STORE_ROOT
@@ -66,20 +71,15 @@ func New(ctx context.Context, cfg Config) (*App, error) {
 		pool.Close()
 		return nil, err
 	}
-	return newWithStores(cfg, pool, objects)
+	return newWithStores(ctx, cfg, pool, objects)
 }
 
-func newWithStores(cfg Config, pool *pgxpool.Pool, objects *storage.ObjectStore) (*App, error) {
+func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects *storage.ObjectStore) (*App, error) {
 	if pool == nil || objects == nil {
 		return nil, errors.New("app: backing stores are required")
 	}
 	clock := identityClock{}
-	key, err := identity.GenerateSigningKey("startup", clock.Now())
-	if err != nil {
-		pool.Close()
-		return nil, err
-	}
-	keys, err := identity.NewKeySet(clock, key)
+	keys, err := identity.LoadKeySet(cfg.SigningKeyConfig, clock)
 	if err != nil {
 		pool.Close()
 		return nil, err
@@ -120,13 +120,12 @@ func newWithStores(cfg Config, pool *pgxpool.Pool, objects *storage.ObjectStore)
 		pool.Close()
 		return nil, err
 	}
-	feed := events.NewStore(clock)
 	broker := newBroker(cfg.BrokerURL, cfg.RequestTimeout, cfg.BrokerClient)
 	var connections ports.ConnectionInitiator
 	if broker != nil {
 		connections = broker
 	}
-	services := rest.Services{Identity: identityStore, Authorizer: policy, Catalog: catalog, Search: lexicalAdapter{service: search}, Versions: catalog, Artifacts: objects, Resolutions: resolutionStore, Connections: connections, Events: eventStoreAdapter{store: feed}, Publisher: publisher{pool: pool, objects: objects, limits: cfg}, Revocations: artifactRevoker{catalog: catalog, feed: eventStoreAdapter{store: feed}}, Resolver: canonicalResolver, Limits: cfg.RESTLimits(), Audience: cfg.ResourceAudience}
+	services := rest.Services{Identity: identityStore, Authorizer: policy, Catalog: catalog, Search: lexicalAdapter{service: search}, Versions: catalog, Artifacts: objects, Resolutions: resolutionStore, Connections: connections, Events: catalog, Publisher: publisher{pool: pool, objects: objects, limits: cfg}, Revocations: artifactRevoker{catalog: catalog}, Resolver: canonicalResolver, Limits: cfg.RESTLimits(), Audience: cfg.ResourceAudience}
 	rh, err := rest.New(services)
 	if err != nil {
 		pool.Close()
@@ -156,8 +155,26 @@ func newWithStores(cfg Config, pool *pgxpool.Pool, objects *storage.ObjectStore)
 		return nil, err
 	}
 	prm := as.ProtectedResourceMetadataURL()
-	handler := requestContext{rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, ready: func(ctx context.Context) error { return pool.Ping(ctx) }}
-	return &App{cfg: cfg, pool: pool, objects: objects, issuer: issuer, identities: catalog, sessions: sessions, server: &http.Server{Addr: cfg.ListenAddress, Handler: handler, ReadHeaderTimeout: cfg.RequestTimeout}}, nil
+	a := &App{cfg: cfg, pool: pool, objects: objects, issuer: issuer, identities: catalog, sessions: sessions}
+	// Qualify explicit current maintenance actors and the first bounded purge
+	// before accepting traffic. This never enumerates or invents tenant authority.
+	maintenanceCtx, stopMaintenance := context.WithTimeout(ctx, cfg.RequestTimeout)
+	maintenanceErr := a.purgeEventTargets(maintenanceCtx, catalog)
+	stopMaintenance()
+	if maintenanceErr != nil {
+		pool.Close()
+		return nil, maintenanceErr
+	}
+	handler := requestContext{rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, ready: func(ctx context.Context) error {
+		if err := a.maintenanceReady(); err != nil {
+			return err
+		}
+		return pool.Ping(ctx)
+	}}
+	a.server = &http.Server{Addr: cfg.ListenAddress, Handler: handler, ReadHeaderTimeout: cfg.RequestTimeout}
+	a.startEventJanitor(ctx, catalog)
+	return a, nil
+
 }
 
 // deriveKey derives a purpose-bound 32-byte key from the configured secret.
@@ -248,9 +265,39 @@ func (a *App) ListenAndServe() error {
 	return err
 }
 func (a *App) Shutdown(ctx context.Context) error {
-	var err error
-	a.closeOnce.Do(func() { err = a.server.Shutdown(ctx); a.pool.Close() })
-	return err
+	a.closeOnce.Do(func() {
+		a.shutdownDone = make(chan struct{})
+		if a.janitorCancel != nil {
+			a.janitorCancel()
+		}
+		// Cleanup runs exactly once, even if a caller's wait expires. Stop HTTP
+		// admission before waiting for the janitor, and keep its pool alive until
+		// the janitor has actually returned all acquired connections.
+		go func() {
+			err := a.server.Shutdown(ctx)
+			if err != nil {
+				err = errors.Join(err, a.server.Close())
+			}
+			if a.janitorDone != nil {
+				<-a.janitorDone
+			}
+			a.pool.Close()
+			a.shutdownErr = err
+			close(a.shutdownDone)
+		}()
+	})
+	// Closing shutdownDone publishes shutdownErr to every later caller.
+	select {
+	case <-a.shutdownDone:
+		return a.shutdownErr
+	default:
+	}
+	select {
+	case <-a.shutdownDone:
+		return a.shutdownErr
+	case <-ctx.Done():
+		return ctx.Err()
+	}
 }
 
 type requestContext struct {
@@ -298,23 +345,6 @@ func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 type identityClock struct{}
 
 func (identityClock) Now() time.Time { return time.Now().UTC() }
-
-type eventStoreAdapter struct{ store *events.Store }
-
-func (s eventStoreAdapter) Append(ctx context.Context, e ports.Event) error {
-	return s.store.Append(ctx, e)
-}
-func (s eventStoreAdapter) Read(ctx context.Context, c ports.Cursor) (ports.EventPage, error) {
-	if c.ID == "" {
-		return ports.EventPage{}, nil
-	}
-	return s.store.Read(ctx, c)
-}
-func (s eventStoreAdapter) NewCursor(p ports.Principal, ttl time.Duration) (ports.Cursor, error) {
-	return s.store.NewCursor(p, ttl)
-}
-
-var _ rest.EventCursorOpener = eventStoreAdapter{}
 
 // identityCatalog is the workspace-scoped identity table. Reads and writes
 // carry the workspace so storage can run them under row-level security.
