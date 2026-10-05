@@ -70,9 +70,9 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ### E-GR-INTERFACE -- Shared component interfaces -> E-GR-INTERFACE-shared-component-interfaces.md (22/22)
 
-### E-GR-WIRE -- Canonical registry wire -> E-GR-WIRE-canonical-registry-wire.md (18/20)
+### E-GR-WIRE -- Canonical registry wire -> E-GR-WIRE-canonical-registry-wire.md (20/20)
 
-### E-GR-EVENT -- Durable revocation feed -> E-GR-EVENT-durable-revocation-feed.md (1/19)
+### E-GR-EVENT -- Durable revocation feed -> E-GR-EVENT-durable-revocation-feed.md (19/19)
 
 ### E-GR-TREG -- Treg action artifacts -> E-GR-TREG-treg-action-artifacts.md (0/7)
 
@@ -80,7 +80,7 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ### E-GR-PUBLISH -- Canonical publication -> E-GR-PUBLISH-canonical-publication.md (0/9)
 
-### E-GR-CORE -- Startup and event composition -> E-GR-CORE-startup-and-event-composition.md (0/34)
+### E-GR-CORE -- Startup and event composition -> E-GR-CORE-startup-and-event-composition.md (10/34)
 
 ### E-GR-INTEGRATE -- Composition and interoperability -> E-GR-INTEGRATE-composition-and-interoperability.md (0/7)
 
@@ -162,3 +162,8 @@ PR48 landed the original reviewed production graph. KEYS/WIRE/EVENT are admitted
 
 
 2026-10-05 CORE-R9 source-preparation assignment: existing retrieval, wiring and named-client acceptance constructors predate strict key configuration and startup maintenance qualification. The designated fixture author owns only their local startup helper files in an isolated worktree; dedicated test-only maintenance grants must precede actual New without broadening original reader or client authority. Numeric fix/verify/independent-review rows join the core merge gate. This records prepared compatibility work, not passing application or production acceptance.
+
+
+2026-10-05 component landed closure: WIRE PR50 reviewed9ac3263 and landed93c5c45 passed exact landed app REST MCP unit/race/vet/lint and actual PostgreSQL checks ([receipt](https://github.com/sirerun/gist/blob/8bfd8695f5301612fc005dd8eff8f6540d4a0cfa/docs/receipts/2026-10-05-wire-landed-verification.md)). EVENT PR51 reviewed80cc432 and landed57927cd passed exact landed tagged storage PostgreSQL/race/vet/lint and frozen contracts ([receipt](https://github.com/sirerun/gist/blob/e58cce4c9d09c6933a53ee2ebd686a2fa1473444/docs/receipts/2026-10-05-event-landed-verification.md)). All component finding chains and merge/landed rows now close on that evidence. CORE clean composition is based on actual landed components; implemented source/fixes are checked while final composed verification and independent review remain open. Fixture-only membership seeding is not external enrollment.
+
+CORE transaction disposition: catalog and outbox roll back together, but failed catalog/outbox publication can leave a private unbound content-addressed blob staged before the database transaction. Component tests explicitly retain that physical boundary; no compensation or storage garbage-collection claim is made. Canonical PUBLISH preflight/implementation/verification must qualify tenant-safe staging ownership, retention and reconciliation before the downstream production gate; unsafe deletion of a shared digest is excluded.

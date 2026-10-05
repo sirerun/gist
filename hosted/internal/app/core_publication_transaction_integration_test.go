@@ -12,6 +12,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -37,7 +38,8 @@ func TestPublisherCatalogAndOutboxShareTransaction(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create catalog adapter: %v", err)
 	}
-	objects, err := storage.NewObjectStore(t.TempDir())
+	storeRoot := t.TempDir()
+	objects, err := storage.NewObjectStore(storeRoot)
 	if err != nil {
 		t.Fatalf("create object store: %v", err)
 	}
@@ -102,6 +104,14 @@ func TestPublisherCatalogAndOutboxShareTransaction(t *testing.T) {
 	assertPublicationRows(t, fixture, failedRef, hex.EncodeToString(failedDigest[:]), false)
 	if _, err := objects.Open(ctx, failedRef); !errors.Is(err, storage.ErrNotFound) {
 		t.Fatalf("failed transaction exposed an unbound object through the catalog: %v", err)
+	}
+	// Catalog/outbox rollback does not compensate content-addressed staging.
+	// Keep this limitation explicit: blindly deleting this shared digest could
+	// destroy another committed version. Canonical publication must separately
+	// qualify staging ownership, retention and reconciliation before production.
+	staged, err := os.ReadFile(filepath.Join(storeRoot, hex.EncodeToString(failedDigest[:])))
+	if err != nil || !bytes.Equal(staged, failedArchive) {
+		t.Fatalf("private rollback staging differs from documented boundary: %v", err)
 	}
 
 	for _, tc := range []struct {
