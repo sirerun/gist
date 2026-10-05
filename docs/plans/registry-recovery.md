@@ -80,7 +80,7 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ### E-GR-PUBLISH -- Canonical publication -> E-GR-PUBLISH-canonical-publication.md (0/9)
 
-### E-GR-CORE -- Startup and event composition -> E-GR-CORE-startup-and-event-composition.md (10/37)
+### E-GR-CORE -- Startup and event composition -> E-GR-CORE-startup-and-event-composition.md (11/40)
 
 ### E-GR-INTEGRATE -- Composition and interoperability -> E-GR-INTEGRATE-composition-and-interoperability.md (0/7)
 
@@ -170,3 +170,5 @@ CORE transaction disposition: catalog and outbox roll back together, but failed 
 
 
 CORE-R10 fixture conformance: after explicit startup adaptation the wiring resolve case fails with validation_failed because it sends the obsolete skill/runtime_id/local_execution shape. Frozen v1 instead requires skill_ref/runtime/max_bytes. The coordinator owns three wiring request fixtures; the fixture author owns the client MCP request in its already assigned file. Successful readiness and revoked-artifact denial expectations remain intact, with numeric fix/verify/independent-review gates before core merge; no public semantics are amended.
+
+CORE-R11 dispatcher disposition: cross-epic bare task IDs were structurally present but unresolved by the installed namespace-first dispatcher. Active split-plan metadata now qualifies those references literally, preserving original semantic dependencies and human production gates; numeric fix, actual-parser verification and independent review join core merge.
