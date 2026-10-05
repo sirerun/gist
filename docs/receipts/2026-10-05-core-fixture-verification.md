@@ -41,11 +41,32 @@ configuration. The following passed:
 | `acceptance/retrieval` | pass | pass | pass | one existing finding below |
 | `acceptance/testfixtures` | n/a | n/a | n/a | pass, 0 issues |
 
-Retrieval lint reports the unowned, pre-existing finding
+The initial retrieval lint run reported the unowned finding
 `acceptance/retrieval/metrics_test.go:306` (`ineffassign`: ineffectual
-assignment to `unauthorized`). The retrieval source was not modified by this
-lane; its tagged tests, race check, and vet passed. This lint item remains for
-coordinator disposition.
+assignment to `unauthorized`). The coordinator removed the redundant
+assignment in commit `dda50c947d14c009bd749273efbcc67ba86b7172`; after that
+fix, retrieval and all acceptance packages passed configured lint as recorded
+below.
+
+## Follow-up verification after the lint fix
+
+Source head: `0e250fb` (`test(retrieval): remove unused workspace denial
+assignment`), following the owned fixture and receipt commits. I cherry-picked
+the coordinator's one-line test-only cleanup; it does not change assertions or
+production code.
+
+On the updated source, these gated commands passed:
+
+- `go test -count=1 -tags=integration -p=2 ./acceptance/retrieval`
+- `go test -race -count=1 -tags=integration -p=2 ./acceptance/retrieval`
+- `go vet -tags=integration -p=2 ./acceptance/retrieval`
+- configured v2 `golangci-lint` on `./acceptance/retrieval`: 0 issues
+- configured v2 `golangci-lint` on `./acceptance/...`: 0 issues
+
+The acceptance-wide lint held the shared build lease and released it
+immediately after the command. The retrieval integration and race commands
+used the local PostgreSQL fixture. No other package source changed between
+the prior package checks and this follow-up.
 
 ## Related evidence supplied by the coordinator
 
