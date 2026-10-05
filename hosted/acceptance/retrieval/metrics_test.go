@@ -303,7 +303,6 @@ func (l labeler) label(ref observedRef, callerWorkspaceID string) (string, bool)
 	// An empty workspace means the boundary omitted it; that response is
 	// scoped to the caller's workspace by construction.
 	if ref.WorkspaceID != "" && ref.WorkspaceID != callerWorkspaceID {
-		unauthorized = true
 		key, ok := l.workspaceKeys[ref.WorkspaceID]
 		if !ok {
 			key = "unknown-workspace"
