@@ -25,6 +25,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/sirerun/gist/hosted/acceptance/testfixtures"
 	"github.com/sirerun/gist/hosted/internal/app"
 	"github.com/sirerun/gist/hosted/internal/contract"
 	"github.com/sirerun/gist/hosted/internal/identity"
@@ -35,7 +36,7 @@ import (
 const (
 	clientWorkspace = "m2a-client-workspace"
 	clientSubject   = "m2a-client-workload"
-	artifactID      = "m2a-fixture-skill"
+	artifactID      = "skill/m2a-fixture-skill"
 	artifactVersion = "1.0.0"
 )
 
@@ -273,7 +274,7 @@ func TestWorkload(t *testing.T) {
 	if err := client.initialize(ctx); err != nil {
 		t.Fatal(err)
 	}
-	reply, err := client.request(ctx, 4, "tools/call", map[string]any{"name": "gist_resolve", "arguments": map[string]any{"skill": map[string]any{"kind": "skill", "id": artifactID, "version": artifactVersion}, "runtime_id": "codex-cli", "local_execution": true, "max_bytes": 4096}})
+	reply, err := client.request(ctx, 4, "tools/call", map[string]any{"name": "gist_resolve", "arguments": map[string]any{"skill_ref": artifactID + "@" + artifactVersion, "runtime": map[string]any{"id": "runtime.acceptance", "owned_connections": true}, "max_bytes": 4096}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -380,7 +381,7 @@ func startClientFixture(t *testing.T) *clientFixture {
 	if err != nil {
 		t.Fatalf("open fixture pool: %v", err)
 	}
-	for _, name := range []string{"001_catalog.sql", "002_policy.sql", "003_identity.sql", "004_events.sql", "005_identity_workspace_key.sql", "006_catalog_version_order.sql", "007_oauth_grants.sql"} {
+	for _, name := range []string{"001_catalog.sql", "002_policy.sql", "003_identity.sql", "004_events.sql", "005_identity_workspace_key.sql", "006_catalog_version_order.sql", "007_oauth_grants.sql", "008_event_retention_floor.sql"} {
 		raw, readErr := os.ReadFile(filepath.Join("..", "..", "migrations", name))
 		if readErr != nil {
 			t.Fatalf("read migration %s: %v", name, readErr)
@@ -408,7 +409,15 @@ func startClientFixture(t *testing.T) *clientFixture {
 	}
 	placeholder := httptest.NewUnstartedServer(http.NotFoundHandler())
 	origin := "https://" + placeholder.Listener.Addr().String()
-	a, err := app.New(ctx, app.Config{ListenAddress: placeholder.Listener.Addr().String(), PublicOrigin: origin, ResourceAudience: origin, DatabaseURL: dsn, ObjectStoreRoot: artifactDir, RequestTimeout: 5 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 10000, MaxConcurrentRequests: 20, MaxDiscoveryResults: 50, RetryAfter: 1, OAuthConsentSecret: []byte("acceptance-only-oauth-consent-secret-0123456789")})
+	maintenanceTargets := testfixtures.MaintenanceTargets([]string{clientWorkspace})
+	if err := testfixtures.SeedMaintenanceTargets(ctx, pool, origin, maintenanceTargets); err != nil {
+		t.Fatalf("seed startup maintenance target: %v", err)
+	}
+	signingKeyConfig, err := testfixtures.SigningKeyConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	a, err := app.New(ctx, app.Config{ListenAddress: placeholder.Listener.Addr().String(), PublicOrigin: origin, ResourceAudience: origin, DatabaseURL: dsn, ObjectStoreRoot: artifactDir, RequestTimeout: 5 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 10000, MaxConcurrentRequests: 20, MaxDiscoveryResults: 50, RetryAfter: 1, OAuthConsentSecret: []byte("acceptance-only-oauth-consent-secret-0123456789"), SigningKeyConfig: signingKeyConfig, EventMaintenanceTargets: maintenanceTargets})
 	if err != nil {
 		t.Fatalf("compose registry app: %v", err)
 	}
@@ -437,7 +446,11 @@ func seedClientFixture(ctx context.Context, f *clientFixture) error {
 		return err
 	}
 	f.artifact = packageBytes
-	return f.app.SeedAcceptanceArtifact(ctx, ports.Principal{Issuer: f.issuer, Subject: clientSubject, Audience: f.issuer, WorkspaceID: clientWorkspace, Scopes: []string{"catalog:read"}, PolicyGeneration: 1}, ports.ArtifactRef{WorkspaceID: clientWorkspace, Kind: ports.KindSkill, ID: artifactID, Version: artifactVersion}, packageBytes, []byte(`{"id":"m2a-fixture-skill","version":"1.0.0","required_capabilities":[]}`))
+	metadata, err := json.Marshal(map[string]any{"id": artifactID, "version": artifactVersion, "required_capabilities": []any{}})
+	if err != nil {
+		return err
+	}
+	return f.app.SeedAcceptanceArtifact(ctx, ports.Principal{Issuer: f.issuer, Subject: clientSubject, Audience: f.issuer, WorkspaceID: clientWorkspace, Scopes: []string{"catalog:read"}, PolicyGeneration: 1}, ports.ArtifactRef{WorkspaceID: clientWorkspace, Kind: ports.KindSkill, ID: artifactID, Version: artifactVersion}, packageBytes, metadata)
 }
 
 func (f *clientFixture) close() {

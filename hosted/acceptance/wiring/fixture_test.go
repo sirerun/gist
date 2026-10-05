@@ -25,6 +25,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/sirerun/gist/hosted/acceptance/testfixtures"
 	"github.com/sirerun/gist/hosted/internal/app"
 	"github.com/sirerun/gist/hosted/internal/contract"
 	"github.com/sirerun/gist/hosted/internal/identity"
@@ -119,7 +120,7 @@ func startFixture() (*fixture, error) {
 		pool.Close()
 		return nil, fmt.Errorf("fixture pool connected to %q, want %q: %v", connected, dbName, err)
 	}
-	for _, name := range []string{"001_catalog.sql", "002_policy.sql", "003_identity.sql", "004_events.sql", "005_identity_workspace_key.sql", "006_catalog_version_order.sql", "007_oauth_grants.sql"} {
+	for _, name := range []string{"001_catalog.sql", "002_policy.sql", "003_identity.sql", "004_events.sql", "005_identity_workspace_key.sql", "006_catalog_version_order.sql", "007_oauth_grants.sql", "008_event_retention_floor.sql"} {
 		raw, readErr := os.ReadFile(filepath.Join("..", "..", "migrations", name))
 		if readErr != nil {
 			pool.Close()
@@ -156,7 +157,23 @@ func startFixture() (*fixture, error) {
 		}
 		w.WriteHeader(http.StatusNotFound)
 	}))
+	maintenanceTargets := testfixtures.MaintenanceTargets([]string{"q3-tenant-a", "q3-tenant-b"})
+	if err := testfixtures.SeedMaintenanceTargets(ctx, pool, origin, maintenanceTargets); err != nil {
+		broker.Close()
+		placeholder.Close()
+		pool.Close()
+		return nil, fmt.Errorf("seed startup maintenance targets: %w", err)
+	}
+	signingKeyConfig, err := testfixtures.SigningKeyConfig()
+	if err != nil {
+		broker.Close()
+		placeholder.Close()
+		pool.Close()
+		return nil, err
+	}
 	appCfg := app.Config{ListenAddress: placeholder.Listener.Addr().String(), PublicOrigin: origin, ResourceAudience: origin, DatabaseURL: dsn, ObjectStoreRoot: artifact, BrokerURL: broker.URL, BrokerClient: broker.Client(), RequestTimeout: 5 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 10000, MaxConcurrentRequests: 20, MaxDiscoveryResults: 50, RetryAfter: 1, OAuthConsentSecret: []byte("acceptance-only-oauth-consent-secret-0123456789")}
+	appCfg.SigningKeyConfig = signingKeyConfig
+	appCfg.EventMaintenanceTargets = maintenanceTargets
 	a, err := app.New(ctx, appCfg)
 	if err != nil {
 		broker.Close()
