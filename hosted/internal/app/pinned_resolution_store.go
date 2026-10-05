@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/sirerun/gist/hosted/internal/ports"
@@ -34,8 +33,9 @@ func (s *postgresResolutionStore) GetPinnedResolution(ctx context.Context, c por
 		return ports.PinnedResolution{}, storage.ErrNotFound
 	}
 	var raw []byte
+	var storedExpires int64
 	err := storage.WithTenant(ctx, s.pool, c.WorkspaceID, func(ctx context.Context, tx pgx.Tx) error {
-		return tx.QueryRow(ctx, `SELECT payload FROM resolutions WHERE id=$1 AND workspace_id=$2 AND principal_hash=$3 AND expires_at > clock_timestamp()`, c.ID, c.WorkspaceID, c.PrincipalHash).Scan(&raw)
+		return tx.QueryRow(ctx, `SELECT payload, extract(epoch from expires_at)::bigint FROM resolutions WHERE id=$1 AND workspace_id=$2 AND principal_hash=$3 AND expires_at > clock_timestamp()`, c.ID, c.WorkspaceID, c.PrincipalHash).Scan(&raw, &storedExpires)
 	})
 	if errors.Is(err, pgx.ErrNoRows) {
 		return ports.PinnedResolution{}, storage.ErrNotFound
@@ -47,7 +47,7 @@ func (s *postgresResolutionStore) GetPinnedResolution(ctx context.Context, c por
 	if err := json.Unmarshal(raw, &r); err != nil {
 		return ports.PinnedResolution{}, fmt.Errorf("decode pinned resolution: %w", err)
 	}
-	if r.Principal.WorkspaceID != c.WorkspaceID || ports.PrincipalHash(r.Principal) != c.PrincipalHash || r.ID != c.ID || r.ExpiresAt <= time.Now().Unix() {
+	if r.Principal.WorkspaceID != c.WorkspaceID || ports.PrincipalHash(r.Principal) != c.PrincipalHash || r.ID != c.ID || r.ExpiresAt != storedExpires {
 		return ports.PinnedResolution{}, storage.ErrNotFound
 	}
 	return r, nil
