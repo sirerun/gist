@@ -53,7 +53,7 @@ func TestM2aWiringAgainstConfiguredService(t *testing.T) {
 	// requirement resolves and the stored resolution reports ready.
 	var resolved struct {
 		ID       string            `json:"resolution_id"`
-		Status   string            `json:"status"`
+		Status   string            `json:"aggregate"`
 		Findings []json.RawMessage `json:"findings"`
 	}
 	if json.Unmarshal(body, &resolved) != nil || resolved.ID == "" || resolved.Status != "ready" || len(resolved.Findings) != 0 {
