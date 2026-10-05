@@ -3,6 +3,7 @@ package identity
 import (
 	"crypto/ed25519"
 	"crypto/rand"
+	"crypto/subtle"
 	"errors"
 	"fmt"
 	"sync"
@@ -68,6 +69,12 @@ func (k *KeySet) Rotate(next SigningKey) error {
 	}
 	k.mu.Lock()
 	defer k.mu.Unlock()
+	if next.KID == k.current.KID && sameSigningKey(next, k.current) {
+		return nil
+	}
+	if _, used := k.keys[next.KID]; used {
+		return fmt.Errorf("signing key id has already been used")
+	}
 	if prev := k.current; prev.KID != next.KID {
 		// The retired key only needs to verify tokens minted before rotation,
 		// and those cannot outlive defaultMaxTokenAge plus clock skew.
@@ -80,6 +87,11 @@ func (k *KeySet) Rotate(next SigningKey) error {
 	k.current = next
 	k.keys[next.KID] = next
 	return nil
+}
+
+func sameSigningKey(a, b SigningKey) bool {
+	return a.KID == b.KID && a.Algorithm == b.Algorithm && a.NotAfter.Equal(b.NotAfter) &&
+		subtle.ConstantTimeCompare(a.Private, b.Private) == 1 && subtle.ConstantTimeCompare(a.Public, b.Public) == 1
 }
 
 func (k *KeySet) currentKey() (SigningKey, error) {

@@ -192,3 +192,58 @@ func TestLoadKeySetRejectsUnsafeConfigWithoutLeakingKey(t *testing.T) {
 		t.Fatal("already retired key was accepted")
 	}
 }
+
+func TestRotateRejectsRetiredKIDReuse(t *testing.T) {
+	clock := &testClock{now: time.Unix(1_700_000_000, 0).UTC()}
+	current, err := GenerateSigningKey("current", clock.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	retired, err := GenerateSigningKey("retired", clock.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	retireAt := clock.Now().Add(defaultMaxTokenAge + maxClockSkew)
+	data, err := json.Marshal(KeySetConfig{
+		Current: KeyConfig{KID: current.KID, Algorithm: current.Algorithm, Private: current.Private, Public: current.Public},
+		Retired: []RetiredKeyConfig{{KID: retired.KID, Algorithm: retired.Algorithm, Public: retired.Public, RetiredAt: retireAt}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	keys, err := LoadKeySet(data, clock)
+	if err != nil {
+		t.Fatal(err)
+	}
+	reused, err := GenerateSigningKey(retired.KID, clock.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := keys.Rotate(reused); err == nil {
+		t.Fatal("rotation reused a retired kid")
+	}
+	clock.now = retireAt
+	if _, err := keys.verifyKey(retired.KID, clock.Now()); err == nil {
+		t.Fatal("reused retired kid remained verifiable at its retirement boundary")
+	}
+	for _, published := range keys.VerificationKeys() {
+		if published.KID == retired.KID {
+			t.Fatal("reused retired kid remained published")
+		}
+	}
+}
+
+func TestRotateSameCurrentKeyIsNoop(t *testing.T) {
+	clock := &testClock{now: time.Unix(1_700_000_000, 0).UTC()}
+	current, err := GenerateSigningKey("current", clock.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	keys, err := NewKeySet(clock, current)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := keys.Rotate(current); err != nil {
+		t.Fatalf("identical current key should be an idempotent no-op: %v", err)
+	}
+}
