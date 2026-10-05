@@ -1,8 +1,8 @@
 # Shared-interface final independent review
 
-**Reviewer:** independent worker (non-author and non-coauthor)  
-**Reviewed source head:** `46b9a5cab5fb30709b3acf4777ad967f6a2ba411`  
-**Base:** `190442c8098ccdd0544cc4e83247b466551c0392`  
+**Reviewer:** independent worker (non-author and non-coauthor)
+**Reviewed source head:** `46b9a5cab5fb30709b3acf4777ad967f6a2ba411`
+**Base:** `190442c8098ccdd0544cc4e83247b466551c0392`
 **Disposition:** PASS; no blocking findings.
 
 The final delta retains the frozen `hosted/internal/ports/events.go` and `hosted/internal/ports/policy.go` bytes. `events_wire.go` implements the frozen v1 JSON shape additively, and `pinned_resolution.go` supplies richer pinned records without changing the legacy resolution API. The REST event route fails closed for stores that cannot budget reads, requires an atomic budget-qualified first page, and uses the authenticated principal on resumed pages. Error mapping does not expose adapter detail.
