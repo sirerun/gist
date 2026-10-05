@@ -445,7 +445,8 @@ func (b *broker) call(ctx context.Context, method, suffix string, p ports.Princi
 	if err != nil {
 		return ports.Connection{}, fmt.Errorf("connection broker: %w", err)
 	}
-	defer resp.Body.Close()
+	// Closing this read-only response stream cannot change the received result.
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return ports.Connection{}, fmt.Errorf("connection broker returned %s", resp.Status)
 	}
