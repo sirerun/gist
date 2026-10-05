@@ -232,11 +232,11 @@ func (f *fixture) seed(ctx context.Context) error {
 	}); err != nil {
 		return err
 	}
-	packageBytes, err := testPackage()
+	packageBytes, manifestBytes, err := testPackage()
 	if err != nil {
 		return err
 	}
-	if err := f.app.SeedAcceptanceArtifact(ctx, ports.Principal{Issuer: f.baseURL, Subject: f.workA, Audience: f.audience, WorkspaceID: "q3-tenant-a", Scopes: []string{"catalog:read", "catalog:publish"}, PolicyGeneration: 1}, ports.ArtifactRef{WorkspaceID: "q3-tenant-a", Kind: ports.KindSkill, ID: "q3-fixture-skill", Version: "1.0.0"}, packageBytes, []byte(`{"id":"q3-fixture-skill","required_capabilities":[]}`)); err != nil {
+	if err := f.app.SeedAcceptanceArtifact(ctx, ports.Principal{Issuer: f.baseURL, Subject: f.workA, Audience: f.audience, WorkspaceID: "q3-tenant-a", Scopes: []string{"catalog:read", "catalog:publish"}, PolicyGeneration: 1}, ports.ArtifactRef{WorkspaceID: "q3-tenant-a", Kind: ports.KindSkill, ID: "q3-fixture-skill", Version: "1.0.0"}, packageBytes, manifestBytes); err != nil {
 		return fmt.Errorf("seed package into composed stores: %w", err)
 	}
 	return nil
@@ -301,34 +301,34 @@ func randomSecret() string {
 	return hex.EncodeToString(b)
 }
 
-func testPackage() ([]byte, error) {
+func testPackage() ([]byte, []byte, error) {
 	skill := []byte("---\nname: Q3 fixture skill\ndescription: A real acceptance package\n---\n\nUse the fixture.\n")
 	sum := sha256.Sum256(skill)
 	entries := []contract.InventoryEntry{{Path: "SKILL.md", Size: int64(len(skill)), SHA256: hex.EncodeToString(sum[:]), MediaType: "text/markdown"}}
 	digest, _, err := contract.PackageDigest(entries)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	manifest := map[string]any{"id": "q3-fixture-skill", "version": "1.0.0", "entrypoint": "SKILL.md", "package_digest": map[string]string{"algorithm": "sha256", "value": digest}, "inventory": entries, "required_capabilities": []any{}, "runtime_requirements": map[string]any{"local_execution": true}, "effects": []string{}, "trust": "operator_asserted", "publication": map[string]string{"status": "approved", "provenance": "publisher_asserted"}}
 	manifestBytes, err := json.Marshal(manifest)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var out bytes.Buffer
 	zw := zip.NewWriter(&out)
 	for name, content := range map[string][]byte{"manifest.json": manifestBytes, "SKILL.md": skill} {
 		w, err := zw.Create(name)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		if _, err := w.Write(content); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 	if err := zw.Close(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return out.Bytes(), nil
+	return out.Bytes(), manifestBytes, nil
 }
 
 // fixtureDSN rewrites the database path of a postgres URL.
