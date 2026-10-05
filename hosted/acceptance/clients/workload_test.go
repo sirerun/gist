@@ -334,7 +334,7 @@ func TestWorkload(t *testing.T) {
 	if err == nil {
 		_, err = revoked.get(revocationCtx, "skill", artifactID, artifactVersion)
 	}
-	if err == nil || !(strings.Contains(err.Error(), "unauthorized") || strings.Contains(err.Error(), "HTTP status 401")) {
+	if err == nil || (!strings.Contains(err.Error(), "unauthorized") && !strings.Contains(err.Error(), "HTTP status 401")) {
 		t.Fatalf("revoked workload was accepted: %v", err)
 	}
 }
