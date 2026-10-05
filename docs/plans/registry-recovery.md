@@ -66,7 +66,7 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ### E-GR-AUTH -- Enrollment and grants -> E-GR-AUTH-enrollment-and-grants.md (0/7)
 
-### E-GR-KEYS -- Persistent signing keys -> E-GR-KEYS-persistent-signing-keys.md (12/13)
+### E-GR-KEYS -- Persistent signing keys -> E-GR-KEYS-persistent-signing-keys.md (13/13)
 
 ### E-GR-INTERFACE -- Shared component interfaces -> E-GR-INTERFACE-shared-component-interfaces.md (5/16)
 
