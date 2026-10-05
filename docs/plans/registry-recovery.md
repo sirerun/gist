@@ -80,7 +80,7 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ### E-GR-PUBLISH -- Canonical publication -> E-GR-PUBLISH-canonical-publication.md (0/9)
 
-### E-GR-CORE -- Startup and event composition -> E-GR-CORE-startup-and-event-composition.md (10/34)
+### E-GR-CORE -- Startup and event composition -> E-GR-CORE-startup-and-event-composition.md (10/37)
 
 ### E-GR-INTEGRATE -- Composition and interoperability -> E-GR-INTEGRATE-composition-and-interoperability.md (0/7)
 
@@ -167,3 +167,6 @@ PR48 landed the original reviewed production graph. KEYS/WIRE/EVENT are admitted
 2026-10-05 component landed closure: WIRE PR50 reviewed9ac3263 and landed93c5c45 passed exact landed app REST MCP unit/race/vet/lint and actual PostgreSQL checks ([receipt](https://github.com/sirerun/gist/blob/8bfd8695f5301612fc005dd8eff8f6540d4a0cfa/docs/receipts/2026-10-05-wire-landed-verification.md)). EVENT PR51 reviewed80cc432 and landed57927cd passed exact landed tagged storage PostgreSQL/race/vet/lint and frozen contracts ([receipt](https://github.com/sirerun/gist/blob/e58cce4c9d09c6933a53ee2ebd686a2fa1473444/docs/receipts/2026-10-05-event-landed-verification.md)). All component finding chains and merge/landed rows now close on that evidence. CORE clean composition is based on actual landed components; implemented source/fixes are checked while final composed verification and independent review remain open. Fixture-only membership seeding is not external enrollment.
 
 CORE transaction disposition: catalog and outbox roll back together, but failed catalog/outbox publication can leave a private unbound content-addressed blob staged before the database transaction. Component tests explicitly retain that physical boundary; no compensation or storage garbage-collection claim is made. Canonical PUBLISH preflight/implementation/verification must qualify tenant-safe staging ownership, retention and reconciliation before the downstream production gate; unsafe deletion of a shared digest is excluded.
+
+
+CORE-R10 fixture conformance: after explicit startup adaptation the wiring resolve case fails with validation_failed because it sends the obsolete skill/runtime_id/local_execution shape. Frozen v1 instead requires skill_ref/runtime/max_bytes. The coordinator owns three wiring request fixtures; the fixture author owns the client MCP request in its already assigned file. Successful readiness and revoked-artifact denial expectations remain intact, with numeric fix/verify/independent-review gates before core merge; no public semantics are amended.
