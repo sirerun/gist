@@ -143,10 +143,12 @@ func validArtifactID(value string) bool {
 		return false
 	}
 	for i, r := range value {
-		if i == 0 && !((r >= 'a' && r <= 'z') || (r >= '0' && r <= '9')) {
+		isLower := r >= 'a' && r <= 'z'
+		isDigit := r >= '0' && r <= '9'
+		if i == 0 && !isLower && !isDigit {
 			return false
 		}
-		if !((r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || strings.ContainsRune("._/-", r)) {
+		if !isLower && !isDigit && !strings.ContainsRune("._/-", r) {
 			return false
 		}
 	}
