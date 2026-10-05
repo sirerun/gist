@@ -36,7 +36,7 @@ import (
 const (
 	clientWorkspace = "m2a-client-workspace"
 	clientSubject   = "m2a-client-workload"
-	artifactID      = "skill/m2a-fixture-skill"
+	artifactID      = "m2a-fixture-skill"
 	artifactVersion = "1.0.0"
 )
 
