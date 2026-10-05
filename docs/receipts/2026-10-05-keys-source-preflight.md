@@ -70,3 +70,20 @@ installed version 2.13.2 rejects the repository config's empty/unsupported
 version. With the coordinator-qualified migrated config and an external SSD
 lint cache, `golangci-lint run --concurrency=2 ./internal/identity` reported
 zero issues. The coordinator's independent fix review remains required.
+
+## Additional independent review finding
+
+The independent exact-head review of PR #49 at `04f9c0df04a8d09d08e95d8481aac8db626e0c22`
+accepted P2 finding F1: `KeySet.Rotate` could overwrite a loaded retired `kid`
+with a new current key, clearing the retired key's expiry. The follow-up now
+rejects previously used IDs and treats an identical current key as an
+idempotent no-op. New regression cases cover retired-ID reuse and that no-op.
+The retired-ID regression failed against the reviewed `04f9c0d` candidate with
+`rotation reused a retired kid`, then passed with the fix. The updated identity
+package passed `go test -p=2 ./internal/identity -count=1`, the same scoped
+race test, `go vet -p=2 ./internal/identity`, and golangci-lint v2.13.2 using
+the coordinator-qualified migrated v2 config (`0 issues`). Each Go command ran
+after a fresh one-minute load check at or below 10, with `GOWORK=off`,
+`GOMAXPROCS=2`, and Go/lint caches and temporary files on the external SSD.
+`gofmt` and `git diff --check` are clean. Independent exact-head re-review of
+the updated candidate remains required.
