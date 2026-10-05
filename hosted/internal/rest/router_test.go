@@ -219,10 +219,11 @@ func decodeJSON(t *testing.T, w *httptest.ResponseRecorder, v any) {
 func TestEventsUnsafeStoreRefusesHTTPWithoutConsumingPage(t *testing.T) {
 	clock := &fixedClock{now: time.Unix(1_700_000_000, 0)}
 	store := events.NewStore(clock)
-	p, err := (testIdentity{}).Authenticate(context.Background(), "Bearer test")
+	rec, err := (testIdentity{}).Lookup(context.Background(), "test", "")
 	if err != nil {
 		t.Fatal(err)
 	}
+	p := ports.Principal{Issuer: rec.Issuer, Subject: rec.Subject, WorkspaceID: rec.WorkspaceID, Scopes: rec.Scopes, PolicyGeneration: rec.PolicyGeneration, SubjectType: rec.SubjectType}
 	cursor, err := store.NewCursor(p, time.Minute)
 	if err != nil {
 		t.Fatal(err)
