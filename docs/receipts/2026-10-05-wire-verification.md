@@ -24,3 +24,19 @@ R6 regression tests were added at `dc8adc6` and failed on the prior WIRE head `7
 - `go vet -p 2` passed for those three packages individually.
 - Configured golangci-lint v2 across all three packages reported 0 issues.
 - Duplicate keys and trailing JSON are rejected by REST; duplicate keys are preserved through MCP argument routing and rejected by the same canonical resolver.
+
+## R7 PostgreSQL fixture isolation
+
+Final source: `5406596760e77b03ca85562704e16ce1eadbf137`, rebased onto landed `origin/main` `f162015238a94fbc930865f70bef014865f553d4`.
+
+The integration helper now generates independent 16-hex cryptographic suffixes for each database and restricted role. Its names stay below PostgreSQL's 63-byte identifier limit. Cleanup is registered immediately after successful creation and targets only those generated resources; role cleanup runs before database cleanup and closes restricted connections first. No existing global role or shared fixture is dropped. Repeating the integration package twice completed successfully, covering repeated creation and cleanup without stale-name collisions.
+
+Final local checks, each passed at this source revision:
+
+- `go test -count=2 -tags=integration -p=2 ./internal/app` against the local PostgreSQL fixture.
+- `go test -count=1 -p=2 ./internal/app`.
+- `go test -race -count=1 -p=2 ./internal/app`.
+- `go vet -p=2 ./internal/app`.
+- Configured golangci-lint v2 for `./internal/app` reported 0 issues.
+
+Every Go/lint command was launched through the fresh `gated-command.py` load gate; commands held at load above 10 were retried only after a fresh reading was below 10. All caches and temporary files were on the external SSD. These results are local verification, not hosted CI or runtime acceptance.
