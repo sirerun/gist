@@ -40,10 +40,14 @@ func (f *fsBackend) put(_ context.Context, name string, b []byte) error {
 		return fmt.Errorf("create object temp: %w", err)
 	}
 	tmpName := tmp.Name()
-	defer os.Remove(tmpName)
+	defer func() {
+		if cleanupErr := os.Remove(tmpName); cleanupErr != nil && !errors.Is(cleanupErr, os.ErrNotExist) {
+			err = errors.Join(err, fmt.Errorf("remove temporary object: %w", cleanupErr))
+		}
+	}()
 	if _, err = tmp.Write(b); err != nil {
-		_ = tmp.Close()
-		return fmt.Errorf("write object: %w", err)
+		closeErr := tmp.Close()
+		return fmt.Errorf("write object: %w", errors.Join(err, closeErr))
 	}
 	if err = tmp.Close(); err != nil {
 		return fmt.Errorf("close object: %w", err)

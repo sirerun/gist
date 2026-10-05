@@ -139,7 +139,8 @@ func (b *s3Backend) get(ctx context.Context, name string) ([]byte, error) {
 		}
 		return nil, fmt.Errorf("read object: %w", err)
 	}
-	defer out.Body.Close()
+	// Closing this read-only object stream cannot change the received result.
+	defer func() { _ = out.Body.Close() }()
 	data, err := io.ReadAll(out.Body)
 	if err != nil {
 		return nil, fmt.Errorf("read object: %w", err)
