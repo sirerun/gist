@@ -23,6 +23,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/sirerun/gist/hosted/acceptance/testfixtures"
 	"github.com/sirerun/gist/hosted/internal/app"
 	"github.com/sirerun/gist/hosted/internal/identity"
 	"github.com/sirerun/gist/hosted/internal/storage"
@@ -101,7 +102,19 @@ func openTarget(s frozenSuite) (*target, error) {
 	server := httptest.NewUnstartedServer(http.NotFoundHandler())
 	cleanups = append(cleanups, server.Close)
 	origin := "https://" + server.Listener.Addr().String()
-	cfg := app.Config{ListenAddress: server.Listener.Addr().String(), PublicOrigin: origin, ResourceAudience: origin, DatabaseURL: dsn, ObjectStoreRoot: objects, RequestTimeout: 5 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 10000, MaxConcurrentRequests: 20, MaxDiscoveryResults: 50, RetryAfter: 1, OAuthConsentSecret: []byte("acceptance-only-oauth-consent-secret-0123456789")}
+	workspaceIDs := make([]string, 0, len(s.corpus.Workspaces))
+	for _, workspace := range s.corpus.Workspaces {
+		workspaceIDs = append(workspaceIDs, workspace.ID)
+	}
+	maintenanceTargets := testfixtures.MaintenanceTargets(workspaceIDs)
+	if err := testfixtures.SeedMaintenanceTargets(ctx, pool, origin, maintenanceTargets); err != nil {
+		return fail(fmt.Errorf("seed startup maintenance targets: %w", err))
+	}
+	signingKeyConfig, err := testfixtures.SigningKeyConfig()
+	if err != nil {
+		return fail(err)
+	}
+	cfg := app.Config{ListenAddress: server.Listener.Addr().String(), PublicOrigin: origin, ResourceAudience: origin, DatabaseURL: dsn, ObjectStoreRoot: objects, RequestTimeout: 5 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 10000, MaxConcurrentRequests: 20, MaxDiscoveryResults: 50, RetryAfter: 1, OAuthConsentSecret: []byte("acceptance-only-oauth-consent-secret-0123456789"), SigningKeyConfig: signingKeyConfig, EventMaintenanceTargets: maintenanceTargets}
 	a, err := app.New(ctx, cfg)
 	if err != nil {
 		return fail(fmt.Errorf("compose registry app: %w", err))
@@ -194,7 +207,7 @@ func seedStore(ctx context.Context, pool *pgxpool.Pool, issuer string, principal
 	}
 	for workspace, members := range byWorkspace {
 		err := storage.WithTenant(ctx, pool, workspace, func(ctx context.Context, tx pgx.Tx) error {
-			if _, err := tx.Exec(ctx, `INSERT INTO workspaces(id,name) VALUES($1,$1)`, workspace); err != nil {
+			if _, err := tx.Exec(ctx, `INSERT INTO workspaces(id,name) VALUES($1,$1) ON CONFLICT (id) DO NOTHING`, workspace); err != nil {
 				return err
 			}
 			for _, p := range members {
