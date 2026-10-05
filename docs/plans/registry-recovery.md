@@ -78,6 +78,8 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ### E-GR-COMPOSIO -- Composio action artifacts -> E-GR-COMPOSIO-composio-action-artifacts.md (0/7)
 
+### E-GR-CORE -- Startup and event composition -> E-GR-CORE-startup-and-event-composition.md (0/7)
+
 ### E-GR-INTEGRATE -- Composition and interoperability -> E-GR-INTEGRATE-composition-and-interoperability.md (0/7)
 
 ### E-GR-AWS -- AWS origin and infrastructure -> E-GR-AWS-aws-origin-and-infrastructure.md (0/13)
