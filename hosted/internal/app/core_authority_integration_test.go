@@ -59,6 +59,15 @@ func TestCoreHTTPRejectsForeignCursorIssuerAndStalePolicy(t *testing.T) {
 	assertDenied := func(name, target, bearer string) {
 		t.Helper()
 		response := compositionHTTP(t, a.Handler(), http.MethodGet, target, bearer, nil)
+		if response.Code == http.StatusConflict {
+			var body struct {
+				Code string `json:"code"`
+			}
+			if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil || body.Code != "cursor_expired" {
+				t.Fatalf("%s returned an unexpected conflict: %s", name, response.Body.String())
+			}
+			return
+		}
 		if response.Code != http.StatusUnauthorized && response.Code != http.StatusForbidden && response.Code != http.StatusNotFound {
 			t.Fatalf("%s accepted unauthorized request: %d", name, response.Code)
 		}
