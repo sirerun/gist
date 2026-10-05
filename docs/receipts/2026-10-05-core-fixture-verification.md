@@ -70,15 +70,30 @@ the prior package checks and this follow-up.
 
 ## Related evidence supplied by the coordinator
 
-The coordinator reported a pre-fix CORE-R6 zero-budget RED on source
-`04c889138ac21b7d9ec33da41e8f7c565` with the `fe8` test overlay: the request
-unexpectedly committed. The coordinator reports that corrected source
-`08f9` with `fe8` passed the actual PostgreSQL case twice, plus race, vet, and
-lint. I did not run those R6 checks, so they are attributed evidence rather
-than results of this lane; this receipt does not assert an R6 race result
-beyond that coordinator report.
+The CORE-R6 zero-budget regression was independently reproduced in an isolated
+worktree at source `8f07de04c889138ac21b7d9ec33da41e8f7c565d`. The single
+integration test file was taken from overlay commit
+`fe8cda3486e02b8561ea7ceb06b98fa351d30c7b`; the test name was
+`TestPublisherCatalogAndOutboxShareTransaction`. With the local PostgreSQL
+fixture, the command
+`go test -count=1 -tags=integration -run '^TestPublisherCatalogAndOutboxShareTransaction$' -p=2 ./internal/app`
+failed as intended: `core_publication_transaction_integration_test.go:122:
+response budget 0 did not reject before publication: <nil>`. Thus a zero-byte
+response budget still allowed publication on the pre-fix source.
 
-The coordinator also reports that its final physical-blob test on source
+The corrected implementation is
+`08f9b012967f251b434768c2c214512b1daad573`, with overlay
+`fe8cda3486e02b8561ea7ceb06b98fa351d30c7b`. The coordinator reports that the
+corrected PostgreSQL case passed twice and records its associated race, vet,
+and lint results. In addition, I ran the same exact named test against the
+corrected current source at `d6d65da87484a958031281438917ce8c7461c898`:
+`go test -count=1 -tags=integration -run '^TestPublisherCatalogAndOutboxShareTransaction$' -p=2 ./internal/app`
+passed against the local PostgreSQL fixture. The integration test file's git
+blob is identical to the overlay file from `fe8cda3`. The RED and this
+corrected-source PASS are direct results; the previously reported repeated
+checks remain coordinator-attributed evidence.
+
+The coordinator reports that its final physical-blob test on source
 `bd5` passed all eight PostgreSQL tests. That result is separate from this
 fixture lane and is recorded only as coordinator-supplied evidence.
 
