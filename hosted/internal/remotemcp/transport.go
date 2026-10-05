@@ -421,8 +421,8 @@ func (h *Handler) call(w http.ResponseWriter, r *http.Request, id any, raw json.
 		return
 	}
 	var p struct {
-		Name      string         `json:"name"`
-		Arguments map[string]any `json:"arguments"`
+		Name      string          `json:"name"`
+		Arguments json.RawMessage `json:"arguments"`
 	}
 	if json.Unmarshal(raw, &p) != nil {
 		writeRPC(w, rpcErr(id, -32602, "Invalid tool arguments", nil))
@@ -432,7 +432,16 @@ func (h *Handler) call(w http.ResponseWriter, r *http.Request, id any, raw json.
 		writeRPC(w, rpcErr(id, -32601, "Unknown tool", nil))
 		return
 	}
-	path, method, body := toolRoute(p.Name, p.Arguments)
+	var arguments map[string]any
+	if json.Unmarshal(p.Arguments, &arguments) != nil {
+		writeRPC(w, rpcErr(id, -32602, "Invalid tool arguments", nil))
+		return
+	}
+	path, method, body := toolRoute(p.Name, arguments)
+	if p.Name == "gist_resolve" {
+		// The canonical resolver must see duplicate fields and exact JSON types.
+		body = p.Arguments
+	}
 	if path == "" {
 		writeRPC(w, rpcErr(id, -32602, "Invalid tool arguments", nil))
 		return
