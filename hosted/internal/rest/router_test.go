@@ -70,6 +70,9 @@ func (testEvents) Append(context.Context, ports.Event) error { return nil }
 func (testEvents) Read(context.Context, ports.Cursor) (ports.EventPage, error) {
 	return ports.EventPage{}, nil
 }
+func (testEvents) ReadEventPageForPrincipal(context.Context, ports.Principal, ports.Cursor, int) (ports.EventPage, error) {
+	return ports.EventPage{}, nil
+}
 func (testEvents) NewCursor(ports.Principal, time.Duration) (ports.Cursor, error) {
 	return ports.Cursor{ID: "cur"}, nil
 }
@@ -189,6 +192,9 @@ func (errEvents) Append(context.Context, ports.Event) error { return nil }
 func (e errEvents) Read(context.Context, ports.Cursor) (ports.EventPage, error) {
 	return e.page, e.err
 }
+func (e errEvents) ReadEventPageForPrincipal(context.Context, ports.Principal, ports.Cursor, int) (ports.EventPage, error) {
+	return e.page, e.err
+}
 
 func handlerWith(t *testing.T, mutate func(*Services)) *Handler {
 	t.Helper()
@@ -208,47 +214,37 @@ func decodeJSON(t *testing.T, w *httptest.ResponseRecorder, v any) {
 	}
 }
 
-// Regression: GET /v1/events used to send an unbound cursor and had no way to
-// open one, so every request failed with 503.
-func TestEventsOpensPrincipalBoundCursorAndResumes(t *testing.T) {
+// A store that consumes a page before checking the HTTP budget is unavailable
+// until a budget-aware adapter is supplied. A refused request must not lose data.
+func TestEventsUnsafeStoreRefusesHTTPWithoutConsumingPage(t *testing.T) {
 	clock := &fixedClock{now: time.Unix(1_700_000_000, 0)}
 	store := events.NewStore(clock)
-	ref := ports.ArtifactRef{WorkspaceID: "workspace-a", Kind: ports.KindSkill, ID: "s", Version: "1"}
-	if err := store.Append(context.Background(), ports.Event{ID: "e1", WorkspaceID: "workspace-a", Type: ports.EventVersionPublished, Subject: ref, OccurredAt: clock.now.Unix()}); err != nil {
+	p, err := (testIdentity{}).Authenticate(context.Background(), "Bearer test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cursor, err := store.NewCursor(p, time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ref := ports.ArtifactRef{WorkspaceID: p.WorkspaceID, Kind: ports.KindSkill, ID: "s", Version: "1"}
+	if err := store.Append(context.Background(), ports.Event{ID: "e1", WorkspaceID: p.WorkspaceID, Type: ports.EventVersionPublished, Subject: ref, OccurredAt: clock.now.Unix()}); err != nil {
 		t.Fatal(err)
 	}
 	h := handlerWith(t, func(s *Services) { s.Events = store })
-
-	w := do(t, h, "GET", "/v1/events", "")
-	if w.Code != 200 {
-		t.Fatalf("open status=%d body=%s", w.Code, w.Body.String())
+	for _, path := range []string{"/v1/events?max_bytes=1", "/v1/events?cursor=" + cursor.ID + "&max_bytes=1"} {
+		w := do(t, h, "GET", path, "")
+		if w.Code != 503 || !bytes.Contains(w.Body.Bytes(), []byte(`"service_unavailable"`)) {
+			t.Fatalf("status=%d body=%s", w.Code, w.Body.String())
+		}
 	}
-	var first struct {
-		Events     []ports.Event `json:"events"`
-		NextCursor string        `json:"next_cursor"`
-	}
-	decodeJSON(t, w, &first)
-	if len(first.Events) != 1 || first.NextCursor == "" {
-		t.Fatalf("first page = %+v", first)
-	}
-
-	if err := store.Append(context.Background(), ports.Event{ID: "e2", WorkspaceID: "workspace-a", Type: ports.EventVersionRevoked, Subject: ref, OccurredAt: clock.now.Unix()}); err != nil {
-		t.Fatal(err)
-	}
-	w = do(t, h, "GET", "/v1/events?cursor="+first.NextCursor, "")
-	if w.Code != 200 {
-		t.Fatalf("resume status=%d body=%s", w.Code, w.Body.String())
-	}
-	var second struct {
-		Events []ports.Event `json:"events"`
-	}
-	decodeJSON(t, w, &second)
-	if len(second.Events) != 1 || second.Events[0].ID != "e2" {
-		t.Fatalf("second page = %+v", second)
+	page, err := store.Read(context.Background(), cursor)
+	if err != nil || len(page.Events) != 1 || page.Events[0].ID != "e1" {
+		t.Fatalf("refused HTTP request consumed page: %+v %v", page, err)
 	}
 }
 
-func TestEventsRejectsCursorOfAnotherPrincipal(t *testing.T) {
+func TestEventsUnsafeStoreDoesNotDiscloseForeignCursor(t *testing.T) {
 	store := events.NewStore(&fixedClock{now: time.Unix(1_700_000_000, 0)})
 	foreign, err := store.NewCursor(ports.Principal{Issuer: "test", Subject: "someone-else", WorkspaceID: "workspace-a"}, time.Minute)
 	if err != nil {
@@ -256,7 +252,7 @@ func TestEventsRejectsCursorOfAnotherPrincipal(t *testing.T) {
 	}
 	h := handlerWith(t, func(s *Services) { s.Events = store })
 	w := do(t, h, "GET", "/v1/events?cursor="+foreign.ID, "")
-	if w.Code != 409 || !bytes.Contains(w.Body.Bytes(), []byte(`"cursor_expired"`)) {
+	if w.Code != 503 || !bytes.Contains(w.Body.Bytes(), []byte(`"service_unavailable"`)) {
 		t.Fatalf("status=%d body=%s", w.Code, w.Body.String())
 	}
 }

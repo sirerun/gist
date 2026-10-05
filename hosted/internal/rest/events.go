@@ -34,16 +34,17 @@ func (h *Handler) events(w http.ResponseWriter, r *http.Request, p ports.Princip
 	if err := h.authorize(r.Context(), p, ports.ActionRead, nil); err != nil {
 		return err
 	}
+	reader, ok := h.s.Events.(BudgetedEventReader)
+	if !ok {
+		// A legacy read can consume a page before writeJSON rejects its size.
+		// Refuse it before opening or mutating any cursor.
+		return appError("service_unavailable", "Service unavailable", 503, true)
+	}
 	cursor, err := h.eventCursor(r, p)
 	if err != nil {
 		return err
 	}
-	var page ports.EventPage
-	if reader, ok := h.s.Events.(BudgetedEventReader); ok {
-		page, err = reader.ReadEventPageForPrincipal(r.Context(), p, cursor, budget(r, h.limits.MaxResponseBytes))
-	} else {
-		page, err = h.s.Events.Read(r.Context(), cursor)
-	}
+	page, err := reader.ReadEventPageForPrincipal(r.Context(), p, cursor, budget(r, h.limits.MaxResponseBytes))
 	switch {
 	case page.RetentionGap, errors.Is(err, events.ErrCursorExpired), errors.Is(err, events.ErrCursorBinding):
 		// An expired, purged, unknown, or foreign cursor all require the
