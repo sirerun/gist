@@ -72,7 +72,7 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ### E-GR-WIRE -- Canonical registry wire -> E-GR-WIRE-canonical-registry-wire.md (0/11)
 
-### E-GR-EVENT -- Durable revocation feed -> E-GR-EVENT-durable-revocation-feed.md (0/13)
+### E-GR-EVENT -- Durable revocation feed -> E-GR-EVENT-durable-revocation-feed.md (1/16)
 
 ### E-GR-TREG -- Treg action artifacts -> E-GR-TREG-treg-action-artifacts.md (0/7)
 
