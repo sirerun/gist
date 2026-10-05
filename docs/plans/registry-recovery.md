@@ -68,11 +68,11 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ### E-GR-KEYS -- Persistent signing keys -> E-GR-KEYS-persistent-signing-keys.md (12/13)
 
-### E-GR-INTERFACE -- Shared component interfaces -> E-GR-INTERFACE-shared-component-interfaces.md (3/10)
+### E-GR-INTERFACE -- Shared component interfaces -> E-GR-INTERFACE-shared-component-interfaces.md (3/13)
 
 ### E-GR-WIRE -- Canonical registry wire -> E-GR-WIRE-canonical-registry-wire.md (0/11)
 
-### E-GR-EVENT -- Durable revocation feed -> E-GR-EVENT-durable-revocation-feed.md (0/10)
+### E-GR-EVENT -- Durable revocation feed -> E-GR-EVENT-durable-revocation-feed.md (0/13)
 
 ### E-GR-TREG -- Treg action artifacts -> E-GR-TREG-treg-action-artifacts.md (0/7)
 

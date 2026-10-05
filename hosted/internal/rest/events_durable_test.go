@@ -14,12 +14,12 @@ import (
 )
 
 type durableEventProbe struct {
-	err          error
-	opened, read bool
-	principal    ports.Principal
-	cursor       ports.Cursor
-	limit        int
-	contextValue any
+	err                  error
+	opened, read, atomic bool
+	principal            ports.Principal
+	cursor               ports.Cursor
+	limit                int
+	contextValue         any
 }
 
 type eventContextKey struct{}
@@ -36,6 +36,18 @@ func (s *durableEventProbe) NewEventCursor(ctx context.Context, p ports.Principa
 	s.opened = true
 	s.contextValue = ctx.Value(eventContextKey{})
 	return ports.Cursor{ID: "durable", WorkspaceID: p.WorkspaceID, PrincipalHash: events.PrincipalHash(p)}, nil
+}
+func (s *durableEventProbe) OpenEventPageForPrincipal(ctx context.Context, p ports.Principal, limit int) (ports.EventPage, error) {
+	s.atomic = true
+	s.contextValue = ctx.Value(eventContextKey{})
+	s.principal = p
+	s.limit = limit
+	if s.err != nil {
+		return ports.EventPage{}, s.err
+	}
+	s.opened = true
+	s.cursor = ports.Cursor{ID: "durable", WorkspaceID: p.WorkspaceID, PrincipalHash: events.PrincipalHash(p)}
+	return ports.EventPage{Events: []ports.Event{}, Next: s.cursor}, nil
 }
 func (s *durableEventProbe) ReadEventPageForPrincipal(_ context.Context, p ports.Principal, c ports.Cursor, limit int) (ports.EventPage, error) {
 	s.read = true
@@ -66,7 +78,7 @@ func TestDurableEventsUseContextPrincipalAndEffectiveBudget(t *testing.T) {
 			if w.Code != 200 {
 				t.Fatalf("status %d: %s", w.Code, w.Body.String())
 			}
-			if !store.opened || !store.read || store.contextValue != "request-context" || store.limit != tc.want {
+			if !store.opened || !store.atomic || store.read || store.contextValue != "request-context" || store.limit != tc.want {
 				t.Fatalf("durable context/budget not used: %+v", store)
 			}
 			if store.principal.WorkspaceID != "workspace-a" || store.cursor.PrincipalHash != events.PrincipalHash(store.principal) {
@@ -103,5 +115,18 @@ func TestDurableEventDenialsRetainPublicErrorContract(t *testing.T) {
 				t.Fatal("internal error detail exposed")
 			}
 		})
+	}
+}
+
+func TestDurableFirstPageBudgetDoesNotUseSeparateOpen(t *testing.T) {
+	h := testHandler(t)
+	store := &durableEventProbe{err: eventBudgetFailure{}}
+	h.s.Events = store
+	w := do(t, h, http.MethodGet, "/v1/events?max_bytes=1", "")
+	if w.Code != http.StatusRequestEntityTooLarge {
+		t.Fatalf("status %d: %s", w.Code, w.Body.String())
+	}
+	if !store.atomic || store.opened || store.read {
+		t.Fatalf("budget failure used non-atomic cursor opening: %+v", store)
 	}
 }
