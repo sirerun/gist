@@ -62,11 +62,13 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ## Checkable Work Breakdown
 
-### E-GR-SCOPE -- Requirements and preflight -> E-GR-SCOPE-requirements-and-preflight.md (5/11)
+### E-GR-SCOPE -- Requirements and preflight -> E-GR-SCOPE-requirements-and-preflight.md (7/11)
 
 ### E-GR-AUTH -- Enrollment and grants -> E-GR-AUTH-enrollment-and-grants.md (0/7)
 
-### E-GR-KEYS -- Persistent signing keys -> E-GR-KEYS-persistent-signing-keys.md (0/7)
+### E-GR-KEYS -- Persistent signing keys -> E-GR-KEYS-persistent-signing-keys.md (0/10)
+
+### E-GR-INTERFACE -- Shared component interfaces -> E-GR-INTERFACE-shared-component-interfaces.md (1/7)
 
 ### E-GR-WIRE -- Canonical registry wire -> E-GR-WIRE-canonical-registry-wire.md (0/7)
 
@@ -125,7 +127,7 @@ Stable architecture remains in docs/design.md and RFC/ADRs. Accepted design chan
 
 ## Planning handoff
 
-This plan is a draft refinement only. All new checkboxes remain open, historical checkboxes and authored evidence are retained, and no fixes/builds/tests/reviews/merges/releases/deployments/worker starts have been performed by /plan. The executing coordinator reads this file, revalidates SCOPE.1/.6/.8/.11 and keeps scheduling/refining dependency-ready in-scope stages until T-GR-PROD.9 is true; no routine proceed-confirmation at local merge, rollout or NEXT planning checkpoint. External missing choices remain coordinator-routed. Planning validation is parser/graph/coverage and artifact consistency, not application acceptance.
+Original planning handoff (superseded by authorized October4/5 ship execution): this was a draft refinement only. All new checkboxes remain open, historical checkboxes and authored evidence are retained, and no fixes/builds/tests/reviews/merges/releases/deployments/worker starts have been performed by /plan. The executing coordinator reads this file, revalidates SCOPE.1/.6/.8/.11 and keeps scheduling/refining dependency-ready in-scope stages until T-GR-PROD.9 is true; no routine proceed-confirmation at local merge, rollout or NEXT planning checkpoint. External missing choices remain coordinator-routed. Planning validation is parser/graph/coverage and artifact consistency, not application acceptance.
 
 Planning validation (2026-10-04): installed parser accepted 77 open tasks in 11 epics with all six supported code-stage markers; every task has owner, acceptance and wave assignment. Additional graph checks found no missing dependency, cycle, duplicate local ID, malformed acceptance, unguarded coding merge or TOC count mismatch. Exactly two outline epics have one trigger planning task each. Hash checks confirm preexisting plan/design contents remain byte-identical prefixes and the gateway plan is untouched. Whitespace checks passed; no application checks were run. Parser IDs namespace the preserved local IDs for display; they are not minted lifecycle or claim IDs.
 
@@ -148,3 +150,8 @@ Historical planning-only validation (2026-10-04, before shipping started): 128 o
 User invoked /ship. T-GR-SCOPE.1/.2/.6/.8 have source-only receipts in docs/receipts; component contracts await independent T-GR-SCOPE.3 disposition before engineering admission. Four slots are occupied by one coordinator and three explicitly requested GPT-6-Luna workers, with isolated external-SSD ownership. Engineering builds are held while one-minute host load exceeds 10; no build lease is bypassed. Production bindings are partially qualified but blocked by AWS session/stack-account mismatch and absent configured Cloudflare MCP. Enrollment and provider targets/caps are pending a decision brief requested by the founder. No production_done, code/lifecycle admission, CI pass, release or live acceptance is asserted. Read-only preflights are not application acceptance.
 
 Current shipping validation: 128 total active production tasks, five source-only preflights checked and 123 open; deferred gateway is outside that count. Founder identity/pilot choices remain pending. Consumer owner reports its actual runtime/header/funding qualifications are not yet admitted; T-GR-SCOPE.7 stays blocked rather than accepting its planning PR as runtime evidence. Exact source review findings R1 (open-PR accuracy) and R2 (historical/current count distinction) were corrected in this candidate; fresh independent review is still required.
+
+
+## October5 source delivery continuation
+
+PR48 landed the original reviewed production graph. KEYS/WIRE/EVENT are admitted source components; trust, live pilot and AWS/DNS operator bindings remain held. KEYS has three accepted loader findings tracked as7/8/9, with independent re-review required. Shared-interface source delivery is now a separate prerequisite so dependent components can land without completing the held final app composition. Graph rows retain one terminal production gate and the same registry/caller scope.
