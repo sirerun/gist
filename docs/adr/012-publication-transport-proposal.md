@@ -1,0 +1,51 @@
+# ADR012 — Publication transport compatibility proposal
+
+Date: 2026-10-05. Status: **proposed; not approved or implemented**.
+Decision owners: founder and registry contract owner. Scope: registry publication only; no provider execution or managed gateway.
+
+## Problem and verified evidence
+
+The frozen v1 publish schema requires `artifact`, positive `max_bytes` and nonempty `idempotency_key`, but defines `artifact` only as a nonempty object. The v1 OpenAPI publication binding instead references a generic budgeted JSON object. Neither defines how uploaded package bytes are represented. The actual REST handler forwards its entire body, and the app publisher reads it as a ZIP requiring `manifest.json` and `SKILL.md`, including for capability, tool, provider, binding and taxonomy routes. A schema-valid JSON publication cannot succeed through that implementation. Route doubles and direct catalog seeds do not qualify publication.
+
+Evidence: `contracts/registry/v1/publish.schema.json`, `contracts/registry/v1/openapi.yaml`, `hosted/internal/rest/publish.go`, `hosted/internal/app/adapters.go`, `hosted/internal/packages/validate.go`, `hosted/internal/rest/router_test.go`, `hosted/acceptance/wiring/fixture_test.go`. RFC002 sections6–7 require complete immutable skill packages, explicit source/provenance/license, typed provider artifacts and trusted workspace-maintainer ingestion without executing imported scripts. ADR004 preserves operator-asserted private distribution and governed capability/binding admission.
+
+## Recommended decision, subject to owner acceptance
+
+Publish a new, explicitly versioned publication transport rather than changing frozen v1 source bytes. Add `/v2/publish/{kind}` with a strict JSON envelope containing `artifact`, `max_bytes` and `idempotency_key`. Keep existing discovery, exact retrieval and resolution contracts unchanged where their actual typed records remain compatible. Do not describe historical raw-ZIP v1 publication as canonical JSON or qualify it as the supported production publisher. Its deprecation/disable behavior must be selected and covered by a compatibility fixture before rollout.
+
+For skills, use an `artifact` object containing a single `package` object with exact keys `encoding: "base64"`, `media_type: "application/zip"` and `data: "..."`. The archive contains the authoritative manifest; there is no second outer copy of its ID/version/inventory that could disagree. This lets the publisher preserve the complete original archive and detached manifest bytes, while using explicit encoded and decoded size limits. Base64 increases upload bytes by roughly one third; this is a bounded ingestion path outside agent-facing MCP. No source URL is fetched implicitly.
+
+For other kinds, `artifact` contains an exact version descriptor and a typed document: `id`, `version`, `document`. The route supplies kind, the authenticated principal supplies workspace and publisher, and the typed document must match its descriptor wherever its frozen schema contains identity. Provider schemas do not currently carry version, so the descriptor provides the immutable registry version without teaching the provider schema an undeclared field. Capability/tool/provider/binding/taxonomy each use their declared typed schema and source/admission rules; none goes through the skill ZIP validator. Preserve the document's original byte representation for transfer and digest checks; do not hash a database JSONB reserialization as immutable source evidence.
+
+These examples are proposed v2 shapes, not valid v1 fixtures or accepted production inputs:
+
+```json
+{"artifact":{"package":{"encoding":"base64","media_type":"application/zip","data":"<base64 archive>"}},"max_bytes":4096,"idempotency_key":"publish-skill-1"}
+```
+
+```json
+{"artifact":{"id":"provider/example","version":"1.0.0","document":{"id":"provider/example","support_state":"catalog_only","last_verified_at":"2026-10-05T00:00:00Z"}},"max_bytes":4096,"idempotency_key":"publish-provider-1"}
+```
+
+The second example demonstrates transport only. It does not satisfy captured provenance/licensing/admission or justify a real provider artifact.
+
+## Alternatives and tradeoffs
+
+1. Define a compatible detailed artifact profile within v1, keeping the frozen envelope bytes while adding new explicit per-kind profile files. This avoids another route version, but v1 OpenAPI and the raw-ZIP implementation still disagree, and current callers would need explicit migration. This is viable only if the owner deliberately approves a v1 clarification and reconciles its method/media binding without silently rewriting locks.
+2. Multipart skill uploads with a JSON metadata part and raw archive part reduce encoding overhead, but require an explicit media/schema binding separate from ordinary JSON artifact publication. The current frozen JSON envelope does not define this representation. It remains an option if upload sizes justify the additional client and handler complexity.
+3. A JSON file map changes the package transfer representation and requires byte encoding, path/inventory and archive reconstruction rules. It offers no demonstrated benefit over preserving an uploaded archive here.
+
+## Required implementation and acceptance
+
+Before writing production handlers, settle and independently review the exact envelope/profile schemas, OpenAPI version/media binding, migration behavior and byte limits. Preserve all frozen v1 lock entries. The user decision chooses a public compatibility boundary, not an authentication issuer or provider spending authority.
+
+- Strictly reject duplicate, unknown and case-variant canonical fields, malformed base64, trailing JSON, wrong media type, malformed identities, tenant/publisher fields, traversal, unsafe links, invalid manifest inventory and oversized encoded or expanded content.
+- Refresh current authenticated maintainer membership/policy; enforce capability namespaces, provider/action provenance, binding golden conformance and taxonomy attribution/redistribution rights. A selected provider account is not evidence of permission to execute or redistribute its catalog.
+- Keep archive transfer digest, manifest-byte digest and inventory package digest distinct. Define their exact catalog/response mapping in the schema decision and verify retrieval/client agreement; do not replace an inventory digest with an archive hash merely because both are SHA256.
+- Reserve publication identity and compare exact immutable input. Repeating the same idempotency key and payload returns the same admitted result without a second event; reusing a key with changed payload conflicts. Concurrent requests cannot create conflicting versions. Revoked versions cannot be republished to erase revocation.
+- Compute the complete canonical response and effective client/server byte budget before mutating catalog or outbox. Join version and event admission in one principal-bound PostgreSQL transaction, compensate only owned staging objects, and report storage failures. Metadata and original-byte object references must remain readable across replicas/restart.
+- Real restricted-role PostgreSQL and object-store tests exercise each kind through actual authenticated HTTP, then retrieve/resolve exact immutable records, repeat publication, reject changed bytes and foreign tenants, prove budget and transaction rollback, and replay after restart. Catalog seeding and stub publishers remain fixture setup only.
+
+## Decision still required
+
+Accept the recommended v2 JSON/base64 skill transport, choose an explicit v1 profile clarification, or select multipart with its reviewed binding. Until then PUBLISH.8 remains open, production publisher implementation and deployment remain gated, and independent KEYS/WIRE/EVENT/CORE source delivery continues.
