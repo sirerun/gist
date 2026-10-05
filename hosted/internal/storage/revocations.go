@@ -29,11 +29,28 @@ type Revocation struct {
 // notice with its original time. A missing, foreign, or never-published
 // version returns ErrNotFound.
 func (s *Postgres) RevokeVersion(ctx context.Context, ref ports.ArtifactRef) (Revocation, error) {
+	return s.revokeVersion(ctx, Tenant{WorkspaceID: ref.WorkspaceID}, ref)
+}
+
+// RevokeVersionForPrincipal persists the authenticated policy generation in
+// the revocation event. Application adapters should prefer this method when
+// they have the authorized principal available.
+func (s *Postgres) RevokeVersionForPrincipal(ctx context.Context, principal ports.Principal, ref ports.ArtifactRef) (Revocation, error) {
+	if principal.WorkspaceID == "" || principal.WorkspaceID != ref.WorkspaceID {
+		return Revocation{}, errors.New("storage: revocation principal workspace mismatch")
+	}
+	return s.revokeVersion(ctx, tenantFromPrincipal(principal), ref)
+}
+
+func (s *Postgres) revokeVersion(ctx context.Context, tenant Tenant, ref ports.ArtifactRef) (Revocation, error) {
+	if s == nil || s.pool == nil {
+		return Revocation{}, errors.New("storage: unavailable postgres revocation store")
+	}
 	if err := validateRef(ref); err != nil {
 		return Revocation{}, err
 	}
 	out := Revocation{Ref: ref}
-	err := WithTenant(ctx, s.pool, ref.WorkspaceID, func(ctx context.Context, tx pgx.Tx) error {
+	err := WithTenantPrincipal(ctx, s.pool, tenant, func(ctx context.Context, tx pgx.Tx) error {
 		var state string
 		var revokedAt *time.Time
 		if err := tx.QueryRow(ctx, `SELECT state, revoked_at FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4 FOR UPDATE`, ref.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&state, &revokedAt); err != nil {
@@ -46,10 +63,18 @@ func (s *Postgres) RevokeVersion(ctx context.Context, ref ports.ArtifactRef) (Re
 				return nil
 			}
 			// A revoked row without a time predates this path; stamp it once.
-			return tx.QueryRow(ctx, `UPDATE catalog_versions SET revoked_at=now() WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4 RETURNING revoked_at`, ref.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&out.RevokedAt)
+			return tx.QueryRow(ctx, `UPDATE catalog_versions SET revoked_at=clock_timestamp() WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4 RETURNING revoked_at`, ref.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&out.RevokedAt)
 		case "published", "deprecated":
 			out.Created = true
-			return tx.QueryRow(ctx, `UPDATE catalog_versions SET state='revoked', revoked_at=now() WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4 RETURNING revoked_at`, ref.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&out.RevokedAt)
+			if err := tx.QueryRow(ctx, `UPDATE catalog_versions SET state='revoked', revoked_at=clock_timestamp() WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4 RETURNING revoked_at`, ref.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&out.RevokedAt); err != nil {
+				return err
+			}
+			return insertEvent(ctx, tx, ports.Event{
+				WorkspaceID:      ref.WorkspaceID,
+				Type:             ports.EventVersionRevoked,
+				Subject:          ref,
+				PolicyGeneration: tenant.PolicyGeneration,
+			})
 		default:
 			return pgx.ErrNoRows
 		}
