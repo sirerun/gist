@@ -68,7 +68,7 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ### E-GR-KEYS -- Persistent signing keys -> E-GR-KEYS-persistent-signing-keys.md (13/13)
 
-### E-GR-INTERFACE -- Shared component interfaces -> E-GR-INTERFACE-shared-component-interfaces.md (6/19)
+### E-GR-INTERFACE -- Shared component interfaces -> E-GR-INTERFACE-shared-component-interfaces.md (7/22)
 
 ### E-GR-WIRE -- Canonical registry wire -> E-GR-WIRE-canonical-registry-wire.md (0/11)
 
