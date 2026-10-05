@@ -279,11 +279,11 @@ func TestWorkload(t *testing.T) {
 		t.Fatal(err)
 	}
 	var resolved struct {
-		ID       string            `json:"resolution_id"`
-		Status   string            `json:"status"`
-		Findings []json.RawMessage `json:"findings"`
+		ID        string            `json:"resolution_id"`
+		Aggregate string            `json:"aggregate"`
+		Findings  []json.RawMessage `json:"findings"`
 	}
-	if reply.Result.IsError || json.Unmarshal([]byte(reply.Result.Text()), &resolved) != nil || resolved.ID == "" || resolved.Status != "ready" || len(resolved.Findings) != 0 {
+	if reply.Result.IsError || json.Unmarshal([]byte(reply.Result.Text()), &resolved) != nil || resolved.ID == "" || resolved.Aggregate != "ready" || len(resolved.Findings) != 0 {
 		t.Fatalf("resolution was not reported as ready: %+v", reply.Result)
 	}
 
