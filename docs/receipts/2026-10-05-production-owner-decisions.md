@@ -1,7 +1,7 @@
 # Production owner decision handoff
 
-Date: 2026-10-05  
-Status: recommendations for named owners; none of the decisions below is recorded as approved.  
+Date: 2026-10-05
+Status: recommendations for named owners; none of the decisions below is recorded as approved.
 Source context: PR #55 candidate `a2379fda6bcccc29ee2700c75e95596cfcb2310a`, base `d75ac183fe8b949a4f1381e8ebca3226f0c0e282`.
 
 This packet turns existing design and preflight evidence into concrete decisions. It does not authorize publication, account changes, provider calls, credential reads, DNS changes, deployment, or live acceptance. The current grant/user authorization supports only its already stated scope; it does not provide actual identity values, account bindings, provider targets, numerical ceilings, expiries, or consumer runtime evidence. An offline owner or silence cannot supply those facts or approve a proposal.
