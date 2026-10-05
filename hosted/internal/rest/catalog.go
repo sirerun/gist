@@ -167,7 +167,9 @@ func (h *Handler) download(w http.ResponseWriter, r *http.Request, p ports.Princ
 	if err != nil {
 		return appError("not_found", "Not found", 404, false)
 	}
-	defer a.Close()
+	// The body is a read-only stream; a close failure cannot change an already
+	// delivered response. Release it explicitly without masking a read error.
+	defer func() { _ = a.Close() }()
 	b, err := io.ReadAll(io.LimitReader(a, h.limits.MaxBodyBytes+1))
 	if err != nil {
 		return appError("integrity_error", "Artifact integrity check failed", 422, false)
