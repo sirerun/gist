@@ -40,3 +40,15 @@ Commands ran from `hosted/`, with Go caches/temp on the external SSD, `GOMAXPROC
 - `git diff --check d75ac183fe8b949a4f1381e8ebca3226f0c0e282..bd5d4d9c88cea35425a1d306cde5f424f6a42e90` — PASS.
 
 No hosted CI, provider, production credential custody, deployment, external enrollment, or production acceptance status is claimed.
+
+## Final R9-integrated candidate follow-up
+
+The later exact PR #55 candidate is `a2379fda6bcccc29ee2700c75e95596cfcb2310a` (base remains `d75ac183fe8b949a4f1381e8ebca3226f0c0e282`). Its delta from bd5 is limited to acceptance fixtures and plan text. The production app and CLI package files are byte-identical to bd5, so the affected app/CLI tagged PostgreSQL, race, vet, and lint evidence above carries across this fixture-only update.
+
+- Full hosted `go test -count=1 -p=2 ./...` with the explicit local PostgreSQL fixture configuration — PASS across all packages, including retrieval acceptance (1.357s) and the R9 startup fixture.
+- Full hosted `go vet -p=2 ./...` — PASS at exact a237.
+- The full hosted unit run supersedes the earlier bd5 checkpoint where retrieval acceptance had stopped during setup.
+- CORE-R1/R3 historical RED replay used an isolated compatibility-only branch `8546928bb5a0766d7552f062c1162ac26cd1fb98` based on production source `70636b567b131d1e6866200cd5d717b1eac9a201`. It copied the preserved `core_maintenance_integration_test.go` and changed only the unrelated Go 1.27-incompatible comparison in `resolution_store_integration_test.go` to `reflect.DeepEqual`; no production files changed. Under the gated selected app integration command, R1 failed because the bounded-backlog function returned nil, and R3 failed because the valid target remained unprocessed with one event. The original preserved red worktree was not modified.
+- CORE-R4 historical RED replay at `f0eabf62259b1a1e2a0b74387d929e9e8c4a5713` ran the unmodified `TestCoreMaintenanceStartupUsesConfiguredDeadline` and failed in 3.13s with `startup ignored configured maintenance timeout`. Corrected-source counterpart passed in the exact bd5 selected app integration suite.
+
+The R1/R3/R4 red gaps noted in the bd5 snapshot are now filled. All verification remains local. No final independent CORE review or approval is claimed by this author receipt.
