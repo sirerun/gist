@@ -367,7 +367,10 @@ func (h *Handler) addSessionLocked(id, principal, workspace string) bool {
 // the LRU, stopping at the first live one. Callers hold h.mu.
 func (h *Handler) sweepExpiredLocked(now time.Time) {
 	for e := h.lru.Back(); e != nil; {
-		sess := e.Value.(*session)
+		sess, ok := e.Value.(*session)
+		if !ok || sess == nil {
+			return // Preserve indexes if the private LRU invariant is violated.
+		}
 		if now.Sub(sess.last) <= h.cfg.SessionTTL {
 			return
 		}
@@ -384,7 +387,10 @@ func (h *Handler) sweepExpiredLocked(now time.Time) {
 // Callers hold h.mu.
 func (h *Handler) evictIdleLocked(l *list.List) bool {
 	for e := l.Back(); e != nil; e = e.Prev() {
-		sess := e.Value.(*session)
+		sess, ok := e.Value.(*session)
+		if !ok || sess == nil {
+			return false // Never evict from a corrupted index.
+		}
 		if h.calls[sess.id] > 0 {
 			continue
 		}
