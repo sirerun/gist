@@ -24,7 +24,7 @@ func TestC1HTTPAndRemoteMCPBoundaries(t *testing.T) {
 		{"package", "GET", "/v1/skills/q3-fixture-skill/versions/1.0.0/package", "", 200, ""},
 		{"tool", "GET", "/v1/tools/tool/versions/1.0.0", "", 200, ""},
 		{"capability", "GET", "/v1/capabilities/cap/versions/1.0.0", "", 200, ""},
-		{"resolve", "POST", "/v1/resolve", `{"skill":{"kind":"skill","id":"q3-fixture-skill","version":"1.0.0"},"runtime_id":"go","local_execution":true,"max_bytes":4096}`, 200, ""},
+		{"resolve", "POST", "/v1/resolve", `{"skill_ref":"q3-fixture-skill@1.0.0","runtime":{"id":"go","owned_connections":false},"max_bytes":4096}`, 200, ""},
 		{"connection", "POST", "/v1/connections", `{"capability":{"kind":"capability","id":"cap","version":"1.0.0"}}`, 201, ""},
 		{"connection poll", "GET", "/v1/connections/broker-c1", "", 200, ""},
 		{"taxonomies", "GET", "/v1/taxonomies", "", 200, ""},

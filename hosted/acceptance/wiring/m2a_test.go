@@ -43,7 +43,7 @@ func TestM2aWiringAgainstConfiguredService(t *testing.T) {
 	if err := json.Unmarshal(body, &page); err != nil || len(page.Items) == 0 {
 		t.Fatalf("discover body=%s", body)
 	}
-	resp = f.do(t, "POST", "/v1/resolve", read, `{"skill":{"kind":"skill","id":"q3-fixture-skill","version":"1.0.0"},"runtime_id":"go","local_execution":true,"max_bytes":4096}`)
+	resp = f.do(t, "POST", "/v1/resolve", read, `{"skill_ref":"q3-fixture-skill@1.0.0","runtime":{"id":"go","owned_connections":false},"max_bytes":4096}`)
 	body, _ = io.ReadAll(resp.Body)
 	resp.Body.Close()
 	if resp.StatusCode != 200 {

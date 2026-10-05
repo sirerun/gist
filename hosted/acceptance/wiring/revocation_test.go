@@ -99,7 +99,7 @@ func TestPublishRevocationRevokesExistingVersion(t *testing.T) {
 	if list.StatusCode != 200 || strings.Contains(string(listRaw), `"1.0.0"`) || !strings.Contains(string(listRaw), `"1.1.0"`) {
 		t.Fatalf("versions list status=%d body=%s", list.StatusCode, listRaw)
 	}
-	resolve := f.do(t, "POST", "/v1/resolve", token, `{"skill":{"Kind":"skill","ID":"rev-skill","Version":"1.0.0"},"runtime_id":"go","local_execution":true,"max_bytes":4096}`)
+	resolve := f.do(t, "POST", "/v1/resolve", token, `{"skill_ref":"rev-skill@1.0.0","runtime":{"id":"go","owned_connections":false},"max_bytes":4096}`)
 	resolveRaw, _ := io.ReadAll(resolve.Body)
 	_ = resolve.Body.Close()
 	if resolve.StatusCode != 409 || !strings.Contains(string(resolveRaw), `"artifact_revoked"`) {
