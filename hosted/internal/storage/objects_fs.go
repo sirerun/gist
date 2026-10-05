@@ -14,6 +14,8 @@ import (
 type fsBackend struct {
 	root string
 	mu   sync.Mutex
+	// Optional per-instance fault seam; production uses os.Remove.
+	removeTemp func(string) error
 }
 
 func newFSBackend(root string) (*fsBackend, error) {
@@ -40,8 +42,12 @@ func (f *fsBackend) put(_ context.Context, name string, b []byte) error {
 		return fmt.Errorf("create object temp: %w", err)
 	}
 	tmpName := tmp.Name()
+	removeTemp := f.removeTemp
+	if removeTemp == nil {
+		removeTemp = os.Remove
+	}
 	defer func() {
-		if cleanupErr := os.Remove(tmpName); cleanupErr != nil && !errors.Is(cleanupErr, os.ErrNotExist) {
+		if cleanupErr := removeTemp(tmpName); cleanupErr != nil && !errors.Is(cleanupErr, os.ErrNotExist) {
 			err = errors.Join(err, fmt.Errorf("remove temporary object: %w", cleanupErr))
 		}
 	}()
