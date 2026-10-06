@@ -17,7 +17,7 @@ ROOT executed the four remaining checks in the clean, exact landed worktree's ho
 
 App and CLI real-store integration packages passed in2.325s and0.596s; full hosted unit packages passed; vet emitted no findings; integration acceptance lint reported0 issues. Lint used the previously qualified faithful v1-to-v2 migration, SHA256 `5962b020c904c61cb50ab80d27f117c79159de5139276b04462d08bec7b8e898`, rather than omitting repository lint settings. The four phase logs each record `RELEASED: R-build-lease`; no lease remains held by this runner.
 
-WIRE separately ran fresh actual-b91 PostgreSQL integration checks for acceptance/wiring (2.43s, load2.43), acceptance/retrieval (local real-store smoke, load2.13), and acceptance/clients (30.762s, load6.40). These exercise real local HTTP/MCP application startup and resolution; the programmatic Go MCP client's synthetic native-client labels do **not** qualify Codex, Claude, client build pins, live providers, or consumer runtime acceptance. Generated fixture receipts are not admitted as native evidence.
+WIRE separately ran fresh actual-b91 PostgreSQL integration checks for acceptance/wiring (load2.43), acceptance/retrieval (local real-store smoke, load2.13), and acceptance/clients (30.762s, load6.40). These exercise real local HTTP/MCP application startup and resolution; the programmatic Go MCP client's synthetic native-client labels do **not** qualify Codex, Claude, client build pins, live providers, or consumer runtime acceptance. Generated fixture receipts are not admitted as native evidence.
 
 ## Carried exact-source evidence and boundaries
 
