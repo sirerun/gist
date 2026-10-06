@@ -5,7 +5,7 @@ Date: 2026-10-06. Outcome: **BLOCKED for production writes; read-only bindings r
 ## Source and policy
 
 - Gist `main` was freshly read as `b91ec511153c5e2ed57569be532e0401ab8121a8`. The receipt is based on that exact source commit.
-- The mapped Foundation checkout is dirty and is not current source evidence. Its remote `main` currently resolves to `cd86b6f1a5b2364d22e1b0fdeba8133b20f09daf`; no Foundation file was changed.
+- The separately mapped private IaC checkout is dirty/stale and cannot qualify current source. Its private identity and revision are intentionally omitted; no IaC file was changed.
 - GitHub ruleset 13902341 is active for the protected branch. It prohibits deletion and non-fast-forward updates, allows rebase merges only, requires no approving review, and lists no required status checks.
 - The latest observed Actions run on the Gist source commit ended with failed and skipped job statuses. Its failure annotations say the failed jobs were not started because the account is locked by a billing issue. This is unavailable hosted validation, not a code or test failure. No workflow was retried and no paid runner was used.
 

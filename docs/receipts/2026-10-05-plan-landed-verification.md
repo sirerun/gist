@@ -5,7 +5,7 @@ Verified `origin/main` at `d75ac183fe8b949a4f1381e8ebca3226f0c0e282` against rev
 The installed absolute-path plan parser was invoked read-only:
 
 ```python
-runpy.run_path('/Users/dndungu/.codex/skills/plan/scripts/parse_plan.py')['parse'](
+runpy.run_path('<installed-plan-parser>')['parse'](
     source_path=Path('docs/plan.md').resolve(), write_output=False
 )
 ```

@@ -62,7 +62,7 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ## Checkable Work Breakdown
 
-### E-GR-SCOPE -- Requirements and preflight -> E-GR-SCOPE-requirements-and-preflight.md (7/11)
+### E-GR-SCOPE -- Requirements and preflight -> E-GR-SCOPE-requirements-and-preflight.md (11/17)
 
 ### E-GR-AUTH -- Enrollment and grants -> E-GR-AUTH-enrollment-and-grants.md (0/7)
 
