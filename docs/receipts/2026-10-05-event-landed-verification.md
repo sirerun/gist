@@ -1,7 +1,7 @@
 # EVENT landed storage verification
 
-**PR:** [#51](https://github.com/sirerun/gist/pull/51)  
-**Landed SHA:** `57927cda892ffdd6d7bd048041c77a3bc7a8e8ab`  
+**PR:** [#51](https://github.com/sirerun/gist/pull/51)
+**Landed SHA:** `57927cda892ffdd6d7bd048041c77a3bc7a8e8ab`
 **Prior verification candidate:** `8a990009c8907c0d4a5f5028b77d91c9610cde82`
 
 At the exact landed SHA, all seven EVENT-owned storage and migration files compare byte-for-byte with the tested candidate. The storage package test sources contain no `t.Skip` calls.
