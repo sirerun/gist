@@ -517,4 +517,8 @@ The March plan above is preserved as historical completed work. The active bound
 
 The founder selected registry plus caller-owned integrations, with completion only when https://gist.sire.run is running qualified AWS production. The included plan below is the canonical new work graph and supersedes earlier recovery-only closure/model assumptions; all March authored text and checked tasks above remain historical. Read [the production owner plan](plans/registry-recovery.md) for GPT-6-Luna pool limits, ownership, qualified operation routing and the final production predicate. No local merge/initial rollout/planning checkpoint completes this delivery. All stages and external authority are enforced from its task dependencies and evidence; /plan itself executes nothing.
 
-### E-GR-PRODUCTION -- Full SDLC to canonical AWS production -> plans/registry-recovery.md (5/128)
+### E-GR-PRODUCTION -- Full SDLC to canonical AWS production -> plans/registry-recovery.md (135/245)
+
+2026-10-08 current scope/execution refresh: [ADR013](adr/013-optional-caller-integrations.md) records optional Gist/direct MCP/no Zatiti demo dependency. [Preflight](receipts/2026-10-08-alignment-and-dgx-preflight.md) verifies preservation/relocation and fresh Cloudflare read availability. Active coding/checks/workers use qualified DGX storage and existing shared dispatch. SCOPE.18–23 deliver the plan/design/decision update without advancing production gates.
+
+2026-10-08 owner explicitly approves ADR012 v2 publication implementation; T-GR-PUBLISH.8 is complete and T-GR-PUBLISH.0 becomes ready after planning delivery. Source contract/readback/tenant-safe orphan qualification and independent review remain required. Provider/release/deployment gates retain their own authority.
