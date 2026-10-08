@@ -36,3 +36,9 @@ Second exact-head review found two Markdown hard-break trailing spaces in the pr
 2026-10-06 checkpoint review: accepted PR56-F1 private IaC identity/revision and PR56-F2 local home-path disclosure findings. Corrected only the public receipt text and allocated numeric fix/verification/independent-review chains in SCOPE; final checkpoint merge waits for re-review. Existing private history is preserved, with no rewritten foreign branches or expanded runtime authority.
 
 2026-10-06: Independent corrected-head review at b89999b/baseb91 passed and closed both checkpoint privacy findings. Executed SCOPE14/17 reviews are recorded; metadata-only Treg/Composio preflight receipts preserve open version/schema/license/account/target gates. Final documentation head comparison and guarded merge remain required; no live/provider/deployment acceptance is inferred.
+
+## 2026-10-08 -- Optional integration scope and DGX execution
+
+Reconciled current main dacb0c9 with the final four-owner discussion: optional Gist, independent direct MCP, no Zatiti demo prerequisite, separate indexing adoption and existing app/Serenity/runtime authority. ADR013, design and recovery plan record the decision without assigning a proposed seam. E-GR-SCOPE.18–23 track this documentation candidate through independent review, merge and landed verification, converging on the existing production terminal.
+
+Preserved history plus36unfinished paths in an integrity-verified DGX task archive; original source/worktrees remain. Qualified tools/storage/load before isolated source editing; no credentials transferred or Mac builds/workers started. Current Cloudflare connection/read binding works (200/one active zone/zero canonical-name records); DNS write and AWS target qualification remain blocked. V2 publication source implementation is now owner-approved; provider/enrollment/consumer decisions remain pending.

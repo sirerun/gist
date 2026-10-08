@@ -1,7 +1,9 @@
 # ADR012 — Publication transport compatibility proposal
 
-Date: 2026-10-05. Status: **proposed; not approved or implemented**.
+Date: proposed2026-10-05; accepted2026-10-08. Status: **approved for v2 source implementation; not implemented or deployed**.
 Decision owners: founder and registry contract owner. Scope: registry publication only; no provider execution or managed gateway.
+
+Owner decision2026-10-08: **v2 publication implementation approved**. JSON envelope, base64 skill ZIP containing its manifest, typed raw JSON for other artifact kinds; frozen v1 unchanged with an explicit migration path. Earlier proposal/decision-pending language below describes the drafting record and is superseded for this selected source format. Source implementation still requires contract preflight, behavior verification and independent exact-head review. No release/provider/deployment authority is added.
 
 ## Problem and verified evidence
 
@@ -9,7 +11,7 @@ The frozen v1 publish schema requires `artifact`, positive `max_bytes` and nonem
 
 Evidence: `contracts/registry/v1/publish.schema.json`, `contracts/registry/v1/openapi.yaml`, `hosted/internal/rest/publish.go`, `hosted/internal/app/adapters.go`, `hosted/internal/packages/validate.go`, `hosted/internal/rest/router_test.go`, `hosted/acceptance/wiring/fixture_test.go`. RFC002 sections6–7 require complete immutable skill packages, explicit source/provenance/license, typed provider artifacts and trusted workspace-maintainer ingestion without executing imported scripts. ADR004 preserves operator-asserted private distribution and governed capability/binding admission.
 
-## Recommended decision, subject to owner acceptance
+## Accepted decision
 
 Publish a new, explicitly versioned publication transport rather than changing frozen v1 source bytes. Add `/v2/publish/{kind}` with a strict JSON envelope containing `artifact`, `max_bytes` and `idempotency_key`. Keep existing discovery, exact retrieval and resolution contracts unchanged where their actual typed records remain compatible. Do not describe historical raw-ZIP v1 publication as canonical JSON or qualify it as the supported production publisher. Its deprecation/disable behavior must be selected and covered by a compatibility fixture before rollout.
 
@@ -56,6 +58,6 @@ Before writing production handlers, settle and independently review the exact en
 - Compute the complete canonical response and effective client/server byte budget before mutating catalog or outbox. Join version and exactly one `version_published` outbox admission in one principal-bound PostgreSQL transaction, compensate only owned staging objects, and report storage failures. Metadata and original-byte object references must remain readable across replicas/restart.
 - Real restricted-role PostgreSQL and object-store tests exercise each kind through actual authenticated HTTP, then perform actual per-kind exact read-back and resolve applicable immutable records, repeat publication, reject changed bytes and foreign tenants, prove budget and transaction rollback, and replay after restart. Each typed document must satisfy its own source/admission rule and schema; a generic descriptor is insufficient. Include byte-exact publish/readback roundtrips with independent body/digest assertions. Catalog seeding and stub publishers remain fixture setup only.
 
-## Decision still required
+## Recorded owner decision and remaining gates
 
-Accept the recommended v2 JSON/base64 skill transport, choose an explicit v1 profile clarification, or select multipart with its reviewed binding. Until then PUBLISH.8 remains open, production publisher implementation and deployment remain gated, and independent KEYS/WIRE/EVENT/CORE source delivery continues.
+On2026-10-08 the owner approved the recommended v2 JSON/base64 skill transport and typed raw JSON for other artifacts, with frozen v1 unchanged and an explicit migration path. PUBLISH.8 is complete. PUBLISH.0 must freeze exact source contracts, method/media binding and safe staging/reconciliation before implementation. Any production migration/deprecation timing and client readiness require release evidence; this source-format approval grants no provider execution, release or deployment.

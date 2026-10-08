@@ -95,3 +95,7 @@ Hosted architecture remains governed by RFC-002 and ADR004-008; managed gateway 
 ## Canonical AWS production boundary — 2026-10-04
 
 [ADR011](adr/011-gist-production-canonical-origin.md) records the founder-selected canonical origin https://gist.sire.run on the accepted AWS architecture and confirmed registry/caller-owned scope. It supersedes ADR008's earlier origin only. Exact origin/audience/issuer/redirect migration follows ADR007; DNS/ACM/ALB, task config and callback consent require reviewed migration, not a wildcard alias. Registry artifact identity is unchanged. [The production plan](plans/registry-recovery.md) tracks code, private infrastructure owner receipts, qualified release/cutover, full registry/client/provider acceptance and operations through one terminal production predicate. Managed gateway remains separate.
+
+## Optional caller integrations
+
+[ADR013](adr/013-optional-caller-integrations.md) records the accepted optional registry boundary: Zatiti and its demo can use independently configured direct MCP connections without Gist. Application/AMOS definitions stay app-owned; Serenity retains governed knowledge. Registry artifact discovery/resolution and separate context-index library adoption supply no runtime authority. The caller owns qualified connections, current authorization, effects/spend and ambiguous outcomes. A revoked or unavailable registry grant never implies automatic direct-connection rerouting. Registry production and actual consumer qualification remain separately gated in the full-SDLC plan.

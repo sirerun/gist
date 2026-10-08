@@ -1,7 +1,17 @@
 # Gist full SDLC to AWS production at gist.sire.run
 
-Date: 2026-10-04. Status: **execution started: source-only preflights; engineering and production gates remain open**.
-Planning contract: ordinary unenrolled repository delivery. Source baseline inspected: Gist main `84e14128565058419a9b90619f27fa517ba4f494`; revalidate before dispatch. This is the active bounded recovery supplement to [registry-buildout.md](registry-buildout.md), not a replacement of its completed tasks. [gateway-buildout.md](gateway-buildout.md) remains a separate scope. This is the canonical production-owner plan, also included by docs/plan.md for default parser/dispatcher visibility; March task text and completed status remain historical. Destination/scope follow accepted ADR011. No executing lifecycle is admitted by this planning refinement.
+Date: 2026-10-08. Status: **CORE source landed; owner-approved v2 publication preflight ready; production gates remain open**.
+Planning contract: ordinary unenrolled repository delivery. Current source baseline inspected: Gist main `dacb0c92d2a535e45066927e59eb67d155a86065`; revalidate before dispatch. Earlier dated discovery below used84e1412 and remains historical. This is the active bounded recovery supplement to [registry-buildout.md](registry-buildout.md), not a replacement of its completed tasks. [gateway-buildout.md](gateway-buildout.md) remains a separate scope. This is the canonical production-owner plan, also included by docs/plan.md for default parser/dispatcher visibility; March task text and completed status remain historical. Destination/scope follow accepted ADR011. No executing lifecycle is admitted by this planning refinement.
+
+## Current alignment and execution baseline -- 2026-10-08
+
+The founder's final VISION-ALIGN-17 decision and four-owner VISION-ALIGN-20 closure make Gist an optional capability registry. Zatiti supports independently configured direct MCP connections; neither its general use, demo nor first app/host packet requires Gist. Context-index library adoption is separate, Serenity owns governed knowledge, and no managed gateway is selected. Discovery/resolution never grants execution authority. Direct connections have their own qualified binding and governance; they are not an automatic bypass for an unavailable, expired or revoked Gist grant. See [ADR013](../adr/013-optional-caller-integrations.md).
+
+Gist's own accepted full-SDLC goal remains the registry with caller-owned integrations running at https://gist.sire.run on AWS. The existing requirements/design, implementation, testing, independent review, merge, landed verification, release, deployment, live acceptance and operations rows remain first-class gates. An optional future Zatiti-specific seam packet needs a separately accepted owner/contract/plan; its proposal supplies no worker assignment and does not gate the Zatiti demo. Existing generic consumer acceptance is still required for Gist production and must identify an actual qualified consumer rather than substitute a synthetic fixture.
+
+Current source baseline is dacb0c92d2a535e45066927e59eb67d155a86065: PR55 CORE43/43 and PR56 checkpoint are landed. Prior dated execution entries below are historical receipts, not current host admission. The owned DGX transfer preserves bundled history (including worktree heads),36unfinished paths and original local copies; archive and per-file hashes verified, no active Git operation, no credentials transferred. See [current preflight](../receipts/2026-10-08-alignment-and-dgx-preflight.md).
+
+Fresh configured Cloudflare MCP GETs on2026-10-08 returned200 for one active canonical zone and zero exact service-name DNS records. This supersedes earlier missing-binding observations only for connection/read availability. Write permissions, reviewed target records and rollout readiness remain unqualified; AWS identity/stack-account matching was not refreshed. Publication v2 implementation was approved on2026-10-08; its preflight/contract freeze is now ready. Identity/workspace custody, bounded provider approval, actual consumer acceptance and AWS target access remain open gates. No release, deployment, provider call or production acceptance occurred.
 
 ## Context and outcome
 
@@ -47,12 +57,11 @@ Each named task below is a planning task record, not a minted external-service t
 ## GPT-6-Luna concurrency contract
 
 - All delegated implementation, verification, review and landed-check workers use **GPT-6-Luna**, explicit model binding `gpt-6-luna`. One coordinator retains requirements, contracts, ownership, plan writes, integration arbitration, decision routing and final verification. No automatic paid model/provider fallback.
-- Fill every available worker slot with an eligible disjoint task and refill immediately on handoff; barriers are actual dependencies, not completion of a whole artificial wave. Current harness capacity is four active agents including coordinator: **three concurrent Luna workers**. Preflight records the actual capacity; maximum workers = available total agent capacity minus one coordinator, limited by eligible owned work and qualified host/build resources. Scale above three only when the executing harness exposes and records additional authorized capacity; no bypass of runtime limits.
-- Initial read-only capacity, CI-policy and provider-source preflights are independent, letting three workers run while the coordinator reconciles source. Six independent component lanes then give a backlog wider than today's pool. AUTH can remain blocked on operator choice while KEYS/WIRE/EVENT and offline capture preflights progress. Candidate verification and independent review can overlap another lane's implementation. Reviewers must be different from candidate authors/coauthors; no fixed idle reviewer slot is required.
-- Each writer owns a unique external-SSD worktree and exact file set. Verify the configured volume mounted, writable and with measured adequate space; keep task-specific GOCACHE/GOMODCACHE/GOTMPDIR/TMPDIR and test artifacts there. Never repurpose HOME or silently use internal disk. No worktree/build was created by this planning run.
-- Integrator alone owns app.go/config.go, shared ports/bootstrap/catalog indexes and joined acceptance files. Allocate disjoint storage files and migration IDs before dispatch; contract changes are returned as handoffs. Workers never overwrite another lane or mutate another repository. task/resource claims retain WON SHA for CAS release; coordinator alone writes this plan.
-- Maximum **two heavy build lanes per project**, one full race suite, and the shared machine build lease/load rules still apply. On the shared Mac, hold if one-minute load >10 and claim the configured R-build-lease before multi-package build/test/lint; only WON authorizes running, recheck ownership and release own SHA immediately afterward. Where that exclusive lease serializes heavy commands, worker count does not override it. Other workers perform source/design/capture/review while waiting; qualified isolated remote builders require separate admitted capacity.
-- Use runtime-detected native agent tools; never create guessed CLI APIs. Stage/domain guidance loads only at the runnable stage. No new agent was spawned for planning. Unavailable model, worker tooling, build capacity or SSD blocks the affected stage and is reported candidly.
+- Use the maximum eligible GPT-6-Luna capacity from real dependency readiness, isolated ownership, independent reviewers and qualified resources. Do not reserve a synthetic worker count or infer concurrency from unused harness slots. The shared subscription bucket currently has an aggregate ceiling of four sessions and minimum launch spacing of sixty seconds; these are conservative dispatch settings, not published provider quotas. Read the live shared queue/cooldown before dispatch.
+- Active non-Apple implementation, verification and workers run on qualified DGX storage. The Mac is limited to lightweight coordination and transfer. New task/worktree/cache/artifact directories are isolated under the owned task alias; preserve original checkouts and all unfinished source/history/receipts. Transfer hashes must match before resuming; credential stores, environment secrets and signing keys stay in their existing custody. Existing Apple-native exceptions belong to their owners.
+- Use the existing cross-project atomic dispatch lease and shared queue/cooldown. Admit one session per fair turn, record acknowledgement/failure, release the exact owned token, and honor Foundry/Zatiti dependency-unblocking priority without starvation. A 429 pauses the shared bucket: honor Retry-After, otherwise start at sixty seconds and double up to fifteen minutes with jitter, halve concurrency and double spacing. After cooldown admit one probe; increase by at most one after five healthy minutes with twenty percent headroom. More hosts or paid fallback do not remove model quotas.
+- Qualify DGX load, storage, tools, cache bounds and actual worker processes before starting. Keep at most two heavy build lanes per project and one full race suite; Mac build leases do not establish DGX capacity. Existing shared resources and foreign claims remain untouched. Documentation-only checks do not trigger application builds.
+- Workers receive exact owned files, task IDs, base/head and accepted product/contract readbacks. Independent review uses a different author identity and the exact candidate. Refill only dependency-ready work; unavailable approval, model capacity, access or tooling blocks the affected stage. Coordinate through the existing project ajent.social, with no second bus, wake loop or global notifier.
 
 ## Schedule and dependency policy
 
@@ -62,7 +71,7 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ## Checkable Work Breakdown
 
-### E-GR-SCOPE -- Requirements and preflight -> E-GR-SCOPE-requirements-and-preflight.md (13/17)
+### E-GR-SCOPE -- Requirements and preflight -> E-GR-SCOPE-requirements-and-preflight.md (16/23)
 
 ### E-GR-AUTH -- Enrollment and grants -> E-GR-AUTH-enrollment-and-grants.md (0/7)
 
@@ -78,7 +87,7 @@ Every candidate chain is preflight -> implement -> behavior/quality verify -> in
 
 ### E-GR-COMPOSIO -- Composio action artifacts -> E-GR-COMPOSIO-composio-action-artifacts.md (0/7)
 
-### E-GR-PUBLISH -- Canonical publication -> E-GR-PUBLISH-canonical-publication.md (1/9)
+### E-GR-PUBLISH -- Canonical publication -> E-GR-PUBLISH-canonical-publication.md (2/9)
 
 ### E-GR-CORE -- Startup and event composition -> E-GR-CORE-startup-and-event-composition.md (43/43)
 
@@ -175,3 +184,5 @@ CORE-R11 dispatcher disposition: cross-epic bare task IDs were structurally pres
 
 
 2026-10-06 CORE landed closure: [actual b91 verification](../receipts/2026-10-06-core-landed-verification.md) completes43/43 core source rows. Publication proposal drafting is complete1/9, but owner choice remains open. [Fresh production bindings](../receipts/2026-10-06-production-bindings-refresh.md) still show AWS target-account mismatch and unavailable Cloudflare DNS capability. Operator/custody, live provider targets/caps, consumer runtime evidence and final production acceptance remain blocked. No deployment occurred.
+
+2026-10-08 alignment delivery: E-GR-SCOPE.T-GR-SCOPE.18–23 cover the current scope/execution refresh through exact-head independent review, guarded rebase merge and landed verification. Earlier completed task IDs/evidence remain unchanged.
