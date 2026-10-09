@@ -54,7 +54,7 @@ type App struct {
 // names (a directory, or s3://bucket/prefix). It pings
 // PostgreSQL before returning, so a missing integration fixture is an actual
 // failure rather than a test skip.
-func New(ctx context.Context, cfg Config) (*App, error) {
+func New(ctx context.Context, cfg Config) (constructed *App, retErr error) {
 	if cfg.ResourceAudience == "" {
 		cfg.ResourceAudience = cfg.PublicOrigin
 	}
@@ -74,6 +74,11 @@ func New(ctx context.Context, cfg Config) (*App, error) {
 		pool.Close()
 		return nil, err
 	}
+	defer func() {
+		if constructed == nil {
+			retErr = errors.Join(retErr, objects.Close())
+		}
+	}()
 	return newWithStores(ctx, cfg, pool, objects)
 }
 
@@ -310,6 +315,7 @@ func (a *App) Shutdown(ctx context.Context) error {
 			if a.publicationJanitorDone != nil {
 				<-a.publicationJanitorDone
 			}
+			err = errors.Join(err, a.objects.Close())
 			a.pool.Close()
 			a.shutdownErr = err
 			close(a.shutdownDone)
