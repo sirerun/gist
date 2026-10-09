@@ -145,9 +145,9 @@ func matrixFixtures(t *testing.T) (map[string]matrixPublication, *matrixIdentity
 	at := time.Now().UTC().Add(-10 * time.Minute).Truncate(time.Second).Format(time.RFC3339)
 	reviewerAt := time.Now().UTC().Add(-5 * time.Minute).Truncate(time.Second).Format(time.RFC3339)
 	grant := []byte("Synthetic local redistribution permission; no external provider or public license claim.")
-	source := []byte("Synthetic captured action schema version1; fixture identity conversion.")
 	sourceURI := "https://fixture.invalid/source/action-v1"
 	scalarSchema := map[string]any{"type": "object", "additionalProperties": false, "required": []string{"n"}, "properties": map[string]any{"n": map[string]any{"type": "integer", "minimum": 0}}}
+	source := matrixJSON(t, map[string]any{"provider_action": map[string]string{"id": "action/demo", "version": "1"}, "input_schema": scalarSchema, "output_schema": scalarSchema, "fixture_only": true})
 	cases := make([]map[string]any, 5)
 	outputs := make([]json.RawMessage, 5)
 	for i := range cases {
