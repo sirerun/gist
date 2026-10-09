@@ -54,3 +54,20 @@ Consolidated the 266-task split plan at main ad6b3fa into authoritative docs/pla
 PR58 landed a91ea32 with exact reviewed-tree parity and actual full Wazi conformance. PUBLISH.0 now records six exact v2 envelope/readback contracts, complete synthetic skill bytes and strict schema/OpenAPI gates, current-principal/evidence and named-digest consumer seams, tenant-owned durable staging/reconciliation and qualified isolated PostgreSQL/RLS/filesystem availability. Three bounded isolated Luna author/audit lanes contributed; coordinator integration corrected invalid Operation Object references and removed a response replay flag to preserve admitted receipt bytes. Production handlers wait for first-class PUBLISH.9/10/11 review/merge/landed gates. Actual provider capture/license, live HTTP publication, consumer, release and AWS production remain open.
 
 PR59 R1 at86503fb requested changes for PUBLISH59-R1: copied PR57 receipt had two trailing-space lines in the committed diff. Fix preserves wording and original report; PUBLISH.12/13/14 track repair, complete-range verification and independent exact corrected-head approval. Negative R1 is retained and does not satisfy the review gate.
+
+## 2026-10-09 — Publication v2 implementation and actual source verification
+
+Integrated bounded isolated Luna interfaces, decoder, storage, app and acceptance
+lanes under coordinator ownership. Real six-kind HTTP publication/retrieval/replay,
+restricted PostgreSQL/outbox/RLS, owned object reconciliation, negative authority,
+dependency, grammar and budget behavior now pass. Original baseline RED and
+worker/coordinator failures remain in the source verification receipt. Source
+fixes include denying unretained file-schema resolution, revoked catalog object
+reads, lower configured input/archive bounds, correct bounded receipt error
+mapping and binding validation-denial mapping. Explicit versioned additive source
+amendment preserves both frozen wire inventories and reconstructs original ports.
+
+PUBLISH.1/2/3 source gates are qualified; independent exact-head review, guarded
+merge and actual landed verification remain separate. Full hosted lint retains
+five reproduced baseline findings; the v2 delta is clean. AWS STS has no default
+credentials. No actual provider, live S3, consumer or production gate is closed.
