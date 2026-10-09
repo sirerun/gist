@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -74,6 +75,18 @@ func (s *PublicationStore) Publish(ctx context.Context, p ports.Principal, prepa
 	} else if !bytes.Equal(prepared.Artifact, prepared.Metadata) {
 		return ports.PublicationResult{}, errors.New("storage: typed artifact and metadata bytes differ")
 	}
+	if prepared.Ref.Kind == ports.KindTaxonomy {
+		e := prepared.AdmissionEvidence
+		fields := map[string]bool{}
+		if e != nil && e.TaxonomyGrant != nil {
+			for _, field := range e.TaxonomyGrant.AllowedFields {
+				fields[field] = true
+			}
+		}
+		if e == nil || e.WorkspaceID != p.WorkspaceID || e.Artifact.Kind != prepared.Ref.Kind || e.Artifact.ID != prepared.Ref.ID || e.Artifact.Version != prepared.Ref.Version || e.Artifact.ArtifactDigest != "sha256:"+artifactHex || e.TaxonomyGrant == nil || e.TaxonomyGrant.TaxonomyID != prepared.Ref.ID || e.TaxonomyGrant.Edition != prepared.Ref.Version || !fields["id"] || !fields["edition"] || !fields["attribution"] || !fields["nodes"] || strings.TrimSpace(e.Rights.License) == "" || !e.Rights.Redistribution {
+			return ports.PublicationResult{}, errors.New("storage: taxonomy lacks bound redistribution evidence and license")
+		}
+	}
 	ref := prepared.Ref
 	ref.WorkspaceID = p.WorkspaceID
 	var attemptID, objectKey string
@@ -92,6 +105,12 @@ func (s *PublicationStore) Publish(ctx context.Context, p ports.Principal, prepa
 		var oldID, oldVersion, oldDigest string
 		err := tx.QueryRow(ctx, `SELECT artifact_id,version,artifact_digest,attempt_id,response_body FROM publication_idempotency WHERE workspace_id=$1 AND kind=$2 AND idempotency_key=$3`, p.WorkspaceID, ref.Kind, prepared.IdempotencyKey).Scan(&oldID, &oldVersion, &oldDigest, &attemptID, &receipt)
 		if err == nil {
+			// The permanent canonical response, rather than a newly prepared
+			// response, is the replay budget domain. Check it before lease renewal
+			// or any fenced identity transition can mutate storage state.
+			if int64(len(receipt)) > prepared.MaxBytes {
+				return ErrPublicationBudget
+			}
 			if oldID != ref.ID || oldVersion != ref.Version || oldDigest != artifactHex {
 				return ErrConflict
 			}
@@ -176,6 +195,9 @@ func (s *PublicationStore) Publish(ctx context.Context, p ports.Principal, prepa
 			if err := tx.QueryRow(ctx, `SELECT publication_receipt FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4`, p.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&receipt); err != nil {
 				return err
 			}
+			if int64(len(receipt)) > prepared.MaxBytes {
+				return ErrPublicationBudget
+			}
 		} else {
 			var random [16]byte
 			if _, err := rand.Read(random[:]); err != nil {
@@ -202,7 +224,29 @@ func (s *PublicationStore) Publish(ctx context.Context, p ports.Principal, prepa
 			if err := fence(ctx, tx); err != nil {
 				return err
 			}
-			return tx.QueryRow(ctx, `SELECT response_body FROM publication_idempotency WHERE workspace_id=$1 AND kind=$2 AND idempotency_key=$3`, p.WorkspaceID, ref.Kind, prepared.IdempotencyKey).Scan(&stored)
+			var ledgerID, ledgerVersion, ledgerDigest, ledgerAttempt string
+			if err := tx.QueryRow(ctx, `SELECT artifact_id,version,artifact_digest,attempt_id,response_body FROM publication_idempotency WHERE workspace_id=$1 AND kind=$2 AND idempotency_key=$3`, p.WorkspaceID, ref.Kind, prepared.IdempotencyKey).Scan(&ledgerID, &ledgerVersion, &ledgerDigest, &ledgerAttempt, &stored); err != nil {
+				return err
+			}
+			if ledgerID != ref.ID || ledgerVersion != ref.Version || ledgerDigest != artifactHex || ledgerAttempt != attemptID {
+				return ErrConflict
+			}
+			var state, ownedKey string
+			if err := tx.QueryRow(ctx, `SELECT state,object_key FROM publication_attempts WHERE workspace_id=$1 AND attempt_id=$2`, p.WorkspaceID, ledgerAttempt).Scan(&state, &ownedKey); err != nil {
+				return err
+			}
+			var liveDigest, liveState, liveKey string
+			var liveReceipt []byte
+			if state != "committed" {
+				return ErrConflict
+			}
+			if err := tx.QueryRow(ctx, `SELECT digest_value,state,COALESCE(object_key,''),publication_receipt FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4`, p.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&liveDigest, &liveState, &liveKey, &liveReceipt); err != nil {
+				return err
+			}
+			if liveDigest != artifactHex || liveKey != ownedKey || liveKey != objectKey || (liveState != "published" && liveState != "deprecated") || !bytes.Equal(liveReceipt, stored) {
+				return ErrConflict
+			}
+			return nil
 		}); err != nil {
 			return ports.PublicationResult{}, err
 		}
@@ -216,6 +260,9 @@ func (s *PublicationStore) Publish(ctx context.Context, p ports.Principal, prepa
 		return publicationResult(prepared, stored, false), nil
 	}
 	if alias {
+		if int64(len(receipt)) > prepared.MaxBytes {
+			return ports.PublicationResult{}, ErrPublicationBudget
+		}
 		return publicationResult(prepared, receipt, false), nil
 	}
 	if err := s.objects.StageOwned(ctx, objectKey, prepared.Artifact, prepared.ArtifactDigest); err != nil {
@@ -278,6 +325,11 @@ func (s *PublicationStore) Publish(ctx context.Context, p ports.Principal, prepa
 		if err != nil {
 			return err
 		}
+		if ref.Kind == ports.KindTaxonomy {
+			if err := insertTaxonomyProjection(ctx, tx, p.WorkspaceID, ref, prepared.Metadata, prepared.AdmissionEvidence.Rights.License); err != nil {
+				return err
+			}
+		}
 		// Taxonomy projection rights are trusted app evidence and are not part
 		// of PreparedPublication. The final fence may write the qualified
 		// projection in this same transaction; storage does not invent license.
@@ -300,6 +352,38 @@ func nullableDigest(d ports.Digest) (any, any) {
 	}
 	return d.Algorithm, d.Value
 }
+
+func insertTaxonomyProjection(ctx context.Context, tx pgx.Tx, workspace string, ref ports.ArtifactRef, raw []byte, license string) error {
+	var document struct {
+		ID          string `json:"id"`
+		Edition     string `json:"edition"`
+		Attribution string `json:"attribution"`
+		Nodes       []struct {
+			ID       string  `json:"id"`
+			ParentID *string `json:"parent_id"`
+			Label    string  `json:"label"`
+			Level    int     `json:"level"`
+			APQCRef  string  `json:"apqc_ref"`
+		} `json:"nodes"`
+	}
+	if err := json.Unmarshal(raw, &document); err != nil || document.ID != ref.ID || document.Edition != ref.Version || strings.TrimSpace(document.Attribution) == "" || len(document.Nodes) == 0 || strings.TrimSpace(license) == "" {
+		return errors.New("storage: invalid taxonomy projection evidence or document")
+	}
+	attribution, err := json.Marshal(document.Attribution)
+	if err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `INSERT INTO taxonomy_editions(workspace_id,taxonomy_id,version,attribution,license,metadata,source_bytes) VALUES($1,$2,$3,$4::jsonb,$5,$6::jsonb,$7)`, workspace, ref.ID, ref.Version, string(attribution), license, raw, raw); err != nil {
+		return err
+	}
+	for _, node := range document.Nodes {
+		if _, err := tx.Exec(ctx, `INSERT INTO taxonomy_nodes(workspace_id,taxonomy_id,version,node_id,parent_id,label,level,apqc_ref) VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, workspace, ref.ID, ref.Version, node.ID, node.ParentID, node.Label, node.Level, node.APQCRef); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func digestString(d ports.Digest) string {
 	if d.Algorithm == "" && d.Value == "" {
 		return ""
@@ -375,6 +459,9 @@ func (s *PublicationStore) Read(ctx context.Context, p ports.Principal, ref port
 		}
 		contentType = "application/zip"
 	} else {
+		if int64(len(metadata)) > maxBytes {
+			return ports.PublicationRead{}, ErrPublicationBudget
+		}
 		body = metadata
 		bodyDigest = ports.Digest{Algorithm: "sha256", Value: ddv}
 		if ddv == "" {
