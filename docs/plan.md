@@ -964,6 +964,16 @@ Final lead REQUEST_CHANGES at0006a12/base8a24c72: Server.Close after a shutdown 
 - [x] T-GR-PUBLISH.20 Independently re-review final active-drain candidate  Owner: independent-luna-reviewer  Est: 20m  kind: agent  stage: review  blocked-by: [T-GR-PUBLISH.19, T-GR-PUBLISH.16]  acc: [Nonauthor records exact final head/base and accepted LEAD-R1 disposition; full candidate and tracked gates remain truthful; approved unchanged source and corrected code are independently covered before guarded merge]  Done: 2026-10-09  Evidence: [PR60 exact independent final-head approval guarded rebase and actual landed acceptance](receipts/2026-10-09-publication-landed.md); production remains separately open
 
 
+
+#### Accepted checkpoint finding PUB-CLOSEOUT-PRIVACY-1
+
+Independent checkpoint review REQUEST_CHANGES at7058490/baseeb1bd865 found private home/worktree tool/config paths in the landed command table. The same pattern is present in the earlier source-verification table, so repair covers both current public receipts. Exact private original records and public Git history remain preserved; no historical erasure is claimed.
+
+- [x] T-GR-PUBLISH.21 Fix checkpoint private-path disclosure  Owner: coordinator  Est: 10m  kind: agent  stage: implement  blocked-by: [T-GR-PUBLISH.6]  acc: [Normalize public command tables to portable qualified tool/config forms and remove home paths private hosts and private addresses from current new publication receipts; retain original private evidence and results without rewriting Git history]  Done: 2026-10-09  Evidence: corrected current source and landed receipt command forms; exact raw logs remain private
+- [ ] T-GR-PUBLISH.22 Verify corrected checkpoint privacy and conformance  Owner: coordinator-verifier  Est: 10m  kind: agent  stage: verify  blocked-by: [T-GR-PUBLISH.21]  acc: [Current new publication receipt scan full diff/link/task-status preservation and full pinned Wazi actual-reader/schema/owning-semantic checks pass on exact corrected source; no code wire archive or production status mutation]
+- [ ] T-GR-PUBLISH.23 Independently re-review checkpoint privacy repair  Owner: independent-luna-reviewer  Est: 20m  kind: agent  stage: review  blocked-by: [T-GR-PUBLISH.22]  acc: [Nonauthor records exact corrected checkpoint head/base and privacy finding disposition; final artifact delivery still uses exact-head review guard and actual landed conformance; source and production evidence remain separate]
+
+
 ### E-GR-CORE -- Startup and event composition
 
 fidelity: executable

@@ -46,12 +46,12 @@ The retained controlled TLS/store RED demonstrates the former active-handler rac
 
 Executed at actual landed SHA in a fresh isolated worktree, after proving reviewed-tree parity and fresh remote-main reachability. Runtime PostgreSQL remains explicitly NOSUPERUSER/NOBYPASSRLS; successful catalog records come from actual authenticated HTTP or named transactional storage tests, not seeded publication success.
 
-| Command | Result |
+| Portable command form | Result |
 | --- | --- |
 | `go test -tags=integration ./internal/app ./internal/storage -count=1` | exit0 |
 | `go test -tags=integration ./acceptance/wiring ./acceptance/retrieval -count=1` | exit0 |
 | `go vet ./...` | exit0 |
-| `/home/ndungu/go/bin/golangci-lint run --config /home/ndungu/worktrees/gist-plan-ship-20261008-root/tooling/lint-derived/.golangci.yml --new-from-rev=8a24c72a596a757e13426945911d87446cc3a4e0 ./...` | exit0 |
+| `golangci-lint run --config "$GIST_QUALIFIED_LINT_CONFIG" --new-from-rev=8a24c72a596a757e13426945911d87446cc3a4e0 ./...` | exit0 |
 
 Also passed actual landed contract freeze, nine Python registry checks, v2 strict fixtures/OpenAPI validation, and full pinned Wazi syntax/actual-reader/schema/owning-semantic conformance for278tasks. authorityAuthenticated=false is retained; plan conformance grants no runtime authority. Root/hosted unit/race/build and affected verification from the final source are reusable because the complete reviewed/landed trees are equal; fresh full app/storage and wiring/retrieval acceptance ran at the landed SHA.
 
@@ -71,3 +71,5 @@ Fresh default AWS STS returned exit253/NoCredentials. A single unauthenticated h
 Invited-operator issuer/workspace/enrollment custody, actual Treg/Composio capture/license/account/target/numerical authority, admitted real consumer and production verifier, AWS account/role/stack/image/config/migration release and rollout/live acceptance remain open. V2 source is opt-in; it has not been enabled in a deployed service. The approved scope remains registry plus caller-owned integrations; no managed execution gateway or Zatiti prerequisite was introduced.
 
 This evidence closes PUBLISH.4/.5/.6/.17/.20 against actual PR60 review/merge/landing. Earlier source, preflight, negative reviews and runtime RED/fixture-failure receipts remain preserved. No terminal production row is marked complete.
+
+Public command tables use portable tool/config names. Exact qualified interpreter, derived lint configuration, cache and worktree paths remain in the private hash-pinned raw command receipts; this normalization changes no invocation result or source revision. Original public Git history is retained; this correction sanitizes current receipt text and does not claim historical erasure.
