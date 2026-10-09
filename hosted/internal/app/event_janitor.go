@@ -117,5 +117,8 @@ func (a *App) maintenanceReady() error {
 	if a.maintenanceErr != nil {
 		return errors.New("app: event maintenance unavailable")
 	}
+	if a.publicationMaintenanceErr != nil {
+		return errors.New("app: publication maintenance unavailable")
+	}
 	return nil
 }

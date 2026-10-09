@@ -470,7 +470,16 @@ func (r *Resolver) getAdmitted(ctx context.Context, ref ports.ArtifactRef) (port
 	if record.State == "revoked" {
 		return ports.CatalogRecord{}, ErrArtifactRevoked
 	}
-	if record.Ref != ref || record.State != "published" && record.State != "deprecated" || !validDigest(record.Digest) || !validDigest(record.ManifestDigest) {
+	if record.Ref != ref || record.State != "published" && record.State != "deprecated" || !validDigest(record.Digest) {
+		return ports.CatalogRecord{}, fmt.Errorf("catalog record is not a complete immutable pin")
+	}
+	if !validDigest(record.ManifestDigest) && ref.Kind != ports.KindSkill {
+		alias, ok := documentMetadataAlias(record)
+		if ok {
+			record.ManifestDigest = alias
+		}
+	}
+	if !validDigest(record.ManifestDigest) {
 		return ports.CatalogRecord{}, fmt.Errorf("catalog record is not a complete immutable pin")
 	}
 	return record, nil
@@ -520,10 +529,28 @@ func (r *Resolver) persist(ctx context.Context, req Request, skill ArtifactPin, 
 }
 
 func pin(record ports.CatalogRecord) (ArtifactPin, error) {
+	if !validDigest(record.ManifestDigest) && record.Ref.Kind != ports.KindSkill {
+		if alias, ok := documentMetadataAlias(record); ok {
+			record.ManifestDigest = alias
+		}
+	}
 	if !validDigest(record.Digest) || !validDigest(record.ManifestDigest) {
 		return ArtifactPin{}, fmt.Errorf("invalid digest")
 	}
 	return ArtifactPin{Reference: capabilityRef(record.Ref), Kind: string(record.Ref.Kind), Digest: Digest{Algorithm: record.Digest.Algorithm, Value: record.Digest.Value}, ManifestDigest: Digest{Algorithm: record.ManifestDigest.Algorithm, Value: record.ManifestDigest.Value}}, nil
+}
+
+func documentMetadataAlias(record ports.CatalogRecord) (ports.Digest, bool) {
+	if !validDigest(record.DocumentDigest) || record.DocumentDigest.Algorithm != "sha256" {
+		return ports.Digest{}, false
+	}
+	sum := sha256.Sum256(record.Metadata)
+	if hex.EncodeToString(sum[:]) != record.DocumentDigest.Value {
+		return ports.Digest{}, false
+	}
+	// The frozen resolver field name is retained as a compatibility alias for
+	// typed v2 document bytes. This does not create a v2 manifest digest.
+	return record.DocumentDigest, true
 }
 func capabilityRef(ref ports.ArtifactRef) string { return ref.ID + "@" + ref.Version }
 func portRef(workspace string, pin ArtifactPin) ports.ArtifactRef {

@@ -120,7 +120,7 @@ func startFixture() (*fixture, error) {
 		pool.Close()
 		return nil, fmt.Errorf("fixture pool connected to %q, want %q: %v", connected, dbName, err)
 	}
-	for _, name := range []string{"001_catalog.sql", "002_policy.sql", "003_identity.sql", "004_events.sql", "005_identity_workspace_key.sql", "006_catalog_version_order.sql", "007_oauth_grants.sql", "008_event_retention_floor.sql"} {
+	for _, name := range []string{"001_catalog.sql", "002_policy.sql", "003_identity.sql", "004_events.sql", "005_identity_workspace_key.sql", "006_catalog_version_order.sql", "007_oauth_grants.sql", "008_event_retention_floor.sql", "009_publication_v2.sql"} {
 		raw, readErr := os.ReadFile(filepath.Join("..", "..", "migrations", name))
 		if readErr != nil {
 			pool.Close()
@@ -136,7 +136,16 @@ func startFixture() (*fixture, error) {
 			return nil, fmt.Errorf("apply migration %s: %w", name, execErr)
 		}
 	}
-	artifact, err := os.MkdirTemp("", "gist-registry-q3-artifacts-")
+	artifactCache, err := filepath.Abs(filepath.Join("..", "..", "..", "..", "cache", "gist-publish1", "acceptance"))
+	if err != nil {
+		pool.Close()
+		return nil, err
+	}
+	if err := os.MkdirAll(artifactCache, 0o700); err != nil {
+		pool.Close()
+		return nil, err
+	}
+	artifact, err := os.MkdirTemp(artifactCache, "owned-artifacts-")
 	if err != nil {
 		pool.Close()
 		return nil, err

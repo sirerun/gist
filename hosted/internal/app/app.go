@@ -36,15 +36,18 @@ type App struct {
 	// identities records the stored identity behind every minted token.
 	identities issuedIdentityRecorder
 	// sessions issues reference authorization-server session cookies.
-	sessions       *oauth.CookieSessions
-	server         *http.Server
-	closeOnce      sync.Once
-	shutdownDone   chan struct{}
-	shutdownErr    error
-	janitorCancel  context.CancelFunc
-	janitorDone    chan struct{}
-	maintenanceMu  sync.Mutex
-	maintenanceErr error
+	sessions                  *oauth.CookieSessions
+	server                    *http.Server
+	closeOnce                 sync.Once
+	shutdownDone              chan struct{}
+	shutdownErr               error
+	janitorCancel             context.CancelFunc
+	janitorDone               chan struct{}
+	publicationJanitorCancel  context.CancelFunc
+	publicationJanitorDone    chan struct{}
+	maintenanceMu             sync.Mutex
+	maintenanceErr            error
+	publicationMaintenanceErr error
 }
 
 // New opens the real pgx pool and the object store GIST_OBJECT_STORE_ROOT
@@ -126,6 +129,19 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		connections = broker
 	}
 	services := rest.Services{Identity: identityStore, Authorizer: policy, Catalog: catalog, Search: lexicalAdapter{service: search}, Versions: catalog, Artifacts: objects, Resolutions: resolutionStore, Connections: connections, Events: catalog, Publisher: publisher{pool: pool, objects: objects, limits: cfg}, Revocations: artifactRevoker{catalog: catalog}, Resolver: canonicalResolver, Limits: cfg.RESTLimits(), Audience: cfg.ResourceAudience}
+	if cfg.PublicationV2 != nil {
+		publicationStore, err := storage.NewPublicationStore(pool, objects)
+		if err != nil {
+			pool.Close()
+			return nil, err
+		}
+		maxPublicationResponse := int64(cfg.MaxResponseBytes)
+		if maxPublicationResponse > 100<<20 {
+			maxPublicationResponse = 100 << 20
+		}
+		v2 := &publicationV2{pool: pool, catalog: catalog, store: publicationStore, config: *cfg.PublicationV2, maxResponse: maxPublicationResponse, maxRequest: 16 << 20}
+		services.V2Publisher, services.V2Reader = v2, v2
+	}
 	rh, err := rest.New(services)
 	if err != nil {
 		pool.Close()
@@ -172,6 +188,12 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		return pool.Ping(ctx)
 	}}
 	a.server = &http.Server{Addr: cfg.ListenAddress, Handler: handler, ReadHeaderTimeout: cfg.RequestTimeout}
+	if cfg.PublicationV2 != nil {
+		if err := a.startPublicationJanitor(ctx, services.V2Publisher.(*publicationV2)); err != nil {
+			pool.Close()
+			return nil, err
+		}
+	}
 	a.startEventJanitor(ctx, catalog)
 	return a, nil
 
@@ -270,6 +292,9 @@ func (a *App) Shutdown(ctx context.Context) error {
 		if a.janitorCancel != nil {
 			a.janitorCancel()
 		}
+		if a.publicationJanitorCancel != nil {
+			a.publicationJanitorCancel()
+		}
 		// Cleanup runs exactly once, even if a caller's wait expires. Stop HTTP
 		// admission before waiting for the janitor, and keep its pool alive until
 		// the janitor has actually returned all acquired connections.
@@ -280,6 +305,9 @@ func (a *App) Shutdown(ctx context.Context) error {
 			}
 			if a.janitorDone != nil {
 				<-a.janitorDone
+			}
+			if a.publicationJanitorDone != nil {
+				<-a.publicationJanitorDone
 			}
 			a.pool.Close()
 			a.shutdownErr = err

@@ -18,8 +18,11 @@ type Error struct {
 // These errors keep adapter failures within the public error contract without
 // exposing parser input, private metadata or internal implementation details.
 var (
-	ErrBudgetExceeded   = appError("budget_exceeded", "Response exceeds the requested byte budget", http.StatusRequestEntityTooLarge, false)
-	ErrValidationFailed = appError("validation_failed", "Invalid request", http.StatusUnprocessableEntity, false)
+	ErrBudgetExceeded      = appError("budget_exceeded", "Response exceeds the requested byte budget", http.StatusRequestEntityTooLarge, false)
+	ErrValidationFailed    = appError("validation_failed", "Invalid request", http.StatusUnprocessableEntity, false)
+	ErrPublicationDenied   = appError("forbidden", "Forbidden", http.StatusForbidden, false)
+	ErrPublicationConflict = appError("version_conflict", "Version conflict", http.StatusConflict, false)
+	ErrPublicationNotFound = appError("not_found", "Not found", http.StatusNotFound, false)
 )
 
 func (e Error) Error() string { return e.Code + ": " + e.Message }
