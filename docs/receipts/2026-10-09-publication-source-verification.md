@@ -1,6 +1,6 @@
 # Publication v2 source verification
 
-Tested final changed tagged source: `fb45bea5e416fdc8e66ba941afb81f2cdc856532`. Base: `8a24c72a596a757e13426945911d87446cc3a4e0`. Execution: isolated DGX worktree, Go1.26.1, PostgreSQL16.15, owned filesystem store and actual TLS HTTP. No Mac build, credential migration, AWS deployment, live S3 or external provider execution.
+Initial tested changed tagged source: `fb45bea5e416fdc8e66ba941afb81f2cdc856532`. Base: `8a24c72a596a757e13426945911d87446cc3a4e0`. Execution: isolated DGX worktree, Go1.26.1, PostgreSQL16.15, owned filesystem store and actual TLS HTTP. No Mac build, credential migration, AWS deployment, live S3 or external provider execution.
 
 ## Observed behavior
 
@@ -66,3 +66,33 @@ unchanged root-module bytes at original candidate864b492.
 R5 receipt integrity: `sha256:364e4ad21f8e3c3dbb431b6598b206d473348e295898921faeeed30d17ab22cb`.
 Actual lifetime RED integrity: `sha256:d5e8a6b9876d20797749e893188c19fabcdea9aef8acbbfe7738a15a1bec4f8e`.
 Root race log integrity: `sha256:0afaab55ca5df6c83c06cf1943c12a6a07460c9c9747ce9400c3e5378a1665b7`.
+
+## Accepted LEAD-R1 active-handler drain
+
+The independent corrected-lifetime lead requested changes at0006a12:
+Server.Close cancels connections but does not wait for active handlers.
+The original report is preserved in publication-drain-review.md.
+A controlled actual TLS handler using the real owned object reader observed
+cleanup completion while it was still admitted. The initial negative fixture
+had teardown ordering that blocked release; only the corrected, completed
+`publication-drain-completed-red.log` is the behavior RED.
+
+At corrected source `a0df51a038544f907dc2b90e97cb4586de4e21be`, a mutex-bound admission fence stops
+new request admission before a WaitGroup drain. After forced HTTP connection
+close, cleanup keeps the object root and SQL pool until admitted handlers and
+both janitors have actually returned. The shutdown caller still returns on its
+deadline; repeated callers observe the retained actual HTTP drain error.
+The controlled reader finishes with identical real stored bytes, new admission
+denies503 and final cleanup closes the root. Shutdown errors use bounded canonical
+JSON and a generated request ID, without echoing incoming identity metadata.
+
+R6 full hosted unit, complete real app/storage integration, wiring/retrieval,
+full hosted race, publication real-store race, vet/build and delta lint all
+pass at this exact source. Full candidate diff check also passes, including
+normalization of one trailing blank line in the retained original review report.
+Root-module source and both v1/v2 wire inventories remain unchanged from base.
+PUBLISH.18/.19 are qualified; independent corrected-head PUBLISH.20 review plus
+PUBLISH.4/.17, guarded merge and actual landed proof remain open.
+
+R6 receipt integrity: `sha256:0425267665fc9939047f1cdea595964e05af448cae6c562731aec53922acfd2f`.
+Completed active-drain RED integrity: `sha256:44ec1b4fd1623bbd8cc74e94a3bc6ff41d4fe7ecf59386d6b03415373d9a7121`.
