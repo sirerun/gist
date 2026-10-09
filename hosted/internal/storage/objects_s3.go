@@ -3,8 +3,8 @@ package storage
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -28,6 +28,9 @@ const s3PutAttempts = 3
 type s3API interface {
 	PutObject(context.Context, *s3.PutObjectInput, ...func(*s3.Options)) (*s3.PutObjectOutput, error)
 	GetObject(context.Context, *s3.GetObjectInput, ...func(*s3.Options)) (*s3.GetObjectOutput, error)
+}
+type s3DeleteAPI interface {
+	DeleteObject(context.Context, *s3.DeleteObjectInput, ...func(*s3.Options)) (*s3.DeleteObjectOutput, error)
 }
 
 // s3Backend keeps blobs as objects named <prefix>/<digest> in one bucket. S3
@@ -96,27 +99,38 @@ func (b *s3Backend) key(name string) string {
 }
 
 func (b *s3Backend) put(ctx context.Context, name string, data []byte) error {
-	raw, err := hex.DecodeString(name)
-	if err != nil {
-		return fmt.Errorf("objects: decode digest: %w", err)
+	if !validSHA256Hex(name) && !validOwnedObjectKey(name) {
+		return errors.New("objects: invalid S3 object key")
 	}
+	sum := sha256.Sum256(data)
 	var lastErr error
 	for range s3PutAttempts {
-		_, err = b.client.PutObject(ctx, &s3.PutObjectInput{
+		_, err := b.client.PutObject(ctx, &s3.PutObjectInput{
 			Bucket:        aws.String(b.bucket),
 			Key:           aws.String(b.key(name)),
 			Body:          bytes.NewReader(data),
 			ContentLength: aws.Int64(int64(len(data))),
 			ContentType:   aws.String("application/octet-stream"),
 			// The name is the sha256 of data, so S3 re-verifies the body.
-			ChecksumSHA256: aws.String(base64.StdEncoding.EncodeToString(raw)),
+			ChecksumSHA256: aws.String(base64.StdEncoding.EncodeToString(sum[:])),
 			// Content addressing makes an existing key the same bytes, so a
 			// 412 here means the blob is already stored.
 			IfNoneMatch: aws.String("*"),
 		})
 		switch status := s3Status(err); {
-		case err == nil, status == http.StatusPreconditionFailed:
+		case err == nil:
 			return nil
+		case status == http.StatusPreconditionFailed:
+			// Conditional retries must verify the existing bytes; a key collision
+			// is never treated as successful immutable storage by assumption.
+			existing, getErr := b.get(ctx, name)
+			if getErr == nil && bytes.Equal(existing, data) {
+				return nil
+			}
+			if getErr != nil {
+				return fmt.Errorf("verify existing object after conditional put: %w", getErr)
+			}
+			return errors.New("objects: immutable S3 key contains different bytes")
 		case status == http.StatusConflict:
 			lastErr = err
 			continue
@@ -128,6 +142,9 @@ func (b *s3Backend) put(ctx context.Context, name string, data []byte) error {
 }
 
 func (b *s3Backend) get(ctx context.Context, name string) ([]byte, error) {
+	if !validSHA256Hex(name) && !validOwnedObjectKey(name) {
+		return nil, errors.New("objects: invalid S3 object key")
+	}
 	out, err := b.client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(b.bucket),
 		Key:    aws.String(b.key(name)),
@@ -146,6 +163,21 @@ func (b *s3Backend) get(ctx context.Context, name string) ([]byte, error) {
 		return nil, fmt.Errorf("read object: %w", err)
 	}
 	return data, nil
+}
+
+func (b *s3Backend) delete(ctx context.Context, name string) error {
+	if !validOwnedObjectKey(name) {
+		return errors.New("objects: invalid owned S3 key")
+	}
+	client, ok := b.client.(s3DeleteAPI)
+	if !ok {
+		return errors.New("objects: S3 client has no delete operation")
+	}
+	_, err := client.DeleteObject(ctx, &s3.DeleteObjectInput{Bucket: aws.String(b.bucket), Key: aws.String(b.key(name))})
+	if err != nil {
+		return fmt.Errorf("delete owned object: %w", err)
+	}
+	return nil
 }
 
 // s3Status returns the HTTP status of a failed S3 call, or 0.

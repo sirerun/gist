@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 	"sync"
 
 	"github.com/sirerun/gist/hosted/internal/ports"
@@ -134,6 +135,64 @@ func (s *ObjectStore) Open(ctx context.Context, ref ports.ArtifactRef) (ports.Ar
 		return nil, err
 	}
 	return &readSeekCloser{Reader: bytes.NewReader(b)}, nil
+}
+
+// StageOwned writes bytes under a storage-generated v2 key. It is deliberately
+// separate from Put: legacy objects retain their digest-only namespace.
+func (s *ObjectStore) StageOwned(ctx context.Context, key string, data []byte, digest ports.Digest) error {
+	if !validOwnedObjectKey(key) || digest.Algorithm != "sha256" || !validSHA256Hex(digest.Value) {
+		return errors.New("objects: invalid owned object identity")
+	}
+	sum := sha256.Sum256(data)
+	if hex.EncodeToString(sum[:]) != digest.Value {
+		return errors.New("objects: owned object digest mismatch")
+	}
+	return s.blobs.put(ctx, key, data)
+}
+
+// OpenOwned resolves a durable object key and verifies the exact stored bytes.
+func (s *ObjectStore) OpenOwned(ctx context.Context, key string, digest ports.Digest, size int64) (ports.ArtifactReader, error) {
+	if !validOwnedObjectKey(key) || digest.Algorithm != "sha256" || !validSHA256Hex(digest.Value) || size < 0 {
+		return nil, errors.New("objects: invalid owned object identity")
+	}
+	b, err := s.blobs.get(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	sum := sha256.Sum256(b)
+	if int64(len(b)) != size || hex.EncodeToString(sum[:]) != digest.Value {
+		return nil, errors.New("objects: owned object content mismatch")
+	}
+	return &readSeekCloser{Reader: bytes.NewReader(b)}, nil
+}
+
+// DeleteOwned removes exactly one validated v2 key. Backends without an exact
+// delete primitive fail closed.
+func (s *ObjectStore) DeleteOwned(ctx context.Context, key string) error {
+	if !validOwnedObjectKey(key) {
+		return errors.New("objects: invalid owned object key")
+	}
+	d, ok := s.blobs.(interface {
+		delete(context.Context, string) error
+	})
+	if !ok {
+		return errors.New("objects: backend does not support owned deletes")
+	}
+	return d.delete(ctx, key)
+}
+
+func validOwnedObjectKey(key string) bool {
+	parts := strings.Split(key, "/")
+	return len(parts) == 3 && parts[0] == "v2" && len(parts[1]) == 32 && validLowerHex(parts[1]) && validSHA256Hex(parts[2])
+}
+
+func validLowerHex(v string) bool {
+	for i := range v {
+		if (v[i] < '0' || v[i] > '9') && (v[i] < 'a' || v[i] > 'f') {
+			return false
+		}
+	}
+	return v != ""
 }
 func refKey(ref ports.ArtifactRef) string {
 	return ref.WorkspaceID + "/" + string(ref.Kind) + "/" + ref.ID + "/" + ref.Version
