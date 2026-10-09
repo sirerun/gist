@@ -135,6 +135,15 @@ func (s *PublicationStore) Publish(ctx context.Context, p ports.Principal, prepa
 			if state == "retired" {
 				// The old physical key remains a cleanup tombstone. Reassign this
 				// permanent identity to a fresh attempt/key only after deletion.
+				// Retiring an attempt does not exempt its replacement from the
+				// workspace's active-attempt quota.
+				var active int
+				if err := tx.QueryRow(ctx, `SELECT count(*) FROM publication_attempts WHERE workspace_id=$1 AND state IN ('staged','deleting')`, p.WorkspaceID).Scan(&active); err != nil {
+					return err
+				}
+				if active >= 64 {
+					return ErrPublicationBudget
+				}
 				var random [16]byte
 				if _, err := rand.Read(random[:]); err != nil {
 					return err
