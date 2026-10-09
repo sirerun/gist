@@ -39,3 +39,30 @@ Raw local command logs, durations, exit codes and source revisions remain in the
 PUBLISH.1/.2/.3 source implementation and verification are satisfied; PUBLISH.4 independent review, .5 guarded merge and .6 landed verification remain open. The full plan is not complete. This candidate adds only opt-in source composition; it does not select an operator issuer, provider workspace, credentials or production verifier, or enable v2 in a deployed service.
 
 Default AWS CLI STS preflight returned NoCredentials (exit253). AWS account/role/stack binding, invited-operator enrollment, actual provider capture/license/account/target/numerical bounds, independent consumer and production release/deployment/live acceptance remain open. Existing GitHub hosted jobs are billing-unavailable; local verification is the authorized fallback, with unchanged protection/policy.
+
+## PUBLISH60-R1 lifetime correction and refreshed source
+
+Original independent lead, decoder and storage reports approved exact
+head864b4927270e0fee4ae93f4add566e209950b8e8 at the same base.
+They remain historical: coordinator subsequently observed two actual runtime REDs
+at that source: successful owned-object read after completed shutdown and root
+descriptor count1to2 after denied construction. Corrected code releases the pinned
+root exactly once after HTTP and both janitors finish; failure construction releases
+newly owned resources and joins actual errors. Existing nil-store shutdown fixtures
+remain compatible; no S3 deletion or credential action is introduced.
+
+Final changed source is `56b3236af2ed853566db4f3d8fa0c480db450074`.
+The first correction's full checks exposed a test field typo and the existing
+nil-store fixture panic; these were corrected, and original R4 failed receipts are
+retained. The original two-case attempt that could not compile is not behavior RED;
+`publication-lifetime-both-actual-red.log` is the actual two-case runtime RED.
+R5 full hosted unit, complete app/storage real-store integration, wiring/retrieval,
+full hosted race, publication real-store race, vet/build and delta lint all pass
+at the corrected SHA. Linux descriptor-observation test executes here; it does
+not qualify non-Linux descriptor behavior. Required new final-head independent
+review remains PUBLISH.17, with merge still gated. Root full race also passes on
+unchanged root-module bytes at original candidate864b492.
+
+R5 receipt integrity: `sha256:364e4ad21f8e3c3dbb431b6598b206d473348e295898921faeeed30d17ab22cb`.
+Actual lifetime RED integrity: `sha256:d5e8a6b9876d20797749e893188c19fabcdea9aef8acbbfe7738a15a1bec4f8e`.
+Root race log integrity: `sha256:0afaab55ca5df6c83c06cf1943c12a6a07460c9c9747ce9400c3e5378a1665b7`.
