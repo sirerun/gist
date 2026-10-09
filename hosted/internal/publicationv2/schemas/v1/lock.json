@@ -1,0 +1,143 @@
+{
+  "lock_version": "1",
+  "dependencies": {
+    "github.com/getkin/kin-openapi": "v0.147.0",
+    "github.com/lestrrat-go/jwx/v2": "v2.1.7",
+    "github.com/jackc/pgx/v5": "v5.11.0",
+    "github.com/aws/aws-sdk-go-v2": "v1.47.1",
+    "github.com/aws/aws-sdk-go-v2/config": "v1.33.6",
+    "github.com/aws/aws-sdk-go-v2/credentials": "v1.20.6",
+    "github.com/aws/aws-sdk-go-v2/service/s3": "v1.113.4",
+    "github.com/aws/smithy-go": "v1.28.2"
+  },
+  "files": [
+    {
+      "path": "contracts/registry/v1/batch-get.schema.json",
+      "sha256": "0cbad8df8313232f9a6431ac38c13cfb95ff8255b78c71b57fc438bf69f4d40d"
+    },
+    {
+      "path": "contracts/registry/v1/binding.schema.json",
+      "sha256": "e74628160d8ece82beb5703e56d0c45f00818ac0d9fe4c33a96a44fd147af17f"
+    },
+    {
+      "path": "contracts/registry/v1/capability.schema.json",
+      "sha256": "9ae81be94619b9735f9fe50c9813f0a3d3e8f7d79abe0cab84f7e7ecbf0ac2dd"
+    },
+    {
+      "path": "contracts/registry/v1/common.schema.json",
+      "sha256": "c0ac7f97c851edef24c9c7f067d09e6a5afdc0755d5744b7c74006755009b83b"
+    },
+    {
+      "path": "contracts/registry/v1/connection.schema.json",
+      "sha256": "971f1106b7137e106b68987442bd164397eab717cfdd8db6c8af4bcdef8ead7d"
+    },
+    {
+      "path": "contracts/registry/v1/discover.schema.json",
+      "sha256": "eac1b658f43d5707db8ab290aa4e7b0093bbcc73b9fd802f99f532083cc25d5a"
+    },
+    {
+      "path": "contracts/registry/v1/effects.schema.json",
+      "sha256": "6e8bbc59dd2877ba623f9f613862dc708333731b492ba0a7b9213f022ebb4e09"
+    },
+    {
+      "path": "contracts/registry/v1/error.schema.json",
+      "sha256": "f8a451a0bd260a4b26f1c8a83b51806682b450ae60039d77b3fd226d7b261667"
+    },
+    {
+      "path": "contracts/registry/v1/event.schema.json",
+      "sha256": "ea1c64af585379ac6459e5868bfd0946ec32f23261615c4f465ad867f6152a1c"
+    },
+    {
+      "path": "contracts/registry/v1/execution-schema.schema.json",
+      "sha256": "ffb74089d35b04e5f3d9c18272f5b86f0f4170972bed0981813ebe9ddb6bacf4"
+    },
+    {
+      "path": "contracts/registry/v1/golden-fixture.schema.json",
+      "sha256": "6c0c99086374bd5f19f81d605cc9e6950e758373fbe53dad809b9b24052274fb"
+    },
+    {
+      "path": "contracts/registry/v1/inventory.schema.json",
+      "sha256": "327b4355d433b8acd9a216ab9540dced6e0d3206865247ab29553f814c2d71c3"
+    },
+    {
+      "path": "contracts/registry/v1/manifest.schema.json",
+      "sha256": "ebea0095f305c1bc59fe678d11daadceba0e2e21ab63fa36dcf76c335cda2051"
+    },
+    {
+      "path": "contracts/registry/v1/provider.schema.json",
+      "sha256": "6700fdf20149df87a452b708e89a55ca4bff77c51e7746e2d274ad2cc12dea1a"
+    },
+    {
+      "path": "contracts/registry/v1/publish.schema.json",
+      "sha256": "1b6a009694fa0f3e92822bf94b246582ea7f322fbe2a72b02ec9e3558d08d4dc"
+    },
+    {
+      "path": "contracts/registry/v1/resolve.schema.json",
+      "sha256": "649221bd1600efe7315dd4f2ae35ff9458df43ac1536ab7008bee22fde63ab3d"
+    },
+    {
+      "path": "contracts/registry/v1/taxonomy.schema.json",
+      "sha256": "0a298dfdf1e4931cf0437bcd77e80d855f08b9d359781ef599168cce5e7457fa"
+    },
+    {
+      "path": "contracts/registry/v1/fixtures/digest-vectors.json",
+      "sha256": "a4557e03fedaebfa5b0b93ad8651264a3fe18b287447b4b53d8c2a2acf9a1173"
+    },
+    {
+      "path": "contracts/registry/v1/fixtures/http-cases.json",
+      "sha256": "ec72aee0ce3801da0896659da13d1ca04d7726e9eabbc633cf548e1dd4a9ec87"
+    },
+    {
+      "path": "contracts/registry/v1/fixtures/wire-cases.json",
+      "sha256": "71bdede769a8546c266a9e8dc60b515d52f52ce76a08e10e3beedc1c5ccfb246"
+    },
+    {
+      "path": "contracts/registry/v1/openapi.yaml",
+      "sha256": "04490d7decec58e33bef3f3ef78132727f646dc75eef8bc1fe957bd6021005c0"
+    },
+    {
+      "path": "contracts/registry/v1/route-matrix.json",
+      "sha256": "e098b009bef0ac5781826eb95e0eaa33c8b2a6eb92481b34ed44eacd2ec17e04"
+    },
+    {
+      "path": "hosted/go.mod",
+      "sha256": "5becd1074a7e078dcae1ee1ca3b4e3af54876bdb6f8d48b63088ce060d95bffb"
+    },
+    {
+      "path": "hosted/go.sum",
+      "sha256": "1800df407aacf59b38f18c81832fb56261d2547f685c3c26b7f2131e80efc1e8"
+    },
+    {
+      "path": "hosted/internal/ports/catalog.go",
+      "sha256": "11358de29fe578fb41a1c57d6b4b756777bce4eac580823acacfb980a63b028a"
+    },
+    {
+      "path": "hosted/internal/ports/clock.go",
+      "sha256": "145164cda2d4b7fe893c303c49199aa79591e2e7d0c9aa76ce08f87e9e6e9708"
+    },
+    {
+      "path": "hosted/internal/ports/connections.go",
+      "sha256": "652ab3b8a56f6a51bc74f5831c54130c50ff5b56a45b740594310c565534c1f7"
+    },
+    {
+      "path": "hosted/internal/ports/contracts_test.go",
+      "sha256": "b8bd2821c8e6c7e6006ce4a23a254bb5c2e152af2faeed3523d1f1d080e43ea3"
+    },
+    {
+      "path": "hosted/internal/ports/events.go",
+      "sha256": "13d373e63607d5b7197373d0095279a6f987850bcb413f1452d277ef2ae7bc0d"
+    },
+    {
+      "path": "hosted/internal/ports/identity.go",
+      "sha256": "32595f93e92a7caf359a0f401dfa9a07482bbbf15da6d60ae7db3156dcd51ac4"
+    },
+    {
+      "path": "hosted/internal/ports/policy.go",
+      "sha256": "c8d48048915984054c8851e5d628f3a94025fcac686e0ca5c3b04e296fb9f972"
+    },
+    {
+      "path": "hosted/internal/ports/search.go",
+      "sha256": "01ae332194e65d9d2623e3a29e04a953a6e7472daf81b4c3c521617b42fc403d"
+    }
+  ]
+}
