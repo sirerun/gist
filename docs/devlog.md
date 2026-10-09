@@ -78,3 +78,11 @@ shutdown and observed an extra root descriptor after denied startup. PUBLISH.15/
 record the fix and actual two-case RED/refreshed full hosted PASS; PUBLISH.17
 requires independent corrected-head approval before merging. Original review and
 failed fixture/aggregate reports are retained rather than overwritten.
+
+Final lead requested changes at0006a12 for GIST-PUBLISH60-LEAD-R1: forced HTTP
+connection close does not wait for active handlers, so immediate object-root
+closure races admitted work. PUBLISH.18/19 record a completed actual TLS/store
+RED and corrected admission fence/drain plus full hosted aggregate PASS at
+a0df51a. The first repro teardown ordering was corrected and its blocked result
+is not claimed as completed acceptance. PUBLISH.20 requires independent final-head
+re-review; original approvals and negative review remain retained.
