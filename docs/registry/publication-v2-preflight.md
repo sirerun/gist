@@ -67,3 +67,15 @@ The coordinator owns composition and shared interfaces. Freeze these publication
 Implementation workers may add concrete structs/interfaces preserving these semantics under coordinator ownership; any semantic change returns to independent interface review. PUBLISH.2 acceptance uses an actual qualified local offline verifier and explicitly owned synthetic capture/license fixtures to exercise source behavior; those fixtures never qualify real providers. Evidence configuration defaults deny synthetic records in production. Existing record-to-pin behavior and current authorization code are regression inputs, not already-qualified new mappings.
 
 Source quota defaults: at most 64 uncommitted attempts and 100,000 permanent idempotency keys per workspace, checked transactionally before reserving a new identity. Quota exhaustion returns bounded retryable 503 without mutation; existing valid replay remains available. No short TTL/eviction removes identity guarantees. Configured catalog limits remain separate. These are source resource bounds, not an AWS storage/spend approval.
+
+## Additive source lock migration
+
+The frozen v1 lock pins the complete catalog port source file as well as wire
+contracts. V2's approved catalog projection adds DocumentDigest, PackageDigest,
+ObjectKey and ArtifactSize to the internal record. The explicit
+[source amendment](../../contracts/registry/v2/source-amendments.json) pins both
+the original v1 hash and current source hash and the exact additive fragment.
+The normal freeze gate reconstructs and verifies the complete original file;
+changes outside that fragment, stale hashes, duplicate/unmatched amendments and
+wire-file amendments fail. V1 schemas, routes, dependency locks and lock bytes
+remain unchanged. This is source compatibility, not deployment migration.

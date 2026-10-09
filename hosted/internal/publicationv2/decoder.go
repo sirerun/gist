@@ -19,7 +19,6 @@ import (
 	"net/url"
 	"path"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -344,8 +343,8 @@ func decodeSkill(blob []byte, l Limits) (skillResult, error) {
 			return skillResult{}, fail("open member")
 		}
 		b, e := io.ReadAll(io.LimitReader(r, l.MaxFileBytes+boolInt64(l.MaxFileBytes < math.MaxInt64)))
-		r.Close()
-		if e != nil || int64(len(b)) > l.MaxFileBytes {
+		closeErr := r.Close()
+		if e != nil || closeErr != nil || int64(len(b)) > l.MaxFileBytes {
 			return skillResult{}, fail("read member")
 		}
 		files[n] = b
@@ -1025,14 +1024,4 @@ func Receipt(p ports.PreparedPublication) ([]byte, error) {
 		return nil, ErrBudgetExceeded
 	}
 	return b, nil
-}
-
-// keep deterministic ordering available to inventory validation helpers.
-func sortedKeys(m map[string][]byte) []string {
-	k := make([]string, 0, len(m))
-	for x := range m {
-		k = append(k, x)
-	}
-	sort.Strings(k)
-	return k
 }

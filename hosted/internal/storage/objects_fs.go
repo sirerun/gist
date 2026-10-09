@@ -280,8 +280,11 @@ func (f *fsBackend) getLimit(_ context.Context, name string, limit int64) ([]byt
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
 	data, err := io.ReadAll(io.LimitReader(file, limit))
+	closeErr := file.Close()
+	if err == nil {
+		err = closeErr
+	}
 	return data, err
 }
 

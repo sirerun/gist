@@ -129,6 +129,7 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		connections = broker
 	}
 	services := rest.Services{Identity: identityStore, Authorizer: policy, Catalog: catalog, Search: lexicalAdapter{service: search}, Versions: catalog, Artifacts: objects, Resolutions: resolutionStore, Connections: connections, Events: catalog, Publisher: publisher{pool: pool, objects: objects, limits: cfg}, Revocations: artifactRevoker{catalog: catalog}, Resolver: canonicalResolver, Limits: cfg.RESTLimits(), Audience: cfg.ResourceAudience}
+	var v2 *publicationV2
 	if cfg.PublicationV2 != nil {
 		publicationStore, err := storage.NewPublicationStore(pool, objects)
 		if err != nil {
@@ -139,7 +140,7 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		if maxPublicationResponse > 100<<20 {
 			maxPublicationResponse = 100 << 20
 		}
-		v2 := &publicationV2{pool: pool, catalog: catalog, store: publicationStore, config: *cfg.PublicationV2, maxResponse: maxPublicationResponse, maxRequest: cfg.MaxRequestBytes, maxPackage: int64(cfg.MaxPackageBytes), maxExpanded: int64(cfg.MaxExpandedBytes)}
+		v2 = &publicationV2{pool: pool, catalog: catalog, store: publicationStore, config: *cfg.PublicationV2, maxResponse: maxPublicationResponse, maxRequest: cfg.MaxRequestBytes, maxPackage: int64(cfg.MaxPackageBytes), maxExpanded: int64(cfg.MaxExpandedBytes)}
 		services.V2Publisher, services.V2Reader = v2, v2
 	}
 	rh, err := rest.New(services)
@@ -189,7 +190,7 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 	}}
 	a.server = &http.Server{Addr: cfg.ListenAddress, Handler: handler, ReadHeaderTimeout: cfg.RequestTimeout}
 	if cfg.PublicationV2 != nil {
-		if err := a.startPublicationJanitor(ctx, services.V2Publisher.(*publicationV2)); err != nil {
+		if err := a.startPublicationJanitor(ctx, v2); err != nil {
 			pool.Close()
 			return nil, err
 		}
