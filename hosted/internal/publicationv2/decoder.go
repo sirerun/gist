@@ -521,7 +521,7 @@ func validateDynamicSchemas(b []byte) error {
 		if json.Unmarshal(m[key], &doc) != nil {
 			return fail("invalid %s", key)
 		}
-		c := jsonschema.NewCompiler()
+		c := retainedCompiler()
 		c.AssertFormat()
 		c.DefaultDraft(jsonschema.Draft2020)
 		if err := c.AddResource("urn:gist:dynamic:"+key, doc); err != nil {
@@ -741,8 +741,23 @@ func taxonomySemantics(b []byte) error {
 	return nil
 }
 
-func validateSchema(uri string, instance []byte) error {
+// Retained schemas and built-in dialects are the only permitted resources.
+// jsonschema's default loader supports file: URLs, so explicitly deny missing
+// resources for both owner schemas and client-supplied dynamic schemas.
+type unretainedSchemaLoader struct{}
+
+func (unretainedSchemaLoader) Load(string) (any, error) {
+	return nil, errors.New("unretained schema resource")
+}
+func retainedCompiler() *jsonschema.Compiler {
 	c := jsonschema.NewCompiler()
+	c.UseLoader(unretainedSchemaLoader{})
+	c.DefaultDraft(jsonschema.Draft2020)
+	return c
+}
+
+func validateSchema(uri string, instance []byte) error {
+	c := retainedCompiler()
 	c.AssertFormat()
 	err := fs.WalkDir(schemaFiles, "schemas", func(p string, d fs.DirEntry, e error) error {
 		if e != nil {
