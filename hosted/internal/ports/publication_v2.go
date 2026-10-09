@@ -52,6 +52,11 @@ type PreparedPublication struct {
 	DocumentDigest Digest
 	ManifestDigest Digest
 	PackageDigest  Digest
+	// AdmissionEvidence is populated only by app after trusted server review
+	// validation and rechecked by its transaction fence. Decoder output leaves
+	// it nil; it is never accepted from a client. Taxonomy projections retain
+	// the exact qualified license instead of inventing a placeholder.
+	AdmissionEvidence *PublicationAdmissionEvidence
 }
 
 // PublicationReceipt is the fixed successful HTTP receipt shape. Its Body is
