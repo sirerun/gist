@@ -151,7 +151,7 @@ def check_contracts(freeze_check: bool) -> None:
         if not isinstance(entries, list) or not entries:
             fail("contract lock must contain non-empty files")
         amendments = {}
-        amendment_path = ROOT / "contracts/registry/v2/source-amendments.json"
+        amendment_path = ROOT / "contracts/registry/implementation-v2.json"
         if amendment_path.is_file():
             document = read_json(amendment_path)
             if document.get("amendment_version") != "1" or document.get("contract") != "v2" or not isinstance(document.get("files"), list):
