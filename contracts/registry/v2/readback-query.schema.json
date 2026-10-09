@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gist.local/contracts/registry/v2/readback.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "id",
+    "version",
+    "max_bytes"
+  ],
+  "properties": {
+    "kind": {
+      "enum": [
+        "skill",
+        "capability",
+        "tool",
+        "provider",
+        "binding",
+        "taxonomy"
+      ]
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "max_bytes": {
+      "$ref": "common.schema.json#/$defs/budget"
+    }
+  }
+}
