@@ -1,11 +1,13 @@
 package storage
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -31,8 +33,14 @@ func newFSBackend(root string) (*fsBackend, error) {
 func (f *fsBackend) put(_ context.Context, name string, b []byte) (returnErr error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	path := filepath.Join(f.root, name)
-	if _, err := os.Stat(path); err == nil {
+	path, err := f.objectPath(name, true)
+	if err != nil {
+		return err
+	}
+	if existing, err := os.ReadFile(path); err == nil {
+		if !bytes.Equal(existing, b) {
+			return errors.New("objects: immutable key already contains different bytes")
+		}
 		return nil
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("stat object: %w", err)
@@ -58,14 +66,28 @@ func (f *fsBackend) put(_ context.Context, name string, b []byte) (returnErr err
 	if err = tmp.Close(); err != nil {
 		return fmt.Errorf("close object: %w", err)
 	}
-	if err = os.Rename(tmpName, path); err != nil && !errors.Is(err, os.ErrExist) {
+	if err = os.Link(tmpName, path); err != nil {
+		if errors.Is(err, os.ErrExist) {
+			existing, readErr := os.ReadFile(path)
+			if readErr == nil && bytes.Equal(existing, b) {
+				return nil
+			}
+			if readErr != nil {
+				return fmt.Errorf("verify existing object: %w", readErr)
+			}
+			return errors.New("objects: immutable key already contains different bytes")
+		}
 		return fmt.Errorf("commit object: %w", err)
 	}
 	return nil
 }
 
 func (f *fsBackend) get(_ context.Context, name string) ([]byte, error) {
-	b, err := os.ReadFile(filepath.Join(f.root, name))
+	path, err := f.objectPath(name, false)
+	if err != nil {
+		return nil, err
+	}
+	b, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, ErrNotFound
 	}
@@ -73,4 +95,68 @@ func (f *fsBackend) get(_ context.Context, name string) ([]byte, error) {
 		return nil, fmt.Errorf("read object: %w", err)
 	}
 	return b, nil
+}
+
+func (f *fsBackend) objectPath(name string, create bool) (string, error) {
+	if !validLowerHex(name) && !validOwnedObjectKey(name) {
+		return "", errors.New("objects: invalid filesystem key")
+	}
+	root, err := filepath.Abs(f.root)
+	if err != nil {
+		return "", err
+	}
+	resolvedRoot, err := filepath.EvalSymlinks(root)
+	if err != nil {
+		return "", err
+	}
+	if resolvedRoot != root {
+		return "", errors.New("objects: symlink in configured object root")
+	}
+	if err := rejectSymlink(root); err != nil {
+		return "", err
+	}
+	path := filepath.Join(root, filepath.FromSlash(name))
+	if !strings.HasPrefix(path, root+string(os.PathSeparator)) {
+		return "", errors.New("objects: path escapes root")
+	}
+	parent := filepath.Dir(path)
+	if create {
+		if err := os.MkdirAll(parent, 0o700); err != nil {
+			return "", err
+		}
+	}
+	for dir := parent; dir != root; dir = filepath.Dir(dir) {
+		if err := rejectSymlink(dir); err != nil {
+			return "", err
+		}
+	}
+	if info, err := os.Lstat(path); err == nil && info.Mode()&os.ModeSymlink != 0 {
+		return "", errors.New("objects: symlink object rejected")
+	} else if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return "", err
+	}
+	return path, nil
+}
+
+func rejectSymlink(path string) error {
+	info, err := os.Lstat(path)
+	if err != nil {
+		return err
+	}
+	if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+		return errors.New("objects: unsafe filesystem path")
+	}
+	return nil
+}
+
+func (f *fsBackend) delete(_ context.Context, name string) error {
+	path, err := f.objectPath(name, false)
+	if err != nil {
+		return err
+	}
+	if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+		return ErrNotFound
+	} else {
+		return err
+	}
 }
