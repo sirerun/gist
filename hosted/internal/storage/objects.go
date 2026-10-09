@@ -135,6 +135,12 @@ func (s *ObjectStore) Open(ctx context.Context, ref ports.ArtifactRef) (ports.Ar
 	}
 	name := digest.Value
 	if record.ObjectKey != "" {
+		if record.State == "revoked" {
+			return nil, ErrRevoked
+		}
+		if record.State != "published" && record.State != "deprecated" {
+			return nil, ErrNotFound
+		}
 		if !validOwnedObjectKey(record.ObjectKey) || !strings.HasSuffix(record.ObjectKey, "/"+digest.Value) || record.ArtifactSize < 0 {
 			return nil, errors.New("objects: catalog object key does not match digest")
 		}

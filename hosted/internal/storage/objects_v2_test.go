@@ -140,7 +140,7 @@ func TestOwnedV2CatalogReadsRecheckCurrentRecordAndExactSize(t *testing.T) {
 		t.Fatal(err)
 	}
 	ref := ports.ArtifactRef{WorkspaceID: "w", Kind: ports.KindSkill, ID: "a", Version: "1.0.0"}
-	record := ports.CatalogRecord{Ref: ref, Digest: d, ObjectKey: key, ArtifactSize: int64(len(body))}
+	record := ports.CatalogRecord{Ref: ref, State: "published", Digest: d, ObjectKey: key, ArtifactSize: int64(len(body))}
 	catalog := digestCatalog{records: map[string]ports.CatalogRecord{refKey(ref): record}}
 	s.UseCatalog(catalog)
 	if err = s.Bind(ref, d); err != nil {
@@ -155,12 +155,14 @@ func TestOwnedV2CatalogReadsRecheckCurrentRecordAndExactSize(t *testing.T) {
 	if !bytes.Equal(got, body) {
 		t.Fatalf("read %q", got)
 	}
-	s.UseCatalog(digestCatalog{records: map[string]ports.CatalogRecord{}})
-	if _, err = s.Open(ctx, ref); !errors.Is(err, ErrNotFound) {
-		t.Fatalf("cached revoked ref = %v", err)
+	revoked := record
+	revoked.State = "revoked"
+	s.UseCatalog(digestCatalog{records: map[string]ports.CatalogRecord{refKey(ref): revoked}})
+	if _, err = s.Open(ctx, ref); !errors.Is(err, ErrRevoked) {
+		t.Fatalf("cached revoked durable row = %v", err)
 	}
 	// Same digest with a wrong durable length must fail closed.
-	catalog.records[refKey(ref)] = ports.CatalogRecord{Ref: ref, Digest: d, ObjectKey: key, ArtifactSize: int64(len(body) + 1)}
+	catalog.records[refKey(ref)] = ports.CatalogRecord{Ref: ref, State: "published", Digest: d, ObjectKey: key, ArtifactSize: int64(len(body) + 1)}
 	s.UseCatalog(catalog)
 	if _, err = s.Open(ctx, ref); err == nil {
 		t.Fatal("wrong catalog length accepted")
