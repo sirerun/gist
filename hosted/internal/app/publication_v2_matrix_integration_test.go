@@ -161,6 +161,13 @@ func matrixFixtures(t *testing.T) (map[string]matrixPublication, *matrixIdentity
 	result := map[string]matrixPublication{}
 	for _, kind := range []string{"skill", "capability", "tool", "provider", "binding", "taxonomy"} {
 		body := append([]byte(nil), envelopes[kind]...)
+		if kind == "skill" {
+			var compact bytes.Buffer
+			if err := json.Compact(&compact, body); err != nil {
+				t.Fatal(err)
+			}
+			body = compact.Bytes()
+		}
 		retained := append([]byte(nil), source...)
 		if kind != "skill" {
 			var env map[string]any

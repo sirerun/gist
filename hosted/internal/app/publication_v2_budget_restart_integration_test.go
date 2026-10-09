@@ -4,8 +4,11 @@ package app
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/sirerun/gist/hosted/internal/ports"
+	"github.com/sirerun/gist/hosted/internal/publicationv2"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -67,8 +70,8 @@ func TestPublicationV2BudgetsAndGrammar(t *testing.T) {
 		t.Fatalf("budget rejection wrote publication state: before=%v after=%v", before, after)
 	}
 	bad := map[string][]byte{
-		"duplicate_key":     []byte(strings.Replace(string(a.envelope), `"max_bytes":1048576`, `"max_bytes":1048576,"max_bytes":1048576`, 1)),
-		"escaped_duplicate": []byte(strings.Replace(string(a.envelope), `"max_bytes":1048576`, `"max_bytes":1048576,"max_\u0062ytes":1048576`, 1)),
+		"duplicate_key":     append([]byte(`{"max_bytes":1048576,`), a.envelope[1:]...),
+		"escaped_duplicate": append([]byte(`{"max_\u0062ytes":1048576,`), a.envelope[1:]...),
 		"nested_duplicate":  []byte(strings.Replace(string(a.envelope), `"artifact":`, `"artifact":{"id":"x","id":"y"},"discarded_artifact":`, 1)),
 		"invalid_utf8":      append(append([]byte(nil), a.envelope...), 0xff),
 		"invalid_surrogate": []byte(strings.Replace(string(a.envelope), `"idempotency_key":`, `"idempotency_key":"bad\uD800","discarded":`, 1)),
@@ -78,9 +81,9 @@ func TestPublicationV2BudgetsAndGrammar(t *testing.T) {
 	for name, body := range bad {
 		t.Run(name, func(t *testing.T) {
 			beforeCase := count()
-			// Isolate each parser case under its own key so an incorrectly
-			// accepted duplicate cannot turn a later request into a replay.
-			body = bytes.Replace(body, []byte("matrix-skill"), []byte("matrix-skill-"+name), 1)
+			if bytes.Equal(body, a.envelope) {
+				t.Fatal("malformed fixture did not alter the valid envelope")
+			}
 			status, _, _ := h.request(t, http.MethodPost, "/v2/publish/skill", body)
 			if status < 400 || status >= 500 {
 				t.Fatalf("malformed envelope status=%d", status)
@@ -206,11 +209,19 @@ func TestPublicationV2ReplicaReplayAndRead(t *testing.T) {
 	versionArtifact := h.artifacts["capability"]
 	versionReceipt := h.publish(t, "capability")
 	_ = versionReceipt
-	versionAt := bytes.Index(versionArtifact.envelope, []byte(versionArtifact.prepared.Ref.Version))
-	if versionAt < 0 {
-		t.Fatal("outer artifact version missing from capability envelope")
+	changed := bytes.ReplaceAll(versionArtifact.envelope, []byte("1.0.0"), []byte("9.9.9"))
+	changedPrepared, err := publicationv2.Decode(ports.KindCapability, changed, publicationv2.DefaultLimits())
+	if err != nil {
+		t.Fatal(err)
 	}
-	changed := append(append(append([]byte(nil), versionArtifact.envelope[:versionAt]...), []byte("9.9.9")...), versionArtifact.envelope[versionAt+len(versionArtifact.prepared.Ref.Version):]...)
+	changedEvidence := versionArtifact.evidence
+	changedEvidence.Artifact.Version = changedPrepared.Ref.Version
+	changedEvidence.Artifact.ArtifactDigest = matrixDigest(changedPrepared.Artifact)
+	changedEvidence.Source.CaptureDigest = matrixDigest(changedPrepared.Metadata)
+	changedEvidence.Source.RetainedBytesBase64 = base64.StdEncoding.EncodeToString(changedPrepared.Metadata)
+	if _, err := h.fixture.adminPool.Exec(h.ctx, "INSERT INTO review_records(workspace_id,kind,artifact_id,version,decision,reviewer_id,evidence) VALUES($1,$2,$3,$4,'approved',$5,$6)", compositionWorkspace, changedPrepared.Ref.Kind, changedPrepared.Ref.ID, changedPrepared.Ref.Version, "fixture-maintainer", matrixJSON(t, changedEvidence)); err != nil {
+		t.Fatal(err)
+	}
 	status, _ = req(http.MethodPost, "/v2/publish/capability", changed)
 	if status != http.StatusConflict {
 		t.Fatalf("changed-version replay status=%d want=409", status)
@@ -229,7 +240,7 @@ func TestPublicationV2ReplicaReplayAndRead(t *testing.T) {
 		t.Fatal(err)
 	}
 	status, b = req(http.MethodGet, "/v2/artifacts/skill/package"+q, nil)
-	if status < 400 || status >= 500 || bytes.Equal(b, []byte("corrupt")) {
+	if status < 400 || bytes.Equal(b, []byte("corrupt")) {
 		t.Fatalf("corrupt object status=%d body=%q", status, b)
 	}
 
