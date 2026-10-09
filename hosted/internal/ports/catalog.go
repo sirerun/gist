@@ -39,7 +39,10 @@ type CatalogRecord struct {
 	PackageDigest Digest
 	// ObjectKey is the storage-owned opaque object reference for v2 content.
 	ObjectKey string
-	Metadata  []byte
+	// ArtifactSize is the exact retained v2 artifact length. Legacy records
+	// use zero and continue through their separate digest-addressed adapter.
+	ArtifactSize int64
+	Metadata     []byte
 }
 
 type SearchQuery struct {
