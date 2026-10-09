@@ -21,10 +21,23 @@ import (
 // which Open consults on a cache miss when UseCatalog has been called, so
 // bindings survive a restart.
 type ObjectStore struct {
-	blobs   blobBackend
-	mu      sync.RWMutex
-	refs    map[string]ports.Digest
-	catalog ports.CatalogStore
+	closeOnce sync.Once
+	closeErr  error
+	blobs     blobBackend
+	mu        sync.RWMutex
+	refs      map[string]ports.Digest
+	catalog   ports.CatalogStore
+}
+
+// Close releases backend resources exactly once. S3 owns no local handle;
+// filesystem stores close their pinned root after request/janitor shutdown.
+func (s *ObjectStore) Close() error {
+	s.closeOnce.Do(func() {
+		if closer, ok := s.blobs.(io.Closer); ok {
+			s.closeErr = closer.Close()
+		}
+	})
+	return s.closeErr
 }
 
 // UseCatalog makes the catalog the durable fallback for ref->digest lookups.

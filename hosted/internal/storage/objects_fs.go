@@ -39,6 +39,13 @@ func newFSBackend(root string) (*fsBackend, error) {
 	return &fsBackend{root: abs, rootFD: r}, nil
 }
 
+func (f *fsBackend) Close() error {
+	if f.rootFD == nil {
+		return nil
+	}
+	return f.rootFD.Close()
+}
+
 // mkdirRootNoSymlink walks from the filesystem root, rejecting every existing
 // link or non-directory before creating the next component. This prevents
 // MkdirAll from following a configured-root symlink before validation.
