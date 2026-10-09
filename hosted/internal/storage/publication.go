@@ -457,12 +457,15 @@ func (s *PublicationStore) Read(ctx context.Context, p ports.Principal, ref port
 		if e != nil {
 			return ports.PublicationRead{}, e
 		}
-		defer r.Close()
 		readLimit := maxBytes
 		if readLimit < int64(^uint64(0)>>1) {
 			readLimit++
 		}
 		body, e = io.ReadAll(io.LimitReader(r, readLimit))
+		closeErr := r.Close()
+		if e == nil {
+			e = closeErr
+		}
 		if e != nil {
 			return ports.PublicationRead{}, e
 		}

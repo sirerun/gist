@@ -61,6 +61,24 @@ def file_hash(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def check_source_amendment(entry: dict[str, Any], amendment: dict[str, Any]) -> None:
+    # ADR012 permits this internal additive projection only. Frozen wire files
+    # and all other baseline ports never use this migration path.
+    if entry["path"] != "hosted/internal/ports/catalog.go" or amendment.get("path") != entry["path"]:
+        fail("unsupported v2 source amendment")
+    if amendment.get("baseline_sha256") != entry.get("sha256"):
+        fail("v2 source amendment is not bound to the frozen v1 baseline")
+    current = (ROOT / entry["path"]).read_text(encoding="utf-8")
+    before, after = amendment.get("baseline_fragment"), amendment.get("amended_fragment")
+    if not isinstance(before, str) or not isinstance(after, str) or not before or not after:
+        fail("v2 source amendment requires exact baseline and amended fragments")
+    if current.count(after) != 1 or file_hash(ROOT / entry["path"]) != amendment.get("sha256"):
+        fail("stale v2 source amendment")
+    baseline = current.replace(after, before, 1).encode("utf-8")
+    if hashlib.sha256(baseline).hexdigest() != entry["sha256"]:
+        fail("v2 source amendment alters the frozen baseline outside the approved addition")
+
+
 def check_contracts(freeze_check: bool) -> None:
     directory = ROOT / "contracts" / "registry" / "v1"
     if not directory.is_dir():
@@ -132,12 +150,31 @@ def check_contracts(freeze_check: bool) -> None:
         entries = lock_doc.get("files")
         if not isinstance(entries, list) or not entries:
             fail("contract lock must contain non-empty files")
+        amendments = {}
+        amendment_path = ROOT / "contracts/registry/v2/source-amendments.json"
+        if amendment_path.is_file():
+            document = read_json(amendment_path)
+            if document.get("amendment_version") != "1" or document.get("contract") != "v2" or not isinstance(document.get("files"), list):
+                fail("invalid v2 source amendment document")
+            for amendment in document["files"]:
+                if not isinstance(amendment, dict) or amendment.get("path") in amendments:
+                    fail("invalid or duplicate v2 source amendment")
+                amendments[amendment.get("path")] = amendment
+        consumed = set()
         for entry in entries:
             if not isinstance(entry, dict) or not isinstance(entry.get("path"), str):
                 fail("contract lock entries require path and sha256")
             path = ROOT / entry["path"]
-            if not path.is_file() or entry.get("sha256") != file_hash(path):
+            amendment = amendments.get(entry["path"])
+            if amendment is not None:
+                if not path.is_file():
+                    fail("missing amended source file")
+                check_source_amendment(entry, amendment)
+                consumed.add(entry["path"])
+            elif not path.is_file() or entry.get("sha256") != file_hash(path):
                 fail(f"stale or missing contract lock entry: {entry.get('path')}")
+        if consumed != set(amendments):
+            fail("unmatched v2 source amendment")
 
 
 def _references(value: Any):

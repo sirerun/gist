@@ -179,12 +179,11 @@ func TestOwnedV2CatalogReadsRecheckCurrentRecordAndExactSize(t *testing.T) {
 }
 
 type ownedS3Fake struct {
-	putErr    error
-	get       []byte
-	gotKey    string
-	deleted   []string
-	putStatus int
-	gets      int
+	putErr  error
+	get     []byte
+	gotKey  string
+	deleted []string
+	gets    int
 }
 
 func (f *ownedS3Fake) PutObject(_ context.Context, in *s3.PutObjectInput, _ ...func(*s3.Options)) (*s3.PutObjectOutput, error) {

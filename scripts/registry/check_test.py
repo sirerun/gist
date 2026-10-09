@@ -1,3 +1,4 @@
+import hashlib
 import contextlib
 import io
 import json
@@ -62,6 +63,29 @@ class RegistryCheckTests(unittest.TestCase):
         with mock.patch.object(check, "ROOT", Path(tempfile.mkdtemp())):
             with self.assertRaises(check.CheckError):
                 check.validate_evidence_document(document, "M1")
+
+    def test_v2_amendment_preserves_baseline_and_rejects_other_changes(self):
+        baseline = "type CatalogRecord struct {\n\tMetadata []byte\n}\n"
+        before, after = "\tMetadata []byte\n", "\tDocumentDigest Digest\n\tMetadata []byte\n"
+        current = baseline.replace(before, after)
+        path = "hosted/internal/ports/catalog.go"
+        entry = {"path": path, "sha256": hashlib.sha256(baseline.encode()).hexdigest()}
+        amendment = {"path": path, "baseline_sha256": entry["sha256"], "sha256": hashlib.sha256(current.encode()).hexdigest(), "baseline_fragment": before, "amended_fragment": after}
+        with tempfile.TemporaryDirectory() as directory, mock.patch.object(check, "ROOT", Path(directory)):
+            source = Path(directory) / path
+            source.parent.mkdir(parents=True)
+            source.write_text(current)
+            check.check_source_amendment(entry, amendment)
+            for modified in (current.replace("CatalogRecord", "BrokenRecord"), current.replace("Metadata []byte", "Metadata string")):
+                source.write_text(modified)
+                # Even repinning the current digest cannot hide baseline drift.
+                amendment["sha256"] = hashlib.sha256(modified.encode()).hexdigest()
+                with self.assertRaises(check.CheckError):
+                    check.check_source_amendment(entry, amendment)
+
+    def test_v2_amendment_cannot_override_frozen_wire_file(self):
+        with self.assertRaises(check.CheckError):
+            check.check_source_amendment({"path": "contracts/registry/v1/common.schema.json"}, {"path": "contracts/registry/v1/common.schema.json"})
 
     def test_cli_reports_failure(self):
         output = io.StringIO()

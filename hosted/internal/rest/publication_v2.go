@@ -14,8 +14,6 @@ import (
 	"github.com/sirerun/gist/hosted/internal/ports"
 )
 
-const v2ErrorLimit = 16 << 10
-
 func v2Kind(raw string) (ports.ArtifactKind, bool) {
 	switch raw {
 	case "skill":
@@ -164,7 +162,7 @@ func validPublicationID(value string) bool {
 	}
 	for i, r := range value {
 		valid := r >= 'a' && r <= 'z' || r >= '0' && r <= '9' || r == '.' || r == '_' || r == '/' || r == '-'
-		if !valid || i == 0 && !(r >= 'a' && r <= 'z' || r >= '0' && r <= '9') {
+		if !valid || i == 0 && (r < 'a' || r > 'z') && (r < '0' || r > '9') {
 			return false
 		}
 	}
