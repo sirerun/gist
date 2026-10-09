@@ -5,6 +5,7 @@ package app
 import (
 	"bytes"
 	"context"
+	"errors"
 	"github.com/sirerun/gist/hosted/internal/identity"
 	"io"
 	"net/http"
@@ -17,13 +18,14 @@ import (
 // TLS HTTP server and filesystem. Only trusted synthetic reviews/namespaces
 // are seeded; callers publish every positive artifact through HTTP themselves.
 type matrixHarness struct {
-	fixture   compositionPostgres
-	artifacts map[string]matrixPublication
-	verifier  *matrixIdentityVerifier
-	instance  *App
-	server    *httptest.Server
-	token     string
-	ctx       context.Context
+	fixture          compositionPostgres
+	artifacts        map[string]matrixPublication
+	verifier         *matrixIdentityVerifier
+	instance         *App
+	server           *httptest.Server
+	token            string
+	ctx              context.Context
+	shutdownExpected error
 }
 
 func startMatrixHarness(t *testing.T, configure func(*Config)) *matrixHarness {
@@ -51,9 +53,10 @@ func startMatrixHarness(t *testing.T, configure func(*Config)) *matrixHarness {
 	if err != nil {
 		t.Fatal(err)
 	}
+	h := &matrixHarness{fixture: f, artifacts: artifacts, verifier: verifier, instance: a, ctx: ctx}
 	t.Cleanup(func() {
-		if err := a.Shutdown(context.Background()); err != nil {
-			t.Error(err)
+		if err := a.Shutdown(context.Background()); !errors.Is(err, h.shutdownExpected) {
+			t.Errorf("shutdown = %v want %v", err, h.shutdownExpected)
 		}
 	})
 	assertCompositionRuntimeRole(t, a, f.role)
@@ -63,7 +66,8 @@ func startMatrixHarness(t *testing.T, configure func(*Config)) *matrixHarness {
 	}
 	server := httptest.NewTLSServer(a.Handler())
 	t.Cleanup(server.Close)
-	return &matrixHarness{fixture: f, artifacts: artifacts, verifier: verifier, instance: a, server: server, token: token, ctx: ctx}
+	h.server, h.token = server, token
+	return h
 }
 func (h *matrixHarness) request(t *testing.T, method, path string, body []byte) (int, http.Header, []byte) {
 	t.Helper()

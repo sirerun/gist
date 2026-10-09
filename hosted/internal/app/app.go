@@ -38,6 +38,7 @@ type App struct {
 	// sessions issues reference authorization-server session cookies.
 	sessions                  *oauth.CookieSessions
 	server                    *http.Server
+	requests                  *requestLifetime
 	closeOnce                 sync.Once
 	shutdownDone              chan struct{}
 	shutdownErr               error
@@ -177,7 +178,7 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		return nil, err
 	}
 	prm := as.ProtectedResourceMetadataURL()
-	a := &App{cfg: cfg, pool: pool, objects: objects, issuer: issuer, identities: catalog, sessions: sessions}
+	a := &App{cfg: cfg, pool: pool, objects: objects, issuer: issuer, identities: catalog, sessions: sessions, requests: &requestLifetime{}}
 	// Qualify explicit current maintenance actors and the first bounded purge
 	// before accepting traffic. This never enumerates or invents tenant authority.
 	maintenanceCtx, stopMaintenance := context.WithTimeout(ctx, cfg.RequestTimeout)
@@ -187,7 +188,7 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		pool.Close()
 		return nil, maintenanceErr
 	}
-	handler := requestContext{rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, ready: func(ctx context.Context) error {
+	handler := requestContext{lifetime: a.requests, rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, ready: func(ctx context.Context) error {
 		if err := a.maintenanceReady(); err != nil {
 			return err
 		}
@@ -295,6 +296,9 @@ func (a *App) ListenAndServe() error {
 func (a *App) Shutdown(ctx context.Context) error {
 	a.closeOnce.Do(func() {
 		a.shutdownDone = make(chan struct{})
+		if a.requests != nil {
+			a.requests.stop()
+		}
 		if a.janitorCancel != nil {
 			a.janitorCancel()
 		}
@@ -314,6 +318,12 @@ func (a *App) Shutdown(ctx context.Context) error {
 			}
 			if a.publicationJanitorDone != nil {
 				<-a.publicationJanitorDone
+			}
+			// Forced connection close cancels requests but does not wait for
+			// their handlers. Keep both backend resources alive until all
+			// already admitted work has actually returned.
+			if a.requests != nil {
+				a.requests.wait()
 			}
 			if a.objects != nil {
 				err = errors.Join(err, a.objects.Close())
@@ -338,11 +348,29 @@ func (a *App) Shutdown(ctx context.Context) error {
 }
 
 type requestContext struct {
+	lifetime         *requestLifetime
 	rest, mcp, oauth http.Handler
 	ready            func(context.Context) error
 }
 
 func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if h.lifetime != nil {
+		if !h.lifetime.enter() {
+			// Keep shutdown errors canonical and independently bounded;
+			// never echo an unvalidated incoming request-id header here.
+			id := "req_shutdown"
+			var random [12]byte
+			if _, err := rand.Read(random[:]); err == nil {
+				id = fmt.Sprintf("req_%x", random)
+			}
+			w.Header().Set("X-Request-ID", id)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusServiceUnavailable)
+			_ = json.NewEncoder(w).Encode(rest.Error{Code: "service_unavailable", Message: "Service unavailable", RequestID: id, Retryable: true})
+			return
+		}
+		defer h.lifetime.leave()
+	}
 	if r.Header.Get("X-Request-ID") == "" {
 		var b [12]byte
 		if _, err := rand.Read(b[:]); err == nil {
