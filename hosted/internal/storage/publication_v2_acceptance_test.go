@@ -174,7 +174,7 @@ func TestPublicationV2PublishReplayAliasRestartAndConflict(t *testing.T) {
 	if err != nil || alias.Created || string(alias.Body) != string(first.Body) {
 		t.Fatalf("alias=%+v err=%v", alias, err)
 	}
-	var attempts, events, identities int
+	var attempts, events int
 	if err := WithTenantPrincipal(context.Background(), pool, tenantFromPrincipal(p), func(ctx context.Context, tx pgx.Tx) error {
 		if err := tx.QueryRow(ctx, `SELECT count(*) FROM publication_attempts WHERE workspace_id=$1`, p.WorkspaceID).Scan(&attempts); err != nil {
 			return err
@@ -305,7 +305,7 @@ func TestPublicationV2ConcurrentKeysAndOutboxRollbackRetry(t *testing.T) {
 			t.Fatalf("concurrent alias publish: %v", e)
 		}
 	}
-	var attempts, events int
+	var attempts, events, identities int
 	if err := WithTenantPrincipal(context.Background(), pool, tenantFromPrincipal(p), func(ctx context.Context, tx pgx.Tx) error {
 		if e := tx.QueryRow(ctx, `SELECT count(*) FROM publication_attempts WHERE workspace_id=$1`, p.WorkspaceID).Scan(&attempts); e != nil {
 			return e
