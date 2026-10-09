@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gist.local/contracts/registry/v2/taxonomy.publish.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact",
+    "max_bytes",
+    "idempotency_key"
+  ],
+  "properties": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "document"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "document": {
+          "$ref": "https://gist.local/contracts/registry/v1/taxonomy.schema.json"
+        }
+      }
+    },
+    "max_bytes": {
+      "$ref": "common.schema.json#/$defs/budget"
+    },
+    "idempotency_key": {
+      "$ref": "common.schema.json#/$defs/idempotencyKey"
+    }
+  }
+}

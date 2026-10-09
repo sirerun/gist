@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gist.local/contracts/registry/v2/publish-response.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "id",
+    "version",
+    "artifact_digest",
+    "replayed"
+  ],
+  "properties": {
+    "kind": {
+      "enum": [
+        "skill",
+        "capability",
+        "tool",
+        "provider",
+        "binding",
+        "taxonomy"
+      ]
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_digest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "manifest_digest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "package_digest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "replayed": {
+      "type": "boolean"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "skill"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "required": [
+          "manifest_digest",
+          "package_digest"
+        ]
+      },
+      "else": {
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "manifest_digest"
+              ]
+            },
+            {
+              "required": [
+                "package_digest"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gist.local/contracts/registry/v2/skill.publish.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact",
+    "max_bytes",
+    "idempotency_key"
+  ],
+  "properties": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "package"
+      ],
+      "properties": {
+        "package": {
+          "$ref": "skill-package.schema.json"
+        }
+      }
+    },
+    "max_bytes": {
+      "$ref": "common.schema.json#/$defs/budget"
+    },
+    "idempotency_key": {
+      "$ref": "common.schema.json#/$defs/idempotencyKey"
+    }
+  }
+}
