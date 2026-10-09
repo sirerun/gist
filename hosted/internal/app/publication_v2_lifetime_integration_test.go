@@ -69,7 +69,7 @@ func TestPublicationV2FailedConstructionClosesObjectRoot(t *testing.T) {
 	}
 	cfg := h.instance.cfg
 	v2 := *cfg.PublicationV2
-	v2.MaintenanceTargets = []MaintenanceTarget{{Issuer: compositionIssuer, Subject: "missing-maintainer", WorkspaceID: compositionWorkspace}}
+	v2.MaintenanceTargets = []MaintenanceTarget{{Subject: "missing-maintainer", WorkspaceID: compositionWorkspace}}
 	cfg.PublicationV2 = &v2
 	if instance, err := New(h.ctx, cfg); err == nil || instance != nil {
 		if instance != nil {
