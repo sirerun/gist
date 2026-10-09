@@ -38,8 +38,9 @@ func (s *Postgres) Get(ctx context.Context, ref ports.ArtifactRef) (ports.Catalo
 	var record ports.CatalogRecord
 	var metadata []byte
 	var state, da, dv, mda, mdv, dda, ddv, pda, pdv, objectKey string
+	var artifactSize int64
 	err := WithTenant(ctx, s.pool, ref.WorkspaceID, func(ctx context.Context, tx pgx.Tx) error {
-		return tx.QueryRow(ctx, `SELECT state,digest_algorithm,digest_value,COALESCE(manifest_digest_algorithm,''),COALESCE(manifest_digest_value,''),COALESCE(document_digest_algorithm,''),COALESCE(document_digest_value,''),COALESCE(package_digest_algorithm,''),COALESCE(package_digest_value,''),COALESCE(object_key,''),COALESCE(metadata_bytes,convert_to(metadata::text,'UTF8')) FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4`, ref.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&state, &da, &dv, &mda, &mdv, &dda, &ddv, &pda, &pdv, &objectKey, &metadata)
+		return tx.QueryRow(ctx, `SELECT state,digest_algorithm,digest_value,COALESCE(manifest_digest_algorithm,''),COALESCE(manifest_digest_value,''),COALESCE(document_digest_algorithm,''),COALESCE(document_digest_value,''),COALESCE(package_digest_algorithm,''),COALESCE(package_digest_value,''),COALESCE(object_key,''),COALESCE(octet_length(artifact_bytes),0),COALESCE(metadata_bytes,convert_to(metadata::text,'UTF8')) FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4`, ref.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&state, &da, &dv, &mda, &mdv, &dda, &ddv, &pda, &pdv, &objectKey, &artifactSize, &metadata)
 	})
 	if errors.Is(err, pgx.ErrNoRows) {
 		return ports.CatalogRecord{}, ErrNotFound
@@ -53,6 +54,7 @@ func (s *Postgres) Get(ctx context.Context, ref ports.ArtifactRef) (ports.Catalo
 	record.DocumentDigest = ports.Digest{Algorithm: dda, Value: ddv}
 	record.PackageDigest = ports.Digest{Algorithm: pda, Value: pdv}
 	record.ObjectKey = objectKey
+	record.ArtifactSize = artifactSize
 	record.Metadata = append([]byte(nil), metadata...)
 	return record, nil
 }
@@ -93,7 +95,7 @@ func (s *Postgres) Search(ctx context.Context, q ports.SearchQuery) (ports.Searc
 		scan = maxSearchScan
 	}
 	args = append(args, scan)
-	query := `SELECT kind, artifact_id, version, state, digest_algorithm, digest_value, COALESCE(manifest_digest_algorithm,''), COALESCE(manifest_digest_value,''), COALESCE(document_digest_algorithm,''), COALESCE(document_digest_value,''), COALESCE(package_digest_algorithm,''), COALESCE(package_digest_value,''), COALESCE(object_key,''), COALESCE(metadata_bytes,convert_to(metadata::text,'UTF8')) FROM catalog_versions WHERE ` + strings.Join(where, " AND ") + ` ORDER BY kind, artifact_id, version LIMIT $` + fmt.Sprint(len(args))
+	query := `SELECT kind, artifact_id, version, state, digest_algorithm, digest_value, COALESCE(manifest_digest_algorithm,''), COALESCE(manifest_digest_value,''), COALESCE(document_digest_algorithm,''), COALESCE(document_digest_value,''), COALESCE(package_digest_algorithm,''), COALESCE(package_digest_value,''), COALESCE(object_key,''), COALESCE(octet_length(artifact_bytes),0), COALESCE(metadata_bytes,convert_to(metadata::text,'UTF8')) FROM catalog_versions WHERE ` + strings.Join(where, " AND ") + ` ORDER BY kind, artifact_id, version LIMIT $` + fmt.Sprint(len(args))
 	type ranked struct {
 		record ports.CatalogRecord
 		match  lexical.Match
@@ -107,11 +109,12 @@ func (s *Postgres) Search(ctx context.Context, q ports.SearchQuery) (ports.Searc
 		defer rows.Close()
 		for rows.Next() {
 			var kind, id, version, state, da, dv, mda, mdv, dda, ddv, pda, pdv, objectKey string
+			var artifactSize int64
 			var metadata []byte
-			if err := rows.Scan(&kind, &id, &version, &state, &da, &dv, &mda, &mdv, &dda, &ddv, &pda, &pdv, &objectKey, &metadata); err != nil {
+			if err := rows.Scan(&kind, &id, &version, &state, &da, &dv, &mda, &mdv, &dda, &ddv, &pda, &pdv, &objectKey, &artifactSize, &metadata); err != nil {
 				return err
 			}
-			record := ports.CatalogRecord{Ref: ports.ArtifactRef{WorkspaceID: q.Principal.WorkspaceID, Kind: ports.ArtifactKind(kind), ID: id, Version: version}, State: state, Digest: ports.Digest{Algorithm: da, Value: dv}, ManifestDigest: ports.Digest{Algorithm: mda, Value: mdv}, DocumentDigest: ports.Digest{Algorithm: dda, Value: ddv}, PackageDigest: ports.Digest{Algorithm: pda, Value: pdv}, ObjectKey: objectKey, Metadata: append([]byte(nil), metadata...)}
+			record := ports.CatalogRecord{Ref: ports.ArtifactRef{WorkspaceID: q.Principal.WorkspaceID, Kind: ports.ArtifactKind(kind), ID: id, Version: version}, State: state, Digest: ports.Digest{Algorithm: da, Value: dv}, ManifestDigest: ports.Digest{Algorithm: mda, Value: mdv}, DocumentDigest: ports.Digest{Algorithm: dda, Value: ddv}, PackageDigest: ports.Digest{Algorithm: pda, Value: pdv}, ObjectKey: objectKey, ArtifactSize: artifactSize, Metadata: append([]byte(nil), metadata...)}
 			var match lexical.Match
 			if len(terms) > 0 {
 				doc, err := lexical.DocumentFromMetadata(kind, id, metadata)
@@ -173,18 +176,19 @@ func (s *Postgres) ListVersions(ctx context.Context, ref ports.ArtifactRef, afte
 	}
 	var out []ports.CatalogRecord
 	err := WithTenant(ctx, s.pool, ref.WorkspaceID, func(ctx context.Context, tx pgx.Tx) error {
-		rows, err := tx.Query(ctx, `SELECT version,state,digest_algorithm,digest_value,COALESCE(manifest_digest_algorithm,''),COALESCE(manifest_digest_value,''),COALESCE(document_digest_algorithm,''),COALESCE(document_digest_value,''),COALESCE(package_digest_algorithm,''),COALESCE(package_digest_value,''),COALESCE(object_key,''),COALESCE(metadata_bytes,convert_to(metadata::text,'UTF8')) FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND state IN ('published','deprecated') AND ($4 = '' OR (version_key, version COLLATE "C") > (registry_semver_key($4), $4 COLLATE "C")) ORDER BY version_key, version COLLATE "C" LIMIT $5`, ref.WorkspaceID, ref.Kind, ref.ID, after, limit)
+		rows, err := tx.Query(ctx, `SELECT version,state,digest_algorithm,digest_value,COALESCE(manifest_digest_algorithm,''),COALESCE(manifest_digest_value,''),COALESCE(document_digest_algorithm,''),COALESCE(document_digest_value,''),COALESCE(package_digest_algorithm,''),COALESCE(package_digest_value,''),COALESCE(object_key,''),COALESCE(octet_length(artifact_bytes),0),COALESCE(metadata_bytes,convert_to(metadata::text,'UTF8')) FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND state IN ('published','deprecated') AND ($4 = '' OR (version_key, version COLLATE "C") > (registry_semver_key($4), $4 COLLATE "C")) ORDER BY version_key, version COLLATE "C" LIMIT $5`, ref.WorkspaceID, ref.Kind, ref.ID, after, limit)
 		if err != nil {
 			return err
 		}
 		defer rows.Close()
 		for rows.Next() {
 			var version, state, da, dv, mda, mdv, dda, ddv, pda, pdv, objectKey string
+			var artifactSize int64
 			var metadata []byte
-			if err := rows.Scan(&version, &state, &da, &dv, &mda, &mdv, &dda, &ddv, &pda, &pdv, &objectKey, &metadata); err != nil {
+			if err := rows.Scan(&version, &state, &da, &dv, &mda, &mdv, &dda, &ddv, &pda, &pdv, &objectKey, &artifactSize, &metadata); err != nil {
 				return err
 			}
-			out = append(out, ports.CatalogRecord{Ref: ports.ArtifactRef{WorkspaceID: ref.WorkspaceID, Kind: ref.Kind, ID: ref.ID, Version: version}, State: state, Digest: ports.Digest{Algorithm: da, Value: dv}, ManifestDigest: ports.Digest{Algorithm: mda, Value: mdv}, DocumentDigest: ports.Digest{Algorithm: dda, Value: ddv}, PackageDigest: ports.Digest{Algorithm: pda, Value: pdv}, ObjectKey: objectKey, Metadata: append([]byte(nil), metadata...)})
+			out = append(out, ports.CatalogRecord{Ref: ports.ArtifactRef{WorkspaceID: ref.WorkspaceID, Kind: ref.Kind, ID: ref.ID, Version: version}, State: state, Digest: ports.Digest{Algorithm: da, Value: dv}, ManifestDigest: ports.Digest{Algorithm: mda, Value: mdv}, DocumentDigest: ports.Digest{Algorithm: dda, Value: ddv}, PackageDigest: ports.Digest{Algorithm: pda, Value: pdv}, ObjectKey: objectKey, ArtifactSize: artifactSize, Metadata: append([]byte(nil), metadata...)})
 		}
 		return rows.Err()
 	})
