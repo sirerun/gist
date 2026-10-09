@@ -63,7 +63,7 @@ func TestV2ReadRejectsAmbiguousQueryAndClampsBudget(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, path := range []string{"/v2/artifacts/tool?id=x&id=y&version=1&max_bytes=4", "/v2/artifacts/tool?id=x&version=1&unexpected=z&max_bytes=4"} {
+	for _, path := range []string{"/v2/artifacts/tool?id=x&id=y&version=1&max_bytes=4", "/v2/artifacts/tool?id=x&version=1&unexpected=z&max_bytes=4", "/v2/artifacts/tool?id=x&version=1.0.0&max_bytes=04", "/v2/artifacts/tool?id=x&version=1.0.0&max_bytes=%2B4", "/v2/artifacts/tool?id=x&version=1.0.0&max_bytes=4&"} {
 		r := httptest.NewRequest(http.MethodGet, path, nil)
 		r.Header.Set("Authorization", "Bearer test")
 		w := httptest.NewRecorder()
@@ -78,5 +78,23 @@ func TestV2ReadRejectsAmbiguousQueryAndClampsBudget(t *testing.T) {
 	h.ServeHTTP(w, r)
 	if w.Code != 200 || reader.limit != 10 || reader.ref.WorkspaceID != "workspace-a" || reader.ref.Kind != ports.KindTool {
 		t.Fatalf("status=%d limit=%d ref=%+v", w.Code, reader.limit, reader.ref)
+	}
+}
+
+func TestV2PublishRejectsAnyQueryBeforeCallingPublisher(t *testing.T) {
+	pub := &v2PublisherStub{result: ports.PublicationResult{Body: []byte(`{"ok":true}`), Created: true, ArtifactDigest: ports.Digest{Algorithm: "sha256", Value: strings.Repeat("a", 64)}}}
+	h, err := New(Services{Identity: testIdentity{}, Authorizer: testPolicy{}, V2Publisher: pub, Limits: Limits{MaxResponseBytes: 1024}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, target := range []string{"/v2/publish/tool?x=1", "/v2/publish/tool?x=1&x=2"} {
+		r := httptest.NewRequest(http.MethodPost, target, strings.NewReader(`{}`))
+		r.Header.Set("Authorization", "Bearer test")
+		r.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, r)
+		if w.Code != http.StatusUnprocessableEntity || pub.calls != 0 {
+			t.Fatalf("target=%s status=%d publisher calls=%d body=%s", target, w.Code, pub.calls, w.Body.String())
+		}
 	}
 }
