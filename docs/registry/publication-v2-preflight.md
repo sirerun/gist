@@ -73,7 +73,7 @@ Source quota defaults: at most 64 uncommitted attempts and 100,000 permanent ide
 The frozen v1 lock pins the complete catalog port source file as well as wire
 contracts. V2's approved catalog projection adds DocumentDigest, PackageDigest,
 ObjectKey and ArtifactSize to the internal record. The explicit
-[source amendment](../../contracts/registry/v2/source-amendments.json) pins both
+[source amendment](../../contracts/registry/implementation-v2.json) pins both
 the original v1 hash and current source hash and the exact additive fragment.
 The normal freeze gate reconstructs and verifies the complete original file;
 changes outside that fragment, stale hashes, duplicate/unmatched amendments and
