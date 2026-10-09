@@ -1,0 +1,6 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://gist.local/contracts/registry/v1/inventory.schema.json",
+  "type":"array", "uniqueItems":true,
+  "items":{"type":"object","additionalProperties":false,"required":["path","size","sha256","media_type"],"properties":{"path":{"type":"string","pattern":"^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*//)[^\\u0000]+$"},"size":{"type":"integer","minimum":0},"sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"},"media_type":{"type":"string","minLength":1}}}
+}

@@ -1,0 +1,434 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gist.local/contracts/registry/v2/admission-evidence.schema.json",
+  "description": "Trusted server review-record evidence; never a public request envelope or runtime execution grant.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "evidence_version": {
+      "const": "1"
+    },
+    "workspace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "skill",
+            "capability",
+            "tool",
+            "provider",
+            "binding",
+            "taxonomy"
+          ]
+        },
+        "id": {
+          "$ref": "../v1/common.schema.json#/properties/id",
+          "maxLength": 256
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_digest": {
+          "$ref": "common.schema.json#/$defs/digest"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "version",
+        "artifact_digest"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "uri": {
+          "type": "string",
+          "minLength": 1
+        },
+        "captured_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "collector": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "id",
+            "version"
+          ]
+        },
+        "capture_digest": {
+          "$ref": "common.schema.json#/$defs/digest"
+        },
+        "retained_bytes_base64": {
+          "type": "string",
+          "minLength": 4
+        },
+        "media_type": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "uri",
+        "captured_at",
+        "collector",
+        "capture_digest",
+        "retained_bytes_base64",
+        "media_type"
+      ]
+    },
+    "rights": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "license": {
+          "type": "string",
+          "minLength": 1
+        },
+        "redistribution": {
+          "const": true
+        },
+        "scope": {
+          "const": "workspace_only"
+        },
+        "grant_digest": {
+          "$ref": "common.schema.json#/$defs/digest"
+        },
+        "allowed_use": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "private_distribution",
+              "catalog_metadata"
+            ]
+          }
+        },
+        "retained_grant_base64": {
+          "type": "string",
+          "minLength": 4
+        }
+      },
+      "required": [
+        "license",
+        "redistribution",
+        "scope",
+        "grant_digest",
+        "allowed_use",
+        "retained_grant_base64"
+      ]
+    },
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "issuer",
+        "subject",
+        "reviewed_at"
+      ]
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "origin_publisher": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_revision": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "approved_support_state": {
+      "enum": [
+        "planned",
+        "catalog_only",
+        "resolvable",
+        "executable",
+        "degraded",
+        "retired"
+      ]
+    },
+    "provider_qualification": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "receipt_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "receipt_digest": {
+          "$ref": "common.schema.json#/$defs/digest"
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "receipt_ref",
+        "receipt_digest",
+        "valid_until"
+      ]
+    },
+    "conformance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "adapter_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "executor_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "executor_revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fixture_digest": {
+          "$ref": "common.schema.json#/$defs/digest"
+        },
+        "retained_fixture_base64": {
+          "type": "string",
+          "minLength": 4
+        },
+        "executed_case_count": {
+          "type": "integer",
+          "minimum": 5
+        },
+        "result_digest": {
+          "$ref": "common.schema.json#/$defs/digest"
+        },
+        "exact_refs": {
+          "type": "array",
+          "minItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "passed": {
+          "const": true
+        }
+      },
+      "required": [
+        "adapter_version",
+        "executor_id",
+        "executor_revision",
+        "fixture_digest",
+        "retained_fixture_base64",
+        "executed_case_count",
+        "result_digest",
+        "exact_refs",
+        "passed"
+      ]
+    },
+    "taxonomy_grant": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "taxonomy_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "edition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allowed_fields": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "taxonomy_id",
+        "edition",
+        "allowed_fields"
+      ]
+    }
+  },
+  "required": [
+    "evidence_version",
+    "workspace_id",
+    "artifact",
+    "source",
+    "rights",
+    "reviewer",
+    "synthetic"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "artifact": {
+            "properties": {
+              "kind": {
+                "const": "provider"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "approved_support_state"
+        ]
+      },
+      "else": {
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "approved_support_state"
+              ]
+            },
+            {
+              "required": [
+                "provider_qualification"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "approved_support_state": {
+            "enum": [
+              "resolvable",
+              "executable"
+            ]
+          }
+        },
+        "required": [
+          "approved_support_state"
+        ]
+      },
+      "then": {
+        "required": [
+          "provider_qualification"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "artifact": {
+            "properties": {
+              "kind": {
+                "const": "binding"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "conformance"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "conformance"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "artifact": {
+            "properties": {
+              "kind": {
+                "const": "taxonomy"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "taxonomy_grant"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "taxonomy_grant"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "artifact": {
+            "properties": {
+              "kind": {
+                "const": "skill"
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "not": {
+          "required": [
+            "origin_publisher"
+          ]
+        }
+      }
+    }
+  ]
+}

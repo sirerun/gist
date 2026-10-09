@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gist.local/contracts/registry/v2/skill-package.schema.json",
+  "description": "Base64 ZIP wrapper; decoded manifest.json MUST validate against the frozen v1 manifest schema. ZIP contents are semantic/runtime validation, not JSON Schema instance data.",
+  "$defs": {
+    "archive_manifest": {
+      "$ref": "https://gist.local/contracts/registry/v1/manifest.schema.json"
+    }
+  },
+  "$ref": "common.schema.json#/$defs/package"
+}
