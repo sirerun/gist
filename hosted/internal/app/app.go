@@ -315,7 +315,9 @@ func (a *App) Shutdown(ctx context.Context) error {
 			if a.publicationJanitorDone != nil {
 				<-a.publicationJanitorDone
 			}
-			err = errors.Join(err, a.objects.Close())
+			if a.objects != nil {
+				err = errors.Join(err, a.objects.Close())
+			}
 			a.pool.Close()
 			a.shutdownErr = err
 			close(a.shutdownDone)
