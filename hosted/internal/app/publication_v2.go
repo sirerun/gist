@@ -78,14 +78,14 @@ func (p *publicationV2) PublishV2(ctx context.Context, principal ports.Principal
 		}
 		refs, refList, err := bindingRecords(ctx, p.catalog, principal, prepared)
 		if err != nil {
-			return ports.PublicationResult{}, err
+			return ports.PublicationResult{}, mapPublicationError(err)
 		}
 		golden, err := base64.StdEncoding.Strict().DecodeString(evidence.Conformance.RetainedFixtureBase64)
 		if err != nil {
 			return ports.PublicationResult{}, publicationv2.ErrValidation
 		}
 		if err := p.config.BindingVerifier.VerifyPublicationBinding(ctx, refs, evidence, golden); err != nil {
-			return ports.PublicationResult{}, err
+			return ports.PublicationResult{}, rest.ErrValidationFailed
 		}
 		_ = refList
 		protectedRecords = append(protectedRecords, refs...)
@@ -100,7 +100,7 @@ func (p *publicationV2) PublishV2(ctx context.Context, principal ports.Principal
 	prepared.MaxBytes = budget
 	receipt, err := publicationv2.Receipt(prepared)
 	if err != nil {
-		return ports.PublicationResult{}, err
+		return ports.PublicationResult{}, mapPublicationError(err)
 	}
 	if int64(len(receipt)) > budget {
 		return ports.PublicationResult{}, rest.ErrBudgetExceeded

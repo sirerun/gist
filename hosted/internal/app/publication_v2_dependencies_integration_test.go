@@ -101,8 +101,14 @@ func TestPublicationV2BindingDenials(t *testing.T) {
 			if status < 400 || status >= 500 {
 				t.Fatalf("tampered binding evidence status=%d body=%s", status, body)
 			}
-			if h.verifier.cases != 0 {
-				t.Fatalf("tampered evidence passed verifier cases=%d", h.verifier.cases)
+			wantCases := 0
+			if field == "result_digest" {
+				// This pin is checked against the computed result after the
+				// executor runs all five cases; rejection is still mandatory.
+				wantCases = 5
+			}
+			if h.verifier.cases != wantCases {
+				t.Fatalf("verifier executed cases=%d want=%d", h.verifier.cases, wantCases)
 			}
 			assertPublicationRows(t, h.fixture, ref, h.artifacts["binding"].prepared.ArtifactDigest.Value, false)
 			assertNoPublicationAttempt(t, h, ref)
