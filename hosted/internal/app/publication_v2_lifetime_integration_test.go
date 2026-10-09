@@ -4,6 +4,9 @@ package app
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -35,5 +38,46 @@ func TestPublicationV2ShutdownClosesObjectStore(t *testing.T) {
 	// Repeated shutdown must return the retained completed cleanup result.
 	if err := h.instance.Shutdown(context.Background()); err != nil {
 		t.Fatal(err)
+	}
+}
+
+// Test-only Linux descriptor observation qualifies startup resource cleanup
+// without reaching into the storage adapter's private root representation.
+func TestPublicationV2FailedConstructionClosesObjectRoot(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("descriptor observation requires Linux")
+	}
+	h := startMatrixHarness(t, nil)
+	count := func() int {
+		t.Helper()
+		entries, err := os.ReadDir("/proc/self/fd")
+		if err != nil {
+			t.Fatal(err)
+		}
+		n := 0
+		for _, e := range entries {
+			target, err := os.Readlink(filepath.Join("/proc/self/fd", e.Name()))
+			if err == nil && target == h.instance.cfg.ObjectStoreRoot {
+				n++
+			}
+		}
+		return n
+	}
+	before := count()
+	if before != 1 {
+		t.Fatalf("fixture owns %d root handles, want1", before)
+	}
+	cfg := h.instance.cfg
+	v2 := *cfg.PublicationV2
+	v2.MaintenanceTargets = []MaintenanceTarget{{Issuer: compositionIssuer, Subject: "missing-maintainer", WorkspaceID: compositionWorkspace}}
+	cfg.PublicationV2 = &v2
+	if instance, err := New(h.ctx, cfg); err == nil || instance != nil {
+		if instance != nil {
+			_ = instance.Shutdown(context.Background())
+		}
+		t.Fatalf("unqualified maintenance actor unexpectedly constructed app: %v", err)
+	}
+	if after := count(); after != before {
+		t.Fatalf("failed construction retained object handles: before%d after%d", before, after)
 	}
 }
