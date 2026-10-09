@@ -16,6 +16,7 @@ import (
 	"io"
 	"io/fs"
 	"math"
+	"net/url"
 	"path"
 	"regexp"
 	"sort"
@@ -215,6 +216,13 @@ func Decode(kind ports.ArtifactKind, raw []byte, limits Limits) (ports.PreparedP
 	if err := checkJSON(raw); err != nil {
 		return out, err
 	}
+	name, ok := map[ports.ArtifactKind]string{ports.KindSkill: "skill", ports.KindCapability: "capability", ports.KindTool: "tool", ports.KindProvider: "provider", ports.KindBinding: "binding", ports.KindTaxonomy: "taxonomy"}[kind]
+	if !ok {
+		return out, fail("unsupported artifact kind")
+	}
+	if err := validateSchema("https://gist.local/contracts/registry/v2/"+name+".publish.schema.json", raw); err != nil {
+		return out, err
+	}
 	var e envelope
 	if err := json.Unmarshal(raw, &e); err != nil {
 		return out, fail("invalid envelope: %v", err)
@@ -244,6 +252,15 @@ func Decode(kind ports.ArtifactKind, raw []byte, limits Limits) (ports.PreparedP
 		if !exactKeys(pkg, "encoding", "media_type", "data") {
 			return out, fail("invalid package keys")
 		}
+		decodedUpper := int64(len(a.Package.Data)/4) * 3
+		if strings.HasSuffix(a.Package.Data, "==") {
+			decodedUpper -= 2
+		} else if strings.HasSuffix(a.Package.Data, "=") {
+			decodedUpper--
+		}
+		if decodedUpper > limits.MaxPackageBytes {
+			return out, fmt.Errorf("%w: encoded archive", ErrBudgetExceeded)
+		}
 		blob, er := base64.StdEncoding.Strict().DecodeString(a.Package.Data)
 		if er != nil || base64.StdEncoding.EncodeToString(blob) != a.Package.Data {
 			return out, fail("non-canonical base64")
@@ -266,6 +283,9 @@ func Decode(kind ports.ArtifactKind, raw []byte, limits Limits) (ports.PreparedP
 		}
 		id, version, er := validateDocument(kind, a.ID, a.Version, a.Document)
 		if er != nil {
+			return out, er
+		}
+		if er = typedSemantics(kind, a.Document); er != nil {
 			return out, er
 		}
 		out = ports.PreparedPublication{Ref: ports.ArtifactRef{Kind: kind, ID: id, Version: version}, Artifact: append([]byte(nil), a.Document...), Metadata: append([]byte(nil), a.Document...), ArtifactDigest: digest(sum(a.Document)), DocumentDigest: digest(sum(a.Document))}
@@ -303,7 +323,7 @@ func decodeSkill(blob []byte, l Limits) (skillResult, error) {
 		n := f.Name
 		clean := path.Clean(n)
 		mode := f.Mode()
-		if n == "" || strings.Contains(n, "\\") || strings.HasPrefix(n, "/") || clean != n || clean == "." || strings.HasPrefix(clean, "../") || mode&0o170000 != 0 && !mode.IsRegular() {
+		if n == "" || !safeInventoryPath(n) || strings.Contains(n, "\\") || strings.HasPrefix(n, "/") || clean != n || clean == "." || strings.HasPrefix(clean, "../") || mode&0o170000 != 0 && !mode.IsRegular() {
 			return skillResult{}, fail("unsafe or non-regular member %q", n)
 		}
 		if !mode.IsRegular() {
@@ -312,18 +332,18 @@ func decodeSkill(blob []byte, l Limits) (skillResult, error) {
 		if _, ok := files[n]; ok {
 			return skillResult{}, fail("duplicate member %q", n)
 		}
-		if int64(f.UncompressedSize64) > l.MaxFileBytes {
+		if f.UncompressedSize64 > uint64(l.MaxFileBytes) || f.UncompressedSize64 > math.MaxInt64 {
 			return skillResult{}, fmt.Errorf("%w: member size", ErrBudgetExceeded)
 		}
-		total += int64(f.UncompressedSize64)
-		if total > l.MaxExpandedBytes {
+		if int64(f.UncompressedSize64) > l.MaxExpandedBytes-total {
 			return skillResult{}, fmt.Errorf("%w: expanded archive", ErrBudgetExceeded)
 		}
+		total += int64(f.UncompressedSize64)
 		r, e := f.Open()
 		if e != nil {
 			return skillResult{}, fail("open member")
 		}
-		b, e := io.ReadAll(io.LimitReader(r, l.MaxFileBytes+1))
+		b, e := io.ReadAll(io.LimitReader(r, l.MaxFileBytes+boolInt64(l.MaxFileBytes < math.MaxInt64)))
 		r.Close()
 		if e != nil || int64(len(b)) > l.MaxFileBytes {
 			return skillResult{}, fail("read member")
@@ -344,6 +364,29 @@ func decodeSkill(blob []byte, l Limits) (skillResult, error) {
 	if err = validateSchema("https://gist.local/contracts/registry/v1/manifest.schema.json", mb); err != nil {
 		return skillResult{}, err
 	}
+	var semantics struct {
+		Status      string `json:"publication_status"`
+		Publication struct {
+			Status     string `json:"status"`
+			Provenance string `json:"provenance"`
+		} `json:"publication"`
+		Trust string `json:"trust"`
+		Caps  []struct {
+			ID      string `json:"id"`
+			Version string `json:"contract_version"`
+		} `json:"required_capabilities"`
+	}
+	if err = json.Unmarshal(mb, &semantics); err != nil || (semantics.Publication.Status != "approved" && semantics.Publication.Status != "published") || (semantics.Publication.Provenance != "publisher_asserted" && semantics.Publication.Provenance != "derived_unverified") || semantics.Trust != "operator_asserted" {
+		return skillResult{}, fail("skill publication/trust provenance is not admissible")
+	}
+	for _, c := range semantics.Caps {
+		if !validID(c.ID) || !semverRE.MatchString(c.Version) {
+			return skillResult{}, fail("invalid required capability reference")
+		}
+	}
+	if m.Entrypoint != "SKILL.md" {
+		return skillResult{}, fail("entrypoint must be SKILL.md")
+	}
 	if _, ok = files["SKILL.md"]; !ok {
 		return skillResult{}, fail("missing entrypoint")
 	}
@@ -352,7 +395,7 @@ func decodeSkill(blob []byte, l Limits) (skillResult, error) {
 	}
 	declared := map[string]bool{}
 	for _, x := range m.Inventory {
-		if x.Path == "manifest.json" || declared[x.Path] {
+		if x.Path == "manifest.json" || !safeInventoryPath(x.Path) || declared[x.Path] {
 			return skillResult{}, fail("invalid inventory")
 		}
 		declared[x.Path] = true
@@ -376,6 +419,28 @@ func decodeSkill(blob []byte, l Limits) (skillResult, error) {
 
 var idRE = regexp.MustCompile(`^[a-z0-9][a-z0-9._/-]{0,255}$`)
 
+func boolInt64(b bool) int64 {
+	if b {
+		return 1
+	}
+	return 0
+}
+func safeInventoryPath(n string) bool {
+	if n == "" || !utf8.ValidString(n) || strings.ContainsAny(n, "\\\x00\r\n\t") || strings.HasPrefix(n, "/") || strings.HasSuffix(n, "/") || path.Clean(n) != n {
+		return false
+	}
+	for _, p := range strings.Split(n, "/") {
+		if p == "" || p == "." || p == ".." {
+			return false
+		}
+		for _, r := range p {
+			if r < 0x20 || r == 0x7f {
+				return false
+			}
+		}
+	}
+	return true
+}
 func validID(s string) bool {
 	if !idRE.MatchString(s) {
 		return false
@@ -387,6 +452,9 @@ func validID(s string) bool {
 	}
 	return true
 }
+
+var semverRE = regexp.MustCompile(`^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$`)
+
 func validVersion(s string) bool {
 	if s == "" || strings.ContainsAny(s, "/@ \t\r\n") {
 		return false
@@ -419,7 +487,7 @@ func validateDocument(k ports.ArtifactKind, id, version string, b []byte) (strin
 		if version != ed || !validVersion(version) {
 			return "", "", fail("taxonomy edition mismatch")
 		}
-	} else if version != dver || !validVersion(version) {
+	} else if version != dver || !validVersion(version) || !semverRE.MatchString(version) {
 		return "", "", fail("descriptor/document version mismatch")
 	}
 	switch k {
@@ -430,6 +498,11 @@ func validateDocument(k ports.ArtifactKind, id, version string, b []byte) (strin
 	if err := validateSchema("https://gist.local/contracts/registry/v1/"+map[ports.ArtifactKind]string{ports.KindCapability: "capability.schema.json", ports.KindTool: "execution-schema.schema.json", ports.KindProvider: "provider.schema.json", ports.KindBinding: "binding.schema.json", ports.KindTaxonomy: "taxonomy.schema.json"}[k], b); err != nil {
 		return "", "", err
 	}
+	if k == ports.KindCapability || k == ports.KindTool {
+		if err := validateDynamicSchemas(b); err != nil {
+			return "", "", err
+		}
+	}
 	if k == ports.KindTaxonomy {
 		if err := taxonomySemantics(b); err != nil {
 			return "", "", err
@@ -438,11 +511,195 @@ func validateDocument(k ports.ArtifactKind, id, version string, b []byte) (strin
 	return id, version, nil
 }
 
+func validateDynamicSchemas(b []byte) error {
+	var m map[string]json.RawMessage
+	if json.Unmarshal(b, &m) != nil {
+		return fail("invalid schema owner")
+	}
+	for _, key := range []string{"input_schema", "output_schema"} {
+		var doc any
+		if json.Unmarshal(m[key], &doc) != nil {
+			return fail("invalid %s", key)
+		}
+		c := jsonschema.NewCompiler()
+		c.AssertFormat()
+		c.DefaultDraft(jsonschema.Draft2020)
+		if err := c.AddResource("urn:gist:dynamic:"+key, doc); err != nil {
+			return fail("compile %s: %v", key, err)
+		}
+		sch, err := c.Compile("urn:gist:dynamic:" + key)
+		if err != nil {
+			return fail("compile %s: %v", key, err)
+		}
+		_ = sch
+	}
+	return nil
+}
+func typedSemantics(k ports.ArtifactKind, b []byte) error {
+	var m map[string]json.RawMessage
+	_ = json.Unmarshal(b, &m)
+	switch k {
+	case ports.KindCapability:
+		var x struct {
+			Scopes  []string `json:"required_scopes"`
+			Effects struct {
+				Terms []struct {
+					ID string `json:"id"`
+				} `json:"terms"`
+				Aggregate struct {
+					Class string `json:"class"`
+				} `json:"aggregate"`
+			} `json:"effects"`
+			Cost struct {
+				Currency string      `json:"currency"`
+				Unit     string      `json:"unit"`
+				Upper    json.Number `json:"upper_bound"`
+			} `json:"cost"`
+			Timeout int64 `json:"timeout_ms"`
+			Retry   struct {
+				Supported bool `json:"supported"`
+				Max       int  `json:"max_attempts"`
+			} `json:"retry"`
+			Idempotency struct {
+				Supported bool `json:"supported"`
+			} `json:"idempotency"`
+		}
+		_ = json.Unmarshal(b, &x)
+		if len(x.Effects.Terms) == 0 || x.Timeout <= 0 || x.Timeout > 3600000 || strings.TrimSpace(x.Cost.Currency) == "" || strings.TrimSpace(x.Cost.Unit) == "" {
+			return fail("invalid capability effects, cost or timeout")
+		}
+		termIDs := map[string]bool{}
+		for _, term := range x.Effects.Terms {
+			if strings.TrimSpace(term.ID) == "" || termIDs[term.ID] {
+				return fail("invalid or duplicate effect")
+			}
+			termIDs[term.ID] = true
+		}
+		seen := map[string]bool{}
+		for _, scope := range x.Scopes {
+			if strings.TrimSpace(scope) == "" || seen[scope] {
+				return fail("invalid or duplicate scope")
+			}
+			seen[scope] = true
+		}
+		var cm map[string]json.RawMessage
+		_ = json.Unmarshal(m["cost"], &cm)
+		var f json.Number
+		if e := json.Unmarshal(cm["upper_bound"], &f); e != nil {
+			return fail("cost upper_bound must be numeric")
+		}
+		fv, e := f.Float64()
+		if e != nil || math.IsNaN(fv) || math.IsInf(fv, 0) || fv < 0 {
+			return fail("invalid cost upper_bound")
+		}
+		if x.Retry.Max < 0 || x.Retry.Max > 10 || x.Retry.Supported != (x.Retry.Max > 0) || x.Retry.Supported && x.Effects.Aggregate.Class != "read_only" && !x.Idempotency.Supported {
+			return fail("retry support/max_attempts mismatch")
+		}
+	case ports.KindTool:
+		var x struct {
+			Action      struct{ ID, Version string } `json:"provider_action"`
+			Location    string                       `json:"execution_location"`
+			Lifecycle   string                       `json:"lifecycle"`
+			Credentials struct {
+				Scopes []string `json:"scopes"`
+			} `json:"credentials"`
+			Destinations []string `json:"destinations"`
+			Provenance   string   `json:"provenance"`
+			Capture      string   `json:"capture_time"`
+		}
+		_ = json.Unmarshal(b, &x)
+		if !validID(x.Action.ID) || !validVersion(x.Action.Version) || x.Location != "client" && x.Location != "runtime" || x.Lifecycle != "published" && x.Lifecycle != "deprecated" && x.Lifecycle != "draft" || strings.TrimSpace(x.Provenance) == "" {
+			return fail("tool action, lifecycle, execution or provenance invalid")
+		}
+		t, e := time.Parse(time.RFC3339, x.Capture)
+		if e != nil || t.After(time.Now().Add(time.Minute)) {
+			return fail("invalid/future tool capture time")
+		}
+		for _, u := range x.Destinations {
+			if strings.TrimSpace(u) == "" {
+				return fail("empty destination")
+			}
+			parsed, err := url.ParseRequestURI(u)
+			if err != nil || parsed.Scheme == "" || parsed.Host == "" {
+				return fail("invalid destination URI")
+			}
+		}
+		scopeSet := map[string]bool{}
+		for _, scope := range x.Credentials.Scopes {
+			if strings.TrimSpace(scope) == "" || scopeSet[scope] {
+				return fail("invalid credential scope")
+			}
+			scopeSet[scope] = true
+		}
+	case ports.KindProvider:
+		var x struct {
+			State    string `json:"support_state"`
+			Verified string `json:"last_verified_at"`
+			Capture  struct {
+				Source string `json:"source"`
+				Digest struct {
+					Algorithm string `json:"algorithm"`
+					Value     string `json:"value"`
+				} `json:"digest"`
+			} `json:"capture"`
+		}
+		_ = json.Unmarshal(b, &x)
+		if x.State != "planned" && x.State != "catalog_only" && x.State != "resolvable" && x.State != "executable" && x.State != "degraded" && x.State != "retired" {
+			return fail("invalid provider state")
+		}
+		t, e := time.Parse(time.RFC3339, x.Verified)
+		if e != nil || t.After(time.Now().Add(time.Minute)) {
+			return fail("invalid/future provider verification time")
+		}
+		if x.State == "resolvable" || x.State == "executable" {
+			if x.Capture.Source == "" || x.Capture.Digest.Algorithm != "sha256" || !validHex(x.Capture.Digest.Value) {
+				return fail("qualified provider requires retained capture reference")
+			}
+		}
+	case ports.KindBinding:
+		var x struct {
+			Adapter     string `json:"adapter_version"`
+			Conformance string `json:"conformance"`
+			Exact       bool   `json:"exact_versions"`
+		}
+		_ = json.Unmarshal(b, &x)
+		// JSON tags are explicit because the frozen document uses *_ref names.
+		var refs map[string]string
+		_ = json.Unmarshal(b, &refs)
+		for _, key := range []string{"capability_ref", "tool_ref", "provider_ref"} {
+			if !canonicalRef(refs[key]) {
+				return fail("binding reference %q is not canonical", key)
+			}
+		}
+		if !x.Exact || x.Adapter == "" || x.Conformance != "passed" {
+			return fail("binding adapter/conformance/pins invalid")
+		}
+	case ports.KindSkill:
+	}
+	return nil
+}
+func validHex(s string) bool {
+	if len(s) != 64 {
+		return false
+	}
+	_, e := hex.DecodeString(s)
+	return e == nil
+}
+func canonicalRef(s string) bool {
+	a, b, ok := strings.Cut(s, "@")
+	if !ok || !validID(a) || !semverRE.MatchString(b) || strings.Contains(b, "@") {
+		return false
+	}
+	return true
+}
+
 func taxonomySemantics(b []byte) error {
 	var x struct {
 		Nodes []struct {
 			ID     string  `json:"id"`
 			Level  int     `json:"level"`
+			Label  string  `json:"label"`
+			APQF   string  `json:"apqc_ref"`
 			Parent *string `json:"parent_id"`
 		} `json:"nodes"`
 	}
@@ -452,7 +709,7 @@ func taxonomySemantics(b []byte) error {
 	nodes := map[string]int{}
 	parents := map[string]string{}
 	for _, n := range x.Nodes {
-		if !validID(n.ID) || n.Level < 1 {
+		if !validID(n.ID) || n.Level < 1 || strings.TrimSpace(n.Label) == "" || strings.TrimSpace(n.APQF) == "" {
 			return fail("invalid taxonomy node")
 		}
 		if _, ok := nodes[n.ID]; ok {
@@ -461,6 +718,8 @@ func taxonomySemantics(b []byte) error {
 		nodes[n.ID] = n.Level
 		if n.Parent != nil {
 			parents[n.ID] = *n.Parent
+		} else if n.Level != 1 {
+			return fail("taxonomy root must be level one")
 		}
 	}
 	for id, parent := range parents {
@@ -592,13 +851,69 @@ func ValidateEvidence(p ports.PreparedPublication, principal ports.Principal, e 
 	if er != nil || sum(grant) != strings.TrimPrefix(e.Rights.GrantDigest, "sha256:") {
 		return fail("retained grant digest mismatch")
 	}
-	if base64.StdEncoding.EncodeToString(grant) != e.Rights.RetainedGrantBase64 || e.Rights.Scope != "workspace_only" || !e.Rights.Redistribution || len(e.Rights.AllowedUse) == 0 {
+	if base64.StdEncoding.EncodeToString(grant) != e.Rights.RetainedGrantBase64 || e.Rights.Scope != "workspace_only" || !e.Rights.Redistribution || !containsUse(e.Rights.AllowedUse, "private_distribution") {
 		return fail("rights do not qualify")
 	}
 	captured, _ := time.Parse(time.RFC3339, e.Source.CapturedAt)
 	reviewed, _ := time.Parse(time.RFC3339, e.Reviewer.ReviewedAt)
 	if reviewed.Before(captured) {
 		return fail("review predates source capture")
+	}
+	if p.Ref.Kind == ports.KindTool {
+		var x struct {
+			Provenance string `json:"provenance"`
+			Capture    string `json:"capture_time"`
+			Digest     struct {
+				Algorithm string `json:"algorithm"`
+				Value     string `json:"value"`
+			} `json:"digest"`
+		}
+		_ = json.Unmarshal(p.Metadata, &x)
+		if x.Provenance != e.Source.URI || x.Digest.Algorithm != "sha256" || x.Digest.Value != strings.TrimPrefix(e.Source.CaptureDigest, "sha256:") || x.Capture != e.Source.CapturedAt {
+			return fail("tool source capture/provenance does not match retained evidence")
+		}
+	}
+	if p.Ref.Kind == ports.KindProvider {
+		var x struct {
+			Verified string `json:"last_verified_at"`
+			Capture  struct {
+				Source string `json:"source"`
+				Digest struct {
+					Algorithm string `json:"algorithm"`
+					Value     string `json:"value"`
+				} `json:"digest"`
+			} `json:"capture"`
+		}
+		_ = json.Unmarshal(p.Metadata, &x)
+		if x.Capture.Source != "" && (x.Capture.Source != e.Source.URI || x.Capture.Digest.Algorithm != "sha256" || x.Capture.Digest.Value != strings.TrimPrefix(e.Source.CaptureDigest, "sha256:") || x.Verified != e.Source.CapturedAt) {
+			return fail("provider capture does not match retained evidence")
+		}
+	}
+	if p.Ref.Kind == ports.KindBinding {
+		var x struct {
+			Adapter string `json:"adapter_version"`
+			Fixture struct {
+				Algorithm string `json:"algorithm"`
+				Value     string `json:"value"`
+			} `json:"fixture_digest"`
+			Cap      string `json:"capability_ref"`
+			Tool     string `json:"tool_ref"`
+			Provider string `json:"provider_ref"`
+		}
+		_ = json.Unmarshal(p.Metadata, &x)
+		c := e.Conformance
+		if c == nil || x.Adapter != c.AdapterVersion || x.Fixture.Algorithm != "sha256" || x.Fixture.Value != strings.TrimPrefix(c.FixtureDigest, "sha256:") || !validDigest(c.ResultDigest) || c.ExecutorID == "" || c.ExecutorRevision == "" {
+			return fail("binding evidence does not pin adapter, fixture and executor")
+		}
+		refs := map[string]bool{x.Cap: true, x.Tool: true, x.Provider: true}
+		for _, r := range c.ExactRefs {
+			if !refs[r] {
+				return fail("binding evidence exact refs mismatch")
+			}
+		}
+		if len(refs) != 3 || len(c.ExactRefs) != 3 {
+			return fail("binding exact reference set mismatch")
+		}
 	}
 	if p.Ref.Kind == ports.KindSkill {
 		if sum(src) != p.ArtifactDigest.Value {
@@ -642,11 +957,31 @@ func ValidateEvidence(p ports.PreparedPublication, principal ports.Principal, e 
 	}
 	if p.Ref.Kind == ports.KindTaxonomy {
 		g := e.TaxonomyGrant
-		if g == nil || g.TaxonomyID != p.Ref.ID || g.Edition != p.Ref.Version {
+		if g == nil || g.TaxonomyID != p.Ref.ID || g.Edition != p.Ref.Version || !allFields(g.AllowedFields, []string{"id", "edition", "attribution", "nodes"}) {
 			return fail("taxonomy grant mismatch")
 		}
 	}
 	return nil
+}
+func allFields(got, want []string) bool {
+	set := map[string]bool{}
+	for _, x := range got {
+		set[x] = true
+	}
+	for _, x := range want {
+		if !set[x] {
+			return false
+		}
+	}
+	return true
+}
+func containsUse(list []string, want string) bool {
+	for _, v := range list {
+		if v == want {
+			return true
+		}
+	}
+	return false
 }
 func stringValueFrom(b []byte, k string) string {
 	var m map[string]any
@@ -656,11 +991,14 @@ func stringValueFrom(b []byte, k string) string {
 }
 
 func Receipt(p ports.PreparedPublication) ([]byte, error) {
-	if !validID(p.Ref.ID) || !validVersion(p.Ref.Version) || p.Ref.Kind == "" || p.ArtifactDigest.Value == "" {
+	if !validID(p.Ref.ID) || !validVersion(p.Ref.Version) || p.Ref.Kind == "" || !validHex(p.ArtifactDigest.Value) || p.MaxBytes <= 0 {
 		return nil, fail("invalid prepared publication")
 	}
 	r := ports.PublicationReceipt{Kind: p.Ref.Kind, ID: p.Ref.ID, Version: p.Ref.Version, ArtifactDigest: "sha256:" + p.ArtifactDigest.Value}
 	if p.Ref.Kind == ports.KindSkill {
+		if !validHex(p.ManifestDigest.Value) || !validHex(p.PackageDigest.Value) {
+			return nil, fail("invalid skill digest")
+		}
 		r.ManifestDigest = "sha256:" + p.ManifestDigest.Value
 		r.PackageDigest = "sha256:" + p.PackageDigest.Value
 	}
