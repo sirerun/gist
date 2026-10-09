@@ -182,3 +182,52 @@ func TestEvidencePureAdmissionBindsSourceAndSyntheticFlag(t *testing.T) {
 		t.Fatalf("forged retained source accepted: %v", err)
 	}
 }
+
+func TestArchiveRejectsDuplicateForgedAndExpandedMembers(t *testing.T) {
+	makeArchive := func(t *testing.T, names ...string) []byte {
+		t.Helper()
+		var b bytes.Buffer
+		zw := zip.NewWriter(&b)
+		for _, name := range names {
+			w, err := zw.Create(name)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err = w.Write([]byte("xx")); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if err := zw.Close(); err != nil {
+			t.Fatal(err)
+		}
+		return b.Bytes()
+	}
+	t.Run("duplicate", func(t *testing.T) {
+		if _, err := decodeSkill(makeArchive(t, "same", "same"), DefaultLimits()); !errors.Is(err, ErrValidation) {
+			t.Fatalf("duplicate archive member accepted: %v", err)
+		}
+	})
+	t.Run("expanded limit", func(t *testing.T) {
+		limits := DefaultLimits()
+		limits.MaxExpandedBytes = 1
+		if _, err := decodeSkill(makeArchive(t, "payload"), limits); !errors.Is(err, ErrBudgetExceeded) {
+			t.Fatalf("expanded bytes exceeded without budget error: %v", err)
+		}
+	})
+	t.Run("forged uncompressed size", func(t *testing.T) {
+		archive := makeArchive(t, "payload")
+		// The first central directory record stores uncompressed size at byte 24.
+		central := bytes.Index(archive, []byte("PK\x01\x02"))
+		if central < 0 {
+			t.Fatal("central directory not found")
+		}
+		for i := 0; i < 4; i++ {
+			archive[central+24+i] = 0xff
+		}
+		limits := DefaultLimits()
+		limits.MaxFileBytes = 8
+		if _, err := decodeSkill(archive, limits); !errors.Is(err, ErrBudgetExceeded) {
+			t.Fatalf("forged size bypassed budget: %v", err)
+		}
+	})
+}
