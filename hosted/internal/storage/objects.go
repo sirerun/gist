@@ -78,7 +78,7 @@ func (s *ObjectStore) Put(ctx context.Context, digest ports.Digest, r io.Reader,
 	if digest.Algorithm != "sha256" || len(digest.Value) != 64 {
 		return errors.New("objects: only sha256 digests are accepted")
 	}
-	if size < 0 {
+	if size < 0 || size == int64(^uint64(0)>>1) {
 		return errors.New("objects: negative size")
 	}
 	b, err := io.ReadAll(io.LimitReader(r, size+1))
@@ -113,25 +113,17 @@ func (s *ObjectStore) Open(ctx context.Context, ref ports.ArtifactRef) (ports.Ar
 	catalog := s.catalog
 	s.mu.RUnlock()
 	var record ports.CatalogRecord
-	if !ok {
-		if catalog == nil {
-			return nil, ErrNotFound
-		}
-		var err error
-		record, err = catalog.Get(ctx, ref)
-		if err != nil {
-			return nil, fmt.Errorf("objects: resolve %s from catalog: %w", refKey(ref), err)
-		}
-		digest = record.Digest
-	} else if catalog != nil {
-		// A cached legacy digest must never bypass current catalog state or
-		// rebind a v2 reference after revocation.
+	if catalog != nil {
+		// A cached binding is never authority for a retained v2 publication:
+		// consult current durable state on every read, including after revoke.
 		var err error
 		record, err = catalog.Get(ctx, ref)
 		if err != nil {
 			return nil, err
 		}
 		digest = record.Digest
+	} else if !ok {
+		return nil, ErrNotFound
 	}
 	if digest.Algorithm != "sha256" {
 		return nil, errors.New("objects: unsupported digest")
@@ -143,18 +135,10 @@ func (s *ObjectStore) Open(ctx context.Context, ref ports.ArtifactRef) (ports.Ar
 	}
 	name := digest.Value
 	if record.ObjectKey != "" {
-		if !validOwnedObjectKey(record.ObjectKey) || !strings.HasSuffix(record.ObjectKey, "/"+digest.Value) {
+		if !validOwnedObjectKey(record.ObjectKey) || !strings.HasSuffix(record.ObjectKey, "/"+digest.Value) || record.ArtifactSize < 0 {
 			return nil, errors.New("objects: catalog object key does not match digest")
 		}
-		b, err := s.blobs.get(ctx, record.ObjectKey)
-		if err != nil {
-			return nil, err
-		}
-		sum := sha256.Sum256(b)
-		if hex.EncodeToString(sum[:]) != digest.Value {
-			return nil, errors.New("objects: retained owned object digest mismatch")
-		}
-		return &readSeekCloser{Reader: bytes.NewReader(b)}, nil
+		return s.OpenOwned(ctx, record.ObjectKey, digest, record.ArtifactSize)
 	}
 	b, err := s.blobs.get(ctx, name)
 	if err != nil {
@@ -178,10 +162,18 @@ func (s *ObjectStore) StageOwned(ctx context.Context, key string, data []byte, d
 
 // OpenOwned resolves a durable object key and verifies the exact stored bytes.
 func (s *ObjectStore) OpenOwned(ctx context.Context, key string, digest ports.Digest, size int64) (ports.ArtifactReader, error) {
-	if !validOwnedObjectKey(key) || !strings.HasSuffix(key, "/"+digest.Value) || digest.Algorithm != "sha256" || !validSHA256Hex(digest.Value) || size < 0 {
+	if !validOwnedObjectKey(key) || !strings.HasSuffix(key, "/"+digest.Value) || digest.Algorithm != "sha256" || !validSHA256Hex(digest.Value) || size < 0 || size == int64(^uint64(0)>>1) {
 		return nil, errors.New("objects: invalid owned object identity")
 	}
-	b, err := s.blobs.get(ctx, key)
+	var b []byte
+	var err error
+	if bounded, ok := s.blobs.(interface {
+		getLimit(context.Context, string, int64) ([]byte, error)
+	}); ok {
+		b, err = bounded.getLimit(ctx, key, size+1)
+	} else {
+		b, err = s.blobs.get(ctx, key)
+	}
 	if err != nil {
 		return nil, err
 	}

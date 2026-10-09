@@ -121,6 +121,11 @@ func (b *s3Backend) put(ctx context.Context, name string, data []byte) error {
 		case err == nil:
 			return nil
 		case status == http.StatusPreconditionFailed:
+			// Frozen legacy digest writes treat a content-addressed 412 as
+			// success. Owned v2 keys require byte-for-byte collision proof.
+			if !validOwnedObjectKey(name) {
+				return nil
+			}
 			// Conditional retries must verify the existing bytes; a key collision
 			// is never treated as successful immutable storage by assumption.
 			existing, getErr := b.get(ctx, name)
@@ -142,6 +147,10 @@ func (b *s3Backend) put(ctx context.Context, name string, data []byte) error {
 }
 
 func (b *s3Backend) get(ctx context.Context, name string) ([]byte, error) {
+	return b.getLimit(ctx, name, int64(^uint64(0)>>1))
+}
+
+func (b *s3Backend) getLimit(ctx context.Context, name string, limit int64) ([]byte, error) {
 	if !validSHA256Hex(name) && !validOwnedObjectKey(name) {
 		return nil, errors.New("objects: invalid S3 object key")
 	}
@@ -158,7 +167,7 @@ func (b *s3Backend) get(ctx context.Context, name string) ([]byte, error) {
 	}
 	// Closing this read-only object stream cannot change the received result.
 	defer func() { _ = out.Body.Close() }()
-	data, err := io.ReadAll(out.Body)
+	data, err := io.ReadAll(io.LimitReader(out.Body, limit))
 	if err != nil {
 		return nil, fmt.Errorf("read object: %w", err)
 	}
