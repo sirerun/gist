@@ -40,4 +40,3 @@ The additive `implementation-v2.json` amendment is restricted to `hosted/interna
 The recorded acceptance covers six actual TLS HTTP publication/readback/replay paths against restricted PostgreSQL and owned filesystem storage, plus cleanup, race, restart, and failure cases. I did not rerun tests or builds.
 
 **Limitations:** Fake S3 does not qualify live S3; the five offline golden conversions do not qualify providers. No production verifier, operator, trust source, or deployment is selected. Production gates remain open.
-
