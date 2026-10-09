@@ -29,18 +29,11 @@ import (
 func publicationV2RestrictedPool(t *testing.T) (*pgxpool.Pool, *pgxpool.Pool) {
 	t.Helper()
 	ctx := context.Background()
-	ownership, err := os.ReadFile(filepath.Join("..", "..", "..", "..", "fixtures", "v2-preflight-pg", "ownership.json"))
-	if err != nil {
-		t.Fatalf("read owned PostgreSQL fixture metadata: %v", err)
+	base := os.Getenv("GIST_DATABASE_URL")
+	if base == "" {
+		t.Fatal("GIST_DATABASE_URL is required for PostgreSQL integration tests")
 	}
-	var fixture struct {
-		AdminURL string `json:"admin_url"`
-		Owned    bool   `json:"owned"`
-	}
-	if err := json.Unmarshal(ownership, &fixture); err != nil || !fixture.Owned || fixture.AdminURL == "" {
-		t.Fatalf("invalid owned fixture metadata: %v", err)
-	}
-	adminCfg, err := pgx.ParseConfig(fixture.AdminURL)
+	adminCfg, err := pgx.ParseConfig(base)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +64,7 @@ func publicationV2RestrictedPool(t *testing.T) (*pgxpool.Pool, *pgxpool.Pool) {
 		cleanup()
 		t.Fatal(err)
 	}
-	cfg, err := pgxpool.ParseConfig(fixture.AdminURL)
+	cfg, err := pgxpool.ParseConfig(base)
 	if err != nil {
 		cleanup()
 		t.Fatal(err)
@@ -151,7 +144,7 @@ func publicationV2Prepared(raw []byte, key string, max int64) (ports.PreparedPub
 
 func TestPublicationV2PublishReplayAliasRestartAndConflict(t *testing.T) {
 	_, pool := publicationV2RestrictedPool(t)
-	root := filepath.Join("..", "..", "..", "..", "cache", "gist-publish-pg", "objects", t.Name())
+	root := t.TempDir()
 	if err := os.MkdirAll(filepath.Dir(root), 0700); err != nil {
 		t.Fatal(err)
 	}
@@ -253,7 +246,7 @@ func TestPublicationV2BudgetAndForcedRLS(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	obj, err := NewObjectStore(filepath.Join("..", "..", "..", "..", "cache", "gist-publish-pg", "objects", t.Name()))
+	obj, err := NewObjectStore(t.TempDir())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -286,7 +279,7 @@ func TestPublicationV2BudgetAndForcedRLS(t *testing.T) {
 
 func TestPublicationV2ConcurrentKeysAndOutboxRollbackRetry(t *testing.T) {
 	admin, pool := publicationV2RestrictedPool(t)
-	root := filepath.Join("..", "..", "..", "..", "cache", "gist-publish-pg", "objects", t.Name())
+	root := t.TempDir()
 	obj, err := NewObjectStore(root)
 	if err != nil {
 		t.Fatal(err)
@@ -466,7 +459,7 @@ func publicationV2SetDue(t *testing.T, admin *pgxpool.Pool, workspace, key strin
 
 func TestPublicationV2RetiredRetryAndLatePut(t *testing.T) {
 	admin, pool := publicationV2RestrictedPool(t)
-	root := filepath.Join("..", "..", "..", "..", "cache", "gist-publish-pg", "objects", t.Name())
+	root := t.TempDir()
 	base, err := NewObjectStore(root)
 	if err != nil {
 		t.Fatal(err)
@@ -573,7 +566,7 @@ func TestPublicationV2RetiredRetryAndLatePut(t *testing.T) {
 
 func TestPublicationV2CleanupFaultFairness(t *testing.T) {
 	admin, pool := publicationV2RestrictedPool(t)
-	root := filepath.Join("..", "..", "..", "..", "cache", "gist-publish-pg", "objects", t.Name())
+	root := t.TempDir()
 	base, err := NewObjectStore(root)
 	if err != nil {
 		t.Fatal(err)
@@ -640,7 +633,7 @@ func TestPublicationV2CleanupFaultFairness(t *testing.T) {
 
 func TestPublicationV2CleanupClaimAndTenantDenials(t *testing.T) {
 	admin, pool := publicationV2RestrictedPool(t)
-	root := filepath.Join("..", "..", "..", "..", "cache", "gist-publish-pg", "objects", t.Name())
+	root := t.TempDir()
 	base, err := NewObjectStore(root)
 	if err != nil {
 		t.Fatal(err)
