@@ -86,3 +86,17 @@ RED and corrected admission fence/drain plus full hosted aggregate PASS at
 a0df51a. The first repro teardown ordering was corrected and its blocked result
 is not claimed as completed acceptance. PUBLISH.20 requires independent final-head
 re-review; original approvals and negative review remain retained.
+
+## 2026-10-09 — Publication actual source delivery
+
+PR60 final independent lead/storage APPROVE at ea119d9/base8a24c72 closed
+accepted lifetime and active-drain findings. Guarded rebase landed eb1bd865;
+reviewed/landed tree equality and fresh remote-main reachability are proven.
+Actual landed full app/storage HTTP/RLS/outbox/replay/cleanup/lifetime acceptance,
+wiring/retrieval, vet/delta lint, wire freeze/Python/v2 OpenAPI and Wazi278 pass.
+PUBLISH source/review/merge/landed and recovery gates close against that receipt.
+
+No production gate closes: default AWS STS still has no credentials, and one
+DGX health read failed DNS resolution of gist.sire.run. Enrollment, real provider
+captures/custody/targets/numerical envelope, consumer and AWS/DNS workflow bindings
+remain open. The authoritative plan retains the full production lifecycle.
