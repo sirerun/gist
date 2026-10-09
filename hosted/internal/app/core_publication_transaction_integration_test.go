@@ -7,21 +7,223 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirerun/gist/hosted/internal/contract"
+	"github.com/sirerun/gist/hosted/internal/identity"
 	"github.com/sirerun/gist/hosted/internal/ports"
 	"github.com/sirerun/gist/hosted/internal/rest"
 	"github.com/sirerun/gist/hosted/internal/storage"
 )
+
+// TestPublicationV2 exercises an authenticated TLS publish/replay/readback
+// journey against the real App composition and restricted runtime role.
+func TestPublicationV2(t *testing.T) {
+	fixture := newCompositionPostgres(t)
+	fixture.seedTenant(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+	defer cancel()
+	cacheRoot := filepath.Join("..", "..", "..", "..", "cache")
+	if err := os.MkdirAll(cacheRoot, 0700); err != nil {
+		t.Fatalf("create task cache root: %v", err)
+	}
+	objectRoot, err := os.MkdirTemp(cacheRoot, "publication-v2-objects-")
+	if err != nil {
+		t.Fatalf("create owned object directory: %v", err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(objectRoot) })
+	if _, err = fixture.adminPool.Exec(ctx, `INSERT INTO namespace_reservations(prefix,workspace_id,owner_id,status) VALUES('skill',$1,$2,'active')`, compositionWorkspace, compositionSubject); err != nil {
+		t.Fatalf("seed owned namespace: %v", err)
+	}
+	if _, err = fixture.adminPool.Exec(ctx, `INSERT INTO namespace_reservations(prefix,workspace_id,owner_id,status) VALUES('skill_',$1,$2,'active')`, compositionWorkspace, compositionSubject); err != nil {
+		t.Fatalf("seed literal-underscore namespace: %v", err)
+	}
+	cfg := compositionConfig(fixture.runtimeURL, objectRoot, compositionSigningConfig(t))
+	cfg.MaxRequestBytes = 16 << 20
+	cfg.PublicationV2 = &PublicationV2Config{AllowSynthetic: true, TrustedReviewers: []TrustedPublicationReviewer{{Issuer: "fixture-issuer", Subject: "fixture-maintainer"}}, MaintenanceTargets: []MaintenanceTarget{{WorkspaceID: compositionWorkspace, Subject: compositionSubject}}}
+	instance, err := New(ctx, cfg)
+	if err != nil {
+		t.Fatalf("start v2 app with restricted PostgreSQL role: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := instance.Shutdown(context.Background()); err != nil {
+			t.Errorf("shutdown v2 app: %v", err)
+		}
+	})
+	assertCompositionRuntimeRole(t, instance, fixture.role)
+	token, err := instance.MintWorkloadToken(ctx, identity.WorkloadRequest{Subject: compositionSubject, WorkspaceID: compositionWorkspace, Scopes: []string{"catalog:read", "catalog:publish"}})
+	if err != nil {
+		t.Fatalf("mint fixture workload token: %v", err)
+	}
+	var envelopes map[string]json.RawMessage
+	valid, err := os.ReadFile("../../../contracts/registry/v2/fixtures/valid.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = json.Unmarshal(valid, &envelopes); err != nil {
+		t.Fatal(err)
+	}
+	envelope := envelopes["skill"]
+	var packageEnvelope struct {
+		Artifact struct {
+			Package struct {
+				Data string `json:"data"`
+			} `json:"package"`
+		} `json:"artifact"`
+	}
+	if err = json.Unmarshal(envelope, &packageEnvelope); err != nil {
+		t.Fatal(err)
+	}
+	archive, err := base64.StdEncoding.Strict().DecodeString(packageEnvelope.Artifact.Package.Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	evidenceRaw, err := os.ReadFile("../../../contracts/registry/v2/fixtures/admission-evidence.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var evidence map[string]any
+	if err = json.Unmarshal(evidenceRaw, &evidence); err != nil {
+		t.Fatal(err)
+	}
+	evidence["workspace_id"] = compositionWorkspace
+	evidence["synthetic"] = true
+	evidence["reviewer"] = map[string]any{"issuer": "fixture-issuer", "subject": "fixture-maintainer", "reviewed_at": "2026-10-08T00:00:00Z"}
+	evidence["source"].(map[string]any)["captured_at"] = "2026-10-08T00:00:00Z"
+	evidenceRaw, err = json.Marshal(evidence)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = fixture.adminPool.Exec(ctx, `INSERT INTO review_records(workspace_id,kind,artifact_id,version,decision,reviewer_id,evidence) VALUES($1,'skill','skill/publication-fixture','1.0.0','approved','fixture-maintainer',$2::jsonb)`, compositionWorkspace, string(evidenceRaw)); err != nil {
+		t.Fatalf("seed trusted local review record: %v", err)
+	}
+	server := httptest.NewTLSServer(instance.Handler())
+	defer server.Close()
+	client := server.Client()
+	post := func(key string) *http.Response {
+		var bodyMap map[string]any
+		if err := json.Unmarshal(envelope, &bodyMap); err != nil {
+			t.Fatal(err)
+		}
+		bodyMap["idempotency_key"] = key
+		body, err := json.Marshal(bodyMap)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, server.URL+"/v2/publish/skill", bytes.NewReader(body))
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set("Authorization", "Bearer "+token)
+		req.Header.Set("Content-Type", "application/json")
+		response, err := client.Do(req)
+		if err != nil {
+			t.Fatalf("TLS publication request: %v", err)
+		}
+		return response
+	}
+	first := post("v2-http-first")
+	firstBody, err := io.ReadAll(first.Body)
+	first.Body.Close()
+	if err != nil || first.StatusCode != http.StatusCreated {
+		t.Fatalf("first publish status=%d body=%s read_error=%v", first.StatusCode, firstBody, err)
+	}
+	var receipt map[string]string
+	if err = json.Unmarshal(firstBody, &receipt); err != nil {
+		t.Fatalf("decode canonical receipt: %v", err)
+	}
+	if first.Header.Get("X-Gist-Artifact-Digest") != receipt["artifact_digest"] || first.Header.Get("X-Gist-Manifest-Digest") != receipt["manifest_digest"] || first.Header.Get("X-Gist-Package-Digest") != receipt["package_digest"] {
+		t.Fatalf("publish headers do not match receipt: headers=%v receipt=%v", first.Header, receipt)
+	}
+	replay := post("v2-http-first")
+	replayBody, err := io.ReadAll(replay.Body)
+	replay.Body.Close()
+	if err != nil || replay.StatusCode != http.StatusOK || !bytes.Equal(replayBody, firstBody) {
+		t.Fatalf("same-key replay status=%d exact_body=%t error=%v", replay.StatusCode, bytes.Equal(replayBody, firstBody), err)
+	}
+	alias := post("v2-http-alias")
+	aliasBody, err := io.ReadAll(alias.Body)
+	alias.Body.Close()
+	if err != nil || alias.StatusCode != http.StatusOK || !bytes.Equal(aliasBody, firstBody) {
+		t.Fatalf("new-key exact-version alias status=%d exact_body=%t error=%v", alias.StatusCode, bytes.Equal(aliasBody, firstBody), err)
+	}
+	readURL := server.URL + "/v2/artifacts/skill/package?id=skill%2Fpublication-fixture&version=1.0.0&max_bytes=1048576"
+	readReq, err := http.NewRequestWithContext(ctx, http.MethodGet, readURL, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	readReq.Header.Set("Authorization", "Bearer "+token)
+	read, err := client.Do(readReq)
+	if err != nil {
+		t.Fatalf("TLS readback request: %v", err)
+	}
+	got, readErr := io.ReadAll(read.Body)
+	read.Body.Close()
+	want := sha256.Sum256(archive)
+	if readErr != nil || read.StatusCode != http.StatusOK || !bytes.Equal(got, archive) || read.Header.Get("X-Gist-Body-Digest") != "sha256:"+hex.EncodeToString(want[:]) {
+		t.Fatalf("original-byte readback status=%d exact=%t body_digest=%q error=%v", read.StatusCode, bytes.Equal(got, archive), read.Header.Get("X-Gist-Body-Digest"), readErr)
+	}
+	zipReader, err := zip.NewReader(bytes.NewReader(archive), int64(len(archive)))
+	if err != nil {
+		t.Fatalf("open retained skill archive: %v", err)
+	}
+	var manifest []byte
+	for _, file := range zipReader.File {
+		if file.Name == "manifest.json" {
+			rc, e := file.Open()
+			if e != nil {
+				t.Fatal(e)
+			}
+			manifest, e = io.ReadAll(rc)
+			_ = rc.Close()
+			if e != nil {
+				t.Fatal(e)
+			}
+			break
+		}
+	}
+	if len(manifest) == 0 {
+		t.Fatal("retained archive has no manifest")
+	}
+	manifestURL := server.URL + "/v2/artifacts/skill?id=skill%2Fpublication-fixture&version=1.0.0&max_bytes=1048576"
+	manifestReq, err := http.NewRequestWithContext(ctx, http.MethodGet, manifestURL, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifestReq.Header.Set("Authorization", "Bearer "+token)
+	manifestResponse, err := client.Do(manifestReq)
+	if err != nil {
+		t.Fatalf("TLS manifest readback request: %v", err)
+	}
+	manifestGot, manifestErr := io.ReadAll(manifestResponse.Body)
+	manifestResponse.Body.Close()
+	manifestSum := sha256.Sum256(manifest)
+	if manifestErr != nil || manifestResponse.StatusCode != http.StatusOK || !bytes.Equal(manifestGot, manifest) || manifestResponse.Header.Get("X-Gist-Body-Digest") != "sha256:"+hex.EncodeToString(manifestSum[:]) {
+		t.Fatalf("original manifest readback status=%d exact=%t body_digest=%q error=%v", manifestResponse.StatusCode, bytes.Equal(manifestGot, manifest), manifestResponse.Header.Get("X-Gist-Body-Digest"), manifestErr)
+	}
+	principal := ports.Principal{Issuer: compositionIssuer, Audience: compositionIssuer, Subject: compositionSubject, WorkspaceID: compositionWorkspace, Scopes: []string{"catalog:read", "catalog:publish"}, PolicyGeneration: 1}
+	for _, tc := range []struct {
+		id      string
+		allowed bool
+	}{{"skill_/literal", true}, {"skillX/not-owned", false}, {"skillish/nearforeign", false}} {
+		err := storage.WithTenantPrincipal(ctx, instance.pool, tenantPrincipal(principal), func(ctx context.Context, tx pgx.Tx) error { return currentNamespace(ctx, tx, principal, tc.id) })
+		if (err == nil) != tc.allowed {
+			t.Errorf("namespace %q allowed=%t error=%v; want %t", tc.id, err == nil, err, tc.allowed)
+		}
+	}
+}
 
 func TestPublisherCatalogAndOutboxShareTransaction(t *testing.T) {
 	fixture := newCompositionPostgres(t)

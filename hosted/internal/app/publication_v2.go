@@ -49,13 +49,17 @@ func (p *publicationV2) PublishV2(ctx context.Context, principal ports.Principal
 	if err := publicationv2.ValidateEvidence(prepared, principal, evidence, time.Now().UTC(), p.config.AllowSynthetic); err != nil {
 		return ports.PublicationResult{}, rest.ErrValidationFailed
 	}
-	var protectedRefs []ports.ArtifactRef
+	// Evidence is server-only and is attached only after the approved review
+	// record has been decoded and qualified above. Storage persists the exact
+	// original artifact length alongside its immutable digest.
+	prepared.AdmissionEvidence = &evidence
+	var protectedRecords []ports.CatalogRecord
 	if kind == ports.KindSkill {
-		refs, err := skillCapabilityRefs(ctx, p.catalog, principal, prepared)
+		records, err := skillCapabilityRefs(ctx, p.catalog, principal, prepared)
 		if err != nil {
 			return ports.PublicationResult{}, mapPublicationError(err)
 		}
-		protectedRefs = append(protectedRefs, refs...)
+		protectedRecords = append(protectedRecords, records...)
 	}
 	if kind == ports.KindBinding {
 		if p.config.BindingVerifier == nil || evidence.Conformance == nil {
@@ -72,7 +76,8 @@ func (p *publicationV2) PublishV2(ctx context.Context, principal ports.Principal
 		if err := p.config.BindingVerifier.VerifyPublicationBinding(ctx, refs, evidence, golden); err != nil {
 			return ports.PublicationResult{}, err
 		}
-		protectedRefs = append(protectedRefs, refList...)
+		_ = refList
+		protectedRecords = append(protectedRecords, refs...)
 	}
 	receipt, err := publicationv2.Receipt(prepared)
 	if err != nil {
@@ -85,6 +90,7 @@ func (p *publicationV2) PublishV2(ctx context.Context, principal ports.Principal
 	if budget <= 0 || int64(len(receipt)) > budget {
 		return ports.PublicationResult{}, rest.ErrBudgetExceeded
 	}
+	prepared.MaxBytes = budget
 	fence := func(ctx context.Context, tx pgx.Tx) error {
 		if err := currentPublicationAuthority(ctx, tx, principal, true); err != nil {
 			return err
@@ -92,9 +98,11 @@ func (p *publicationV2) PublishV2(ctx context.Context, principal ports.Principal
 		if err := currentNamespace(ctx, tx, principal, prepared.Ref.ID); err != nil {
 			return err
 		}
-		for _, ref := range protectedRefs {
-			var state string
-			if err := tx.QueryRow(ctx, `SELECT state FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4 FOR SHARE`, ref.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&state); err != nil || state != "published" {
+		for _, expected := range protectedRecords {
+			var state, digest, documentDigest string
+			var metadata []byte
+			ref := expected.Ref
+			if err := tx.QueryRow(ctx, `SELECT state,digest_value,COALESCE(document_digest_value,''),COALESCE(metadata_bytes,convert_to(metadata::text,'UTF8')) FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4 FOR SHARE`, ref.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&state, &digest, &documentDigest, &metadata); err != nil || state != "published" || digest != expected.Digest.Value || documentDigest != expected.DocumentDigest.Value || !bytesEqual(metadata, expected.Metadata) {
 				return publicationv2.ErrValidation
 			}
 		}
@@ -158,7 +166,8 @@ func (p *publicationV2) trustedEvidence(ctx context.Context, principal ports.Pri
 
 func (p *publicationV2) trustedEvidenceTx(ctx context.Context, tx pgx.Tx, principal ports.Principal, prepared ports.PreparedPublication) (ports.PublicationAdmissionEvidence, []byte, error) {
 	var raw []byte
-	err := tx.QueryRow(ctx, `SELECT evidence FROM review_records WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4 AND decision='approved' ORDER BY reviewed_at DESC LIMIT 1 FOR SHARE`, principal.WorkspaceID, prepared.Ref.Kind, prepared.Ref.ID, prepared.Ref.Version).Scan(&raw)
+	var reviewerID, decision string
+	err := tx.QueryRow(ctx, `SELECT evidence,reviewer_id,decision FROM review_records WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4 ORDER BY reviewed_at DESC,id DESC LIMIT 1 FOR SHARE`, principal.WorkspaceID, prepared.Ref.Kind, prepared.Ref.ID, prepared.Ref.Version).Scan(&raw, &reviewerID, &decision)
 	if err != nil {
 		return ports.PublicationAdmissionEvidence{}, nil, rest.ErrValidationFailed
 	}
@@ -166,9 +175,7 @@ func (p *publicationV2) trustedEvidenceTx(ctx context.Context, tx pgx.Tx, princi
 	if err != nil {
 		return ports.PublicationAdmissionEvidence{}, nil, mapPublicationError(err)
 	}
-	var reviewerID string
-	err = tx.QueryRow(ctx, `SELECT reviewer_id FROM review_records WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4 AND decision='approved' AND evidence=$5::jsonb ORDER BY reviewed_at DESC LIMIT 1 FOR SHARE`, principal.WorkspaceID, prepared.Ref.Kind, prepared.Ref.ID, prepared.Ref.Version, raw).Scan(&reviewerID)
-	if err != nil || reviewerID != evidence.Reviewer.Subject || !p.trustedReviewer(evidence.Reviewer) {
+	if decision != "approved" || reviewerID != evidence.Reviewer.Subject || !p.trustedReviewer(evidence.Reviewer) || evidence.WorkspaceID != principal.WorkspaceID || evidence.Artifact.Kind != prepared.Ref.Kind || evidence.Artifact.ID != prepared.Ref.ID || evidence.Artifact.Version != prepared.Ref.Version || evidence.Artifact.ArtifactDigest != "sha256:"+prepared.ArtifactDigest.Value {
 		return ports.PublicationAdmissionEvidence{}, nil, rest.ErrValidationFailed
 	}
 	return evidence, raw, nil
@@ -180,14 +187,14 @@ func tenantPrincipal(p ports.Principal) storage.Tenant {
 
 func currentPublicationAuthority(ctx context.Context, tx pgx.Tx, p ports.Principal, publish bool) error {
 	var issuer, subject, workspace, role string
-	var generation, workspaceGeneration uint64
+	var generation, memberGeneration, workspaceGeneration uint64
 	var active bool
 	var scopes []string
 	var identityScopes []string
 	var expiry time.Time
 	var revoked *time.Time
-	err := tx.QueryRow(ctx, `SELECT wi.issuer,wi.subject,wi.workspace_id,wi.policy_generation,wi.expires_at,wi.revoked_at,wi.scopes,wm.role,wm.scopes,wm.active,w.policy_generation FROM workload_identities wi JOIN workspace_memberships wm ON wm.workspace_id=wi.workspace_id AND wm.issuer=wi.issuer AND wm.subject=wi.subject JOIN workspaces w ON w.id=wi.workspace_id WHERE wi.issuer=$1 AND wi.subject=$2 AND wi.workspace_id=$3 FOR SHARE OF wi,wm,w`, p.Issuer, p.Subject, p.WorkspaceID).Scan(&issuer, &subject, &workspace, &generation, &expiry, &revoked, &identityScopes, &role, &scopes, &active, &workspaceGeneration)
-	if err != nil || issuer != p.Issuer || subject != p.Subject || workspace != p.WorkspaceID || revoked != nil || !expiry.After(time.Now()) || !active || generation != p.PolicyGeneration || workspaceGeneration != p.PolicyGeneration {
+	err := tx.QueryRow(ctx, `SELECT wi.issuer,wi.subject,wi.workspace_id,wi.policy_generation,wi.expires_at,wi.revoked_at,wi.scopes,wm.role,wm.scopes,wm.active,wm.policy_generation,w.policy_generation FROM workload_identities wi JOIN workspace_memberships wm ON wm.workspace_id=wi.workspace_id AND wm.issuer=wi.issuer AND wm.subject=wi.subject JOIN workspaces w ON w.id=wi.workspace_id WHERE wi.issuer=$1 AND wi.subject=$2 AND wi.workspace_id=$3 FOR SHARE OF wi,wm,w`, p.Issuer, p.Subject, p.WorkspaceID).Scan(&issuer, &subject, &workspace, &generation, &expiry, &revoked, &identityScopes, &role, &scopes, &active, &memberGeneration, &workspaceGeneration)
+	if err != nil || issuer != p.Issuer || subject != p.Subject || workspace != p.WorkspaceID || revoked != nil || !expiry.After(time.Now()) || !active || generation != p.PolicyGeneration || memberGeneration != p.PolicyGeneration || workspaceGeneration != p.PolicyGeneration {
 		return rest.ErrPublicationDenied
 	}
 	action := ports.ActionRead
@@ -205,7 +212,7 @@ func currentPublicationAuthority(ctx context.Context, tx pgx.Tx, p ports.Princip
 
 func currentNamespace(ctx context.Context, tx pgx.Tx, p ports.Principal, id string) error {
 	var prefix string
-	err := tx.QueryRow(ctx, `SELECT prefix FROM namespace_reservations WHERE workspace_id=$1 AND owner_id=$2 AND status='active' AND ($3=prefix OR $3 LIKE prefix || '/%') ORDER BY length(prefix) DESC LIMIT 1 FOR SHARE`, p.WorkspaceID, p.Subject, id).Scan(&prefix)
+	err := tx.QueryRow(ctx, `SELECT prefix FROM namespace_reservations WHERE workspace_id=$1 AND owner_id=$2 AND status='active' AND ($3=prefix OR left($3, length(prefix)+1)=prefix || '/') ORDER BY length(prefix) DESC LIMIT 1 FOR SHARE`, p.WorkspaceID, p.Subject, id).Scan(&prefix)
 	if err != nil || prefix == "" {
 		return rest.ErrPublicationDenied
 	}
@@ -248,7 +255,7 @@ func bindingRecords(ctx context.Context, catalog ports.CatalogStore, p ports.Pri
 	return records, refs, nil
 }
 
-func skillCapabilityRefs(ctx context.Context, catalog ports.CatalogStore, p ports.Principal, prepared ports.PreparedPublication) ([]ports.ArtifactRef, error) {
+func skillCapabilityRefs(ctx context.Context, catalog ports.CatalogStore, p ports.Principal, prepared ports.PreparedPublication) ([]ports.CatalogRecord, error) {
 	var manifest struct {
 		Required []struct {
 			ID      string `json:"id"`
@@ -258,7 +265,7 @@ func skillCapabilityRefs(ctx context.Context, catalog ports.CatalogStore, p port
 	if json.Unmarshal(prepared.Metadata, &manifest) != nil || len(manifest.Required) > 256 {
 		return nil, publicationv2.ErrValidation
 	}
-	refs := make([]ports.ArtifactRef, 0, len(manifest.Required))
+	records := make([]ports.CatalogRecord, 0, len(manifest.Required))
 	seen := map[string]bool{}
 	for _, required := range manifest.Required {
 		ref := ports.ArtifactRef{WorkspaceID: p.WorkspaceID, Kind: ports.KindCapability, ID: required.ID, Version: required.Version}
@@ -276,9 +283,9 @@ func skillCapabilityRefs(ctx context.Context, catalog ports.CatalogStore, p port
 		if record.Digest.Algorithm != "sha256" || record.Digest.Value != digest || record.DocumentDigest.Algorithm != "sha256" || record.DocumentDigest.Value != digest {
 			return nil, publicationv2.ErrValidation
 		}
-		refs = append(refs, ref)
+		records = append(records, record)
 	}
-	return refs, nil
+	return records, nil
 }
 
 func bytesEqual(a, b []byte) bool {

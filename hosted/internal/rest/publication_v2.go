@@ -40,6 +40,9 @@ func (h *Handler) publishV2(w http.ResponseWriter, r *http.Request, p ports.Prin
 	if !ok || h.s.V2Publisher == nil {
 		return appError("not_found", "Not found", 404, false)
 	}
+	if r.URL.RawQuery != "" {
+		return appError("validation_failed", "Invalid request", 422, false)
+	}
 	if err := h.authorize(r.Context(), p, ports.ActionPublish, nil); err != nil {
 		return err
 	}
@@ -88,6 +91,11 @@ func (h *Handler) readV2(w http.ResponseWriter, r *http.Request, p ports.Princip
 	if queryErr != nil {
 		return appError("validation_failed", "Invalid request", 422, false)
 	}
+	for _, pair := range strings.Split(r.URL.RawQuery, "&") {
+		if pair == "" || !strings.Contains(pair, "=") {
+			return appError("validation_failed", "Invalid request", 422, false)
+		}
+	}
 	allowed := map[string]bool{"id": true, "version": true, "max_bytes": true}
 	if packageBody {
 		allowed = map[string]bool{"id": true, "version": true, "max_bytes": true}
@@ -107,7 +115,7 @@ func (h *Handler) readV2(w http.ResponseWriter, r *http.Request, p ports.Princip
 	}
 	if value, exists := q["max_bytes"]; exists {
 		n, err := strconv.ParseInt(value[0], 10, 64)
-		if err != nil || n <= 0 {
+		if err != nil || n <= 0 || strconv.FormatInt(n, 10) != value[0] {
 			return appError("validation_failed", "Invalid request", 422, false)
 		}
 		if n < limit {
