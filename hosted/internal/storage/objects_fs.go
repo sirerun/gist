@@ -120,14 +120,25 @@ func (f *fsBackend) objectPath(name string, create bool) (string, error) {
 		return "", errors.New("objects: path escapes root")
 	}
 	parent := filepath.Dir(path)
-	if create {
-		if err := os.MkdirAll(parent, 0o700); err != nil {
-			return "", err
-		}
-	}
+	// Inspect the existing chain before making any directory. In particular,
+	// never call MkdirAll through an attacker-controlled v2 parent symlink.
+	var missing []string
 	for dir := parent; dir != root; dir = filepath.Dir(dir) {
 		if err := rejectSymlink(dir); err != nil {
-			return "", err
+			if !errors.Is(err, os.ErrNotExist) {
+				return "", err
+			}
+			missing = append(missing, dir)
+		}
+	}
+	if create {
+		for i := len(missing) - 1; i >= 0; i-- {
+			if err := os.Mkdir(missing[i], 0o700); err != nil && !errors.Is(err, os.ErrExist) {
+				return "", err
+			}
+			if err := rejectSymlink(missing[i]); err != nil {
+				return "", err
+			}
 		}
 	}
 	if info, err := os.Lstat(path); err == nil && info.Mode()&os.ModeSymlink != 0 {
