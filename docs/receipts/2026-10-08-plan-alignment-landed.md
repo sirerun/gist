@@ -20,8 +20,8 @@ V2 source implementation is approved, optional Gist/direct MCP/no Zatiti demo de
 
 **Decision: APPROVE**
 
-**Reviewer:** Codex independent reviewer; nonauthor for this candidate  
-**Base:** `dacb0c92d2a535e45066927e59eb67d155a86065`  
+**Reviewer:** Codex independent reviewer; nonauthor for this candidate
+**Base:** `dacb0c92d2a535e45066927e59eb67d155a86065`
 **Head:** `ee162896f1ee895124eac0eee9f2167afaf4bcf7`
 
 ## Coverage
