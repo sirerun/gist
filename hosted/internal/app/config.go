@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/sirerun/gist/hosted/internal/identity"
+	"github.com/sirerun/gist/hosted/internal/ports"
 	"github.com/sirerun/gist/hosted/internal/rest"
 )
 
@@ -45,7 +46,21 @@ type Config struct {
 	SigningKeyConfig []byte
 	// Every retained workspace needs an explicitly bound existing maintainer.
 	EventMaintenanceTargets []MaintenanceTarget
+	// PublicationV2 enables the additive publication API only when all trusted
+	// reviewer, verifier and explicit maintenance bindings are supplied.
+	PublicationV2 *PublicationV2Config
 }
+
+// PublicationV2Config is runtime-only trust configuration. Evidence remains
+// in approved review_records; requests cannot supply or install it.
+type PublicationV2Config struct {
+	AllowSynthetic     bool
+	TrustedReviewers   []TrustedPublicationReviewer
+	BindingVerifier    ports.PublicationBindingVerifier
+	MaintenanceTargets []MaintenanceTarget
+	CleanupInterval    time.Duration
+}
+type TrustedPublicationReviewer struct{ Issuer, Subject string }
 
 // MinOAuthConsentSecretBytes is the shortest accepted OAuth consent secret.
 const MinOAuthConsentSecretBytes = 32
@@ -91,6 +106,27 @@ func (c Config) Validate() error {
 			return errors.New("app: event maintenance targets require unique workspaces and subjects")
 		}
 		seen[target.WorkspaceID] = true
+	}
+	if c.PublicationV2 != nil {
+		v := c.PublicationV2
+		if len(v.TrustedReviewers) == 0 || len(v.TrustedReviewers) > 100 || len(v.MaintenanceTargets) == 0 || len(v.MaintenanceTargets) > 100 || v.CleanupInterval < 0 {
+			return errors.New("app: v2 publication requires explicit trusted reviewers and maintenance targets")
+		}
+		seen = map[string]bool{}
+		for _, reviewer := range v.TrustedReviewers {
+			key := reviewer.Issuer + "\x00" + reviewer.Subject
+			if reviewer.Issuer == "" || reviewer.Subject == "" || seen[key] {
+				return errors.New("app: invalid v2 trusted reviewer configuration")
+			}
+			seen[key] = true
+		}
+		seen = map[string]bool{}
+		for _, target := range v.MaintenanceTargets {
+			if target.WorkspaceID == "" || target.Subject == "" || seen[target.WorkspaceID] {
+				return errors.New("app: invalid v2 publication maintenance targets")
+			}
+			seen[target.WorkspaceID] = true
+		}
 	}
 	return nil
 }

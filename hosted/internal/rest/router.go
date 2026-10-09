@@ -17,6 +17,12 @@ type Publisher interface {
 type Resolver interface {
 	Resolve(context.Context, ports.Principal, []byte) ([]byte, error)
 }
+type V2Publisher interface {
+	PublishV2(context.Context, ports.Principal, ports.ArtifactKind, []byte) (ports.PublicationResult, error)
+}
+type V2Reader interface {
+	ReadV2(context.Context, ports.Principal, ports.ArtifactRef, int64, bool) (ports.PublicationRead, error)
+}
 
 // VersionLister returns one page of the visible versions of one artifact,
 // identified by workspace, kind and id (Version is ignored). Versions come in
@@ -39,6 +45,8 @@ type Services struct {
 	Connections ports.ConnectionInitiator
 	Events      ports.EventStore
 	Publisher   Publisher
+	V2Publisher V2Publisher
+	V2Reader    V2Reader
 	Revocations ArtifactRevoker
 	Resolver    Resolver
 	Limits      Limits
@@ -88,7 +96,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, err, id)
 		return
 	}
-	if r.ContentLength > h.limits.MaxBodyBytes {
+	requestLimit := h.limits.MaxBodyBytes
+	if strings.HasPrefix(r.URL.Path, "/v2/publish/") && requestLimit < 16<<20 {
+		requestLimit = 16 << 20
+	}
+	if r.ContentLength > requestLimit {
 		writeError(w, appError("budget_exceeded", "Request exceeds the requested byte budget", 413, false), id)
 		return
 	}
@@ -133,6 +145,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		routeErr = h.publishRevocation(w, r, p)
 	case r.Method == "POST" && len(parts) == 3 && parts[0] == "v1" && parts[1] == "publish":
 		routeErr = h.publish(w, r, p, parts[2])
+	case r.Method == "POST" && len(parts) == 3 && parts[0] == "v2" && parts[1] == "publish":
+		routeErr = h.publishV2(w, r, p, parts[2])
+	case r.Method == "GET" && len(parts) == 3 && parts[0] == "v2" && parts[1] == "artifacts":
+		routeErr = h.readV2(w, r, p, parts[2], false)
+	case r.Method == "GET" && len(parts) == 4 && parts[0] == "v2" && parts[1] == "artifacts" && parts[2] == "skill" && parts[3] == "package":
+		routeErr = h.readV2(w, r, p, "skill", true)
 	default:
 		routeErr = appError("not_found", "Not found", 404, false)
 	}
