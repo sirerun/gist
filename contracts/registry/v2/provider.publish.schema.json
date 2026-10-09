@@ -19,12 +19,12 @@
       ],
       "properties": {
         "id": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "../v1/common.schema.json#/properties/id",
+          "maxLength": 256
         },
         "version": {
-          "type": "string",
-          "minLength": 1
+          "$ref": "../v1/common.schema.json#/properties/version",
+          "maxLength": 256
         },
         "document": {
           "$ref": "https://gist.local/contracts/registry/v1/provider.schema.json"

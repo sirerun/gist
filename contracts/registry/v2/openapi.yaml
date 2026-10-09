@@ -2,97 +2,451 @@ openapi: 3.1.0
 info:
   title: Gist Publication Transport
   version: 2.0.0
-  description: Additive publication and exact readback transport. No provider execution authority is implied.
+  description: Additive publication and exact readback transport. No provider execution
+    authority is implied.
 servers:
-  - url: https://gist.example.com
+- url: https://gist.example.com
 security:
-  - bearerAuth: [catalog:publish]
+- bearerAuth: []
 paths:
   /v2/publish/skill:
-    post: {$ref: '#/components/x-operations/publishSkill'}
+    post:
+      operationId: publishSkillV2
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: skill.publish.schema.json
+      responses:
+        '201':
+          $ref: '#/components/responses/Published'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '413':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+        '200':
+          $ref: '#/components/responses/Published'
+        '500':
+          $ref: '#/components/responses/Error'
+      x-required-scopes:
+      - catalog:publish
+      description: Current active maintainer plus catalog:publish; tenant and namespace
+        supplied by authenticated policy.
   /v2/publish/capability:
-    post: {$ref: '#/components/x-operations/publishCapability'}
+    post:
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Published'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '413':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+        '200':
+          $ref: '#/components/responses/Published'
+        '500':
+          $ref: '#/components/responses/Error'
+      operationId: publishCapabilityV2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: capability.publish.schema.json
+      x-required-scopes:
+      - catalog:publish
+      description: Current active maintainer plus catalog:publish; tenant and namespace
+        supplied by authenticated policy.
   /v2/publish/tool:
-    post: {$ref: '#/components/x-operations/publishTool'}
+    post:
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Published'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '413':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+        '200':
+          $ref: '#/components/responses/Published'
+        '500':
+          $ref: '#/components/responses/Error'
+      operationId: publishToolV2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: tool.publish.schema.json
+      x-required-scopes:
+      - catalog:publish
+      description: Current active maintainer plus catalog:publish; tenant and namespace
+        supplied by authenticated policy.
   /v2/publish/provider:
-    post: {$ref: '#/components/x-operations/publishProvider'}
+    post:
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Published'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '413':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+        '200':
+          $ref: '#/components/responses/Published'
+        '500':
+          $ref: '#/components/responses/Error'
+      operationId: publishProviderV2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: provider.publish.schema.json
+      x-required-scopes:
+      - catalog:publish
+      description: Current active maintainer plus catalog:publish; tenant and namespace
+        supplied by authenticated policy.
   /v2/publish/binding:
-    post: {$ref: '#/components/x-operations/publishBinding'}
+    post:
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Published'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '413':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+        '200':
+          $ref: '#/components/responses/Published'
+        '500':
+          $ref: '#/components/responses/Error'
+      operationId: publishBindingV2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: binding.publish.schema.json
+      x-required-scopes:
+      - catalog:publish
+      description: Current active maintainer plus catalog:publish; tenant and namespace
+        supplied by authenticated policy.
   /v2/publish/taxonomy:
-    post: {$ref: '#/components/x-operations/publishTaxonomy'}
+    post:
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Published'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '413':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+        '200':
+          $ref: '#/components/responses/Published'
+        '500':
+          $ref: '#/components/responses/Error'
+      operationId: publishTaxonomyV2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: taxonomy.publish.schema.json
+      x-required-scopes:
+      - catalog:publish
+      description: Current active maintainer plus catalog:publish; tenant and namespace
+        supplied by authenticated policy.
   /v2/artifacts/{kind}:
-    get: {$ref: '#/components/x-operations/readDocument'}
+    get:
+      operationId: readArtifactDocumentV2
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Kind'
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/Version'
+      - $ref: '#/components/parameters/MaxBytes'
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          $ref: '#/components/responses/JsonReadback'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '413':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-required-scopes:
+      - catalog:read
+      description: Current catalog:read policy and exact tenant-bound reference; repeated
+        or unknown query parameters reject.
   /v2/artifacts/skill/package:
-    get: {$ref: '#/components/x-operations/readSkillPackage'}
+    get:
+      operationId: readSkillPackageV2
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/Version'
+      - $ref: '#/components/parameters/MaxBytes'
+      - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          $ref: '#/components/responses/ZipReadback'
+        '401':
+          $ref: '#/components/responses/Error'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '413':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+      x-required-scopes:
+      - catalog:read
+      description: Current catalog:read policy and exact tenant-bound reference; repeated
+        or unknown query parameters reject.
 components:
   securitySchemes:
-    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
     Kind:
       name: kind
       in: path
       required: true
-      schema: {type: string, enum: [skill, capability, tool, provider, binding, taxonomy]}
-    Id: {name: id, in: query, required: true, schema: {type: string, minLength: 1}}
-    Version: {name: version, in: query, required: true, schema: {type: string, minLength: 1}}
-    MaxBytes: {name: max_bytes, in: query, required: true, schema: {type: integer, minimum: 1, maximum: 104857600}}
-    RequestId: {name: X-Request-ID, in: header, required: false, schema: {type: string, maxLength: 128}}
+      schema:
+        type: string
+        enum:
+        - skill
+        - capability
+        - tool
+        - provider
+        - binding
+        - taxonomy
+    Id:
+      name: id
+      in: query
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 256
+        pattern: ^[a-z0-9][a-z0-9._/-]*$
+    Version:
+      name: version
+      in: query
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 256
+    MaxBytes:
+      name: max_bytes
+      in: query
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+        maximum: 9223372036854775807
+    RequestId:
+      name: X-Request-ID
+      in: header
+      required: false
+      schema:
+        type: string
+        maxLength: 128
   headers:
-    BodyDigest: {schema: {type: string, pattern: '^sha256:[a-f0-9]{64}$'}, description: SHA-256 of this exact response body.}
-    ArtifactDigest: {schema: {type: string, pattern: '^sha256:[a-f0-9]{64}$'}, description: SHA-256 of original transferred ZIP or raw document bytes.}
-    ManifestDigest: {schema: {type: string, pattern: '^sha256:[a-f0-9]{64}$'}}
-    PackageDigest: {schema: {type: string, pattern: '^sha256:[a-f0-9]{64}$'}, description: Inventory closure digest; distinct from ZIP and manifest byte digests.}
+    BodyDigest:
+      schema:
+        type: string
+        pattern: ^sha256:[a-f0-9]{64}$
+      description: SHA-256 of this exact response body.
+    ArtifactDigest:
+      schema:
+        type: string
+        pattern: ^sha256:[a-f0-9]{64}$
+      description: SHA-256 of original transferred ZIP or raw document bytes.
+    ManifestDigest:
+      schema:
+        type: string
+        pattern: ^sha256:[a-f0-9]{64}$
+    PackageDigest:
+      schema:
+        type: string
+        pattern: ^sha256:[a-f0-9]{64}$
+      description: Inventory closure digest; distinct from ZIP and manifest byte digests.
   schemas:
-    Error: {$ref: 'error.schema.json'}
-    PublishResponse: {$ref: 'publish-response.schema.json'}
+    Error:
+      $ref: error.schema.json
+    PublishResponse:
+      $ref: publish-response.schema.json
   responses:
     Error:
       description: Bounded error; no response body truncation.
-      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
     Published:
-      description: Complete publication receipt.
+      description: 'Canonical immutable receipt: HTTP201 for first admission, HTTP200
+        for replay/existing admission; identical saved body and no per-call replay
+        field.'
       headers:
-        X-Gist-Artifact-Digest: {$ref: '#/components/headers/ArtifactDigest'}
-      content: {application/json: {schema: {$ref: '#/components/schemas/PublishResponse'}}}
+        X-Gist-Artifact-Digest:
+          $ref: '#/components/headers/ArtifactDigest'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PublishResponse'
     JsonReadback:
-      description: Exact original manifest bytes for skill, exact RawMessage document bytes otherwise. Budget counts body bytes only.
+      description: Exact original manifest bytes for skill, exact RawMessage document
+        bytes otherwise. Budget counts body bytes only.
       headers:
-        X-Gist-Body-Digest: {$ref: '#/components/headers/BodyDigest'}
-        X-Gist-Artifact-Digest: {$ref: '#/components/headers/ArtifactDigest'}
-        X-Gist-Manifest-Digest: {$ref: '#/components/headers/ManifestDigest'}
-        X-Gist-Package-Digest: {$ref: '#/components/headers/PackageDigest'}
-      content: {application/json: {schema: {type: string, contentMediaType: application/json}}}
+        X-Gist-Body-Digest:
+          $ref: '#/components/headers/BodyDigest'
+        X-Gist-Artifact-Digest:
+          $ref: '#/components/headers/ArtifactDigest'
+        X-Gist-Manifest-Digest:
+          $ref: '#/components/headers/ManifestDigest'
+        X-Gist-Package-Digest:
+          $ref: '#/components/headers/PackageDigest'
+      content:
+        application/json:
+          schema:
+            oneOf:
+            - $ref: ../v1/manifest.schema.json
+            - $ref: ../v1/capability.schema.json
+            - $ref: ../v1/execution-schema.schema.json
+            - $ref: ../v1/provider.schema.json
+            - $ref: ../v1/binding.schema.json
+            - $ref: ../v1/taxonomy.schema.json
     ZipReadback:
       description: Original uploaded ZIP bytes. Budget counts body bytes only.
       headers:
-        X-Gist-Body-Digest: {$ref: '#/components/headers/BodyDigest'}
-        X-Gist-Artifact-Digest: {$ref: '#/components/headers/ArtifactDigest'}
-        X-Gist-Manifest-Digest: {$ref: '#/components/headers/ManifestDigest'}
-        X-Gist-Package-Digest: {$ref: '#/components/headers/PackageDigest'}
-      content: {application/zip: {schema: {type: string, format: binary}}}
-  x-operations:
-    publishSkill:
-      operationId: publishSkillV2
-      security: [{bearerAuth: [catalog:publish]}]
-      parameters: [{$ref: '#/components/parameters/RequestId'}]
-      requestBody: {required: true, content: {application/json: {schema: {$ref: 'skill.publish.schema.json'}}}}
-      responses: {'201': {$ref: '#/components/responses/Published'}, '400': {$ref: '#/components/responses/Error'}, '401': {$ref: '#/components/responses/Error'}, '403': {$ref: '#/components/responses/Error'}, '409': {$ref: '#/components/responses/Error'}, '413': {$ref: '#/components/responses/Error'}, '422': {$ref: '#/components/responses/Error'}, '429': {$ref: '#/components/responses/Error'}, '503': {$ref: '#/components/responses/Error'}}
-    publishCapability: {$ref: '#/components/x-operations/publishBase', operationId: publishCapabilityV2, requestBody: {required: true, content: {application/json: {schema: {$ref: 'capability.publish.schema.json'}}}}}
-    publishTool: {$ref: '#/components/x-operations/publishBase', operationId: publishToolV2, requestBody: {required: true, content: {application/json: {schema: {$ref: 'tool.publish.schema.json'}}}}}
-    publishProvider: {$ref: '#/components/x-operations/publishBase', operationId: publishProviderV2, requestBody: {required: true, content: {application/json: {schema: {$ref: 'provider.publish.schema.json'}}}}}
-    publishBinding: {$ref: '#/components/x-operations/publishBase', operationId: publishBindingV2, requestBody: {required: true, content: {application/json: {schema: {$ref: 'binding.publish.schema.json'}}}}}
-    publishTaxonomy: {$ref: '#/components/x-operations/publishBase', operationId: publishTaxonomyV2, requestBody: {required: true, content: {application/json: {schema: {$ref: 'taxonomy.publish.schema.json'}}}}}
-    publishBase:
-      security: [{bearerAuth: [catalog:publish]}]
-      parameters: [{$ref: '#/components/parameters/RequestId'}]
-      responses: {'201': {$ref: '#/components/responses/Published'}, '400': {$ref: '#/components/responses/Error'}, '401': {$ref: '#/components/responses/Error'}, '403': {$ref: '#/components/responses/Error'}, '409': {$ref: '#/components/responses/Error'}, '413': {$ref: '#/components/responses/Error'}, '422': {$ref: '#/components/responses/Error'}, '429': {$ref: '#/components/responses/Error'}, '503': {$ref: '#/components/responses/Error'}}
-    readDocument:
-      operationId: readArtifactDocumentV2
-      security: [{bearerAuth: [catalog:read]}]
-      parameters: [{$ref: '#/components/parameters/Kind'}, {$ref: '#/components/parameters/Id'}, {$ref: '#/components/parameters/Version'}, {$ref: '#/components/parameters/MaxBytes'}, {$ref: '#/components/parameters/RequestId'}]
-      responses: {'200': {$ref: '#/components/responses/JsonReadback'}, '401': {$ref: '#/components/responses/Error'}, '403': {$ref: '#/components/responses/Error'}, '404': {$ref: '#/components/responses/Error'}, '409': {$ref: '#/components/responses/Error'}, '413': {$ref: '#/components/responses/Error'}, '422': {$ref: '#/components/responses/Error'}, '429': {$ref: '#/components/responses/Error'}, '503': {$ref: '#/components/responses/Error'}}
-    readSkillPackage:
-      operationId: readSkillPackageV2
-      security: [{bearerAuth: [catalog:read]}]
-      parameters: [{$ref: '#/components/parameters/Id'}, {$ref: '#/components/parameters/Version'}, {$ref: '#/components/parameters/MaxBytes'}, {$ref: '#/components/parameters/RequestId'}]
-      responses: {'200': {$ref: '#/components/responses/ZipReadback'}, '401': {$ref: '#/components/responses/Error'}, '403': {$ref: '#/components/responses/Error'}, '404': {$ref: '#/components/responses/Error'}, '409': {$ref: '#/components/responses/Error'}, '413': {$ref: '#/components/responses/Error'}, '422': {$ref: '#/components/responses/Error'}, '429': {$ref: '#/components/responses/Error'}, '503': {$ref: '#/components/responses/Error'}}
+        X-Gist-Body-Digest:
+          $ref: '#/components/headers/BodyDigest'
+        X-Gist-Artifact-Digest:
+          $ref: '#/components/headers/ArtifactDigest'
+        X-Gist-Manifest-Digest:
+          $ref: '#/components/headers/ManifestDigest'
+        X-Gist-Package-Digest:
+          $ref: '#/components/headers/PackageDigest'
+      content:
+        application/zip:
+          schema:
+            type: string
+            format: binary

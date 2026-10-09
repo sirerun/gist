@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Offline JSON grammar/schema fixture validation; no network references."""
 import json
+import zipfile, io, base64, hashlib
 from importlib.metadata import version as package_version
 from pathlib import Path
 import sys
+from openapi_spec_validator import OpenAPIV31SpecValidator
+from jsonschema_path import SchemaPath
+from urllib.parse import urlparse, unquote
 
 import jsonschema
 import yaml
@@ -26,11 +30,20 @@ def no_duplicates(pairs):
 
 def strict_load(raw):
     raw.decode('utf-8', errors='strict')
-    decoder = json.JSONDecoder(object_pairs_hook=no_duplicates)
+    def reject_constant(value):
+        raise ValueError('non-JSON constant: '+value)
+    decoder = json.JSONDecoder(object_pairs_hook=no_duplicates, parse_constant=reject_constant)
     text = raw.decode('utf-8')
-    value, end = decoder.raw_decode(text.lstrip())
-    if text.lstrip()[end:].strip():
+    value, end = decoder.raw_decode(text.lstrip(' \t\r\n'))
+    if text.lstrip(' \t\r\n')[end:].strip(' \t\r\n'):
         raise ValueError('trailing JSON content')
+    def scalars(node):
+        if isinstance(node, str): node.encode("utf-8", errors="strict")
+        elif isinstance(node, dict):
+            for key, child in node.items(): scalars(key); scalars(child)
+        elif isinstance(node, list):
+            for child in node: scalars(child)
+    scalars(value)
     return value
 
 
@@ -60,12 +73,39 @@ def must_reject(label, schema, instance):
 
 def main():
     valid = json.loads((V2 / 'fixtures/valid.json').read_text(encoding='utf-8'))
+    evidence_schema = validator(V2 / "admission-evidence.schema.json")
+    evidence = json.loads((V2/"fixtures/admission-evidence.json").read_text())
+    assert not list(evidence_schema.iter_errors(evidence))
+    must_reject("client/server evidence unknown field", evidence_schema, {**evidence,"approved":True})
+    grant = base64.b64decode(evidence["rights"]["retained_grant_base64"],validate=True)
+    assert evidence["rights"]["grant_digest"] == "sha256:"+hashlib.sha256(grant).hexdigest()
+    captured = base64.b64decode(evidence["source"]["retained_bytes_base64"],validate=True)
+    assert evidence["source"]["capture_digest"] == "sha256:"+hashlib.sha256(captured).hexdigest()
     names = ('skill', 'capability', 'tool', 'provider', 'binding', 'taxonomy')
     schemas = {name: validator(V2 / f'{name}.publish.schema.json') for name in names}
     for name in names:
         errors = list(schemas[name].iter_errors(valid[name]))
         if errors:
             raise AssertionError(f'{name}: ' + '; '.join(e.message for e in errors))
+
+    skill_bytes = base64.b64decode(valid["skill"]["artifact"]["package"]["data"], validate=True)
+    assert skill_bytes == (V2/"fixtures/skill.zip").read_bytes()
+    with zipfile.ZipFile(io.BytesIO(skill_bytes)) as archive:
+        manifest_bytes = archive.read("manifest.json")
+        manifest = strict_load(manifest_bytes)
+        errors = list(validator(V1/"manifest.schema.json").iter_errors(manifest))
+        assert not errors, [e.message for e in errors]
+        assert set(archive.namelist()) == {"manifest.json"} | {e["path"] for e in manifest["inventory"]}
+        for entry in manifest["inventory"]:
+            body = archive.read(entry["path"])
+            assert len(body) == entry["size"] and hashlib.sha256(body).hexdigest() == entry["sha256"]
+        canonical = json.dumps(sorted(manifest["inventory"], key=lambda e:e["path"]),sort_keys=True,separators=(",",":")).encode()
+        package_digest = hashlib.sha256(canonical).hexdigest()
+        assert manifest["package_digest"]["value"] == package_digest
+        expected = json.loads((V2/"fixtures/skill-digests.json").read_text())
+        assert expected["artifact_digest"] == "sha256:"+hashlib.sha256(skill_bytes).hexdigest()
+        assert expected["manifest_digest"] == "sha256:"+hashlib.sha256(manifest_bytes).hexdigest()
+        assert expected["package_digest"] == "sha256:"+package_digest
 
     # Strict JSON grammar gates precede schema decoding.
     for label, raw in [
@@ -75,7 +115,7 @@ def main():
     ]:
         try:
             strict_load(raw)
-        except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
+        except (ValueError, UnicodeError, json.JSONDecodeError):
             pass
         else:
             raise AssertionError(f'{label}: grammar accepted')
@@ -83,6 +123,16 @@ def main():
     for case in json.loads((V2 / 'fixtures/invalid.json').read_text(encoding='utf-8')):
         must_reject(case['name'], schemas[case['schema']], case['instance'])
 
+    for label, raw in [
+        ("nested duplicate", b'{"a":[{"x":1,"x":2}]}'),
+        ("escaped duplicate", b'{"id":1,"\\u0069d":2}'),
+        ("non-finite number", b'{"x":NaN}'),
+        ("non-JSON outer whitespace", b"\xc2\xa0{}"),
+        ("lone surrogate", b'{"x":"\\ud800"}'),
+    ]:
+        try: strict_load(raw)
+        except (ValueError, UnicodeError, json.JSONDecodeError): pass
+        else: raise AssertionError(label+": grammar accepted")
     # Semantic identity agreement is separately exercised; schema cannot express cross-field equality.
     sem = json.loads(json.dumps(valid['capability'])); sem['artifact']['id'] = 'capability/other'
     if list(schemas['capability'].iter_errors(sem)):
@@ -94,7 +144,7 @@ def main():
     assert sem['artifact']['version'] != sem['artifact']['document']['edition']  # semantic predicate must reject
 
     response = validator(V2 / 'publish-response.schema.json')
-    response_ok = {'kind':'provider','id':'provider/demo','version':'1.0.0','artifact_digest':'sha256:'+'a'*64,'replayed':False}
+    response_ok = {'kind':'provider','id':'provider/demo','version':'1.0.0','artifact_digest':'sha256:'+'a'*64}
     if list(response.iter_errors(response_ok)):
         raise AssertionError('publish response rejected')
     must_reject('response shape', response, {**response_ok,'unknown':True})
@@ -113,6 +163,16 @@ def main():
         raise AssertionError('readback query shape rejected')
     must_reject('readback query shape', readback, {'kind':'skill','id':'skill/demo','version':'1.0.0'})
 
+    # Client budgets larger than the server cap are valid and clamped by implementation.
+    larger = json.loads(json.dumps(valid["provider"])); larger["max_bytes"] = 104857601
+    assert not list(schemas["provider"].iter_errors(larger))
+    # Source contracts are immutable after the reviewed freeze; locks include validator and fixtures.
+    if (V2/"locks.json").exists():
+        locks = json.loads((V2/"locks.json").read_text())["files"]
+        actual = {str(p.relative_to(V2)) for p in V2.rglob("*") if p.is_file() and p.name != "locks.json" and "__pycache__" not in p.parts}
+        assert actual == set(locks), "contract file set differs from locks"
+        for name, wanted in locks.items():
+            assert "sha256:"+hashlib.sha256((V2/name).read_bytes()).hexdigest() == wanted, name+" differs from lock"
     # Validate the OpenAPI document as YAML and assert critical media/method bindings.
     api = yaml.safe_load((V2 / 'openapi.yaml').read_text(encoding='utf-8'))
     def check_refs(node):
@@ -126,6 +186,22 @@ def main():
         elif isinstance(node, list):
             for child in node: check_refs(child)
     check_refs(api)
+    def local_reference(uri):
+        parsed = urlparse(uri)
+        if parsed.scheme == "https" and parsed.netloc == "gist.local" and parsed.path.startswith("/contracts/registry/"):
+            target = ROOT / parsed.path.lstrip("/")
+        elif parsed.scheme == "file":
+            target = Path(unquote(parsed.path))
+        else:
+            raise ValueError("non-local OpenAPI reference: "+uri)
+        target = target.resolve()
+        if not target.is_relative_to((ROOT / "contracts/registry").resolve()) or not target.is_file():
+            raise ValueError("outside or missing contract reference: "+uri)
+        return yaml.safe_load(target.read_text(encoding="utf-8"))
+    schema_path = SchemaPath.from_dict(api, base_uri=(V2 / "openapi.yaml").as_uri(),
+        handlers={key:local_reference for key in ("<all_urls>","file","http","https")})
+    OpenAPIV31SpecValidator(schema_path).validate()
+    assert all('$ref' not in op for item in api['paths'].values() for method, op in item.items() if method in ('post','get'))
     assert api['paths']['/v2/publish/skill']['post']
     assert api['paths']['/v2/artifacts/{kind}']['get']
     assert 'application/json' in str(api['components']['responses']['JsonReadback'])

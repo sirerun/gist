@@ -1,0 +1,38 @@
+{
+  "evidence_version": "1",
+  "workspace_id": "fixture-workspace",
+  "artifact": {
+    "kind": "skill",
+    "id": "skill/publication-fixture",
+    "version": "1.0.0",
+    "artifact_digest": "sha256:1a0af27f57dd2d264cf226e8a63673cd4c4e0846193ed0739c76c48df9383c5f"
+  },
+  "source": {
+    "uri": "urn:gist:fixture:skill",
+    "captured_at": "2026-10-09T00:00:00Z",
+    "collector": {
+      "id": "fixture-builder",
+      "version": "1"
+    },
+    "capture_digest": "sha256:1a0af27f57dd2d264cf226e8a63673cd4c4e0846193ed0739c76c48df9383c5f",
+    "retained_bytes_base64": "UEsDBBQAAAAAAAAAIQBU2Idf/gIAAP4CAAANAAAAbWFuaWZlc3QuanNvbnsKICAibWFuaWZlc3RfdmVyc2lvbiI6ICIxIiwKICAiaWQiOiAic2tpbGwvcHVibGljYXRpb24tZml4dHVyZSIsCiAgInZlcnNpb24iOiAiMS4wLjAiLAogICJuYW1lIjogIlB1YmxpY2F0aW9uIGZpeHR1cmUiLAogICJzdW1tYXJ5IjogIlN5bnRoZXRpYyBieXRlLXJldGVudGlvbiBmaXh0dXJlIG9ubHkiLAogICJlbnRyeXBvaW50IjogIlNLSUxMLm1kIiwKICAicGFja2FnZV9kaWdlc3QiOiB7CiAgICAiYWxnb3JpdGhtIjogInNoYTI1NiIsCiAgICAidmFsdWUiOiAiZjg2OTUxYWMxNjE5YzgxNTMxMmU0MDZmZTRkYWQzMjk2NTcxYjJlODdjMDFhYTI1ZjBkNWU1ZmNjZGZiNzgxOSIKICB9LAogICJpbnZlbnRvcnkiOiBbCiAgICB7CiAgICAgICJwYXRoIjogIlNLSUxMLm1kIiwKICAgICAgInNpemUiOiAxMzQsCiAgICAgICJzaGEyNTYiOiAiODVjNTAwYTY4MjY4OWRiYjBiY2U4MDI5NjAxNzIzMmU0ZTU0NGQ5YmQ1NGJhZjVmNTY1MGE0ZmFlNTlhYWUyYiIsCiAgICAgICJtZWRpYV90eXBlIjogInRleHQvbWFya2Rvd24iCiAgICB9CiAgXSwKICAicmVxdWlyZWRfY2FwYWJpbGl0aWVzIjogW10sCiAgInJ1bnRpbWVfcmVxdWlyZW1lbnRzIjogewogICAgImxvY2FsX2V4ZWN1dGlvbiI6IHRydWUKICB9LAogICJlZmZlY3RzIjogW10sCiAgInRydXN0IjogIm9wZXJhdG9yX2Fzc2VydGVkIiwKICAicHVibGljYXRpb24iOiB7CiAgICAic3RhdHVzIjogImFwcHJvdmVkIiwKICAgICJwcm92ZW5hbmNlIjogInB1Ymxpc2hlcl9hc3NlcnRlZCIKICB9Cn1QSwMEFAAAAAAAAAAhAOmYczqGAAAAhgAAAAgAAABTS0lMTC5tZC0tLQpuYW1lOiBwdWJsaWNhdGlvbi1maXh0dXJlCmRlc2NyaXB0aW9uOiBWZXJpZnkgZXhhY3Qgb3duZWQgcHVibGljYXRpb24gYnl0ZXMuCi0tLQpVc2Ugb25seSB0aGUgc3ludGhldGljIGNvbnRyb2xsZWQgbG9jYWwgZml4dHVyZS4KUEsBAhQDFAAAAAAAAAAhAFTYh1/+AgAA/gIAAA0AAAAAAAAAAAAAAKSBAAAAAG1hbmlmZXN0Lmpzb25QSwECFAMUAAAAAAAAACEA6ZhzOoYAAACGAAAACAAAAAAAAAAAAAAApIEpAwAAU0tJTEwubWRQSwUGAAAAAAIAAgBxAAAA1QMAAAAA",
+    "media_type": "application/zip"
+  },
+  "rights": {
+    "license": "synthetic-fixture-only",
+    "redistribution": true,
+    "scope": "workspace_only",
+    "grant_digest": "sha256:a1490d7a9759e8bc48f8658efe30ff1eccf7652d90c12436728446b44fcd1791",
+    "retained_grant_base64": "T3duZWQgc3ludGhldGljIGxvY2FsIGZpeHR1cmUgYnl0ZXMgb25seTsgbm8gcmVhbCBwcm92aWRlciwgdGF4b25vbXkgb3IgdGhpcmQtcGFydHkgcmlnaHRzIGFyZSBhc3NlcnRlZC4=",
+    "allowed_use": [
+      "private_distribution",
+      "catalog_metadata"
+    ]
+  },
+  "reviewer": {
+    "issuer": "fixture-issuer",
+    "subject": "fixture-maintainer",
+    "reviewed_at": "2026-10-09T00:00:00Z"
+  },
+  "synthetic": true
+}

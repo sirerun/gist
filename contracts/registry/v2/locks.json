@@ -1,0 +1,26 @@
+{
+  "version": "v2-source-candidate-20261009",
+  "files": {
+    "README.md": "sha256:056bc0962126df6d1167162d8b11f479b26a004481ecb8c4046a2402d817c7ff",
+    "admission-evidence.schema.json": "sha256:7981fb50f57e7283d249f0aa43dfa885d905f12e9d338f7dc0443762262563fe",
+    "binding.publish.schema.json": "sha256:3451c9253e75ac8db97183f8296f261ebfa1f414afb494eab4172aa4f2ffbb5d",
+    "capability.publish.schema.json": "sha256:f0710067ed7ab06c264046a485b8b59c5b9fe43449a25155eac4b37da4e53970",
+    "common.schema.json": "sha256:04fab66c20e0d43522c5fc6a043918deff341390f560dc4e312cdb4021755501",
+    "error.schema.json": "sha256:12289e0df2c697bb55cebc4dc6ca4d08847411b4b8593692af7cb2c5c92fdd5c",
+    "fixtures/admission-evidence.json": "sha256:9456e44fc25e0b52feef89b59a9e84320373850472b0236c3213e7b7fc43d1d9",
+    "fixtures/invalid.json": "sha256:60972fcc60c86b51ae0cc63f0fbf348d29704790be74647c2a2a45ec58179429",
+    "fixtures/skill-digests.json": "sha256:d89d26880439967fa9a7c75a1f1073c840d1c5f0d32feffabbb7c1a8dbb6da38",
+    "fixtures/skill.zip": "sha256:1a0af27f57dd2d264cf226e8a63673cd4c4e0846193ed0739c76c48df9383c5f",
+    "fixtures/valid.json": "sha256:179a7de3f7943d87a6bef9547eb18bdb8d98e5a60ba14cdc821cae4c4615e852",
+    "openapi.yaml": "sha256:b2d4b1a8762d0a790c84c635f8777acbab6f2e06614f1451307942597926ee34",
+    "provider.publish.schema.json": "sha256:8620e1d2214da817a7e9d069b52e46989a4e8ace17a986276865b44022e22102",
+    "publish-response.schema.json": "sha256:116c5cc976be576d4a620c76be148d2bfbaa49b27ed1833e2be724197243e1a1",
+    "readback-query.schema.json": "sha256:bb49e6f9a82dee8590371747a1f6db1aef2dab67dea269e4e409f94e2edde2a3",
+    "requirements.txt": "sha256:9de9cefd31d28dd85062036c7e3e5ce8c183172373966c4d8a60d92d487167e4",
+    "skill-package.schema.json": "sha256:8fb09b4f29d88acb81c09f786cf9244065abdf14b5983f16f43e67a10c60652c",
+    "skill.publish.schema.json": "sha256:f08823ebde2c762de9d4067bb97eabb215e82b2f6010b797e737059a2b813128",
+    "taxonomy.publish.schema.json": "sha256:9e3726c482d5bc4d950499332f8cfed3cad00d11c2c8c353ec07bb6e17302c8f",
+    "tool.publish.schema.json": "sha256:6bfada1931f7109b0aff367796d8a7c786a3904d1e7662c6cf83abc5e4a6c39c",
+    "validate.py": "sha256:54cb29676517cef7cfb091cad7e350d400134d71ec00b73b93e09a338d40e32f"
+  }
+}
