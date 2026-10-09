@@ -1,0 +1,1140 @@
+{
+  "base": "ad6b3fa1c12b1256afe798a726b2cc10b1406e8e",
+  "plan_id": "gist:delivery",
+  "authority_id": "github:sirerun/gist",
+  "root_before": "79bbcb800c438431f59b85575ff83514f8641ac41bfa0090a9cafd606c1c98af",
+  "root_after": "fcd513e3e21b31974747ed983f81bc92bb1d164d32ba22c5d1e262362f6660a9",
+  "source_archives": {
+    "docs/plan.md": {
+      "sha256": "79bbcb800c438431f59b85575ff83514f8641ac41bfa0090a9cafd606c1c98af",
+      "bytes": 30907
+    },
+    "docs/plans/registry-recovery.md": {
+      "sha256": "e4bd42c96843fa3975fb1a5ad4ab91801b44ba0240b01b510b4a2571e5be274e",
+      "bytes": 31310
+    },
+    "docs/plans/E-GR-SCOPE-requirements-and-preflight.md": {
+      "sha256": "0f0749ec3975af8ee98a4635494f12e79ebedc5e061b0a7349db73adbc1780f6",
+      "bytes": 14426
+    },
+    "docs/plans/E-GR-AUTH-enrollment-and-grants.md": {
+      "sha256": "03a25a2ca9f07cec205c77b5419077f9c1508f3ad7f330ca6edb89f1696acfec",
+      "bytes": 4842
+    },
+    "docs/plans/E-GR-KEYS-persistent-signing-keys.md": {
+      "sha256": "c50248ce4fced0b6ef006451bd3c539b58957b18cacc5c20edb7562273afc0b9",
+      "bytes": 7499
+    },
+    "docs/plans/E-GR-INTERFACE-shared-component-interfaces.md": {
+      "sha256": "5e1e41e3bba077c20c9a444f9919085e7d371f456cb6726710d98d6ef2299c29",
+      "bytes": 10818
+    },
+    "docs/plans/E-GR-WIRE-canonical-registry-wire.md": {
+      "sha256": "2fc8d621a0bd2b56d42eb892ffe689d536339e6512300c91f9d43a1a3b250358",
+      "bytes": 11033
+    },
+    "docs/plans/E-GR-EVENT-durable-revocation-feed.md": {
+      "sha256": "5223897bddfb4a1dad8813f448936f03c7208ff1d32317f2ba5afea5a93e637a",
+      "bytes": 10279
+    },
+    "docs/plans/E-GR-TREG-treg-action-artifacts.md": {
+      "sha256": "b3761ceb8750f7083f3b1d8552a289474278474f456d2ba6eacc8c0238edc1f5",
+      "bytes": 5421
+    },
+    "docs/plans/E-GR-COMPOSIO-composio-action-artifacts.md": {
+      "sha256": "8c084bf43c9e3592c301b6d53a002f21fe77fa76e7b1df29291b52f5eeab14b2",
+      "bytes": 5518
+    },
+    "docs/plans/E-GR-PUBLISH-canonical-publication.md": {
+      "sha256": "b151eaf88c59c2ffd5d70961880cf425b760c1db8fa167fd34595f63d9ba3dbe",
+      "bytes": 6537
+    },
+    "docs/plans/E-GR-CORE-startup-and-event-composition.md": {
+      "sha256": "0f85fdc7cf24b4ce832b8fbc3b3708f8d1b6450ec5437d915b2e651837c88da2",
+      "bytes": 20622
+    },
+    "docs/plans/E-GR-INTEGRATE-composition-and-interoperability.md": {
+      "sha256": "67aa355220bd02c4910c62ed44b6bec97a139f984263ee9b5eb2d492ab2da77c",
+      "bytes": 5055
+    },
+    "docs/plans/E-GR-AWS-aws-origin-and-infrastructure.md": {
+      "sha256": "62109b991866804e749820fb3a2f2ef751df5fcfdda7cb8ef3aaed992489f826",
+      "bytes": 8092
+    },
+    "docs/plans/E-GR-RELEASE-release-acceptance-and-operations.md": {
+      "sha256": "bd6d7099349a98d21bf53194e7da79c1e9ad4661d0f6552254b1fd8544d37dd2",
+      "bytes": 10161
+    },
+    "docs/plans/E-GR-NEXT-remaining-registry-milestones.md": {
+      "sha256": "2b849d6760194dd9e1c3c5309e373d9df9aa30f794ff947c3fd846ce7fd6cfc1",
+      "bytes": 1747
+    },
+    "docs/plans/E-GR-M2B-oauth-preview-and-production.md": {
+      "sha256": "92a84ea8ab7269ad41c6310e5e72afddc4da51dc1dbb4cd0b73e0fe21c4b26d1",
+      "bytes": 8226
+    },
+    "docs/plans/E-GR-M3-clients-runtime-and-production-metrics.md": {
+      "sha256": "29e8db76a90d68184619fe416f7bf1445eec51159be5a6e954dad8fe8721deb6",
+      "bytes": 7719
+    },
+    "docs/plans/E-GR-PROD-terminal-production-delivery.md": {
+      "sha256": "fb903764ba01f0de7100c9e7b6f0f6c51787c24e5052f76c67a1a61db821cc2d",
+      "bytes": 6298
+    }
+  },
+  "semantic_metadata_repairs": [
+    {
+      "task": "T1.1",
+      "field": "stage",
+      "value": "implement",
+      "source": "docs/plan.md",
+      "line": 115,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T1.1",
+      "field": "acc",
+      "value": "compiles, `gist setup` prints tool list, `gist setup invalidtool` prints error.",
+      "source": "docs/plan.md",
+      "line": 115,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T1.2",
+      "field": "stage",
+      "value": "implement",
+      "source": "docs/plan.md",
+      "line": 143,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T1.2",
+      "field": "acc",
+      "value": "function creates/updates/removes MCP entry correctly for both JSON and TOML formats.",
+      "source": "docs/plan.md",
+      "line": 143,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T1.3",
+      "field": "stage",
+      "value": "implement",
+      "source": "docs/plan.md",
+      "line": 157,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T1.3",
+      "field": "acc",
+      "value": "function appends/removes instructions section correctly.",
+      "source": "docs/plan.md",
+      "line": 157,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T1.4",
+      "field": "stage",
+      "value": "implement",
+      "source": "docs/plan.md",
+      "line": 168,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T1.4",
+      "field": "acc",
+      "value": "`gist setup claude` creates both files. `gist setup claude --uninstall` removes both entries.",
+      "source": "docs/plan.md",
+      "line": 168,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T2.1",
+      "field": "stage",
+      "value": "verify",
+      "source": "docs/plan.md",
+      "line": 179,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T2.1",
+      "field": "acc",
+      "value": "`GOWORK=off go test ./cmd/gist/ -run TestConfigureMCP -race -v` passes.",
+      "source": "docs/plan.md",
+      "line": 179,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T2.2",
+      "field": "stage",
+      "value": "verify",
+      "source": "docs/plan.md",
+      "line": 198,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T2.2",
+      "field": "acc",
+      "value": "`GOWORK=off go test ./cmd/gist/ -run TestConfigureInstructions -race -v` passes.",
+      "source": "docs/plan.md",
+      "line": 198,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T2.3",
+      "field": "stage",
+      "value": "verify",
+      "source": "docs/plan.md",
+      "line": 211,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T2.3",
+      "field": "acc",
+      "value": "`GOWORK=off go test ./cmd/gist/ -run TestSetupE2E -race -v` passes.",
+      "source": "docs/plan.md",
+      "line": 211,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T3.1",
+      "field": "stage",
+      "value": "implement",
+      "source": "docs/plan.md",
+      "line": 221,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T3.1",
+      "field": "acc",
+      "value": "compiles, go vet clean.",
+      "source": "docs/plan.md",
+      "line": 221,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T3.2",
+      "field": "stage",
+      "value": "implement",
+      "source": "docs/plan.md",
+      "line": 227,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T3.2",
+      "field": "acc",
+      "value": "`gist stats` output shows human-readable byte values.",
+      "source": "docs/plan.md",
+      "line": 227,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T3.3",
+      "field": "stage",
+      "value": "implement",
+      "source": "docs/plan.md",
+      "line": 234,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T3.3",
+      "field": "acc",
+      "value": "gist_search MCP response includes bytes_used per result and total.",
+      "source": "docs/plan.md",
+      "line": 234,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T4.1",
+      "field": "stage",
+      "value": "verify",
+      "source": "docs/plan.md",
+      "line": 243,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T4.1",
+      "field": "acc",
+      "value": "`GOWORK=off go test -run TestSearch -race -v` passes.",
+      "source": "docs/plan.md",
+      "line": 243,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T4.2",
+      "field": "stage",
+      "value": "verify",
+      "source": "docs/plan.md",
+      "line": 249,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T4.2",
+      "field": "acc",
+      "value": "`GOWORK=off go test ./cmd/gist/ -run TestFormatBytes -v` passes.",
+      "source": "docs/plan.md",
+      "line": 249,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T4.3",
+      "field": "stage",
+      "value": "verify",
+      "source": "docs/plan.md",
+      "line": 254,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T4.3",
+      "field": "acc",
+      "value": "`GOWORK=off go test ./mcp/ -race -v` passes.",
+      "source": "docs/plan.md",
+      "line": 254,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T5.1",
+      "field": "stage",
+      "value": "author",
+      "source": "docs/plan.md",
+      "line": 262,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T5.1",
+      "field": "acc",
+      "value": "README contains \"Agentic Tool Integration\" section with install commands, supported tools table, and flag documentation.",
+      "source": "docs/plan.md",
+      "line": 262,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T5.2",
+      "field": "stage",
+      "value": "author",
+      "source": "docs/plan.md",
+      "line": 289,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T5.2",
+      "field": "acc",
+      "value": "MCP Server section references `gist setup` and provides both automatic and manual configuration paths.",
+      "source": "docs/plan.md",
+      "line": 289,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T5.3",
+      "field": "stage",
+      "value": "author",
+      "source": "docs/plan.md",
+      "line": 296,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T5.3",
+      "field": "acc",
+      "value": "CLI Usage section includes `gist setup` example.",
+      "source": "docs/plan.md",
+      "line": 296,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T6.1",
+      "field": "stage",
+      "value": "verify",
+      "source": "docs/plan.md",
+      "line": 304,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T6.1",
+      "field": "acc",
+      "value": "zero errors, zero warnings.",
+      "source": "docs/plan.md",
+      "line": 304,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "T6.2",
+      "field": "stage",
+      "value": "verify",
+      "source": "docs/plan.md",
+      "line": 310,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "T6.2",
+      "field": "acc",
+      "value": "all tests pass.",
+      "source": "docs/plan.md",
+      "line": 310,
+      "basis": "verbatim existing Acceptance bullet in the task source fragment"
+    },
+    {
+      "task": "E-GR-SCOPE.T-GR-SCOPE.4",
+      "field": "stage",
+      "value": "preflight",
+      "source": "docs/plans/E-GR-SCOPE-requirements-and-preflight.md",
+      "line": 13,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "E-GR-SCOPE.T-GR-SCOPE.5",
+      "field": "stage",
+      "value": "preflight",
+      "source": "docs/plans/E-GR-SCOPE-requirements-and-preflight.md",
+      "line": 14,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "E-GR-PUBLISH.T-GR-PUBLISH.8",
+      "field": "stage",
+      "value": "preflight",
+      "source": "docs/plans/E-GR-PUBLISH-canonical-publication.md",
+      "line": 11,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "E-GR-AWS.T-GR-AWS.7",
+      "field": "stage",
+      "value": "deploy",
+      "source": "docs/plans/E-GR-AWS-aws-origin-and-infrastructure.md",
+      "line": 22,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "E-GR-AWS.T-GR-AWS.8",
+      "field": "stage",
+      "value": "deploy",
+      "source": "docs/plans/E-GR-AWS-aws-origin-and-infrastructure.md",
+      "line": 23,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "E-GR-AWS.T-GR-AWS.10",
+      "field": "stage",
+      "value": "deploy",
+      "source": "docs/plans/E-GR-AWS-aws-origin-and-infrastructure.md",
+      "line": 25,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "E-GR-RELEASE.T-GR-RELEASE.3",
+      "field": "stage",
+      "value": "release",
+      "source": "docs/plans/E-GR-RELEASE-release-acceptance-and-operations.md",
+      "line": 15,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "E-GR-RELEASE.T-GR-RELEASE.4",
+      "field": "stage",
+      "value": "deploy",
+      "source": "docs/plans/E-GR-RELEASE-release-acceptance-and-operations.md",
+      "line": 16,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "E-GR-NEXT.T-GR-NEXT.0",
+      "field": "stage",
+      "value": "author",
+      "source": "docs/plans/E-GR-NEXT-remaining-registry-milestones.md",
+      "line": 10,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "E-GR-M2B.T-GR-M2B.7",
+      "field": "stage",
+      "value": "release",
+      "source": "docs/plans/E-GR-M2B-oauth-preview-and-production.md",
+      "line": 20,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "E-GR-M2B.T-GR-M2B.8",
+      "field": "stage",
+      "value": "deploy",
+      "source": "docs/plans/E-GR-M2B-oauth-preview-and-production.md",
+      "line": 21,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "E-GR-M2B.T-GR-M2B.11",
+      "field": "stage",
+      "value": "deploy",
+      "source": "docs/plans/E-GR-M2B-oauth-preview-and-production.md",
+      "line": 24,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    },
+    {
+      "task": "E-GR-M3.T-GR-M3.7",
+      "field": "stage",
+      "value": "deploy",
+      "source": "docs/plans/E-GR-M3-clients-runtime-and-production-metrics.md",
+      "line": 20,
+      "basis": "existing task title, detailed outcome and acceptance; operational side effects retain release/deploy and generic dispatch stays blocked"
+    }
+  ],
+  "task_count_before": 266,
+  "metadata_layout_repairs": [
+    {
+      "task": "E-GR-PUBLISH.T-GR-PUBLISH.8",
+      "field": "acc",
+      "basis": "Move unchanged bracketed acceptance before Owner so trailing Done/Evidence and narrative cannot be consumed as its value by the Wazi reader/repair grammar"
+    },
+    {
+      "task": "E-GR-INTERFACE.T-GR-INTERFACE.0",
+      "field": "acc",
+      "basis": "Move unchanged bracketed acceptance before Owner, preserving trailing Completed history while excluding it from the acceptance value"
+    }
+  ],
+  "historical_dependency_repairs": [
+    {
+      "task": "T1.1",
+      "field": "deps",
+      "value": [],
+      "source": "docs/plan.md",
+      "line": 115,
+      "basis": "none.",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T1.2",
+      "field": "deps",
+      "value": [],
+      "source": "docs/plan.md",
+      "line": 143,
+      "basis": "none.",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T1.3",
+      "field": "deps",
+      "value": [],
+      "source": "docs/plan.md",
+      "line": 157,
+      "basis": "none.",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T1.4",
+      "field": "deps",
+      "value": [
+        "T1.1",
+        "T1.2",
+        "T1.3"
+      ],
+      "source": "docs/plan.md",
+      "line": 168,
+      "basis": "T1.1, T1.2, T1.3.",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T2.1",
+      "field": "deps",
+      "value": [
+        "T1.2"
+      ],
+      "source": "docs/plan.md",
+      "line": 179,
+      "basis": "T1.2.",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T2.2",
+      "field": "deps",
+      "value": [
+        "T1.3"
+      ],
+      "source": "docs/plan.md",
+      "line": 198,
+      "basis": "T1.3.",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T2.3",
+      "field": "deps",
+      "value": [
+        "T1.4"
+      ],
+      "source": "docs/plan.md",
+      "line": 211,
+      "basis": "T1.4.",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T3.1",
+      "field": "deps",
+      "value": [],
+      "source": "docs/plan.md",
+      "line": 221,
+      "basis": "none.",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T3.2",
+      "field": "deps",
+      "value": [],
+      "source": "docs/plan.md",
+      "line": 227,
+      "basis": "none.",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T3.3",
+      "field": "deps",
+      "value": [
+        "T3.1"
+      ],
+      "source": "docs/plan.md",
+      "line": 234,
+      "basis": "T3.1.",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T4.1",
+      "field": "deps",
+      "value": [
+        "T3.1"
+      ],
+      "source": "docs/plan.md",
+      "line": 243,
+      "basis": "T3.1.",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T4.2",
+      "field": "deps",
+      "value": [
+        "T3.2"
+      ],
+      "source": "docs/plan.md",
+      "line": 249,
+      "basis": "T3.2.",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T4.3",
+      "field": "deps",
+      "value": [
+        "T3.1",
+        "T3.3"
+      ],
+      "source": "docs/plan.md",
+      "line": 254,
+      "basis": "T3.1, T3.3.",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T5.1",
+      "field": "deps",
+      "value": [],
+      "source": "docs/plan.md",
+      "line": 262,
+      "basis": "none (README content can be written before the setup code exists; the README documents the planned interface).",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T5.2",
+      "field": "deps",
+      "value": [],
+      "source": "docs/plan.md",
+      "line": 289,
+      "basis": "No prerequisite declared; both original reader and local projection have empty dependencies",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T5.3",
+      "field": "deps",
+      "value": [],
+      "source": "docs/plan.md",
+      "line": 296,
+      "basis": "No prerequisite declared; both original reader and local projection have empty dependencies",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T6.1",
+      "field": "deps",
+      "value": [
+        "T1.1",
+        "T1.2",
+        "T1.3",
+        "T1.4",
+        "T2.1",
+        "T2.2",
+        "T2.3",
+        "T3.1",
+        "T3.2",
+        "T3.3",
+        "T4.1",
+        "T4.2",
+        "T4.3",
+        "T5.1",
+        "T5.2",
+        "T5.3"
+      ],
+      "source": "docs/plan.md",
+      "line": 304,
+      "basis": "all of E1-E5.",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    },
+    {
+      "task": "T6.2",
+      "field": "deps",
+      "value": [
+        "T6.1"
+      ],
+      "source": "docs/plan.md",
+      "line": 310,
+      "basis": "T6.1.",
+      "reason": "Represent existing historical prerequisites, without adding new runtime obligations"
+    }
+  ],
+  "reference_syntax_repairs": [
+    {
+      "task": "T-GR-AUTH.0",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.9",
+      "to": "T-GR-SCOPE.9",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.9"
+    },
+    {
+      "task": "T-GR-AUTH.0",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.4",
+      "to": "T-GR-SCOPE.4",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.4"
+    },
+    {
+      "task": "T-GR-AUTH.5",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-KEYS.0",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.9",
+      "to": "T-GR-SCOPE.9",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.9"
+    },
+    {
+      "task": "T-GR-KEYS.5",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-INTERFACE.0",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.9",
+      "to": "T-GR-SCOPE.9",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.9"
+    },
+    {
+      "task": "T-GR-INTERFACE.5",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-WIRE.0",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.9",
+      "to": "T-GR-SCOPE.9",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.9"
+    },
+    {
+      "task": "T-GR-WIRE.5",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-WIRE.5",
+      "from": "E-GR-INTERFACE.T-GR-INTERFACE.6",
+      "to": "T-GR-INTERFACE.6",
+      "target_id": "E-GR-INTERFACE.T-GR-INTERFACE.6"
+    },
+    {
+      "task": "T-GR-EVENT.0",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.9",
+      "to": "T-GR-SCOPE.9",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.9"
+    },
+    {
+      "task": "T-GR-EVENT.5",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-EVENT.5",
+      "from": "E-GR-INTERFACE.T-GR-INTERFACE.6",
+      "to": "T-GR-INTERFACE.6",
+      "target_id": "E-GR-INTERFACE.T-GR-INTERFACE.6"
+    },
+    {
+      "task": "T-GR-TREG.0",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.9",
+      "to": "T-GR-SCOPE.9",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.9"
+    },
+    {
+      "task": "T-GR-TREG.0",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.10",
+      "to": "T-GR-SCOPE.10",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.10"
+    },
+    {
+      "task": "T-GR-TREG.5",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-COMPOSIO.0",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.9",
+      "to": "T-GR-SCOPE.9",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.9"
+    },
+    {
+      "task": "T-GR-COMPOSIO.0",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.10",
+      "to": "T-GR-SCOPE.10",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.10"
+    },
+    {
+      "task": "T-GR-COMPOSIO.5",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-PUBLISH.7",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.9",
+      "to": "T-GR-SCOPE.9",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.9"
+    },
+    {
+      "task": "T-GR-PUBLISH.0",
+      "from": "E-GR-INTERFACE.T-GR-INTERFACE.6",
+      "to": "T-GR-INTERFACE.6",
+      "target_id": "E-GR-INTERFACE.T-GR-INTERFACE.6"
+    },
+    {
+      "task": "T-GR-PUBLISH.5",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-CORE.0",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.9",
+      "to": "T-GR-SCOPE.9",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.9"
+    },
+    {
+      "task": "T-GR-CORE.0",
+      "from": "E-GR-INTERFACE.T-GR-INTERFACE.6",
+      "to": "T-GR-INTERFACE.6",
+      "target_id": "E-GR-INTERFACE.T-GR-INTERFACE.6"
+    },
+    {
+      "task": "T-GR-CORE.0",
+      "from": "E-GR-KEYS.T-GR-KEYS.6",
+      "to": "T-GR-KEYS.6",
+      "target_id": "E-GR-KEYS.T-GR-KEYS.6"
+    },
+    {
+      "task": "T-GR-CORE.0",
+      "from": "E-GR-WIRE.T-GR-WIRE.6",
+      "to": "T-GR-WIRE.6",
+      "target_id": "E-GR-WIRE.T-GR-WIRE.6"
+    },
+    {
+      "task": "T-GR-CORE.0",
+      "from": "E-GR-EVENT.T-GR-EVENT.6",
+      "to": "T-GR-EVENT.6",
+      "target_id": "E-GR-EVENT.T-GR-EVENT.6"
+    },
+    {
+      "task": "T-GR-CORE.5",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-CORE.34",
+      "from": "E-GR-WIRE.T-GR-WIRE.6",
+      "to": "T-GR-WIRE.6",
+      "target_id": "E-GR-WIRE.T-GR-WIRE.6"
+    },
+    {
+      "task": "T-GR-INTEGRATE.0",
+      "from": "E-GR-PUBLISH.T-GR-PUBLISH.6",
+      "to": "T-GR-PUBLISH.6",
+      "target_id": "E-GR-PUBLISH.T-GR-PUBLISH.6"
+    },
+    {
+      "task": "T-GR-INTEGRATE.0",
+      "from": "E-GR-CORE.T-GR-CORE.6",
+      "to": "T-GR-CORE.6",
+      "target_id": "E-GR-CORE.T-GR-CORE.6"
+    },
+    {
+      "task": "T-GR-INTEGRATE.0",
+      "from": "E-GR-INTERFACE.T-GR-INTERFACE.6",
+      "to": "T-GR-INTERFACE.6",
+      "target_id": "E-GR-INTERFACE.T-GR-INTERFACE.6"
+    },
+    {
+      "task": "T-GR-INTEGRATE.0",
+      "from": "E-GR-AUTH.T-GR-AUTH.6",
+      "to": "T-GR-AUTH.6",
+      "target_id": "E-GR-AUTH.T-GR-AUTH.6"
+    },
+    {
+      "task": "T-GR-INTEGRATE.0",
+      "from": "E-GR-KEYS.T-GR-KEYS.6",
+      "to": "T-GR-KEYS.6",
+      "target_id": "E-GR-KEYS.T-GR-KEYS.6"
+    },
+    {
+      "task": "T-GR-INTEGRATE.0",
+      "from": "E-GR-WIRE.T-GR-WIRE.6",
+      "to": "T-GR-WIRE.6",
+      "target_id": "E-GR-WIRE.T-GR-WIRE.6"
+    },
+    {
+      "task": "T-GR-INTEGRATE.0",
+      "from": "E-GR-EVENT.T-GR-EVENT.6",
+      "to": "T-GR-EVENT.6",
+      "target_id": "E-GR-EVENT.T-GR-EVENT.6"
+    },
+    {
+      "task": "T-GR-INTEGRATE.0",
+      "from": "E-GR-TREG.T-GR-TREG.6",
+      "to": "T-GR-TREG.6",
+      "target_id": "E-GR-TREG.T-GR-TREG.6"
+    },
+    {
+      "task": "T-GR-INTEGRATE.0",
+      "from": "E-GR-COMPOSIO.T-GR-COMPOSIO.6",
+      "to": "T-GR-COMPOSIO.6",
+      "target_id": "E-GR-COMPOSIO.T-GR-COMPOSIO.6"
+    },
+    {
+      "task": "T-GR-INTEGRATE.5",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-AWS.0",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.2",
+      "to": "T-GR-SCOPE.2",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.2"
+    },
+    {
+      "task": "T-GR-AWS.0",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.11",
+      "to": "T-GR-SCOPE.11",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.11"
+    },
+    {
+      "task": "T-GR-AWS.5",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-AWS.7",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.11",
+      "to": "T-GR-SCOPE.11",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.11"
+    },
+    {
+      "task": "T-GR-AWS.7",
+      "from": "E-GR-RELEASE.T-GR-RELEASE.2",
+      "to": "T-GR-RELEASE.2",
+      "target_id": "E-GR-RELEASE.T-GR-RELEASE.2"
+    },
+    {
+      "task": "T-GR-AWS.10",
+      "from": "E-GR-RELEASE.T-GR-RELEASE.4",
+      "to": "T-GR-RELEASE.4",
+      "target_id": "E-GR-RELEASE.T-GR-RELEASE.4"
+    },
+    {
+      "task": "T-GR-RELEASE.0",
+      "from": "E-GR-INTEGRATE.T-GR-INTEGRATE.6",
+      "to": "T-GR-INTEGRATE.6",
+      "target_id": "E-GR-INTEGRATE.T-GR-INTEGRATE.6"
+    },
+    {
+      "task": "T-GR-RELEASE.2",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.5",
+      "to": "T-GR-SCOPE.5",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.5"
+    },
+    {
+      "task": "T-GR-RELEASE.2",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-RELEASE.2",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.11",
+      "to": "T-GR-SCOPE.11",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.11"
+    },
+    {
+      "task": "T-GR-RELEASE.4",
+      "from": "E-GR-AWS.T-GR-AWS.9",
+      "to": "T-GR-AWS.9",
+      "target_id": "E-GR-AWS.T-GR-AWS.9"
+    },
+    {
+      "task": "T-GR-RELEASE.5",
+      "from": "E-GR-AWS.T-GR-AWS.11",
+      "to": "T-GR-AWS.11",
+      "target_id": "E-GR-AWS.T-GR-AWS.11"
+    },
+    {
+      "task": "T-GR-RELEASE.6",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.7",
+      "to": "T-GR-SCOPE.7",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.7"
+    },
+    {
+      "task": "T-GR-RELEASE.6",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.5",
+      "to": "T-GR-SCOPE.5",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.5"
+    },
+    {
+      "task": "T-GR-RELEASE.9",
+      "from": "E-GR-AWS.T-GR-AWS.12",
+      "to": "T-GR-AWS.12",
+      "target_id": "E-GR-AWS.T-GR-AWS.12"
+    },
+    {
+      "task": "T-GR-EVIDENCE.4",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-NEXT.0",
+      "from": "E-GR-RELEASE.T-GR-EVIDENCE.5",
+      "to": "T-GR-EVIDENCE.5",
+      "target_id": "E-GR-RELEASE.T-GR-EVIDENCE.5"
+    },
+    {
+      "task": "T-GR-M2B.0",
+      "from": "E-GR-NEXT.T-GR-NEXT.0",
+      "to": "T-GR-NEXT.0",
+      "target_id": "E-GR-NEXT.T-GR-NEXT.0"
+    },
+    {
+      "task": "T-GR-M2B.5",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-M2B.7",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.5",
+      "to": "T-GR-SCOPE.5",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.5"
+    },
+    {
+      "task": "T-GR-M2B.7",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.11",
+      "to": "T-GR-SCOPE.11",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.11"
+    },
+    {
+      "task": "T-GR-M2B.11",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.11",
+      "to": "T-GR-SCOPE.11",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.11"
+    },
+    {
+      "task": "T-GR-M3.0",
+      "from": "E-GR-M2B.T-GR-M2B.14",
+      "to": "T-GR-M2B.14",
+      "target_id": "E-GR-M2B.T-GR-M2B.14"
+    },
+    {
+      "task": "T-GR-M3.5",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-M3.7",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.11",
+      "to": "T-GR-SCOPE.11",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.11"
+    },
+    {
+      "task": "T-GR-M3.9",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.7",
+      "to": "T-GR-SCOPE.7",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.7"
+    },
+    {
+      "task": "T-GR-M3.9",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.5",
+      "to": "T-GR-SCOPE.5",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.5"
+    },
+    {
+      "task": "T-GR-M3.10",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.5",
+      "to": "T-GR-SCOPE.5",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.5"
+    },
+    {
+      "task": "T-GR-PROD.0",
+      "from": "E-GR-RELEASE.T-GR-EVIDENCE.5",
+      "to": "T-GR-EVIDENCE.5",
+      "target_id": "E-GR-RELEASE.T-GR-EVIDENCE.5"
+    },
+    {
+      "task": "T-GR-PROD.0",
+      "from": "E-GR-M2B.T-GR-M2B.14",
+      "to": "T-GR-M2B.14",
+      "target_id": "E-GR-M2B.T-GR-M2B.14"
+    },
+    {
+      "task": "T-GR-PROD.0",
+      "from": "E-GR-M3.T-GR-M3.12",
+      "to": "T-GR-M3.12",
+      "target_id": "E-GR-M3.T-GR-M3.12"
+    },
+    {
+      "task": "T-GR-PROD.0",
+      "from": "E-GR-AWS.T-GR-AWS.12",
+      "to": "T-GR-AWS.12",
+      "target_id": "E-GR-AWS.T-GR-AWS.12"
+    },
+    {
+      "task": "T-GR-PROD.0",
+      "from": "E-GR-RELEASE.T-GR-RELEASE.9",
+      "to": "T-GR-RELEASE.9",
+      "target_id": "E-GR-RELEASE.T-GR-RELEASE.9"
+    },
+    {
+      "task": "T-GR-PROD.6",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.8",
+      "to": "T-GR-SCOPE.8",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.8"
+    },
+    {
+      "task": "T-GR-PROD.9",
+      "from": "E-GR-SCOPE.T-GR-SCOPE.23",
+      "to": "T-GR-SCOPE.23",
+      "target_id": "E-GR-SCOPE.T-GR-SCOPE.23"
+    }
+  ]
+}

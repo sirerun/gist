@@ -1,0 +1,110 @@
+{
+  "tasks_before": 266,
+  "tasks_after": 266,
+  "active_tasks": 248,
+  "authored_titles_statuses_owners_existing_acceptance_preserved": true,
+  "existing_dependency_targets_preserved": true,
+  "source_archives_verified": 19,
+  "historical_prerequisites_recovered": {
+    "T1.1": [],
+    "T1.2": [],
+    "T1.3": [],
+    "T1.4": [
+      "T1.1",
+      "T1.2",
+      "T1.3"
+    ],
+    "T2.1": [
+      "T1.2"
+    ],
+    "T2.2": [
+      "T1.3"
+    ],
+    "T2.3": [
+      "T1.4"
+    ],
+    "T3.1": [],
+    "T3.2": [],
+    "T3.3": [
+      "T3.1"
+    ],
+    "T4.1": [
+      "T3.1"
+    ],
+    "T4.2": [
+      "T3.2"
+    ],
+    "T4.3": [
+      "T3.1",
+      "T3.3"
+    ],
+    "T5.1": [],
+    "T5.2": [],
+    "T5.3": [],
+    "T6.1": [
+      "T1.1",
+      "T1.2",
+      "T1.3",
+      "T1.4",
+      "T2.1",
+      "T2.2",
+      "T2.3",
+      "T3.1",
+      "T3.2",
+      "T3.3",
+      "T4.1",
+      "T4.2",
+      "T4.3",
+      "T5.1",
+      "T5.2",
+      "T5.3"
+    ],
+    "T6.2": [
+      "T6.1"
+    ]
+  },
+  "derived_dispatch_blocks": [
+    {
+      "id": "E-GR-AWS.T-GR-AWS.7",
+      "derived_dispatch_block": "Unsupported authored stage: deploy"
+    },
+    {
+      "id": "E-GR-AWS.T-GR-AWS.8",
+      "derived_dispatch_block": "Unsupported authored stage: deploy"
+    },
+    {
+      "id": "E-GR-AWS.T-GR-AWS.10",
+      "derived_dispatch_block": "Unsupported authored stage: deploy"
+    },
+    {
+      "id": "E-GR-RELEASE.T-GR-RELEASE.3",
+      "derived_dispatch_block": "Unsupported authored stage: release"
+    },
+    {
+      "id": "E-GR-RELEASE.T-GR-RELEASE.4",
+      "derived_dispatch_block": "Unsupported authored stage: deploy"
+    },
+    {
+      "id": "E-GR-M2B.T-GR-M2B.7",
+      "derived_dispatch_block": "Unsupported authored stage: release"
+    },
+    {
+      "id": "E-GR-M2B.T-GR-M2B.8",
+      "derived_dispatch_block": "Unsupported authored stage: deploy"
+    },
+    {
+      "id": "E-GR-M2B.T-GR-M2B.11",
+      "derived_dispatch_block": "Unsupported authored stage: deploy"
+    },
+    {
+      "id": "E-GR-M3.T-GR-M3.7",
+      "derived_dispatch_block": "Unsupported authored stage: deploy"
+    }
+  ],
+  "display_title_note": "The legacy parser cuts display labels at Owner only; inserted preceding metadata can appear in derived labels. Authored title text is preserved.",
+  "diagnostics": {
+    "duplicate_task_ids": [],
+    "undefined_wave_ids": [],
+    "ambiguous_wave_ids": []
+  }
+}
