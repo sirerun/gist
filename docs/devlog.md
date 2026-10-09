@@ -71,3 +71,10 @@ PUBLISH.1/2/3 source gates are qualified; independent exact-head review, guarded
 merge and actual landed verification remain separate. Full hosted lint retains
 five reproduced baseline findings; the v2 delta is clean. AWS STS has no default
 credentials. No actual provider, live S3, consumer or production gate is closed.
+
+PR60 original864b492/base8a24c72 received three independent source approvals.
+Coordinator's additional actual lifetime probe still read owned data after app
+shutdown and observed an extra root descriptor after denied startup. PUBLISH.15/16
+record the fix and actual two-case RED/refreshed full hosted PASS; PUBLISH.17
+requires independent corrected-head approval before merging. Original review and
+failed fixture/aggregate reports are retained rather than overwritten.
