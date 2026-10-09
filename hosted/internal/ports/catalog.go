@@ -32,7 +32,14 @@ type CatalogRecord struct {
 	State          string
 	Digest         Digest
 	ManifestDigest Digest
-	Metadata       []byte
+	// DocumentDigest identifies the exact original typed document bytes for a
+	// v2 non-skill publication. It is distinct from Digest and ManifestDigest.
+	DocumentDigest Digest
+	// PackageDigest identifies the v2 skill inventory closure, when present.
+	PackageDigest Digest
+	// ObjectKey is the storage-owned opaque object reference for v2 content.
+	ObjectKey string
+	Metadata  []byte
 }
 
 type SearchQuery struct {
