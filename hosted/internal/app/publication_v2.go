@@ -79,18 +79,21 @@ func (p *publicationV2) PublishV2(ctx context.Context, principal ports.Principal
 		_ = refList
 		protectedRecords = append(protectedRecords, refs...)
 	}
+	// Apply all response limits before the receipt/storage path sees the
+	// prepared record. The hard ceiling is independent of both client input
+	// and the configured server response limit.
+	budget := publicationResponseBudget(prepared.MaxBytes, p.maxResponse)
+	if budget <= 0 {
+		return ports.PublicationResult{}, rest.ErrBudgetExceeded
+	}
+	prepared.MaxBytes = budget
 	receipt, err := publicationv2.Receipt(prepared)
 	if err != nil {
 		return ports.PublicationResult{}, err
 	}
-	budget := prepared.MaxBytes
-	if p.maxResponse > 0 && budget > p.maxResponse {
-		budget = p.maxResponse
-	}
-	if budget <= 0 || int64(len(receipt)) > budget {
+	if int64(len(receipt)) > budget {
 		return ports.PublicationResult{}, rest.ErrBudgetExceeded
 	}
-	prepared.MaxBytes = budget
 	fence := func(ctx context.Context, tx pgx.Tx) error {
 		if err := currentPublicationAuthority(ctx, tx, principal, true); err != nil {
 			return err
@@ -126,6 +129,17 @@ func (p *publicationV2) PublishV2(ctx context.Context, principal ports.Principal
 		return ports.PublicationResult{}, mapPublicationError(err)
 	}
 	return result, nil
+}
+
+func publicationResponseBudget(client, server int64) int64 {
+	budget := client
+	if server > 0 && budget > server {
+		budget = server
+	}
+	if budget > 100<<20 {
+		budget = 100 << 20
+	}
+	return budget
 }
 
 func (p *publicationV2) ReadV2(ctx context.Context, principal ports.Principal, ref ports.ArtifactRef, maxBytes int64, packageBody bool) (ports.PublicationRead, error) {
