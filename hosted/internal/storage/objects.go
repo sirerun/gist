@@ -112,13 +112,24 @@ func (s *ObjectStore) Open(ctx context.Context, ref ports.ArtifactRef) (ports.Ar
 	digest, ok := s.refs[refKey(ref)]
 	catalog := s.catalog
 	s.mu.RUnlock()
+	var record ports.CatalogRecord
 	if !ok {
 		if catalog == nil {
 			return nil, ErrNotFound
 		}
-		record, err := catalog.Get(ctx, ref)
+		var err error
+		record, err = catalog.Get(ctx, ref)
 		if err != nil {
 			return nil, fmt.Errorf("objects: resolve %s from catalog: %w", refKey(ref), err)
+		}
+		digest = record.Digest
+	} else if catalog != nil {
+		// A cached legacy digest must never bypass current catalog state or
+		// rebind a v2 reference after revocation.
+		var err error
+		record, err = catalog.Get(ctx, ref)
+		if err != nil {
+			return nil, err
 		}
 		digest = record.Digest
 	}
@@ -130,7 +141,22 @@ func (s *ObjectStore) Open(ctx context.Context, ref ports.ArtifactRef) (ports.Ar
 	if !validSHA256Hex(digest.Value) {
 		return nil, errors.New("objects: invalid digest")
 	}
-	b, err := s.blobs.get(ctx, digest.Value)
+	name := digest.Value
+	if record.ObjectKey != "" {
+		if !validOwnedObjectKey(record.ObjectKey) || !strings.HasSuffix(record.ObjectKey, "/"+digest.Value) {
+			return nil, errors.New("objects: catalog object key does not match digest")
+		}
+		b, err := s.blobs.get(ctx, record.ObjectKey)
+		if err != nil {
+			return nil, err
+		}
+		sum := sha256.Sum256(b)
+		if hex.EncodeToString(sum[:]) != digest.Value {
+			return nil, errors.New("objects: retained owned object digest mismatch")
+		}
+		return &readSeekCloser{Reader: bytes.NewReader(b)}, nil
+	}
+	b, err := s.blobs.get(ctx, name)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +166,7 @@ func (s *ObjectStore) Open(ctx context.Context, ref ports.ArtifactRef) (ports.Ar
 // StageOwned writes bytes under a storage-generated v2 key. It is deliberately
 // separate from Put: legacy objects retain their digest-only namespace.
 func (s *ObjectStore) StageOwned(ctx context.Context, key string, data []byte, digest ports.Digest) error {
-	if !validOwnedObjectKey(key) || digest.Algorithm != "sha256" || !validSHA256Hex(digest.Value) {
+	if !validOwnedObjectKey(key) || !strings.HasSuffix(key, "/"+digest.Value) || digest.Algorithm != "sha256" || !validSHA256Hex(digest.Value) {
 		return errors.New("objects: invalid owned object identity")
 	}
 	sum := sha256.Sum256(data)
@@ -152,7 +178,7 @@ func (s *ObjectStore) StageOwned(ctx context.Context, key string, data []byte, d
 
 // OpenOwned resolves a durable object key and verifies the exact stored bytes.
 func (s *ObjectStore) OpenOwned(ctx context.Context, key string, digest ports.Digest, size int64) (ports.ArtifactReader, error) {
-	if !validOwnedObjectKey(key) || digest.Algorithm != "sha256" || !validSHA256Hex(digest.Value) || size < 0 {
+	if !validOwnedObjectKey(key) || !strings.HasSuffix(key, "/"+digest.Value) || digest.Algorithm != "sha256" || !validSHA256Hex(digest.Value) || size < 0 {
 		return nil, errors.New("objects: invalid owned object identity")
 	}
 	b, err := s.blobs.get(ctx, key)

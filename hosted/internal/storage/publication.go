@@ -57,6 +57,9 @@ func (s *PublicationStore) Publish(ctx context.Context, p ports.Principal, prepa
 	if saved.Kind != prepared.Ref.Kind || saved.ID != prepared.Ref.ID || saved.Version != prepared.Ref.Version || saved.ArtifactDigest != "sha256:"+artifactHex {
 		return ports.PublicationResult{}, errors.New("storage: publication receipt identity mismatch")
 	}
+	if prepared.MaxBytes <= 0 || int64(len(receipt)) > prepared.MaxBytes {
+		return ports.PublicationResult{}, ErrPublicationBudget
+	}
 	if saved.ManifestDigest != digestString(prepared.ManifestDigest) || saved.PackageDigest != digestString(prepared.PackageDigest) {
 		return ports.PublicationResult{}, errors.New("storage: publication receipt digest mismatch")
 	}
@@ -99,11 +102,33 @@ func (s *PublicationStore) Publish(ctx context.Context, p ports.Principal, prepa
 			if state == "deleting" {
 				return ErrConflict
 			}
-			if state == "retired" {
-				var liveDigest, liveState string
-				if err := tx.QueryRow(ctx, `SELECT digest_value,state FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4`, p.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&liveDigest, &liveState); err != nil || liveDigest != artifactHex || (liveState != "published" && liveState != "deprecated") {
-					return ErrConflict
+			if state == "committed" || state == "retired" {
+				var liveDigest, liveState, liveKey string
+				catalogErr := tx.QueryRow(ctx, `SELECT digest_value,state,COALESCE(object_key,'') FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4`, p.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&liveDigest, &liveState, &liveKey)
+				if state == "committed" || catalogErr == nil {
+					if catalogErr != nil || liveDigest != artifactHex || liveKey != objectKey || (liveState != "published" && liveState != "deprecated") {
+						return ErrConflict
+					}
+				} else if !errors.Is(catalogErr, pgx.ErrNoRows) {
+					return catalogErr
 				}
+			}
+			if state == "retired" {
+				// The old physical key remains a cleanup tombstone. Reassign this
+				// permanent identity to a fresh attempt/key only after deletion.
+				var random [16]byte
+				if _, err := rand.Read(random[:]); err != nil {
+					return err
+				}
+				newID := hex.EncodeToString(random[:])
+				newKey := "v2/" + newID + "/" + artifactHex
+				if _, err := tx.Exec(ctx, `INSERT INTO publication_attempts(workspace_id,attempt_id,kind,artifact_id,version,idempotency_key,artifact_digest,object_key,state,lease_until,artifact_size) VALUES($1,$2,$3,$4,$5,$6,$7,$8,'staged',clock_timestamp()+interval '24 hours',$9)`, p.WorkspaceID, newID, ref.Kind, ref.ID, ref.Version, prepared.IdempotencyKey, artifactHex, newKey, len(prepared.Artifact)); err != nil {
+					return err
+				}
+				if _, err := tx.Exec(ctx, `UPDATE publication_idempotency SET attempt_id=$4,response_body=$5 WHERE workspace_id=$1 AND kind=$2 AND idempotency_key=$3`, p.WorkspaceID, ref.Kind, prepared.IdempotencyKey, newID, receipt); err != nil {
+					return err
+				}
+				attemptID, objectKey, state = newID, newKey, "staged"
 			}
 			if state == "staged" {
 				_, err = tx.Exec(ctx, `UPDATE publication_attempts SET lease_until=clock_timestamp()+interval '24 hours' WHERE workspace_id=$1 AND attempt_id=$2 AND state='staged'`, p.WorkspaceID, attemptID)
@@ -141,22 +166,29 @@ func (s *PublicationStore) Publish(ctx context.Context, p ports.Principal, prepa
 		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 			return err
 		}
-		var random [16]byte
-		if _, err := rand.Read(random[:]); err != nil {
-			return err
-		}
-		attemptID = hex.EncodeToString(random[:])
 		state := "staged"
 		if existingDigest != "" {
 			alias = true
 			state = "committed"
-			objectKey = existingKey
+			if err := tx.QueryRow(ctx, `SELECT attempt_id FROM publication_attempts WHERE workspace_id=$1 AND object_key=$2 AND state='committed'`, p.WorkspaceID, existingKey).Scan(&attemptID); err != nil {
+				return ErrConflict
+			}
+			if err := tx.QueryRow(ctx, `SELECT publication_receipt FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4`, p.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&receipt); err != nil {
+				return err
+			}
 		} else {
+			var random [16]byte
+			if _, err := rand.Read(random[:]); err != nil {
+				return err
+			}
+			attemptID = hex.EncodeToString(random[:])
 			objectKey = "v2/" + attemptID + "/" + artifactHex
 		}
-		_, err = tx.Exec(ctx, `INSERT INTO publication_attempts(workspace_id,attempt_id,kind,artifact_id,version,idempotency_key,artifact_digest,object_key,state,lease_until,artifact_size) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,clock_timestamp()+interval '24 hours',$10)`, p.WorkspaceID, attemptID, ref.Kind, ref.ID, ref.Version, prepared.IdempotencyKey, artifactHex, objectKey, state, len(prepared.Artifact))
-		if err != nil {
-			return err
+		if !alias {
+			_, err = tx.Exec(ctx, `INSERT INTO publication_attempts(workspace_id,attempt_id,kind,artifact_id,version,idempotency_key,artifact_digest,object_key,state,lease_until,artifact_size) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,clock_timestamp()+interval '24 hours',$10)`, p.WorkspaceID, attemptID, ref.Kind, ref.ID, ref.Version, prepared.IdempotencyKey, artifactHex, objectKey, state, len(prepared.Artifact))
+			if err != nil {
+				return err
+			}
 		}
 		_, err = tx.Exec(ctx, `INSERT INTO publication_idempotency(workspace_id,kind,idempotency_key,artifact_id,version,artifact_digest,attempt_id,response_body) VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, p.WorkspaceID, ref.Kind, prepared.IdempotencyKey, ref.ID, ref.Version, artifactHex, attemptID, receipt)
 		return err
@@ -173,6 +205,13 @@ func (s *PublicationStore) Publish(ctx context.Context, p ports.Principal, prepa
 			return tx.QueryRow(ctx, `SELECT response_body FROM publication_idempotency WHERE workspace_id=$1 AND kind=$2 AND idempotency_key=$3`, p.WorkspaceID, ref.Kind, prepared.IdempotencyKey).Scan(&stored)
 		}); err != nil {
 			return ports.PublicationResult{}, err
+		}
+		if int64(len(stored)) > prepared.MaxBytes {
+			return ports.PublicationResult{}, ErrPublicationBudget
+		}
+		var replayReceipt ports.PublicationReceipt
+		if err := json.Unmarshal(stored, &replayReceipt); err != nil || replayReceipt.Kind != ref.Kind || replayReceipt.ID != ref.ID || replayReceipt.Version != ref.Version || replayReceipt.ArtifactDigest != "sha256:"+artifactHex {
+			return ports.PublicationResult{}, errors.New("storage: stored publication receipt identity mismatch")
 		}
 		return publicationResult(prepared, stored, false), nil
 	}
@@ -194,6 +233,17 @@ func (s *PublicationStore) Publish(ctx context.Context, p ports.Principal, prepa
 		if err := tx.QueryRow(ctx, `SELECT state FROM publication_attempts WHERE workspace_id=$1 AND attempt_id=$2 FOR UPDATE`, p.WorkspaceID, attemptID).Scan(&state); err != nil {
 			return err
 		}
+		if state == "committed" {
+			var digest, liveState, liveKey string
+			if err := tx.QueryRow(ctx, `SELECT digest_value,state,COALESCE(object_key,'') FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4`, p.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&digest, &liveState, &liveKey); err != nil {
+				return err
+			}
+			if digest != artifactHex || liveKey != objectKey || (liveState != "published" && liveState != "deprecated") {
+				return ErrConflict
+			}
+			alias = true
+			return nil
+		}
 		if state != "staged" {
 			return ErrConflict
 		}
@@ -203,7 +253,15 @@ func (s *PublicationStore) Publish(ctx context.Context, p ports.Principal, prepa
 			if digest != artifactHex || state == "revoked" {
 				return ErrConflict
 			}
-			_, err := tx.Exec(ctx, `UPDATE publication_attempts SET state='retired' WHERE workspace_id=$1 AND attempt_id=$2`, p.WorkspaceID, attemptID)
+			var canonicalAttempt string
+			if err := tx.QueryRow(ctx, `SELECT a.attempt_id FROM catalog_versions c JOIN publication_attempts a ON a.workspace_id=c.workspace_id AND a.object_key=c.object_key AND a.state='committed' WHERE c.workspace_id=$1 AND c.kind=$2 AND c.artifact_id=$3 AND c.version=$4`, p.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&canonicalAttempt); err != nil {
+				return err
+			}
+			_, err := tx.Exec(ctx, `UPDATE publication_idempotency SET attempt_id=$3,response_body=(SELECT publication_receipt FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$4 AND version=$5) WHERE workspace_id=$1 AND kind=$2 AND idempotency_key=$6`, p.WorkspaceID, ref.Kind, canonicalAttempt, ref.ID, ref.Version, prepared.IdempotencyKey)
+			if err != nil {
+				return err
+			}
+			_, err = tx.Exec(ctx, `UPDATE publication_attempts SET state='retired',lease_until=clock_timestamp()+interval '24 hours' WHERE workspace_id=$1 AND attempt_id=$2`, p.WorkspaceID, attemptID)
 			if err != nil {
 				return err
 			}
@@ -220,11 +278,9 @@ func (s *PublicationStore) Publish(ctx context.Context, p ports.Principal, prepa
 		if err != nil {
 			return err
 		}
-		if ref.Kind == ports.KindTaxonomy {
-			if err := writeTaxonomyProjection(ctx, tx, p.WorkspaceID, ref, prepared.Metadata); err != nil {
-				return err
-			}
-		}
+		// Taxonomy projection rights are trusted app evidence and are not part
+		// of PreparedPublication. The final fence may write the qualified
+		// projection in this same transaction; storage does not invent license.
 		_, err = tx.Exec(ctx, `UPDATE publication_attempts SET state='committed' WHERE workspace_id=$1 AND attempt_id=$2`, p.WorkspaceID, attemptID)
 		if err != nil {
 			return err
@@ -266,7 +322,7 @@ func (s *PublicationStore) Read(ctx context.Context, p ports.Principal, ref port
 		if err := fence(ctx, tx); err != nil {
 			return err
 		}
-		return tx.QueryRow(ctx, `SELECT state,digest_algorithm,digest_value,COALESCE(document_digest_algorithm,''),COALESCE(document_digest_value,''),COALESCE(manifest_digest_algorithm,''),COALESCE(manifest_digest_value,''),COALESCE(package_digest_algorithm,''),COALESCE(package_digest_value,''),COALESCE(object_key,''),octet_length(artifact_bytes),metadata,artifact_bytes FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4`, p.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&state, &da, &dv, &dda, &ddv, &mda, &mdv, &pda, &pdv, &key, &size, &metadata, &artifact)
+		return tx.QueryRow(ctx, `SELECT state,digest_algorithm,digest_value,COALESCE(document_digest_algorithm,''),COALESCE(document_digest_value,''),COALESCE(manifest_digest_algorithm,''),COALESCE(manifest_digest_value,''),COALESCE(package_digest_algorithm,''),COALESCE(package_digest_value,''),COALESCE(object_key,''),COALESCE(octet_length(artifact_bytes),-1),COALESCE(metadata_bytes,convert_to(metadata::text,'UTF8')),artifact_bytes FROM catalog_versions WHERE workspace_id=$1 AND kind=$2 AND artifact_id=$3 AND version=$4`, p.WorkspaceID, ref.Kind, ref.ID, ref.Version).Scan(&state, &da, &dv, &dda, &ddv, &mda, &mdv, &pda, &pdv, &key, &size, &metadata, &artifact)
 	})
 	if errors.Is(err, pgx.ErrNoRows) {
 		return ports.PublicationRead{}, ErrNotFound
@@ -277,6 +333,23 @@ func (s *PublicationStore) Read(ctx context.Context, p ports.Principal, ref port
 	if state != "published" && state != "deprecated" {
 		return ports.PublicationRead{}, ErrNotFound
 	}
+	if packageBody && ref.Kind != ports.KindSkill {
+		return ports.PublicationRead{}, ErrNotFound
+	}
+	if da != "sha256" || !validSHA256Hex(dv) {
+		return ports.PublicationRead{}, errors.New("storage: invalid retained artifact digest")
+	}
+	if ref.Kind == ports.KindSkill {
+		if mda != "sha256" || !validSHA256Hex(mdv) || pda != "sha256" || !validSHA256Hex(pdv) {
+			return ports.PublicationRead{}, errors.New("storage: missing retained skill digest domain")
+		}
+	} else if dda != "sha256" || !validSHA256Hex(ddv) {
+		return ports.PublicationRead{}, errors.New("storage: missing retained document digest domain")
+	}
+	artifactSum := sha256.Sum256(artifact)
+	if hex.EncodeToString(artifactSum[:]) != dv {
+		return ports.PublicationRead{}, errors.New("storage: retained artifact digest mismatch")
+	}
 	var body []byte
 	contentType := "application/json"
 	bodyDigest := ports.Digest{Algorithm: "sha256"}
@@ -284,12 +357,19 @@ func (s *PublicationStore) Read(ctx context.Context, p ports.Principal, ref port
 		if key == "" || size < 0 {
 			return ports.PublicationRead{}, ErrNotFound
 		}
+		if int64(len(artifact)) > maxBytes {
+			return ports.PublicationRead{}, ErrPublicationBudget
+		}
 		r, e := s.objects.OpenOwned(ctx, key, ports.Digest{Algorithm: da, Value: dv}, size)
 		if e != nil {
 			return ports.PublicationRead{}, e
 		}
 		defer r.Close()
-		body, e = io.ReadAll(io.LimitReader(r, maxBytes+1))
+		readLimit := maxBytes
+		if readLimit < int64(^uint64(0)>>1) {
+			readLimit++
+		}
+		body, e = io.ReadAll(io.LimitReader(r, readLimit))
 		if e != nil {
 			return ports.PublicationRead{}, e
 		}
@@ -363,6 +443,15 @@ func (s *PublicationStore) Cleanup(ctx context.Context, p ports.Principal, limit
 	for _, c := range claims {
 		e := s.objects.DeleteOwned(ctx, c.key)
 		if e != nil && !errors.Is(e, ErrNotFound) {
+			// Rotate failures behind newer tombstones; they remain owned and
+			// retryable, while bounded passes continue making progress.
+			_ = WithTenantPrincipal(ctx, s.pool, tenantFromPrincipal(p), func(ctx context.Context, tx pgx.Tx) error {
+				if err := fence(ctx, tx); err != nil {
+					return err
+				}
+				_, err := tx.Exec(ctx, `UPDATE publication_attempts SET state='retired',claim_until=NULL,lease_until=clock_timestamp()+interval '1 minute' WHERE workspace_id=$1 AND attempt_id=$2 AND state='deleting' AND generation=$3`, p.WorkspaceID, c.id, c.generation)
+				return err
+			})
 			continue
 		}
 		e = WithTenantPrincipal(ctx, s.pool, tenantFromPrincipal(p), func(ctx context.Context, tx pgx.Tx) error {
@@ -374,36 +463,6 @@ func (s *PublicationStore) Cleanup(ctx context.Context, p ports.Principal, limit
 		})
 		if e != nil {
 			return e
-		}
-	}
-	return nil
-}
-
-func writeTaxonomyProjection(ctx context.Context, tx pgx.Tx, workspace string, ref ports.ArtifactRef, raw []byte) error {
-	// Source validation belongs to app. Store the exact source alongside an
-	// atomic projection; unknown shapes fail closed instead of partial writes.
-	var doc struct {
-		Attribution string `json:"attribution"`
-		Nodes       []struct {
-			ID       string `json:"id"`
-			ParentID string `json:"parent_id"`
-			Label    string `json:"label"`
-			Level    int    `json:"level"`
-			APQFRef  string `json:"apqc_ref"`
-		} `json:"nodes"`
-	}
-	if err := json.Unmarshal(raw, &doc); err != nil {
-		return err
-	}
-	if doc.Attribution == "" {
-		return errors.New("storage: taxonomy attribution missing")
-	}
-	if _, err := tx.Exec(ctx, `INSERT INTO taxonomy_editions(workspace_id,taxonomy_id,version,attribution,license,metadata,source_bytes) VALUES($1,$2,$3,$4,$5,$6,$7)`, workspace, ref.ID, ref.Version, map[string]string{"attribution": doc.Attribution}, "unspecified", raw, raw); err != nil {
-		return err
-	}
-	for _, n := range doc.Nodes {
-		if _, err := tx.Exec(ctx, `INSERT INTO taxonomy_nodes(workspace_id,taxonomy_id,version,node_id,parent_id,label,level,apqc_ref) VALUES($1,$2,$3,$4,NULLIF($5,''),$6,$7,NULLIF($8,''))`, workspace, ref.ID, ref.Version, n.ID, n.ParentID, n.Label, n.Level, n.APQFRef); err != nil {
-			return err
 		}
 	}
 	return nil

@@ -34,6 +34,8 @@ CREATE POLICY publication_attempts_tenant ON publication_attempts
     USING (registry_workspace_visible(workspace_id))
     WITH CHECK (registry_workspace_visible(workspace_id));
 CREATE INDEX publication_attempts_expired ON publication_attempts(workspace_id, lease_until, attempt_id) WHERE state IN ('staged','deleting','retired');
+-- Each physical object belongs to exactly one permanent attempt tombstone.
+CREATE UNIQUE INDEX publication_attempts_object_key_unique ON publication_attempts(object_key);
 
 CREATE TABLE publication_idempotency (
     workspace_id text NOT NULL,
