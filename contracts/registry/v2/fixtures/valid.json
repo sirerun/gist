@@ -1,8 +1,154 @@
 {
-  "skill": {"artifact":{"package":{"encoding":"base64","media_type":"application/zip","data":"UEsDBA=="}},"max_bytes":4096,"idempotency_key":"fixture-skill-1"},
-  "capability": {"artifact":{"id":"capability/demo","version":"1.0.0","document":{"id":"capability/demo","version":"1.0.0","input_schema":{"type":"object"},"output_schema":{"type":"object"},"effects":{"vocabulary_version":"1","terms":[{"id":"read","class":"read_only","sensitivity":"normal"}],"aggregate":{"class":"read_only","sensitivity":"normal"}},"required_scopes":[],"cost":{"currency":"USD","unit":"request","upper_bound":0},"timeout_ms":1000,"retry":{"supported":false,"max_attempts":0},"idempotency":{"supported":false},"async_status":{"supported":false}}},"max_bytes":4096,"idempotency_key":"fixture-cap-1"},
-  "tool": {"artifact":{"id":"tool/demo","version":"1.0.0","document":{"id":"tool/demo","version":"1.0.0","dialect":"https://json-schema.org/draft/2020-12/schema","input_schema":{"type":"object"},"output_schema":{"type":"object"},"provider_action":{"id":"action/demo","version":"1"},"execution_location":"client","credentials":{"type":"none","scopes":[]},"destinations":[],"provenance":"fixture only","capture_time":"2026-10-08T00:00:00Z","digest":{"algorithm":"sha256","value":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},"lifecycle":"draft"}},"max_bytes":4096,"idempotency_key":"fixture-tool-1"},
-  "provider": {"artifact":{"id":"provider/demo","version":"1.0.0","document":{"id":"provider/demo","support_state":"catalog_only","last_verified_at":"2026-10-08T00:00:00Z"}},"max_bytes":4096,"idempotency_key":"fixture-provider-1"},
-  "binding": {"artifact":{"id":"binding/demo","version":"1.0.0","document":{"id":"binding/demo","version":"1.0.0","capability_ref":"capability/demo@1.0.0","tool_ref":"tool/demo@1.0.0","provider_ref":"provider/demo@1.0.0","adapter_version":"1","fixture_digest":{"algorithm":"sha256","value":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},"conformance":"passed","exact_versions":true}},"max_bytes":4096,"idempotency_key":"fixture-binding-1"},
-  "taxonomy": {"artifact":{"id":"taxonomy/demo","version":"2026.1","document":{"id":"taxonomy/demo","edition":"2026.1","attribution":"synthetic fixture","nodes":[{"id":"root","level":1,"label":"Root","apqc_ref":"demo"}]}},"max_bytes":4096,"idempotency_key":"fixture-taxonomy-1"}
+  "skill": {
+    "artifact": {
+      "package": {
+        "encoding": "base64",
+        "media_type": "application/zip",
+        "data": "UEsDBBQAAAAAAAAAIQBU2Idf/gIAAP4CAAANAAAAbWFuaWZlc3QuanNvbnsKICAibWFuaWZlc3RfdmVyc2lvbiI6ICIxIiwKICAiaWQiOiAic2tpbGwvcHVibGljYXRpb24tZml4dHVyZSIsCiAgInZlcnNpb24iOiAiMS4wLjAiLAogICJuYW1lIjogIlB1YmxpY2F0aW9uIGZpeHR1cmUiLAogICJzdW1tYXJ5IjogIlN5bnRoZXRpYyBieXRlLXJldGVudGlvbiBmaXh0dXJlIG9ubHkiLAogICJlbnRyeXBvaW50IjogIlNLSUxMLm1kIiwKICAicGFja2FnZV9kaWdlc3QiOiB7CiAgICAiYWxnb3JpdGhtIjogInNoYTI1NiIsCiAgICAidmFsdWUiOiAiZjg2OTUxYWMxNjE5YzgxNTMxMmU0MDZmZTRkYWQzMjk2NTcxYjJlODdjMDFhYTI1ZjBkNWU1ZmNjZGZiNzgxOSIKICB9LAogICJpbnZlbnRvcnkiOiBbCiAgICB7CiAgICAgICJwYXRoIjogIlNLSUxMLm1kIiwKICAgICAgInNpemUiOiAxMzQsCiAgICAgICJzaGEyNTYiOiAiODVjNTAwYTY4MjY4OWRiYjBiY2U4MDI5NjAxNzIzMmU0ZTU0NGQ5YmQ1NGJhZjVmNTY1MGE0ZmFlNTlhYWUyYiIsCiAgICAgICJtZWRpYV90eXBlIjogInRleHQvbWFya2Rvd24iCiAgICB9CiAgXSwKICAicmVxdWlyZWRfY2FwYWJpbGl0aWVzIjogW10sCiAgInJ1bnRpbWVfcmVxdWlyZW1lbnRzIjogewogICAgImxvY2FsX2V4ZWN1dGlvbiI6IHRydWUKICB9LAogICJlZmZlY3RzIjogW10sCiAgInRydXN0IjogIm9wZXJhdG9yX2Fzc2VydGVkIiwKICAicHVibGljYXRpb24iOiB7CiAgICAic3RhdHVzIjogImFwcHJvdmVkIiwKICAgICJwcm92ZW5hbmNlIjogInB1Ymxpc2hlcl9hc3NlcnRlZCIKICB9Cn1QSwMEFAAAAAAAAAAhAOmYczqGAAAAhgAAAAgAAABTS0lMTC5tZC0tLQpuYW1lOiBwdWJsaWNhdGlvbi1maXh0dXJlCmRlc2NyaXB0aW9uOiBWZXJpZnkgZXhhY3Qgb3duZWQgcHVibGljYXRpb24gYnl0ZXMuCi0tLQpVc2Ugb25seSB0aGUgc3ludGhldGljIGNvbnRyb2xsZWQgbG9jYWwgZml4dHVyZS4KUEsBAhQDFAAAAAAAAAAhAFTYh1/+AgAA/gIAAA0AAAAAAAAAAAAAAKSBAAAAAG1hbmlmZXN0Lmpzb25QSwECFAMUAAAAAAAAACEA6ZhzOoYAAACGAAAACAAAAAAAAAAAAAAApIEpAwAAU0tJTEwubWRQSwUGAAAAAAIAAgBxAAAA1QMAAAAA"
+      }
+    },
+    "max_bytes": 4096,
+    "idempotency_key": "fixture-skill-1"
+  },
+  "capability": {
+    "artifact": {
+      "id": "capability/demo",
+      "version": "1.0.0",
+      "document": {
+        "id": "capability/demo",
+        "version": "1.0.0",
+        "input_schema": {
+          "type": "object"
+        },
+        "output_schema": {
+          "type": "object"
+        },
+        "effects": {
+          "vocabulary_version": "1",
+          "terms": [
+            {
+              "id": "read",
+              "class": "read_only",
+              "sensitivity": "normal"
+            }
+          ],
+          "aggregate": {
+            "class": "read_only",
+            "sensitivity": "normal"
+          }
+        },
+        "required_scopes": [],
+        "cost": {
+          "currency": "USD",
+          "unit": "request",
+          "upper_bound": 0
+        },
+        "timeout_ms": 1000,
+        "retry": {
+          "supported": false,
+          "max_attempts": 0
+        },
+        "idempotency": {
+          "supported": false
+        },
+        "async_status": {
+          "supported": false
+        }
+      }
+    },
+    "max_bytes": 4096,
+    "idempotency_key": "fixture-cap-1"
+  },
+  "tool": {
+    "artifact": {
+      "id": "tool/demo",
+      "version": "1.0.0",
+      "document": {
+        "id": "tool/demo",
+        "version": "1.0.0",
+        "dialect": "https://json-schema.org/draft/2020-12/schema",
+        "input_schema": {
+          "type": "object"
+        },
+        "output_schema": {
+          "type": "object"
+        },
+        "provider_action": {
+          "id": "action/demo",
+          "version": "1"
+        },
+        "execution_location": "client",
+        "credentials": {
+          "type": "none",
+          "scopes": []
+        },
+        "destinations": [],
+        "provenance": "fixture only",
+        "capture_time": "2026-10-08T00:00:00Z",
+        "digest": {
+          "algorithm": "sha256",
+          "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "lifecycle": "draft"
+      }
+    },
+    "max_bytes": 4096,
+    "idempotency_key": "fixture-tool-1"
+  },
+  "provider": {
+    "artifact": {
+      "id": "provider/demo",
+      "version": "1.0.0",
+      "document": {
+        "id": "provider/demo",
+        "support_state": "catalog_only",
+        "last_verified_at": "2026-10-08T00:00:00Z"
+      }
+    },
+    "max_bytes": 4096,
+    "idempotency_key": "fixture-provider-1"
+  },
+  "binding": {
+    "artifact": {
+      "id": "binding/demo",
+      "version": "1.0.0",
+      "document": {
+        "id": "binding/demo",
+        "version": "1.0.0",
+        "capability_ref": "capability/demo@1.0.0",
+        "tool_ref": "tool/demo@1.0.0",
+        "provider_ref": "provider/demo@1.0.0",
+        "adapter_version": "1",
+        "fixture_digest": {
+          "algorithm": "sha256",
+          "value": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        },
+        "conformance": "passed",
+        "exact_versions": true
+      }
+    },
+    "max_bytes": 4096,
+    "idempotency_key": "fixture-binding-1"
+  },
+  "taxonomy": {
+    "artifact": {
+      "id": "taxonomy/demo",
+      "version": "2026.1",
+      "document": {
+        "id": "taxonomy/demo",
+        "edition": "2026.1",
+        "attribution": "synthetic fixture",
+        "nodes": [
+          {
+            "id": "root",
+            "level": 1,
+            "label": "Root",
+            "apqc_ref": "demo"
+          }
+        ]
+      }
+    },
+    "max_bytes": 4096,
+    "idempotency_key": "fixture-taxonomy-1"
+  }
 }

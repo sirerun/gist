@@ -7,8 +7,7 @@
     "kind",
     "id",
     "version",
-    "artifact_digest",
-    "replayed"
+    "artifact_digest"
   ],
   "properties": {
     "kind": {
@@ -37,9 +36,6 @@
     },
     "package_digest": {
       "$ref": "common.schema.json#/$defs/digest"
-    },
-    "replayed": {
-      "type": "boolean"
     }
   },
   "allOf": [

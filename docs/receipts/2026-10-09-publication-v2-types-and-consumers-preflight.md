@@ -1,6 +1,6 @@
 # PUBLISH.0 typed artifacts and consumer preflight
 
-Date: 2026-10-09  
+Date: 2026-10-09
 Scope: source/design qualification only. No handler, provider, credential, infrastructure, or deployment qualification is asserted.
 
 ## Finding

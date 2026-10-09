@@ -1,0 +1,54 @@
+{
+  "source_revision": "a91ea32a00c98469925223ce4686b7622fcacae4",
+  "PostgreSQL": "16.15 Linux arm64",
+  "owned_isolated_database_ready": true,
+  "runtime_role_superuser": false,
+  "runtime_role_bypassrls": false,
+  "unscoped_namespace_visible_rows": 0,
+  "workspace_A_visible_rows": 1,
+  "foreign_workspace_insert_denied": true,
+  "owned_object_directory_writable": true,
+  "migrations": [
+    {
+      "file": "hosted/migrations/001_catalog.sql",
+      "source_sha256": "67626c6226f7cda466d8d084d95273593d82eedeedbe89a03ba0ce1864751da2",
+      "fixture_only_compatibility": "none"
+    },
+    {
+      "file": "hosted/migrations/002_policy.sql",
+      "source_sha256": "81a42f9e4396d947b98dcfe0b74fb0ab9873bda9a7df6365972fe3428477da8f",
+      "fixture_only_compatibility": "none"
+    },
+    {
+      "file": "hosted/migrations/003_identity.sql",
+      "source_sha256": "897e3db8cf201cb2d16421d83c0d3b6e374e0a92259cc58d5b5cccceb14cc192",
+      "fixture_only_compatibility": "none"
+    },
+    {
+      "file": "hosted/migrations/004_events.sql",
+      "source_sha256": "bc504cc433bb1413cb972c29528f0efcbffaaf2a827d67f9ec39caf6a9aa1784",
+      "fixture_only_compatibility": "existing fixture's event/cursor policy drop-before-create"
+    },
+    {
+      "file": "hosted/migrations/005_identity_workspace_key.sql",
+      "source_sha256": "323338c787a32c0dae1e273b4f1d691c6835ac934a500c5113c3fd7a0f71bd50",
+      "fixture_only_compatibility": "none"
+    },
+    {
+      "file": "hosted/migrations/006_catalog_version_order.sql",
+      "source_sha256": "dcbdf92f6d3f95e7ab4ad942646cb7670957a307b54f579b69185f7f81fc475b",
+      "fixture_only_compatibility": "none"
+    },
+    {
+      "file": "hosted/migrations/007_oauth_grants.sql",
+      "source_sha256": "0ca3e3ac250e7ec5a88323084c0d81ea623f8d0fc8aafc3d84f62c57e025c3b7",
+      "fixture_only_compatibility": "none"
+    },
+    {
+      "file": "hosted/migrations/008_event_retention_floor.sql",
+      "source_sha256": "ce3e437693438f3f81a9535f7acc8465c8f305048d5bc24280ec7ad288c19ac4",
+      "fixture_only_compatibility": "none"
+    }
+  ],
+  "scope": "Actual baseline migration/role/RLS and filesystem availability qualification only; no v2 authenticated HTTP publication, S3/provider, release or production acceptance."
+}
