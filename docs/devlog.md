@@ -100,3 +100,9 @@ No production gate closes: default AWS STS still has no credentials, and one
 DGX health read failed DNS resolution of gist.sire.run. Enrollment, real provider
 captures/custody/targets/numerical envelope, consumer and AWS/DNS workflow bindings
 remain open. The authoritative plan retains the full production lifecycle.
+
+Checkpoint reviewer requested changes at7058490 for PUB-CLOSEOUT-PRIVACY-1:
+public command tables exposed private tool/config paths. PUBLISH.21/22/23
+track portable command-form repair across both new current receipts, verification
+and independent re-review. Exact private records/results and public Git history
+remain intact; no historical erasure, source/code or production change is claimed.
