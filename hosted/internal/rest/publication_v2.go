@@ -49,7 +49,11 @@ func (h *Handler) publishV2(w http.ResponseWriter, r *http.Request, p ports.Prin
 	if strings.TrimSpace(r.Header.Get("Content-Type")) != "application/json" {
 		return appError("validation_failed", "Invalid request", 422, false)
 	}
-	raw, err := readBody(r, 16<<20)
+	limit := h.limits.MaxBodyBytes
+	if limit > 16<<20 {
+		limit = 16 << 20
+	}
+	raw, err := readBody(r, limit)
 	if err != nil {
 		return err
 	}

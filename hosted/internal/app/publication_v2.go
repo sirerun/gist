@@ -28,12 +28,23 @@ type publicationV2 struct {
 	config      PublicationV2Config
 	maxResponse int64
 	maxRequest  int64
+	maxPackage  int64
+	maxExpanded int64
 }
 
 func (p *publicationV2) PublishV2(ctx context.Context, principal ports.Principal, kind ports.ArtifactKind, envelope []byte) (ports.PublicationResult, error) {
 	limits := publicationv2.DefaultLimits()
 	if p.maxRequest > 0 && limits.MaxEnvelopeBytes > p.maxRequest {
 		limits.MaxEnvelopeBytes = p.maxRequest
+	}
+	if p.maxPackage > 0 && limits.MaxPackageBytes > p.maxPackage {
+		limits.MaxPackageBytes = p.maxPackage
+	}
+	if p.maxExpanded > 0 && limits.MaxExpandedBytes > p.maxExpanded {
+		limits.MaxExpandedBytes = p.maxExpanded
+	}
+	if limits.MaxFileBytes > limits.MaxExpandedBytes {
+		limits.MaxFileBytes = limits.MaxExpandedBytes
 	}
 	prepared, err := publicationv2.Decode(kind, envelope, limits)
 	if err != nil {

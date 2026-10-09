@@ -139,7 +139,7 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		if maxPublicationResponse > 100<<20 {
 			maxPublicationResponse = 100 << 20
 		}
-		v2 := &publicationV2{pool: pool, catalog: catalog, store: publicationStore, config: *cfg.PublicationV2, maxResponse: maxPublicationResponse, maxRequest: 16 << 20}
+		v2 := &publicationV2{pool: pool, catalog: catalog, store: publicationStore, config: *cfg.PublicationV2, maxResponse: maxPublicationResponse, maxRequest: cfg.MaxRequestBytes, maxPackage: int64(cfg.MaxPackageBytes), maxExpanded: int64(cfg.MaxExpandedBytes)}
 		services.V2Publisher, services.V2Reader = v2, v2
 	}
 	rh, err := rest.New(services)
