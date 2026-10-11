@@ -51,3 +51,7 @@ acceptance.
 ## Validation evidence
 
 The authored plan source digest is `sha256:d77a873fe5cdc85d5df7c56f5e898acd7dee1cb540ebd0eb573bbc3db2f7f52f`. The pinned Wazi 0.0.1 contract, owning semantic validator, and Markdown reader gate returned `valid=true`, `schemaValid=true`, `semanticValid=true`, `readerCompatible=true`, and `taskCount=317`. The verifier reports `authorityAuthenticated=false`; this is a plan conformance result, not a source of execution or approval authority. All 60 pinned validator fixtures passed. This is local DGX validation, not hosted CI or application acceptance.
+
+## Exact authored revisions
+
+The Gist design candidate is commit `4a3e32075392783701ba8fc4884045a5512ace1e`, based on `3f650f20b33dcf09b673c3d2093dab1babdb1578`. The aligned private threat-model candidate is commit `71281deac75298edf7c1cd0ebc0abd5e3dea6585`, based on `9a813396c6be54875d1f9d8dfbc4caaa395e699f`; its file digest is recorded above. Both commits remain unmerged and require independent exact-revision review.
