@@ -1,19 +1,24 @@
+version: "2"
 linters:
-  enable:
-    - govet
-    - errcheck
-    - staticcheck
-    - unused
-    - gosimple
-    - ineffassign
-
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-
-issues:
-  exclude-use-default: false
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - errcheck
+  default: standard
+  settings:
+    errcheck:
+      check-type-assertions: true
+  exclusions:
+    generated: lax
+    presets: []
+    rules:
+      - linters:
+          - errcheck
+        path: _test\.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

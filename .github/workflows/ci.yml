@@ -18,10 +18,10 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - uses: golangci/golangci-lint-action@v6
+      - uses: golangci/golangci-lint-action@v8
         with:
-          version: latest
-          install-mode: goinstall
+          version: v2.14.0
+          install-mode: binary
 
   test:
     name: Test
