@@ -19,6 +19,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirerun/gist/hosted/internal/discovery"
+	"github.com/sirerun/gist/hosted/internal/enrollment"
 	"github.com/sirerun/gist/hosted/internal/identity"
 	"github.com/sirerun/gist/hosted/internal/oauth"
 	"github.com/sirerun/gist/hosted/internal/ports"
@@ -58,6 +59,9 @@ type App struct {
 func New(ctx context.Context, cfg Config) (constructed *App, retErr error) {
 	if cfg.ResourceAudience == "" {
 		cfg.ResourceAudience = cfg.PublicOrigin
+	}
+	if cfg.GitHubEnrollment != nil && cfg.OAuthLoginURL == "" {
+		cfg.OAuthLoginURL = cfg.PublicOrigin + enrollment.StartPath
 	}
 	if err := cfg.Validate(); err != nil {
 		return nil, err
@@ -171,6 +175,18 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		pool.Close()
 		return nil, err
 	}
+	enrollmentStore, err := catalog.Enrollment(cfg.PublicOrigin)
+	if err != nil {
+		pool.Close()
+		return nil, err
+	}
+	enrollmentHandler, err := enrollment.New(*cfg.GitHubEnrollment, enrollmentStore, sessions, enrollmentSessionAuthenticator{sessions: sessions}, nil)
+	if err != nil {
+		pool.Close()
+		return nil, err
+	}
+	enrollmentRoutes := http.NewServeMux()
+	enrollmentHandler.Routes(enrollmentRoutes)
 	minter := oauth.IssuerMinter{Issuers: map[string]*identity.WorkloadIssuer{cfg.ResourceAudience: issuer}, Record: recordIssued(catalog)}
 	as, err := oauth.New(oauth.Config{Issuer: cfg.PublicOrigin, Resources: []string{cfg.ResourceAudience}, ScopesSupported: []string{"catalog:read", "catalog:publish"}, Store: catalog.OAuth(), Minter: minter, Policy: policy, Sessions: sessions, Keys: keys, Clock: clock, LoginURL: cfg.OAuthLoginURL, Secret: consentSecret})
 	if err != nil {
@@ -188,7 +204,7 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		pool.Close()
 		return nil, maintenanceErr
 	}
-	handler := requestContext{lifetime: a.requests, rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, ready: func(ctx context.Context) error {
+	handler := requestContext{lifetime: a.requests, rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, enrollment: enrollmentRoutes, ready: func(ctx context.Context) error {
 		if err := a.maintenanceReady(); err != nil {
 			return err
 		}
@@ -350,6 +366,7 @@ func (a *App) Shutdown(ctx context.Context) error {
 type requestContext struct {
 	lifetime         *requestLifetime
 	rest, mcp, oauth http.Handler
+	enrollment       http.Handler
 	ready            func(context.Context) error
 }
 
@@ -381,6 +398,10 @@ func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.oauth.ServeHTTP(w, r)
 		return
 	}
+	if h.enrollment != nil && (r.URL.Path == enrollment.StartPath || r.URL.Path == enrollment.CallbackPath || r.URL.Path == enrollment.InvitationsPath) {
+		h.enrollment.ServeHTTP(w, r)
+		return
+	}
 	if r.URL.Path == "/mcp" {
 		h.mcp.ServeHTTP(w, r)
 		return
@@ -405,6 +426,16 @@ func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.rest.ServeHTTP(w, r)
+}
+
+type enrollmentSessionAuthenticator struct{ sessions *oauth.CookieSessions }
+
+func (s enrollmentSessionAuthenticator) Authenticate(r *http.Request) (enrollment.Session, error) {
+	got, err := s.sessions.Authenticate(r)
+	if err != nil {
+		return enrollment.Session{}, err
+	}
+	return enrollment.Session{ID: got.ID, Subject: got.Subject, Workspaces: got.Workspaces}, nil
 }
 
 type identityClock struct{}

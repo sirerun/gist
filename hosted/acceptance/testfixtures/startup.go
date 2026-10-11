@@ -3,6 +3,7 @@
 package testfixtures
 
 import (
+	"bytes"
 	"context"
 	"crypto/ed25519"
 	"crypto/rand"
@@ -12,11 +13,24 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirerun/gist/hosted/internal/app"
+	"github.com/sirerun/gist/hosted/internal/enrollment"
 	"github.com/sirerun/gist/hosted/internal/identity"
 	"github.com/sirerun/gist/hosted/internal/storage"
 )
 
 const maintenanceSubject = "acceptance-fixture-event-maintainer"
+
+// EnrollmentConfig supplies deterministic, test-only GitHub enrollment inputs
+// for local app composition. No test sends credentials to GitHub.
+func EnrollmentConfig(origin string) *enrollment.Config {
+	return &enrollment.Config{
+		ClientID: "acceptance-fixture-client", ClientSecret: "acceptance-fixture-secret",
+		CallbackURL: origin + enrollment.CallbackPath, PublicOrigin: origin,
+		WorkspaceID: "acceptance-enrollment", WorkspaceName: "Acceptance", FounderAccount: "123456",
+		FlowKey: bytes.Repeat([]byte{0x46}, 32), CSRFKey: bytes.Repeat([]byte{0x43}, 32),
+		BootstrapScopes: []string{"catalog:read"}, AllowedScopes: []string{"catalog:read"},
+	}
+}
 
 // SigningKeyConfig returns ephemeral Ed25519 key material solely for a local
 // acceptance-test app instance. Production configuration remains operator-owned.

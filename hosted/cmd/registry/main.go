@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -10,10 +12,15 @@ import (
 	"time"
 
 	"github.com/sirerun/gist/hosted/internal/app"
+	"github.com/sirerun/gist/hosted/internal/enrollment"
 )
 
 func main() {
 	maintenance, err := maintenanceTargets(os.Getenv("GIST_EVENT_MAINTENANCE_TARGETS"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	enrollmentConfig, err := enrollmentConfigFromEnv()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -25,6 +32,7 @@ func main() {
 		OAuthConsentSecret:      []byte(os.Getenv("GIST_OAUTH_CONSENT_SECRET")),
 		SigningKeyConfig:        []byte(os.Getenv("GIST_SIGNING_KEY_CONFIG")),
 		EventMaintenanceTargets: maintenance,
+		GitHubEnrollment:        enrollmentConfig,
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -43,6 +51,40 @@ func main() {
 	if err := a.Shutdown(shutdown); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func enrollmentConfigFromEnv() (*enrollment.Config, error) {
+	flowKey, err := enrollmentSecret("GIST_ENROLLMENT_FLOW_KEY")
+	if err != nil {
+		return nil, err
+	}
+	csrfKey, err := enrollmentSecret("GIST_ENROLLMENT_CSRF_KEY")
+	if err != nil {
+		return nil, err
+	}
+	return &enrollment.Config{
+		ClientID:       os.Getenv("GIST_GITHUB_APP_CLIENT_ID"),
+		ClientSecret:   os.Getenv("GIST_GITHUB_APP_CLIENT_SECRET"),
+		CallbackURL:    os.Getenv("GIST_GITHUB_APP_CALLBACK_URL"),
+		PublicOrigin:   env("GIST_PUBLIC_ORIGIN", ""),
+		WorkspaceID:    os.Getenv("GIST_WORKSPACE_ID"),
+		WorkspaceName:  os.Getenv("GIST_WORKSPACE_NAME"),
+		FounderAccount: os.Getenv("GIST_FOUNDER_GITHUB_ACCOUNT_ID"),
+		FlowKey:        flowKey,
+		CSRFKey:        csrfKey,
+	}, nil
+}
+
+func enrollmentSecret(name string) ([]byte, error) {
+	encoded := os.Getenv(name)
+	if encoded == "" {
+		return nil, nil
+	}
+	key, err := base64.RawURLEncoding.DecodeString(encoded)
+	if err != nil {
+		return nil, fmt.Errorf("%s must be unpadded base64url", name)
+	}
+	return key, nil
 }
 
 func env(k, fallback string) string {

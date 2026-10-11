@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sirerun/gist/hosted/internal/enrollment"
 	"github.com/sirerun/gist/hosted/internal/identity"
 	"github.com/sirerun/gist/hosted/internal/ports"
 	"github.com/sirerun/gist/hosted/internal/rest"
@@ -32,9 +33,13 @@ type Config struct {
 	MaxConcurrentRequests int
 	MaxDiscoveryResults   int
 	RetryAfter            int
-	// OAuthLoginURL is where the reference authorization server sends a
-	// person who has no session. Optional; without it authorize answers 401.
+	// OAuthLoginURL is the permissionless GitHub sign-in route used by the
+	// reference authorization server. New derives it from PublicOrigin when
+	// omitted; an explicit value must match the configured enrollment route.
 	OAuthLoginURL string
+	// GitHubEnrollment enables permissionless operator sign-in and invite-only
+	// workspace membership. GitHub access tokens are never persisted.
+	GitHubEnrollment *enrollment.Config
 	// OAuthConsentSecret keys the reference authorization server's consent
 	// and session HMACs (GIST_OAUTH_CONSENT_SECRET). Every replica must share
 	// it and it must survive restarts, so it is required configuration of at
@@ -81,6 +86,15 @@ func (c Config) Validate() error {
 	}
 	if c.ResourceAudience != c.PublicOrigin {
 		return errors.New("app: resource audience must equal public origin")
+	}
+	if c.GitHubEnrollment == nil {
+		return errors.New("app: GitHub enrollment configuration is required")
+	}
+	if err := enrollment.ValidateConfig(*c.GitHubEnrollment); err != nil {
+		return fmt.Errorf("app: invalid GitHub enrollment configuration: %w", err)
+	}
+	if c.GitHubEnrollment.PublicOrigin != c.PublicOrigin || (c.OAuthLoginURL != "" && c.OAuthLoginURL != c.PublicOrigin+enrollment.StartPath) {
+		return errors.New("app: enrollment origin and OAuth login URL must match the configured public origin")
 	}
 	if len(c.OAuthConsentSecret) < MinOAuthConsentSecretBytes {
 		return fmt.Errorf("app: oauth consent secret (GIST_OAUTH_CONSENT_SECRET) must be at least %d bytes", MinOAuthConsentSecretBytes)

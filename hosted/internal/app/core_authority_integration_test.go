@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/sirerun/gist/hosted/internal/enrollment"
 	"github.com/sirerun/gist/hosted/internal/identity"
 )
 
@@ -85,6 +86,11 @@ func TestCoreHTTPRejectsForeignCursorIssuerAndStalePolicy(t *testing.T) {
 	}
 	foreignCfg := cfg
 	foreignCfg.PublicOrigin, foreignCfg.ResourceAudience = foreignIssuer, foreignIssuer
+	foreignEnrollment := *foreignCfg.GitHubEnrollment
+	foreignEnrollment.PublicOrigin = foreignIssuer
+	foreignEnrollment.CallbackURL = foreignIssuer + enrollment.CallbackPath
+	foreignCfg.GitHubEnrollment = &foreignEnrollment
+	foreignCfg.OAuthLoginURL = foreignIssuer + enrollment.StartPath
 	foreign, err := New(ctx, foreignCfg)
 	if err != nil {
 		t.Fatal(err)
