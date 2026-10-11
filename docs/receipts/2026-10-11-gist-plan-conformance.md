@@ -3,8 +3,8 @@
 Date: 2026-10-11
 Plan: docs/plan.md
 Candidate task count: 352
-Candidate plan SHA-256: sha256:04f83e7326d1396cab90c02d589bca9a1f75874fecd532b8df22f8933c0ac48b
-Authored revision: candidate-20261011-rfc003-graph-r5
+Candidate plan SHA-256: sha256:929c6d74575e660b597283ee1ad72669003902ad2ac03d9c86a192b8ed57b9c2
+Authored revision: candidate-20261011-rfc003-graph-r6
 Rebased on current main d12fd22b7d059629698a2d1c03ed0a0b69fb1860; exact-head pair review remains pending
 
 ## Verification
@@ -20,7 +20,7 @@ Command (tool locations supplied by the execution environment; tool digests belo
       --wazi-dir "${WAZI_DIR}" --wazi "${WAZI_BIN}" \
       --validator "${WAZI_CONTRACT}" --plan-id gist:delivery \
       --authority-id github:sirerun/gist \
-      --revision candidate-20261011-rfc003-graph-r5
+      --revision candidate-20261011-rfc003-graph-r6
 
 Tool and contract digests:
 
