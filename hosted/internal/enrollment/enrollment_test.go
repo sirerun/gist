@@ -16,13 +16,15 @@ import (
 )
 
 type memoryStore struct {
-	flows        map[string]time.Time
-	used         map[string]bool
-	members      map[string]string
-	invites      map[string]inviteRecord
-	bootstrapped bool
-	created      int
-	githubID     string
+	flows         map[string]time.Time
+	used          map[string]bool
+	members       map[string]string
+	invites       map[string]inviteRecord
+	bootstrapped  bool
+	created       int
+	githubID      string
+	githubCalls   []string
+	tokenVerifier string
 }
 type inviteRecord struct {
 	account, role string
@@ -100,6 +102,7 @@ func testHandler(t *testing.T, s *memoryStore, auth SessionAuthenticator) (*Hand
 	t.Helper()
 	sessions := &fakeSessions{}
 	client := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		s.githubCalls = append(s.githubCalls, r.Method+" "+r.URL.Host+r.URL.Path)
 		switch r.URL.Host + r.URL.Path {
 		case "github.com/login/oauth/access_token":
 			if err := r.ParseForm(); err != nil {
@@ -108,6 +111,7 @@ func testHandler(t *testing.T, s *memoryStore, auth SessionAuthenticator) (*Hand
 			if r.Form.Get("code") != "synthetic-code" || r.Form.Get("client_id") != "client" || r.Form.Get("client_secret") != "secret" || r.Form.Get("redirect_uri") != "https://gist.example/auth/github/callback" || r.Form.Get("code_verifier") == "" {
 				return response(400, "{}"), nil
 			}
+			s.tokenVerifier = r.Form.Get("code_verifier")
 			return response(200, "{\"access_token\":\"synthetic-token\",\"token_type\":\"bearer\"}"), nil
 		case "api.github.com/user":
 			if r.Method != http.MethodGet || r.Header.Get("Authorization") != "Bearer synthetic-token" {
@@ -147,6 +151,9 @@ func TestStartAndCallbackBootstrapFounderWithPKCE(t *testing.T) {
 	if q.Get("code_challenge_method") != "S256" || q.Get("client_id") != "client" || q.Get("redirect_uri") != h.cfg.CallbackURL {
 		t.Fatalf("authorize URL missing required fields: %s", loc)
 	}
+	if q.Has("scope") || q.Has("redirect_to") || q.Has("return_to") {
+		t.Fatalf("GitHub authorization requested permissions or a caller-selected return path: %s", loc)
+	}
 	cookies := rec.Result().Cookies()
 	if len(cookies) == 0 {
 		t.Fatal("flow cookie missing")
@@ -167,6 +174,15 @@ func TestStartAndCallbackBootstrapFounderWithPKCE(t *testing.T) {
 	challenge := sha256.Sum256([]byte(verifier))
 	if q.Get("state") != state || q.Get("code_challenge") != base64.RawURLEncoding.EncodeToString(challenge[:]) {
 		t.Fatal("state or S256 challenge mismatch")
+	}
+	if store.tokenVerifier != "" {
+		t.Fatal("code verifier reached the token endpoint before callback")
+	}
+	if _, ok := store.flows[key([]byte(state))]; ok {
+		t.Fatal("raw OAuth state was stored")
+	}
+	if _, ok := store.flows[key(hashToken(state))]; !ok {
+		t.Fatal("hashed OAuth state was not stored")
 	}
 	badState := httptest.NewRequest(http.MethodGet, CallbackPath+"?code=synthetic-code&state=wrong-state", nil)
 	badState.AddCookie(flow)
@@ -189,12 +205,95 @@ func TestStartAndCallbackBootstrapFounderWithPKCE(t *testing.T) {
 	if store.created != 0 {
 		t.Fatal("login persisted unexpected token or code")
 	}
+	if store.tokenVerifier != verifier {
+		t.Fatal("GitHub code exchange did not use the verifier bound to the encrypted flow")
+	}
+	wantCalls := []string{"POST github.com/login/oauth/access_token", "GET api.github.com/user"}
+	if len(store.githubCalls) != len(wantCalls) {
+		t.Fatalf("unexpected GitHub API calls: %v", store.githubCalls)
+	}
+	for i := range wantCalls {
+		if store.githubCalls[i] != wantCalls[i] {
+			t.Fatalf("GitHub API call %d=%q, want %q", i, store.githubCalls[i], wantCalls[i])
+		}
+	}
 	replay := httptest.NewRecorder()
 	h.callback(replay, callback)
 	if replay.Code != http.StatusBadRequest {
 		t.Fatalf("replay status=%d", replay.Code)
 	}
 }
+func TestCallbackRejectsExpiredFlowAndDeniedConsent(t *testing.T) {
+	t.Run("expired flow", func(t *testing.T) {
+		store := newMemoryStore()
+		h, sessions := testHandler(t, store, fakeAuth{})
+		start := httptest.NewRecorder()
+		h.start(start, httptest.NewRequest(http.MethodGet, StartPath, nil))
+		cookie := start.Result().Cookies()[0]
+		state, _, _, expires, err := h.openFlow(cookie.Value)
+		if err != nil {
+			t.Fatal(err)
+		}
+		h.now = func() time.Time { return expires }
+		callback := httptest.NewRequest(http.MethodGet, CallbackPath+"?code=synthetic-code&state="+url.QueryEscape(state), nil)
+		callback.AddCookie(cookie)
+		got := httptest.NewRecorder()
+		h.callback(got, callback)
+		if got.Code != http.StatusBadRequest || sessions.subject != "" || len(store.githubCalls) != 0 || len(store.used) != 0 {
+			t.Fatalf("expired flow was accepted or consumed: status=%d subject=%q github=%v used=%v", got.Code, sessions.subject, store.githubCalls, store.used)
+		}
+	})
+	t.Run("denied consent", func(t *testing.T) {
+		store := newMemoryStore()
+		h, sessions := testHandler(t, store, fakeAuth{})
+		start := httptest.NewRecorder()
+		h.start(start, httptest.NewRequest(http.MethodGet, StartPath, nil))
+		cookie := start.Result().Cookies()[0]
+		state, _, _, _, err := h.openFlow(cookie.Value)
+		if err != nil {
+			t.Fatal(err)
+		}
+		callback := httptest.NewRequest(http.MethodGet, CallbackPath+"?error=access_denied&state="+url.QueryEscape(state), nil)
+		callback.AddCookie(cookie)
+		got := httptest.NewRecorder()
+		h.callback(got, callback)
+		if got.Code != http.StatusBadRequest || sessions.subject != "" || len(store.githubCalls) != 0 || len(store.used) != 0 {
+			t.Fatalf("denied consent continued login: status=%d subject=%q github=%v used=%v", got.Code, sessions.subject, store.githubCalls, store.used)
+		}
+	})
+}
+
+func TestStartCannotUseExternalReturnPath(t *testing.T) {
+	h, _ := testHandler(t, newMemoryStore(), fakeAuth{})
+	request := httptest.NewRequest(http.MethodGet, StartPath+"?return_to=https%3A%2F%2Fattacker.example%2F", nil)
+	got := httptest.NewRecorder()
+	h.start(got, request)
+	if got.Code != http.StatusFound {
+		t.Fatalf("start status=%d", got.Code)
+	}
+	location, err := url.Parse(got.Header().Get("Location"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if location.Host != "github.com" || location.Query().Get("redirect_uri") != h.cfg.CallbackURL || strings.Contains(location.String(), "attacker.example") {
+		t.Fatalf("caller-controlled external return path affected login redirect: %s", location)
+	}
+}
+
+func TestNewRejectsMissingEnrollmentConfiguration(t *testing.T) {
+	h, _ := testHandler(t, newMemoryStore(), fakeAuth{})
+	cfg := h.cfg
+	cfg.ClientSecret = ""
+	if _, err := New(cfg, newMemoryStore(), &fakeSessions{}, fakeAuth{}, nil); err == nil {
+		t.Fatal("missing GitHub App client secret accepted")
+	}
+	cfg = h.cfg
+	cfg.CallbackURL = "https://attacker.example/auth/github/callback"
+	if _, err := New(cfg, newMemoryStore(), &fakeSessions{}, fakeAuth{}, nil); err == nil {
+		t.Fatal("callback on a different origin accepted")
+	}
+}
+
 func TestInvitationBoundToNumericAccountAndOneUse(t *testing.T) {
 	store := newMemoryStore()
 	store.githubID = "67890"
@@ -232,7 +331,8 @@ func TestInvitationCreationRequiresSameOriginCSRFAndOperatorScope(t *testing.T) 
 	auth := fakeAuth{session: Session{ID: "sid", Subject: "12345", Workspaces: []string{"private"}}}
 	h, _ := testHandler(t, store, auth)
 	store.members["private:12345"] = "maintainer"
-	body := strings.NewReader("{\"github_account_id\":\"67890\",\"role\":\"reader\",\"scopes\":[\"catalog:read\"]}")
+	bodyText := "{\"github_account_id\":\"67890\",\"role\":\"reader\",\"scopes\":[\"catalog:read\"]}"
+	body := strings.NewReader(bodyText)
 	req := httptest.NewRequest(http.MethodPost, InvitationsPath, body)
 	req.Header.Set("Origin", h.cfg.PublicOrigin)
 	req.Header.Set("X-Gist-CSRF", h.csrf("12345"))
@@ -260,6 +360,44 @@ func TestInvitationCreationRequiresSameOriginCSRFAndOperatorScope(t *testing.T) 
 	h.createInvitation(crossOut, cross)
 	if crossOut.Code != http.StatusForbidden {
 		t.Fatalf("cross-origin status=%d", crossOut.Code)
+	}
+	unauthorized, _ := testHandler(t, store, fakeAuth{})
+	unauthReq := httptest.NewRequest(http.MethodPost, InvitationsPath, strings.NewReader(bodyText))
+	unauthReq.Header.Set("Origin", h.cfg.PublicOrigin)
+	unauthReq.Header.Set("X-Gist-CSRF", unauthorized.csrf("12345"))
+	unauthOut := httptest.NewRecorder()
+	unauthorized.createInvitation(unauthOut, unauthReq)
+	if unauthOut.Code != http.StatusUnauthorized || store.created != 1 {
+		t.Fatalf("unauthenticated invitation status=%d", unauthOut.Code)
+	}
+	crossWorkspaceAuth := fakeAuth{session: Session{ID: "sid", Subject: "12345", Workspaces: []string{"another-workspace"}}}
+	crossWorkspaceHandler, _ := testHandler(t, store, crossWorkspaceAuth)
+	crossWorkspaceReq := httptest.NewRequest(http.MethodPost, InvitationsPath, strings.NewReader(bodyText))
+	crossWorkspaceReq.Header.Set("Origin", h.cfg.PublicOrigin)
+	crossWorkspaceReq.Header.Set("X-Gist-CSRF", crossWorkspaceHandler.csrf("12345"))
+	crossWorkspaceOut := httptest.NewRecorder()
+	crossWorkspaceHandler.createInvitation(crossWorkspaceOut, crossWorkspaceReq)
+	if crossWorkspaceOut.Code != http.StatusUnauthorized || store.created != 1 {
+		t.Fatalf("cross-workspace invitation status=%d", crossWorkspaceOut.Code)
+	}
+	readerAuth := fakeAuth{session: Session{ID: "reader-session", Subject: "reader", Workspaces: []string{"private"}}}
+	readerHandler, _ := testHandler(t, store, readerAuth)
+	store.members["private:reader"] = "reader"
+	readerReq := httptest.NewRequest(http.MethodPost, InvitationsPath, strings.NewReader(bodyText))
+	readerReq.Header.Set("Origin", h.cfg.PublicOrigin)
+	readerReq.Header.Set("X-Gist-CSRF", readerHandler.csrf("reader"))
+	readerOut := httptest.NewRecorder()
+	readerHandler.createInvitation(readerOut, readerReq)
+	if readerOut.Code != http.StatusForbidden || store.created != 1 {
+		t.Fatalf("reader invitation status=%d", readerOut.Code)
+	}
+	badCSRF := httptest.NewRequest(http.MethodPost, InvitationsPath, strings.NewReader(bodyText))
+	badCSRF.Header.Set("Origin", h.cfg.PublicOrigin)
+	badCSRF.Header.Set("X-Gist-CSRF", "invalid")
+	badCSRFOut := httptest.NewRecorder()
+	h.createInvitation(badCSRFOut, badCSRF)
+	if badCSRFOut.Code != http.StatusForbidden || store.created != 1 {
+		t.Fatalf("invalid CSRF invitation status=%d", badCSRFOut.Code)
 	}
 }
 func TestCanonicalAccountID(t *testing.T) {
