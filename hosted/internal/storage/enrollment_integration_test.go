@@ -65,3 +65,28 @@ func TestEnrollmentBootstrapAndInviteAreAtomicAndBound(t *testing.T) {
 		t.Fatalf("failed bootstrap left a workspace: exists=%t err=%v", workspaceExists, err)
 	}
 }
+
+func TestEnrollmentRejectsExpiredInvitation(t *testing.T) {
+	pool := searchTestPool(t)
+	store, err := NewPostgres(pool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	enrollmentStore, err := store.Enrollment("https://gist.example")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	now := time.Now().UTC()
+	if err := enrollmentStore.CompleteLogin(ctx, "expired-invite", "1001", nil, "1001", "Expired Invite", []string{"catalog:read"}, now); err != nil {
+		t.Fatalf("founder bootstrap: %v", err)
+	}
+	tokenHash := make([]byte, 32)
+	tokenHash[0] = 7
+	if err := enrollmentStore.CreateInvitation(ctx, "expired-invite", "1001", "2002", "reader", []string{"catalog:read"}, tokenHash, now.Add(time.Hour)); err != nil {
+		t.Fatalf("create invitation: %v", err)
+	}
+	if err := enrollmentStore.CompleteLogin(ctx, "expired-invite", "2002", tokenHash, "1001", "Expired Invite", nil, now.Add(2*time.Hour)); !errors.Is(err, enrollment.ErrDenied) {
+		t.Fatalf("expired invitation accepted: %v", err)
+	}
+}

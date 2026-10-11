@@ -300,3 +300,67 @@ func TestInvitedAccountReceivesOnlyInvitedWorkspace(t *testing.T) {
 		t.Fatalf("invitation created unintended membership rows: %#v", store.members)
 	}
 }
+
+func TestRoutesServeLoginOverHTTP(t *testing.T) {
+	store := newMemoryStore()
+	h, sessions := testHandler(t, store, fakeAuth{})
+	mux := http.NewServeMux()
+	h.Routes(mux)
+	server := httptest.NewServer(mux)
+	defer server.Close()
+	client := &http.Client{CheckRedirect: func(*http.Request, []*http.Request) error {
+		return http.ErrUseLastResponse
+	}}
+
+	startResponse, err := client.Get(server.URL + StartPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer startResponse.Body.Close()
+	body, err := io.ReadAll(startResponse.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if startResponse.StatusCode != http.StatusFound {
+		t.Fatalf("start status=%d body=%s", startResponse.StatusCode, body)
+	}
+	var flowCookie *http.Cookie
+	for _, cookie := range startResponse.Cookies() {
+		if cookie.Name == FlowCookieName {
+			flowCookie = cookie
+		}
+	}
+	if flowCookie == nil || !flowCookie.Secure || !flowCookie.HttpOnly {
+		t.Fatalf("missing protected flow cookie: %#v", flowCookie)
+	}
+	location, err := url.Parse(startResponse.Header.Get("Location"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	state := location.Query().Get("state")
+	if state == "" {
+		t.Fatal("authorization redirect omitted state")
+	}
+
+	callbackRequest, err := http.NewRequest(http.MethodGet, server.URL+CallbackPath+"?code=synthetic-code&state="+url.QueryEscape(state), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	callbackRequest.AddCookie(flowCookie)
+	callbackResponse, err := client.Do(callbackRequest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer callbackResponse.Body.Close()
+	body, err = io.ReadAll(callbackResponse.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var callbackBody map[string]any
+	if err := json.Unmarshal(body, &callbackBody); err != nil {
+		t.Fatalf("callback returned invalid JSON %q: %v", body, err)
+	}
+	if callbackResponse.StatusCode != http.StatusOK || sessions.subject != "12345" || callbackBody["authenticated"] != true {
+		t.Fatalf("callback status=%d subject=%q body=%s", callbackResponse.StatusCode, sessions.subject, body)
+	}
+}
