@@ -10,13 +10,14 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -210,6 +211,20 @@ type clientFixture struct {
 	issuer   string
 }
 
+func TestFixtureDSNUsesRequestedDatabase(t *testing.T) {
+	got, err := fixtureDSN("postgres://ndungu@localhost/postgres?host=/tmp/pgsock&port=55439&sslmode=disable", "gist_fixture_test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := url.Parse(got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if u.Path != "/gist_fixture_test" || u.Query().Get("host") != "/tmp/pgsock" || u.Query().Get("port") != "55439" {
+		t.Fatalf("fixture URL lost database or connection settings: path=%q query=%v", u.Path, u.Query())
+	}
+}
+
 func TestWorkload(t *testing.T) {
 	targets := map[string]string{
 		"GIST_CODEX_CLI_BUILD":      os.Getenv("GIST_CODEX_CLI_BUILD"),
@@ -359,27 +374,52 @@ func startClientFixture(t *testing.T) *clientFixture {
 	if base == "" {
 		base = "postgres://dndungu@127.0.0.1:5432/postgres?sslmode=disable"
 	}
-	adminCfg, err := pgx.ParseConfig(base)
+	adminDSN, err := fixtureDSN(base, "postgres")
 	if err != nil {
-		t.Fatalf("parse postgres fixture URL: %v", err)
+		t.Fatalf("build admin fixture URL: %v", err)
 	}
-	adminCfg.Database = "postgres"
-	adminDSN := adminCfg.ConnString()
 	admin, err := pgx.Connect(ctx, adminDSN)
 	if err != nil {
 		t.Fatalf("connect to reachable postgres fixture: %v", err)
 	}
-	dbName := fmt.Sprintf("gist_registry_m2a_%d", rand.New(rand.NewSource(time.Now().UnixNano())).Int63())
+	suffix := make([]byte, 6)
+	if _, err := rand.Read(suffix); err != nil {
+		admin.Close(context.Background())
+		t.Fatalf("generate fixture database name: %v", err)
+	}
+	dbName := "gist_registry_m2a_" + hex.EncodeToString(suffix)
 	if _, err := admin.Exec(ctx, `CREATE DATABASE `+quoteIdent(dbName)); err != nil {
 		admin.Close(context.Background())
 		t.Fatalf("create fixture database: %v", err)
 	}
-	cfg := *adminCfg
-	cfg.Database = dbName
-	dsn := cfg.ConnString()
-	pool, err := pgxpool.New(ctx, dsn)
+	var pool *pgxpool.Pool
+	var fixture *clientFixture
+	ready := false
+	defer func() {
+		if ready {
+			return
+		}
+		if fixture != nil {
+			fixture.close()
+		} else {
+			if pool != nil {
+				pool.Close()
+			}
+			_, _ = admin.Exec(context.Background(), `DROP DATABASE IF EXISTS `+quoteIdent(dbName)+` WITH (FORCE)`)
+		}
+		_ = admin.Close(context.Background())
+	}()
+	dsn, err := fixtureDSN(base, dbName)
+	if err != nil {
+		t.Fatalf("build isolated fixture URL: %v", err)
+	}
+	pool, err = pgxpool.New(ctx, dsn)
 	if err != nil {
 		t.Fatalf("open fixture pool: %v", err)
+	}
+	var connected string
+	if err := pool.QueryRow(ctx, "SELECT current_database()").Scan(&connected); err != nil || connected != dbName {
+		t.Fatalf("fixture pool connected to %q, want %q: %v", connected, dbName, err)
 	}
 	for _, name := range []string{"001_catalog.sql", "002_policy.sql", "003_identity.sql", "004_events.sql", "005_identity_workspace_key.sql", "006_catalog_version_order.sql", "007_oauth_grants.sql", "008_event_retention_floor.sql", "009_publication_v2.sql", "010_operator_enrollment.sql"} {
 		raw, readErr := os.ReadFile(filepath.Join("..", "..", "migrations", name))
@@ -423,12 +463,32 @@ func startClientFixture(t *testing.T) *clientFixture {
 	}
 	placeholder.Config.Handler = a.Handler()
 	placeholder.StartTLS()
-	f := &clientFixture{app: a, server: placeholder, pool: pool, adminDSN: adminDSN, dbName: dbName, issuer: origin}
-	if err := seedClientFixture(ctx, f); err != nil {
+	fixture = &clientFixture{app: a, server: placeholder, pool: pool, adminDSN: adminDSN, dbName: dbName, issuer: origin}
+	if err := seedClientFixture(ctx, fixture); err != nil {
 		t.Fatalf("seed client fixture: %v", err)
 	}
 	_ = admin.Close(context.Background())
-	return f
+	ready = true
+	return fixture
+}
+
+func fixtureDSN(base, dbName string) (string, error) {
+	u, err := url.Parse(base)
+	if err != nil {
+		return "", fmt.Errorf("parse postgres URL: %w", err)
+	}
+	if u.Scheme != "postgres" && u.Scheme != "postgresql" {
+		return "", fmt.Errorf("postgres fixture DSN must use postgres:// or postgresql:// URL form")
+	}
+	if u.Host == "" {
+		return "", fmt.Errorf("postgres fixture URL must include a host")
+	}
+	u.Path = "/" + dbName
+	u.RawPath = ""
+	query := u.Query()
+	query.Del("dbname")
+	u.RawQuery = query.Encode()
+	return u.String(), nil
 }
 
 func seedClientFixture(ctx context.Context, f *clientFixture) error {
