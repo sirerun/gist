@@ -90,3 +90,32 @@ func TestEnrollmentRejectsExpiredInvitation(t *testing.T) {
 		t.Fatalf("expired invitation accepted: %v", err)
 	}
 }
+
+func TestInvitationCannotWidenMaintainerScopes(t *testing.T) {
+	pool := searchTestPool(t)
+	store, err := NewPostgres(pool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	enrollmentStore, err := store.Enrollment("https://gist.example")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	now := time.Now().UTC()
+	if err := enrollmentStore.CompleteLogin(ctx, "scope-bounds", "1001", nil, "1001", "Scope Bounds", []string{"catalog:read"}, now); err != nil {
+		t.Fatalf("founder bootstrap: %v", err)
+	}
+	tokenHash := make([]byte, 32)
+	tokenHash[0] = 9
+	if err := enrollmentStore.CreateInvitation(ctx, "scope-bounds", "1001", "2002", "reader", []string{"catalog:publish"}, tokenHash, now.Add(time.Hour)); !errors.Is(err, enrollment.ErrDenied) {
+		t.Fatalf("maintainer widened invitation scope: %v", err)
+	}
+	var invitationExists bool
+	err = WithTenant(ctx, pool, "scope-bounds", func(ctx context.Context, tx pgx.Tx) error {
+		return tx.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM workspace_invitations WHERE workspace_id=$1 AND token_hash=$2)", "scope-bounds", tokenHash).Scan(&invitationExists)
+	})
+	if err != nil || invitationExists {
+		t.Fatalf("denied invitation persisted: exists=%t err=%v", invitationExists, err)
+	}
+}
