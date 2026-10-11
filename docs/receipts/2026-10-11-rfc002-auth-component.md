@@ -63,3 +63,12 @@ The local client acceptance fixture had mutated a parsed pgx database field and 
 - The local PostgreSQL cluster was stopped after verification. No production credentials or external provider calls were used.
 
 This closes the local integration-suite gap only. Named consumer builds and live workflow acceptance, application startup/configuration wiring for operator enrollment, independent exact-head review, merge, landed verification, and production acceptance remain open.
+
+## Enrollment denial-matrix follow-up at source head f74e5f1a461d5cb804a0085017be292d71632c5a
+
+Added explicit checks for expired and replayed persistent login flows, expired/denied GitHub consent, exact PKCE verifier binding, hashed-only OAuth state, no GitHub scope or external return path, exact token-exchange and `GET /user` calls, missing configuration, unauthorized/cross-workspace/reader/CSRF invitation attempts, invitation workspace binding, and the single-workspace founder bootstrap.
+
+- `GOWORK=off go test -tags=integration ./... -count=1` passed on exact source head `f74e5f1a461d5cb804a0085017be292d71632c5a` with the offline local fixtures and task-owned PostgreSQL cluster.
+- `GOWORK=off go vet -tags=integration ./internal/enrollment ./internal/storage` passed.
+- Pinned golangci-lint v2.14.0 with integration build tags reported zero issues in `internal/enrollment` and `internal/storage`.
+- The PostgreSQL cluster was stopped after the run. Real client builds, live owner/workspace values, startup/route composition, and production acceptance remain open.
