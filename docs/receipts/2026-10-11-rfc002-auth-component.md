@@ -48,3 +48,7 @@ Added TestInvitationCannotWidenMaintainerScopes. It creates a fresh workspace wh
 - GOWORK=off go vet ./internal/enrollment ./internal/storage passed.
 - Pinned golangci-lint v2.14.0 on ./internal/enrollment and ./internal/storage reported zero issues.
 - The cluster was stopped after the run. These checks remain local component evidence; application composition, independent review, merge, landed verification, and production acceptance remain open.
+
+## Scope-denial test filter correction
+
+The earlier TestEnrollment filter did not match TestInvitationCannotWidenMaintainerScopes. That regression was run separately at source head e07d1751990e817bbe1d540fb48427d3238e2e32 using GOWORK=off go test -tags=integration ./internal/storage -run TestInvitationCannotWidenMaintainerScopes -count=1. It passed against a fresh database on the isolated PostgreSQL 16 cluster, and the cluster was stopped afterward.
