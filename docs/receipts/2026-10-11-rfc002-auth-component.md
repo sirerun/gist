@@ -52,3 +52,14 @@ Added TestInvitationCannotWidenMaintainerScopes. It creates a fresh workspace wh
 ## Scope-denial test filter correction
 
 The earlier TestEnrollment filter did not match TestInvitationCannotWidenMaintainerScopes. That regression was run separately at source head e07d1751990e817bbe1d540fb48427d3238e2e32 using GOWORK=off go test -tags=integration ./internal/storage -run TestInvitationCannotWidenMaintainerScopes -count=1. It passed against a fresh database on the isolated PostgreSQL 16 cluster, and the cluster was stopped afterward.
+
+## Client fixture database isolation and current-schema acceptance at source head d4d3a242f72c2c635d6f4e9d69cefbd5c5ebe51c
+
+The local client acceptance fixture had mutated a parsed pgx database field and then called `ConnConfig.ConnString()`, which retained the original database URL. That caused the fixture to connect to the admin database instead of the database it created. It now rewrites the PostgreSQL URL path, verifies `current_database()` before applying migrations, uses a cryptographically random test database name suffix, and cleans up a partially constructed fixture. The fixture applies current migrations 001 through 010.
+
+- `GOWORK=off go test -tags=integration ./... -count=1` passed on the exact code head above with a task-owned PostgreSQL 16 test cluster reachable only over its private Unix socket.
+- The client test used `x@local-fixture` labels for Codex CLI, Claude Code, and the policy-gated runtime. These select offline HTTP/MCP fixtures; they do not identify or qualify real client binaries or replace live consumer acceptance.
+- `GOWORK=off go vet -tags=integration ./acceptance/clients` and `git diff --check` passed.
+- The local PostgreSQL cluster was stopped after verification. No production credentials or external provider calls were used.
+
+This closes the local integration-suite gap only. Named consumer builds and live workflow acceptance, application startup/configuration wiring for operator enrollment, independent exact-head review, merge, landed verification, and production acceptance remain open.
