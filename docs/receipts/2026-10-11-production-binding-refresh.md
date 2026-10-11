@@ -2,9 +2,10 @@
 
 Date: 2026-10-11. Scope: refresh AWS and DNS bindings for the existing Gist production destination. Read-only checks only.
 
-- The AWS CLI authenticated as a user principal. Its account was compared locally with the `registry-aws` Pulumi stack `accountId`; they differ. Three CLI profiles are configured, two authenticate to an account, and none matches the stack target. Account IDs and profile names are intentionally omitted. The DGX environment has no AWS CLI.
-- The Cloudflare MCP returned HTTP 200 for the exact `sire.run` zone lookup; the zone is active. An exact `gist.sire.run` DNS-record lookup returned HTTP 200 with zero records. This confirms current read access and absence of the queried record, not write authority.
-- A public HTTPS `HEAD /` request to `https://gist.sire.run/` failed because DNS could not resolve the hostname; no TLS or application response was obtained.
-- No AWS role assumption, stack preview/apply, DNS write, certificate request, provider action, deployment, or cost-incurring operation was attempted.
+- The AWS CLI authenticated as a user principal in the AWS Organizations management account. The `registry-aws` Pulumi stack `accountId` resolves to an ACTIVE Organizations member account named `gist-registry`; this matches the documented cross-account stack topology. The different account IDs are expected and do not by themselves indicate a mismatch. IDs and profile names are omitted. Three CLI profiles are configured, two authenticate, and none directly selects the member account.
+- The Foundation `registry-aws` runbook on main documents the management/payer account, member-account role assumption, and stack workflow. No STS role assumption, Pulumi preview/apply, or current deployment permission was tested. The DGX environment has no AWS CLI or Pulumi CLI.
+- The Cloudflare MCP returned HTTP 200 for the exact `sire.run` zone lookup; the zone is active. Exact DNS reads returned HTTP 200: `registry.sire.run` has one CNAME and `gist.sire.run` has zero records. Record content is omitted. This confirms read access, not DNS write authority.
+- A public HTTPS `HEAD /` request to `https://gist.sire.run/` failed because DNS could not resolve the hostname. A public request to `https://registry.sire.run/healthz` returned HTTP 200 with `status: ok`; this does not prove Gist acceptance at the canonical hostname.
+- No STS role assumption, stack preview/apply, DNS write, certificate request, provider action, deployment, or cost-incurring operation was attempted.
 
-Remaining: the owner-approved AWS account/role and deployment workflow, current artifact path, numerical change/cost limits, and DNS write authority. T-GR-SCOPE.11 and all production/deployment gates remain open.
+Remaining: verify the permitted member-account role and deploy workflow, the current CodeBuild/ECR artifact path, owner-approved numerical change/cost limits, and Cloudflare DNS write authority. T-GR-SCOPE.11 and all production/deployment gates remain open.
