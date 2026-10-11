@@ -35,6 +35,12 @@ Source file digests for this authored candidate:
 - RFC-003: `92791e1c686f2bc622a20dc180643ad0836a404565815cf2df46661c625ef436`
 - Private threat-model digest: `a9242fead3074792c6b4cb4a78cea1253771e13e08c6331d6e407c6860c0c087`
 
+## Public handover correction
+
+The prior handover described G0.4 as awaiting founder approval and contained workstation-specific setup details. It has been replaced with a current, portable handoff that records the already-approved direction, keeps the exact-revision review gate open, and separates the responding legacy service from the unqualified requested production origin. The prior version remains in Git history; public history was not rewritten. The current file digest is recorded above.
+
+- Current public handover SHA-256: d610dc2183a1fd31bf782dfaceb16d67a7f9ae60d8ab1cf146b45971b1c5e425
+
 ## Remaining gates
 
 Stored-only versus one-shot caller-supplied provider credential intake remains
