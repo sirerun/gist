@@ -40,6 +40,9 @@ type Config struct {
 	// GitHubEnrollment enables permissionless operator sign-in and invite-only
 	// workspace membership. GitHub access tokens are never persisted.
 	GitHubEnrollment *enrollment.Config
+	// GitHubEnrollmentHTTPClient optionally supplies the enrollment outbound
+	// client; nil uses the enrollment package's bounded default client.
+	GitHubEnrollmentHTTPClient *http.Client
 	// OAuthConsentSecret keys the reference authorization server's consent
 	// and session HMACs (GIST_OAUTH_CONSENT_SECRET). Every replica must share
 	// it and it must survive restarts, so it is required configuration of at

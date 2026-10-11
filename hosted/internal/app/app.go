@@ -180,7 +180,7 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		pool.Close()
 		return nil, err
 	}
-	enrollmentHandler, err := enrollment.New(*cfg.GitHubEnrollment, enrollmentStore, sessions, enrollmentSessionAuthenticator{sessions: sessions}, nil)
+	enrollmentHandler, err := enrollment.New(*cfg.GitHubEnrollment, enrollmentStore, sessions, enrollmentSessionAuthenticator{sessions: sessions}, cfg.GitHubEnrollmentHTTPClient)
 	if err != nil {
 		pool.Close()
 		return nil, err
