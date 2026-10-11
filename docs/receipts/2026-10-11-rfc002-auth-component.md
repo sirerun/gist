@@ -16,3 +16,13 @@ Synthetic verification on the candidate:
 - gofmt is clean. The qualified DGX ran golangci-lint v2.14.0 on the root Go module and the changed hosted packages. The full hosted-module lint currently reports five findings in unchanged discovery/cache.go, oauth/delegated.go, packages/retrieve.go, and contract/digest.go; those findings remain outside this enrollment candidate. The repository lint action and config were upgraded to pinned golangci-lint v2.14.0 because the last v1 release cannot analyze the Go 1.26 target. goimports is unavailable.
 
 This is implementation-candidate evidence only. It does not prove deployed GitHub App configuration, application wiring, independent review, merge, production login, or production acceptance.
+
+## Follow-up qualification at candidate head 5cc32d24313ca065fadb2d1b45c819afb7452a49
+
+A task-owned PostgreSQL 16 cluster was created for verification with local Unix-socket access only, no configured password, and no connection to the existing shared PostgreSQL listener. The cluster is now stopped and its task-local data remains in the task cache. This supersedes the earlier statements above that the retrieval and enrollment database checks could not run locally.
+
+- `GOWORK=off go test ./... -count=1` in `hosted/` passed against the isolated database, including all 24 local retrieval smoke cases.
+- `GOWORK=off go test -tags=integration ./internal/storage -count=1` passed against fresh per-test databases and migrations, including `TestEnrollmentBootstrapAndInviteAreAtomicAndBound`.
+- `GOWORK=off go test -tags=integration ./... -count=1` passed for storage, app wiring, retrieval, and the other listed packages, but the overall command failed in `acceptance/clients`: `TestWorkload` requires the absent named client build variable `GIST_CODEX_CLI_BUILD`. This is a real-runtime qualification input; it was not skipped or fabricated.
+
+The tests above are local component and synthetic wiring evidence. They do not qualify a named external runtime, compose the new enrollment handler into application startup, satisfy independent review, prove merge/landed behavior, or establish live production acceptance. The PostgreSQL cluster and URL were temporary and are not production credentials.
