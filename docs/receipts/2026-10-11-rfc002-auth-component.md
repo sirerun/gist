@@ -26,3 +26,16 @@ A task-owned PostgreSQL 16 cluster was created for verification with local Unix-
 - `GOWORK=off go test -tags=integration ./... -count=1` passed for storage, app wiring, retrieval, and the other listed packages, but the overall command failed in `acceptance/clients`: `TestWorkload` requires the absent named client build variable `GIST_CODEX_CLI_BUILD`. This is a real-runtime qualification input; it was not skipped or fabricated.
 
 The tests above are local component and synthetic wiring evidence. They do not qualify a named external runtime, compose the new enrollment handler into application startup, satisfy independent review, prove merge/landed behavior, or establish live production acceptance. The PostgreSQL cluster and URL were temporary and are not production credentials.
+
+## Route and invitation-expiry coverage at source head dd391a511d972fa52fc3ab5623664bc99831830a
+
+Added TestRoutesServeLoginOverHTTP, which registers the public routes on an HTTP mux, runs a local HTTP server, and asserts the start redirect, protected flow cookie, callback status, session issuance, and JSON response. Added TestEnrollmentRejectsExpiredInvitation against the migrated PostgreSQL storage implementation.
+
+- In hosted/, GOWORK=off go test ./... -count=1 passed against the isolated task-owned PostgreSQL 16 Unix-socket cluster.
+- In hosted/, GOWORK=off go test -tags=integration ./internal/storage -count=1 passed against fresh per-test databases and migrations, including expired invitation denial.
+- In hosted/, GOWORK=off go vet ./internal/enrollment ./internal/storage passed.
+- Pinned golangci-lint v2.14.0 on ./internal/enrollment and ./internal/storage reported zero issues.
+- The full integration-tagged module suite remains incomplete because acceptance/clients requires a named Codex build through GIST_CODEX_CLI_BUILD. The target is unavailable; no value was invented.
+- GitHub Actions annotations on the follow-up PR run report that jobs were not started because the account is locked due to a billing issue. No repository self-hosted runners are registered. Local verification is the documented fallback; this does not replace independent review or runtime qualification.
+
+This follow-up remains component evidence. Application startup wiring, independent exact-head security review, merge, landed checks, named consumer qualification, and live production acceptance are still open.
