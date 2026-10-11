@@ -12,7 +12,7 @@ Synthetic verification on the candidate:
 - GOWORK=off go test -race ./internal/enrollment ./internal/storage passed.
 - GOWORK=off go vet ./... passed.
 - All hosted Go packages except acceptance/retrieval passed go test; the retrieval acceptance cases require a configured Postgres URL and failed to connect in this environment.
-- The Postgres enrollment integration test compiled with the integration build tag. It was not executed because no test database credential is configured. An isolated connection attempt to the local Postgres listener failed authentication before creating a database.
+- The Postgres enrollment integration test compiled with the integration build tag. The CI test job now exports its Postgres service URL under GIST_DATABASE_URL, matching the integration helpers. It was not executed locally because no test database credential is configured. An isolated connection attempt to the local Postgres listener failed authentication before creating a database.
 - gofmt is clean. golangci-lint and goimports are unavailable on the qualified DGX tool path.
 
 This is implementation-candidate evidence only. It does not prove deployed GitHub App configuration, application wiring, independent review, merge, production login, or production acceptance.
