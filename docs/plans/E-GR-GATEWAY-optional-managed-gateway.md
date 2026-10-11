@@ -1,10 +1,7 @@
-# E-GR-GATEWAY -- Optional managed gateway
+# Historical plan pointer: E-GR-GATEWAY-optional-managed-gateway.md
 
-fidelity: outline
-Acceptance: Separate selected gateway scope can be planned from actual sign-off without gating caller-owned recovery.
+This former split-plan path is retained for incoming links only. The active RFC-002/RFC-003 task graph and current task status are maintained only in [docs/plan.md](../plan.md). Do not dispatch from this file.
 
-Managed gateway remains separate and is not needed for the admitted caller-owned recovery path. Existing G0.4 and later implemented-control/live approval gates remain intact. Historical gateway task IDs, accepted architecture and source evidence are not deleted.
+Byte-preserved source snapshot: [archive/20261011/E-GR-GATEWAY-optional-managed-gateway.md.source](archive/20261011/E-GR-GATEWAY-optional-managed-gateway.md.source)
 
-#### Wave 6: Optional gateway planning trigger
-
-- [ ] T-GR-GATEWAY.0 PLAN: refine gateway SDLC only if founder selects that separate scope  Owner: coordinator  Est: TBD  kind: plan  verifies: [infrastructure]  blocked-by: [T-GR-EVIDENCE.5]  acc: [Actual gateway scope and G0.4 disposition are recorded before expansion; preserve original G IDs and threat-model gates; use full candidate SDLC and maximum qualified GPT-6-Luna parallelism without weakening custody/approval/execution controls]  blocked: Gateway is deferred; founder scope selection and G0.4 approval are not present
+Original SHA-256: `08ef5204636a1845d3d30bac62abcda77dfb2caf7d7fc2fdae14c1af12489ff3`. This snapshot's task text and checkboxes are historical; consult the canonical plan for current scope, owners, dependencies, and evidence.
