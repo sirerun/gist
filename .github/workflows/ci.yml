@@ -47,7 +47,7 @@ jobs:
         run: PGPASSWORD=testpass psql -h localhost -U postgres -d gist_test -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
       - name: Run tests
         env:
-          GIST_TEST_DSN: postgres://postgres:testpass@localhost:5432/gist_test?sslmode=disable
+          GIST_DATABASE_URL: postgres://postgres:testpass@localhost:5432/gist_test?sslmode=disable
         run: GOWORK=off go test ./... -race -coverprofile=coverage.out -tags=integration
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
