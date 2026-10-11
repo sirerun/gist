@@ -3,8 +3,8 @@
 Date: 2026-10-11
 Plan: docs/plan.md
 Candidate task count: 352
-Candidate plan SHA-256: sha256:f109376c22ece7d5d8d92589293724b8b90015a1c2eb72a0228e81094bfd5fee
-Authored revision: candidate-20261011-rfc003-graph-r3
+Candidate plan SHA-256: sha256:ef9af7731b8b28abe519613db1a2f6bce5af1cfbcda23d8dd5c8406343302e7e
+Authored revision: candidate-20261011-rfc003-graph-r4
 Rebased on current main d12fd22b7d059629698a2d1c03ed0a0b69fb1860; exact-head pair review remains pending
 
 ## Verification
@@ -16,7 +16,7 @@ version 0.0.1, and authorityAuthenticated=false.
 
 Command:
 
-    python3 /home/ndungu/worktrees/gist-plan-ship-20261008-root/tooling/plan/scripts/validate_plan.py docs/plan.md --wazi-dir /home/ndungu/Code/task-worktrees/zati-ws-plan-tools/wazi --wazi /home/ndungu/Code/task-worktrees/zati-ws-plan-tools/bin/wazi --validator /home/ndungu/Code/task-worktrees/zati-ws-plan-tools/bin/wazi-contract --plan-id gist:delivery --authority-id github:sirerun/gist --revision candidate-20261011-rfc003-graph-r3
+    python3 /home/ndungu/worktrees/gist-plan-ship-20261008-root/tooling/plan/scripts/validate_plan.py docs/plan.md --wazi-dir /home/ndungu/Code/task-worktrees/zati-ws-plan-tools/wazi --wazi /home/ndungu/Code/task-worktrees/zati-ws-plan-tools/bin/wazi --validator /home/ndungu/Code/task-worktrees/zati-ws-plan-tools/bin/wazi-contract --plan-id gist:delivery --authority-id github:sirerun/gist --revision candidate-20261011-rfc003-graph-r4
 
 Tool and contract digests:
 
@@ -29,7 +29,7 @@ The same pinned semantic-validator and contract digests were previously qualifie
 by 60/60 fixtures (21 valid, 39 invalid); the archived 317-task receipt preserves
 that run. git diff --check, canonical-plan and pointer relative-link checks,
 archive hash checks, and public-document privacy scans pass for this candidate.
-The plan content digest is revalidated after every subsequent plan edit.
+The plan content digest is revalidated after every subsequent plan edit. The 2026-10-11 AWS/DNS read-only refresh is recorded in [its receipt](2026-10-11-production-binding-refresh.md); production writes remain unqualified.
 
 ## Limits
 
