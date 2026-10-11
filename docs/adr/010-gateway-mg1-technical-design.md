@@ -88,15 +88,30 @@ records mitigate impact without claiming to prove human consent.
 
 ### 4. Idempotency binding
 
-The idempotency key is supplied by the client; the binding is computed
-server-side as `SHA-256(tenant_id || principal_hash || binding_ref ||
-connection_id || SHA-256(payload))` where `principal_hash` is
-`ports.PrincipalHash` (issuer, subject, audience, workspace). The tuple is
-stored in `execution_idempotency` with the execution ID. Reuse with an
-identical binding returns the original execution (`200`, not a new run);
-reuse with a changed binding is `409 idempotency_conflict` — never a silent
-re-run. Keys expire with their execution record's retention, not on a fixed
-clock.
+The idempotency key is supplied by the client; the server computes a
+versioned, domain-separated binding fingerprint. Version 1 hashes these bytes
+with SHA-256, in this exact order:
+
+1. The UTF-8 bytes `gist.gateway.idempotency-binding.v1` followed by one NUL byte.
+2. `tenant_id`, `principal_hash`, `binding_ref`, and `connection_id`, each
+   encoded as a four-byte unsigned big-endian byte length followed by the exact
+   canonical UTF-8 bytes stored for that value. Values longer than `2^32-1`
+   bytes are invalid; no implicit normalization or delimiter splitting occurs.
+3. The 32 raw bytes of `SHA-256(payload)` (fixed width, not hexadecimal text).
+
+`principal_hash` is the existing deterministic `ports.PrincipalHash` value
+(issuer, subject, audience, workspace), encoded as its canonical UTF-8 form.
+The domain separator and length prefixes make field boundaries and algorithm
+version unambiguous across implementations. Implementations must share golden
+vectors and prove that ambiguous unframed pairs such as `("a", "bc")` and
+`("ab", "c")` produce distinct fingerprints. This is the first persisted
+format; any later format uses a new domain/version and an explicit migration.
+
+The tuple is stored in `execution_idempotency` with the execution ID. Reuse
+with an identical binding returns the original execution (`200`, not a new
+run); reuse with a changed binding is `409 idempotency_conflict` — never a
+silent re-run. Keys expire with their execution record's retention, not on a
+fixed clock.
 
 ### 5. Scope and contracts layout
 
