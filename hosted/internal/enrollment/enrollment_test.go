@@ -1,0 +1,302 @@
+package enrollment
+
+import (
+	"context"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+)
+
+type memoryStore struct {
+	flows        map[string]time.Time
+	used         map[string]bool
+	members      map[string]string
+	invites      map[string]inviteRecord
+	bootstrapped bool
+	created      int
+	githubID     string
+}
+type inviteRecord struct {
+	account, role string
+	scopes        []string
+	expires       time.Time
+	used          bool
+}
+
+func newMemoryStore() *memoryStore {
+	return &memoryStore{flows: map[string]time.Time{}, used: map[string]bool{}, members: map[string]string{}, invites: map[string]inviteRecord{}}
+}
+func key(b []byte) string { return base64.RawURLEncoding.EncodeToString(b) }
+func (s *memoryStore) CreateFlow(_ context.Context, h []byte, e time.Time) error {
+	s.flows[key(h)] = e
+	return nil
+}
+func (s *memoryStore) ConsumeFlow(_ context.Context, h []byte, n time.Time) error {
+	k := key(h)
+	e, ok := s.flows[k]
+	if !ok || s.used[k] || !n.Before(e) {
+		return ErrReplay
+	}
+	s.used[k] = true
+	return nil
+}
+func (s *memoryStore) CompleteLogin(_ context.Context, ws, account string, invite []byte, founder, name string, scopes []string, now time.Time) error {
+	if role, ok := s.members[ws+":"+account]; ok && role != "" {
+		return nil
+	}
+	if len(invite) > 0 {
+		k := key(invite)
+		i, ok := s.invites[k]
+		if !ok || i.used || i.account != account || !now.Before(i.expires) {
+			return ErrDenied
+		}
+		i.used = true
+		s.invites[k] = i
+		s.members[ws+":"+account] = i.role
+		return nil
+	}
+	if account != founder || s.bootstrapped {
+		return ErrDenied
+	}
+	s.bootstrapped = true
+	s.members[ws+":"+account] = "maintainer"
+	return nil
+}
+func (s *memoryStore) CreateInvitation(_ context.Context, ws, actor, account, role string, scopes []string, hash []byte, expires time.Time) error {
+	if s.members[ws+":"+actor] != "maintainer" {
+		return ErrDenied
+	}
+	s.invites[key(hash)] = inviteRecord{account: account, role: role, scopes: append([]string(nil), scopes...), expires: expires}
+	s.created++
+	return nil
+}
+
+type fakeSessions struct{ subject string }
+
+func (s *fakeSessions) Issue(subject string, _ []string, _ time.Duration) (*http.Cookie, error) {
+	s.subject = subject
+	return &http.Cookie{Name: "session", Value: "issued", Path: "/", Secure: true, HttpOnly: true}, nil
+}
+
+type fakeAuth struct{ session Session }
+
+func (a fakeAuth) Authenticate(*http.Request) (Session, error) { return a.session, nil }
+
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
+func response(status int, body string) *http.Response {
+	return &http.Response{StatusCode: status, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(body))}
+}
+func testHandler(t *testing.T, s *memoryStore, auth SessionAuthenticator) (*Handler, *fakeSessions) {
+	t.Helper()
+	sessions := &fakeSessions{}
+	client := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		switch r.URL.Host + r.URL.Path {
+		case "github.com/login/oauth/access_token":
+			if err := r.ParseForm(); err != nil {
+				return response(400, "{}"), nil
+			}
+			if r.Form.Get("code") != "synthetic-code" || r.Form.Get("client_id") != "client" || r.Form.Get("client_secret") != "secret" || r.Form.Get("redirect_uri") != "https://gist.example/auth/github/callback" || r.Form.Get("code_verifier") == "" {
+				return response(400, "{}"), nil
+			}
+			return response(200, "{\"access_token\":\"synthetic-token\",\"token_type\":\"bearer\"}"), nil
+		case "api.github.com/user":
+			if r.Method != http.MethodGet || r.Header.Get("Authorization") != "Bearer synthetic-token" {
+				return response(401, "{}"), nil
+			}
+			id := s.githubID
+			if id == "" {
+				id = "12345"
+			}
+			return response(200, "{\"id\":"+id+",\"login\":\"synthetic\"}"), nil
+		default:
+			return response(404, "{}"), nil
+		}
+	})}
+	h, err := New(Config{ClientID: "client", ClientSecret: "secret", CallbackURL: "https://gist.example/auth/github/callback", PublicOrigin: "https://gist.example", WorkspaceID: "private", WorkspaceName: "Private", FounderAccount: "12345", BootstrapScopes: []string{"catalog:read", "catalog:publish"}, AllowedScopes: []string{"catalog:read", "catalog:publish"}, FlowKey: []byte(strings.Repeat("f", 32)), CSRFKey: []byte(strings.Repeat("c", 32)), FlowTTL: 5 * time.Minute}, s, sessions, auth, client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h.now = func() time.Time { return time.Date(2026, 10, 11, 0, 0, 0, 0, time.UTC) }
+	return h, sessions
+}
+func TestStartAndCallbackBootstrapFounderWithPKCE(t *testing.T) {
+	store := newMemoryStore()
+	h, sessions := testHandler(t, store, fakeAuth{})
+	start := httptest.NewRequest(http.MethodGet, "https://gist.example"+StartPath, nil)
+	start.Header.Set("Referer", "https://gist.example/invite")
+	rec := httptest.NewRecorder()
+	h.start(rec, start)
+	if rec.Code != http.StatusFound || rec.Header().Get("Referrer-Policy") != "no-referrer" {
+		t.Fatalf("start response: %d headers=%v", rec.Code, rec.Header())
+	}
+	loc, err := url.Parse(rec.Header().Get("Location"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	q := loc.Query()
+	if q.Get("code_challenge_method") != "S256" || q.Get("client_id") != "client" || q.Get("redirect_uri") != h.cfg.CallbackURL {
+		t.Fatalf("authorize URL missing required fields: %s", loc)
+	}
+	cookies := rec.Result().Cookies()
+	if len(cookies) == 0 {
+		t.Fatal("flow cookie missing")
+	}
+	flow := cookies[0]
+	if !flow.Secure || !flow.HttpOnly || flow.SameSite != http.SameSiteLaxMode || flow.Path != "/" {
+		t.Fatalf("flow cookie flags: %#v", flow)
+	}
+	leaked := httptest.NewRecorder()
+	h.start(leaked, httptest.NewRequest(http.MethodGet, StartPath+"?invite=secret", nil))
+	if leaked.Code != http.StatusBadRequest {
+		t.Fatalf("invitation query token accepted: %d", leaked.Code)
+	}
+	state, verifier, invite, _, err := h.openFlow(flow.Value)
+	if err != nil || invite != "" {
+		t.Fatalf("open flow: invite=%q err=%v", invite, err)
+	}
+	challenge := sha256.Sum256([]byte(verifier))
+	if q.Get("state") != state || q.Get("code_challenge") != base64.RawURLEncoding.EncodeToString(challenge[:]) {
+		t.Fatal("state or S256 challenge mismatch")
+	}
+	badState := httptest.NewRequest(http.MethodGet, CallbackPath+"?code=synthetic-code&state=wrong-state", nil)
+	badState.AddCookie(flow)
+	badStateRec := httptest.NewRecorder()
+	h.callback(badStateRec, badState)
+	if badStateRec.Code != http.StatusBadRequest {
+		t.Fatalf("mismatched state status=%d", badStateRec.Code)
+	}
+	callback := httptest.NewRequest(http.MethodGet, CallbackPath+"?code=synthetic-code&state="+url.QueryEscape(state), nil)
+	callback.AddCookie(flow)
+	out := httptest.NewRecorder()
+	h.callback(out, callback)
+	if out.Code != http.StatusOK || sessions.subject != "12345" || !store.bootstrapped {
+		t.Fatalf("callback: status=%d sessions=%q bootstrapped=%t body=%s", out.Code, sessions.subject, store.bootstrapped, out.Body.String())
+	}
+	var body map[string]any
+	if err := json.Unmarshal(out.Body.Bytes(), &body); err != nil || body["authenticated"] != true || body["csrf_token"] == "" {
+		t.Fatalf("callback body: %s (%v)", out.Body, err)
+	}
+	if store.created != 0 {
+		t.Fatal("login persisted unexpected token or code")
+	}
+	replay := httptest.NewRecorder()
+	h.callback(replay, callback)
+	if replay.Code != http.StatusBadRequest {
+		t.Fatalf("replay status=%d", replay.Code)
+	}
+}
+func TestInvitationBoundToNumericAccountAndOneUse(t *testing.T) {
+	store := newMemoryStore()
+	store.githubID = "67890"
+	h, _ := testHandler(t, store, fakeAuth{})
+	raw, _ := randomToken(32)
+	store.invites[key(hashToken(raw))] = inviteRecord{account: "99999", role: "reader", scopes: []string{"catalog:read"}, expires: h.now().Add(time.Hour)}
+	leaked := httptest.NewRecorder()
+	h.start(leaked, httptest.NewRequest(http.MethodGet, StartPath+"?invite="+url.QueryEscape(raw), nil))
+	if leaked.Code != http.StatusBadRequest {
+		t.Fatalf("invitation query accepted: %d", leaked.Code)
+	}
+	req := httptest.NewRequest(http.MethodPost, StartPath, strings.NewReader(url.Values{"invite": []string{raw}}.Encode()))
+	req.Header.Set("Origin", h.cfg.PublicOrigin)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec := httptest.NewRecorder()
+	h.start(rec, req)
+	if rec.Code != http.StatusFound {
+		t.Fatalf("invite start status=%d body=%s", rec.Code, rec.Body)
+	}
+	flow := rec.Result().Cookies()[0]
+	state, _, saved, _, err := h.openFlow(flow.Value)
+	if err != nil || saved != raw {
+		t.Fatalf("invite not carried in encrypted cookie: saved=%q err=%v", saved, err)
+	}
+	bad := httptest.NewRequest(http.MethodGet, CallbackPath+"?code=synthetic-code&state="+url.QueryEscape(state), nil)
+	bad.AddCookie(flow)
+	badRecorder := httptest.NewRecorder()
+	h.callback(badRecorder, bad)
+	if badRecorder.Code != http.StatusForbidden {
+		t.Fatalf("mismatched numeric account accepted: %d", badRecorder.Code)
+	}
+}
+func TestInvitationCreationRequiresSameOriginCSRFAndOperatorScope(t *testing.T) {
+	store := newMemoryStore()
+	auth := fakeAuth{session: Session{ID: "sid", Subject: "12345", Workspaces: []string{"private"}}}
+	h, _ := testHandler(t, store, auth)
+	store.members["private:12345"] = "maintainer"
+	body := strings.NewReader("{\"github_account_id\":\"67890\",\"role\":\"reader\",\"scopes\":[\"catalog:read\"]}")
+	req := httptest.NewRequest(http.MethodPost, InvitationsPath, body)
+	req.Header.Set("Origin", h.cfg.PublicOrigin)
+	req.Header.Set("X-Gist-CSRF", h.csrf("12345"))
+	out := httptest.NewRecorder()
+	h.createInvitation(out, req)
+	if out.Code != http.StatusCreated || store.created != 1 {
+		t.Fatalf("valid invitation: status=%d body=%s", out.Code, out.Body)
+	}
+	var got map[string]any
+	if err := json.Unmarshal(out.Body.Bytes(), &got); err != nil || got["invitation"] == "" {
+		t.Fatalf("invitation response: %s", out.Body)
+	}
+	widened := httptest.NewRequest(http.MethodPost, InvitationsPath, strings.NewReader("{\"github_account_id\":\"67890\",\"role\":\"maintainer\",\"scopes\":[\"catalog:admin\"]}"))
+	widened.Header.Set("Origin", h.cfg.PublicOrigin)
+	widened.Header.Set("X-Gist-CSRF", h.csrf("12345"))
+	denied := httptest.NewRecorder()
+	h.createInvitation(denied, widened)
+	if denied.Code != http.StatusBadRequest || store.created != 1 {
+		t.Fatalf("widened scope status=%d", denied.Code)
+	}
+	cross := httptest.NewRequest(http.MethodPost, InvitationsPath, strings.NewReader("{\"github_account_id\":\"67890\",\"role\":\"reader\",\"scopes\":[\"catalog:read\"]}"))
+	cross.Header.Set("Origin", "https://attacker.example")
+	cross.Header.Set("X-Gist-CSRF", h.csrf("12345"))
+	crossOut := httptest.NewRecorder()
+	h.createInvitation(crossOut, cross)
+	if crossOut.Code != http.StatusForbidden {
+		t.Fatalf("cross-origin status=%d", crossOut.Code)
+	}
+}
+func TestCanonicalAccountID(t *testing.T) {
+	for _, v := range []string{"", "0", "01", "-1", "9223372036854775808"} {
+		if canonicalID(v) {
+			t.Errorf("accepted invalid ID %q", v)
+		}
+	}
+	if !canonicalID(strconv.FormatInt(12345, 10)) {
+		t.Fatal("rejected valid ID")
+	}
+}
+
+func TestInvitedAccountReceivesOnlyInvitedWorkspace(t *testing.T) {
+	store := newMemoryStore()
+	store.githubID = "67890"
+	h, sessions := testHandler(t, store, fakeAuth{})
+	raw, _ := randomToken(32)
+	store.invites[key(hashToken(raw))] = inviteRecord{account: "67890", role: "reader", scopes: []string{"catalog:read"}, expires: h.now().Add(time.Hour)}
+	start := httptest.NewRequest(http.MethodPost, StartPath, strings.NewReader(url.Values{"invite": []string{raw}}.Encode()))
+	start.Header.Set("Origin", h.cfg.PublicOrigin)
+	start.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	startRec := httptest.NewRecorder()
+	h.start(startRec, start)
+	flow := startRec.Result().Cookies()[0]
+	state, _, invitation, _, err := h.openFlow(flow.Value)
+	if err != nil || invitation != raw {
+		t.Fatalf("flow invitation=%q err=%v", invitation, err)
+	}
+	callback := httptest.NewRequest(http.MethodGet, CallbackPath+"?code=synthetic-code&state="+url.QueryEscape(state), nil)
+	callback.AddCookie(flow)
+	out := httptest.NewRecorder()
+	h.callback(out, callback)
+	if out.Code != http.StatusOK || sessions.subject != "67890" || store.members["private:67890"] != "reader" {
+		t.Fatalf("invited callback status=%d subject=%q membership=%q body=%s", out.Code, sessions.subject, store.members["private:67890"], out.Body)
+	}
+	if len(store.members) != 1 {
+		t.Fatalf("invitation created unintended membership rows: %#v", store.members)
+	}
+}
