@@ -66,20 +66,30 @@ type Handler struct {
 	now      func() time.Time
 }
 
-func New(cfg Config, store Store, sessions SessionIssuer, auth SessionAuthenticator, client *http.Client) (*Handler, error) {
-	if cfg.ClientID == "" || cfg.ClientSecret == "" || store == nil || sessions == nil || auth == nil {
-		return nil, errors.New("enrollment: client credentials, store, and session services are required")
+func ValidateConfig(cfg Config) error {
+	if cfg.ClientID == "" || cfg.ClientSecret == "" {
+		return errors.New("enrollment: GitHub App client credentials are required")
 	}
 	cb, err := url.Parse(cfg.CallbackURL)
 	if err != nil || cb.Scheme != "https" || cb.Host == "" || cb.User != nil || cb.Fragment != "" || cb.RawQuery != "" || cb.Path != CallbackPath {
-		return nil, errors.New("enrollment: callback URL must be a fixed HTTPS callback")
+		return errors.New("enrollment: callback URL must be a fixed HTTPS callback")
 	}
 	origin, err := url.Parse(cfg.PublicOrigin)
 	if err != nil || origin.Scheme != "https" || origin.Host == "" || origin.User != nil || origin.Path != "" || origin.RawQuery != "" || origin.Fragment != "" || cb.Host != origin.Host {
-		return nil, errors.New("enrollment: public origin must be an HTTPS origin")
+		return errors.New("enrollment: public origin must be an HTTPS origin")
 	}
 	if cfg.WorkspaceID == "" || cfg.WorkspaceName == "" || !canonicalID(cfg.FounderAccount) || len(cfg.FlowKey) != 32 || len(cfg.CSRFKey) < 32 {
-		return nil, errors.New("enrollment: workspace, founder account, and strong flow/CSRF keys are required")
+		return errors.New("enrollment: workspace, founder account, and strong flow/CSRF keys are required")
+	}
+	return nil
+}
+
+func New(cfg Config, store Store, sessions SessionIssuer, auth SessionAuthenticator, client *http.Client) (*Handler, error) {
+	if err := ValidateConfig(cfg); err != nil {
+		return nil, err
+	}
+	if store == nil || sessions == nil || auth == nil {
+		return nil, errors.New("enrollment: store and session services are required")
 	}
 	if cfg.FlowTTL <= 0 || cfg.FlowTTL > 10*time.Minute {
 		cfg.FlowTTL = 5 * time.Minute

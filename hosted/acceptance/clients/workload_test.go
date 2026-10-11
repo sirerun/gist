@@ -457,7 +457,7 @@ func startClientFixture(t *testing.T) *clientFixture {
 	if err != nil {
 		t.Fatal(err)
 	}
-	a, err := app.New(ctx, app.Config{ListenAddress: placeholder.Listener.Addr().String(), PublicOrigin: origin, ResourceAudience: origin, DatabaseURL: dsn, ObjectStoreRoot: artifactDir, RequestTimeout: 5 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 10000, MaxConcurrentRequests: 20, MaxDiscoveryResults: 50, RetryAfter: 1, OAuthConsentSecret: []byte("acceptance-only-oauth-consent-secret-0123456789"), SigningKeyConfig: signingKeyConfig, EventMaintenanceTargets: maintenanceTargets})
+	a, err := app.New(ctx, app.Config{ListenAddress: placeholder.Listener.Addr().String(), PublicOrigin: origin, ResourceAudience: origin, GitHubEnrollment: testfixtures.EnrollmentConfig(origin), DatabaseURL: dsn, ObjectStoreRoot: artifactDir, RequestTimeout: 5 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 10000, MaxConcurrentRequests: 20, MaxDiscoveryResults: 50, RetryAfter: 1, OAuthConsentSecret: []byte("acceptance-only-oauth-consent-secret-0123456789"), SigningKeyConfig: signingKeyConfig, EventMaintenanceTargets: maintenanceTargets})
 	if err != nil {
 		t.Fatalf("compose registry app: %v", err)
 	}

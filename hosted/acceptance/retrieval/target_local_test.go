@@ -114,7 +114,7 @@ func openTarget(s frozenSuite) (*target, error) {
 	if err != nil {
 		return fail(err)
 	}
-	cfg := app.Config{ListenAddress: server.Listener.Addr().String(), PublicOrigin: origin, ResourceAudience: origin, DatabaseURL: dsn, ObjectStoreRoot: objects, RequestTimeout: 5 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 10000, MaxConcurrentRequests: 20, MaxDiscoveryResults: 50, RetryAfter: 1, OAuthConsentSecret: []byte("acceptance-only-oauth-consent-secret-0123456789"), SigningKeyConfig: signingKeyConfig, EventMaintenanceTargets: maintenanceTargets}
+	cfg := app.Config{ListenAddress: server.Listener.Addr().String(), PublicOrigin: origin, ResourceAudience: origin, GitHubEnrollment: testfixtures.EnrollmentConfig(origin), DatabaseURL: dsn, ObjectStoreRoot: objects, RequestTimeout: 5 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 10000, MaxConcurrentRequests: 20, MaxDiscoveryResults: 50, RetryAfter: 1, OAuthConsentSecret: []byte("acceptance-only-oauth-consent-secret-0123456789"), SigningKeyConfig: signingKeyConfig, EventMaintenanceTargets: maintenanceTargets}
 	a, err := app.New(ctx, cfg)
 	if err != nil {
 		return fail(fmt.Errorf("compose registry app: %w", err))

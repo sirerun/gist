@@ -4,14 +4,37 @@ import (
 	"context"
 	"crypto/ed25519"
 	"encoding/json"
+	"github.com/sirerun/gist/hosted/internal/enrollment"
 	"github.com/sirerun/gist/hosted/internal/identity"
 	"strings"
 	"testing"
 	"time"
 )
 
+func testEnrollmentConfig() *enrollment.Config {
+	return &enrollment.Config{ClientID: "fixture-client", ClientSecret: "fixture-secret", CallbackURL: "https://registry.example.invalid/auth/github/callback", PublicOrigin: "https://registry.example.invalid", WorkspaceID: "fixture-workspace", WorkspaceName: "Fixture", FounderAccount: "123456", FlowKey: []byte(strings.Repeat("f", 32)), CSRFKey: []byte(strings.Repeat("c", 32)), BootstrapScopes: []string{"catalog:read"}, AllowedScopes: []string{"catalog:read"}}
+}
+
+func TestConfigRequiresCompleteGitHubEnrollment(t *testing.T) {
+	cfg := validConfig()
+	cfg.OAuthLoginURL = ""
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("expected the app to derive the configured enrollment start URL: %v", err)
+	}
+	cfg = validConfig()
+	cfg.GitHubEnrollment = nil
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected missing enrollment configuration to fail closed")
+	}
+	cfg = validConfig()
+	cfg.GitHubEnrollment.CallbackURL = "http://registry.example.invalid/auth/github/callback"
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected non-HTTPS enrollment callback to fail closed")
+	}
+}
+
 func validConfig() Config {
-	return Config{PublicOrigin: "https://registry.example.invalid", ResourceAudience: "https://registry.example.invalid", DatabaseURL: "postgres://registry@127.0.0.1:5432/registry", ObjectStoreRoot: "/tmp/registry-objects", RequestTimeout: 30 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 100000, MaxConcurrentRequests: 80, MaxDiscoveryResults: 50, OAuthConsentSecret: []byte(strings.Repeat("s", MinOAuthConsentSecretBytes)), SigningKeyConfig: fixtureSigningConfig(), EventMaintenanceTargets: []MaintenanceTarget{{WorkspaceID: "fixture-workspace", Subject: "fixture-maintainer"}}}
+	return Config{PublicOrigin: "https://registry.example.invalid", ResourceAudience: "https://registry.example.invalid", OAuthLoginURL: "https://registry.example.invalid/auth/github/start", GitHubEnrollment: testEnrollmentConfig(), DatabaseURL: "postgres://registry@127.0.0.1:5432/registry", ObjectStoreRoot: "/tmp/registry-objects", RequestTimeout: 30 * time.Second, MaxPackageBytes: 10 << 20, MaxExpandedBytes: 50 << 20, MaxRequestBytes: 1 << 20, MaxResponseBytes: 2 << 20, MaxCatalogEntries: 100000, MaxConcurrentRequests: 80, MaxDiscoveryResults: 50, OAuthConsentSecret: []byte(strings.Repeat("s", MinOAuthConsentSecretBytes)), SigningKeyConfig: fixtureSigningConfig(), EventMaintenanceTargets: []MaintenanceTarget{{WorkspaceID: "fixture-workspace", Subject: "fixture-maintainer"}}}
 }
 
 func TestConfigRequiresExactOriginAndExplicitLimits(t *testing.T) {

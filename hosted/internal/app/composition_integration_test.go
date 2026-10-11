@@ -21,6 +21,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/sirerun/gist/hosted/internal/enrollment"
 	"github.com/sirerun/gist/hosted/internal/identity"
 	"github.com/sirerun/gist/hosted/internal/ports"
 )
@@ -226,6 +227,14 @@ func compositionSigningConfig(t *testing.T) []byte {
 
 func compositionConfig(databaseURL, objectRoot string, signingConfig []byte) Config {
 	return Config{
+		GitHubEnrollment: &enrollment.Config{
+			ClientID: "fixture-client", ClientSecret: "fixture-secret",
+			CallbackURL: compositionIssuer + enrollment.CallbackPath, PublicOrigin: compositionIssuer,
+			WorkspaceID: compositionWorkspace, WorkspaceName: "Composition Fixture", FounderAccount: "123456",
+			FlowKey: []byte(strings.Repeat("f", 32)), CSRFKey: []byte(strings.Repeat("c", 32)),
+			BootstrapScopes: []string{"catalog:read"}, AllowedScopes: []string{"catalog:read"},
+		},
+		OAuthLoginURL:         compositionIssuer + enrollment.StartPath,
 		ListenAddress:         "127.0.0.1:0",
 		PublicOrigin:          compositionIssuer,
 		ResourceAudience:      compositionIssuer,
@@ -325,6 +334,22 @@ func TestComposedAppsShareWorkloadKeysAndDurableEventCursor(t *testing.T) {
 	}
 	if strings.Contains(jwksA.Body.String(), `"d"`) {
 		t.Fatal("public JWKS exposed private key material")
+	}
+
+	login := compositionHTTP(t, appA.Handler(), http.MethodGet, enrollment.StartPath, "", nil)
+	if login.Code != http.StatusFound {
+		t.Fatalf("GitHub login route was not composed: status=%d body=%s", login.Code, login.Body.String())
+	}
+	loginURL, err := url.Parse(login.Header().Get("Location"))
+	if err != nil || loginURL.Host != "github.com" || loginURL.Path != "/login/oauth/authorize" {
+		t.Fatalf("unexpected GitHub login destination: %q", login.Header().Get("Location"))
+	}
+	loginQuery := loginURL.Query()
+	if loginQuery.Get("client_id") != "fixture-client" || loginQuery.Get("redirect_uri") != compositionIssuer+enrollment.CallbackPath || loginQuery.Get("code_challenge_method") != "S256" || loginQuery.Get("scope") != "" {
+		t.Fatalf("GitHub login did not use the configured permissionless PKCE flow: %v", loginQuery)
+	}
+	if cookie := login.Result().Cookies(); len(cookie) != 1 || cookie[0].Name != enrollment.FlowCookieName || !cookie[0].Secure || !cookie[0].HttpOnly {
+		t.Fatalf("GitHub login flow did not set its protected state cookie: %#v", cookie)
 	}
 
 	workloadToken, err := appA.MintWorkloadToken(ctx, identity.WorkloadRequest{
