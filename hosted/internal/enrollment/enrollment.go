@@ -127,59 +127,59 @@ func (h *Handler) start(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		if r.URL.Query().Has("invite") {
-			http.Error(w, "invitation must be submitted in a same-origin form", 400)
+			http.Error(w, "invitation must be submitted in a same-origin form", http.StatusBadRequest)
 			return
 		}
 	case http.MethodPost:
 		if r.URL.Query().Has("invite") {
-			http.Error(w, "invitation must be submitted in the request body", 400)
+			http.Error(w, "invitation must be submitted in the request body", http.StatusBadRequest)
 			return
 		}
 		if r.Header.Get("Origin") != h.cfg.PublicOrigin {
-			http.Error(w, "request denied", 403)
+			http.Error(w, "request denied", http.StatusForbidden)
 			return
 		}
 		mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 		if err != nil || mediaType != "application/x-www-form-urlencoded" {
-			http.Error(w, "unsupported media type", 415)
+			http.Error(w, "unsupported media type", http.StatusUnsupportedMediaType)
 			return
 		}
 		r.Body = http.MaxBytesReader(w, r.Body, maxRequestBytes)
 		if err := r.ParseForm(); err != nil || len(r.PostForm["invite"]) != 1 {
-			http.Error(w, "invalid invitation", 400)
+			http.Error(w, "invalid invitation", http.StatusBadRequest)
 			return
 		}
 		invite = r.PostForm.Get("invite")
 	default:
 		w.Header().Set("Allow", "GET, POST")
-		http.Error(w, "method not allowed", 405)
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	if invite != "" {
 		raw, e := base64.RawURLEncoding.DecodeString(invite)
 		if e != nil || len(raw) != 32 {
-			http.Error(w, "invalid invitation", 400)
+			http.Error(w, "invalid invitation", http.StatusBadRequest)
 			return
 		}
 	}
 	state, err := randomToken(32)
 	if err != nil {
-		http.Error(w, "login unavailable", 500)
+		http.Error(w, "login unavailable", http.StatusInternalServerError)
 		return
 	}
 	verifier, err := randomToken(32)
 	if err != nil {
-		http.Error(w, "login unavailable", 500)
+		http.Error(w, "login unavailable", http.StatusInternalServerError)
 		return
 	}
 	expires := h.now().UTC().Add(h.cfg.FlowTTL)
 	cookie, err := h.sealFlow(state, verifier, invite, expires)
 	if err != nil {
-		http.Error(w, "login unavailable", 500)
+		http.Error(w, "login unavailable", http.StatusInternalServerError)
 		return
 	}
 	if err = h.store.CreateFlow(r.Context(), hashToken(state), expires); err != nil {
-		http.Error(w, "login unavailable", 500)
+		http.Error(w, "login unavailable", http.StatusInternalServerError)
 		return
 	}
 	http.SetCookie(w, cookie)
@@ -199,32 +199,32 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Referrer-Policy", "no-referrer")
 	if r.Method != http.MethodGet {
 		w.Header().Set("Allow", http.MethodGet)
-		http.Error(w, "method not allowed", 405)
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	cookie, err := r.Cookie(FlowCookieName)
 	clearFlowCookie(w)
 	q := r.URL.Query()
 	if err != nil || len(q["state"]) != 1 || len(q["code"]) != 1 || q.Get("code") == "" || len(q.Get("code")) > 4096 || q.Get("error") != "" {
-		http.Error(w, "login denied", 400)
+		http.Error(w, "login denied", http.StatusBadRequest)
 		return
 	}
 	state, verifier, invite, expires, err := h.openFlow(cookie.Value)
 	if err != nil || !hmac.Equal([]byte(state), []byte(q.Get("state"))) || !h.now().Before(expires) {
-		http.Error(w, "login denied", 400)
+		http.Error(w, "login denied", http.StatusBadRequest)
 		return
 	}
 	if err = h.store.ConsumeFlow(r.Context(), hashToken(state), h.now().UTC()); err != nil {
 		if errors.Is(err, ErrReplay) {
-			http.Error(w, "login denied", 400)
+			http.Error(w, "login denied", http.StatusBadRequest)
 		} else {
-			http.Error(w, "login unavailable", 500)
+			http.Error(w, "login unavailable", http.StatusInternalServerError)
 		}
 		return
 	}
 	account, err := h.githubAccount(r.Context(), q.Get("code"), verifier)
 	if err != nil {
-		http.Error(w, "login denied", 401)
+		http.Error(w, "login denied", http.StatusUnauthorized)
 		return
 	}
 	inviteHash := []byte(nil)
@@ -233,19 +233,19 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 	}
 	if err = h.store.CompleteLogin(r.Context(), h.cfg.WorkspaceID, account, inviteHash, h.cfg.FounderAccount, h.cfg.WorkspaceName, h.cfg.BootstrapScopes, h.now().UTC()); err != nil {
 		if errors.Is(err, ErrDenied) {
-			http.Error(w, "workspace access denied", 403)
+			http.Error(w, "workspace access denied", http.StatusForbidden)
 		} else {
-			http.Error(w, "login unavailable", 500)
+			http.Error(w, "login unavailable", http.StatusInternalServerError)
 		}
 		return
 	}
 	sessionCookie, err := h.sessions.Issue(account, []string{h.cfg.WorkspaceID}, h.cfg.SessionTTL)
 	if err != nil {
-		http.Error(w, "login unavailable", 500)
+		http.Error(w, "login unavailable", http.StatusInternalServerError)
 		return
 	}
 	http.SetCookie(w, sessionCookie)
-	writeJSON(w, 200, map[string]any{"authenticated": true, "csrf_token": h.csrf(account)})
+	writeJSON(w, http.StatusOK, map[string]any{"authenticated": true, "csrf_token": h.csrf(account)})
 }
 func (h *Handler) githubAccount(ctx context.Context, code, verifier string) (string, error) {
 	form := url.Values{}
@@ -289,7 +289,6 @@ func (h *Handler) githubAccount(ctx context.Context, code, verifier string) (str
 	userReq.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 	userResp, err := h.client.Do(userReq)
 	userReq.Header.Del("Authorization")
-	accessToken = ""
 	if err != nil {
 		return "", fmt.Errorf("enrollment: fetch GitHub account ID: %w", err)
 	}
@@ -313,24 +312,24 @@ func (h *Handler) createInvitation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
-		http.Error(w, "method not allowed", 405)
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	if r.Header.Get("Origin") != h.cfg.PublicOrigin {
-		http.Error(w, "request denied", 403)
+		http.Error(w, "request denied", http.StatusForbidden)
 		return
 	}
 	principal, err := h.auth.Authenticate(r)
 	if err != nil || principal.ID == "" || principal.Subject == "" || !contains(principal.Workspaces, h.cfg.WorkspaceID) {
-		http.Error(w, "authentication required", 401)
+		http.Error(w, "authentication required", http.StatusUnauthorized)
 		return
 	}
 	if !hmac.Equal([]byte(r.Header.Get("X-Gist-CSRF")), []byte(h.csrf(principal.Subject))) {
-		http.Error(w, "request denied", 403)
+		http.Error(w, "request denied", http.StatusForbidden)
 		return
 	}
 	if r.Body == nil {
-		http.Error(w, "invalid invitation", 400)
+		http.Error(w, "invalid invitation", http.StatusBadRequest)
 		return
 	}
 	r.Body = http.MaxBytesReader(w, r.Body, maxRequestBytes)
@@ -342,24 +341,24 @@ func (h *Handler) createInvitation(w http.ResponseWriter, r *http.Request) {
 		Scopes          []string `json:"scopes"`
 	}
 	if err = dec.Decode(&in); err != nil || dec.Decode(new(any)) != io.EOF || !canonicalID(in.GitHubAccountID) || (in.Role != "reader" && in.Role != "maintainer") || len(in.Scopes) == 0 || !subset(in.Scopes, h.cfg.AllowedScopes) {
-		http.Error(w, "invalid invitation", 400)
+		http.Error(w, "invalid invitation", http.StatusBadRequest)
 		return
 	}
 	raw, err := randomToken(32)
 	if err != nil {
-		http.Error(w, "invitation unavailable", 500)
+		http.Error(w, "invitation unavailable", http.StatusInternalServerError)
 		return
 	}
 	expires := h.now().UTC().Add(h.cfg.InvitationTTL)
 	if err = h.store.CreateInvitation(r.Context(), h.cfg.WorkspaceID, principal.Subject, in.GitHubAccountID, in.Role, in.Scopes, hashToken(raw), expires); err != nil {
 		if errors.Is(err, ErrDenied) {
-			http.Error(w, "request denied", 403)
+			http.Error(w, "request denied", http.StatusForbidden)
 		} else {
-			http.Error(w, "invitation unavailable", 500)
+			http.Error(w, "invitation unavailable", http.StatusInternalServerError)
 		}
 		return
 	}
-	writeJSON(w, 201, map[string]any{"invitation": raw, "expires_at": expires.Format(time.RFC3339)})
+	writeJSON(w, http.StatusCreated, map[string]any{"invitation": raw, "expires_at": expires.Format(time.RFC3339)})
 }
 func (h *Handler) csrf(subject string) string {
 	m := hmac.New(sha256.New, h.cfg.CSRFKey)
@@ -423,8 +422,12 @@ func (h *Handler) openFlow(value string) (string, string, string, time.Time, err
 func clearFlowCookie(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{Name: FlowCookieName, Value: "", Path: "/", Expires: time.Unix(1, 0), MaxAge: -1, Secure: true, HttpOnly: true, SameSite: http.SameSiteLaxMode})
 }
-func decodeLimited(body io.ReadCloser, limit int64, dst any) error {
-	defer body.Close()
+func decodeLimited(body io.ReadCloser, limit int64, dst any) (retErr error) {
+	defer func() {
+		if err := body.Close(); err != nil && retErr == nil {
+			retErr = fmt.Errorf("enrollment: close GitHub response body: %w", err)
+		}
+	}()
 	raw, err := io.ReadAll(io.LimitReader(body, limit+1))
 	if err != nil {
 		return err

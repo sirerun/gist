@@ -13,6 +13,6 @@ Synthetic verification on the candidate:
 - GOWORK=off go vet ./... passed.
 - All hosted Go packages except acceptance/retrieval passed go test; the retrieval acceptance cases require a configured Postgres URL and failed to connect in this environment.
 - The Postgres enrollment integration test compiled with the integration build tag. The CI test job now exports its Postgres service URL under GIST_DATABASE_URL, matching the integration helpers. It was not executed locally because no test database credential is configured. An isolated connection attempt to the local Postgres listener failed authentication before creating a database.
-- gofmt is clean. golangci-lint and goimports are unavailable on the qualified DGX tool path.
+- gofmt is clean. The qualified DGX ran golangci-lint v2.14.0 on the root Go module and the changed hosted packages. The full hosted-module lint currently reports five findings in unchanged discovery/cache.go, oauth/delegated.go, packages/retrieve.go, and contract/digest.go; those findings remain outside this enrollment candidate. The repository lint action and config were upgraded to pinned golangci-lint v2.14.0 because the last v1 release cannot analyze the Go 1.26 target. goimports is unavailable.
 
 This is implementation-candidate evidence only. It does not prove deployed GitHub App configuration, application wiring, independent review, merge, production login, or production acceptance.
