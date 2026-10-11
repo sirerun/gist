@@ -2,18 +2,23 @@
 
 ## Status
 
-Accepted (pending founder sign-off, G0.4)
+Technical design under revision; the founder approved the revised M-G1 direction
+for planning and implementation on 2026-10-11. Exact-head review and G0.4
+recording remain open.
 
 ## Date
 
-2026-09-27
+2026-09-27 (amended 2026-10-11)
 
 ## Context
 
-ADR 009 fixed the M-G1 decisions David made on 2026-09-27: review gate first,
-two approval sources, KMS envelope custody, `contracts/gateway/v1` separation,
-two proving adapters, and the registry-aws deployment. RFC-003 §3 leaves the
-exact enum values, state machine, approval evidence format, and idempotency
+ADR 009 fixes the M-G1 direction the founder approved on 2026-10-11:
+caller-owned approval without a Gist approval page or JWS, KMS-encrypted
+provider credentials, a separate OpenAPI-generated gateway MCP surface,
+dynamic task guidance, GitHub REST plus a controlled MCP fixture, and a
+separate gateway contract under `contracts/gateway/v1`. The exact credential
+intake mode remains unresolved. RFC-003 §3 leaves the
+exact enum values, state machine, caller authorization boundary, and idempotency
 binding to "the M-G1 ADR". The build lanes (Wave 1 onward of
 `docs/plans/gateway-buildout.md`) need those fixed so parallel agents do not
 invent divergent schemas. This ADR is that fix. RFC-003 §3's scope boundary
@@ -33,7 +38,7 @@ Outcome confirmation, exactly five values, RFC 2119-free:
 - `accepted_unconfirmed` — the provider accepted the request but has not
   confirmed completion (accepted-but-unconfirmed).
 - `nonexecution` — the effect was never sent: denied, aborted before send,
-  or approval missing.
+  or caller permissions missing.
 - `unknown` — Gist cannot determine whether the request reached the provider
   (for example a connection drop at send time).
 
@@ -49,68 +54,37 @@ Example: `{"outcome_confirmation": "accepted_unconfirmed", "request_sent":
 
 ### 2. Execution state machine
 
-States: `pending` → (`awaiting_approval` | `executing`) → `terminal`.
-
-- `pending` — request validated, re-verification done, no attempt sent.
-- `awaiting_approval` — sensitive effects awaiting approval evidence; the
-  only state from which the Gist-hosted approval step is offered.
-- `executing` — an attempt has been dispatched or is about to be.
-- Terminal: `succeeded`, `failed`, `unknown_outcome`, `rejected`,
-  `cancelled`.
-
-Transitions and their guards:
+States: `pending` → `executing` → terminal. There is no `awaiting_approval`
+state because the caller handles user consent.
 
 | From | Event | To |
 | --- | --- | --- |
-| `pending` | approval evidence verified (or effects not sensitive) | `executing` |
-| `pending` | sensitive effects, no evidence yet | `awaiting_approval` |
-| `awaiting_approval` | evidence verified | `executing` |
-| `awaiting_approval` | denial, expiry, or revocation | `rejected` or `cancelled` (terminal) |
-| `executing` | provider result confirmed | `succeeded` or `failed` |
-| `executing` | send indeterminate | `unknown_outcome` |
-| `executing` | Gist cancels before send | `cancelled` (`request_sent = no`) |
+| `pending` | schema and current caller/connection grants verified | `executing` |
+| `pending` | invalid input, policy denial, or revocation | `rejected` |
+| `pending` | cancelled before dispatch | `cancelled` |
+| `executing` | provider confirms outcome | `succeeded` or `failed` |
+| `executing` | send/outcome indeterminate | `unknown_outcome` |
+| `executing` | cancellation before any send | `cancelled` |
 
-`rejected` and `cancelled` are pre-send terminals (`nonexecution`); they are
-distinct so a policy denial is auditable apart from an operator cancel.
-`pending`→`awaiting_approval`→`executing` is the only approval path; no state
-may transition to `succeeded` without having been `executing`.
+`rejected`/`cancelled` have `request_sent = no`; an already sent request cannot
+be represented as pre-send cancellation. `unknown_outcome` never retries a
+mutating effect automatically. No execution succeeds before dispatch.
+Example: `{"id":"ex_01J...","state":"rejected","outcome_confirmation":
+"nonexecution","request_sent":"no"}` for a connection-grant denial.
 
-Example: `{"id": "ex_01J...", "state": "awaiting_approval", "approval":
-{"href": "https://registry.sire.run/v1/approvals/apr_01J..."}}`.
+### 3. Caller authorization boundary
 
-### 3. Approval evidence format
+The verified identity is the caller; consent is the caller's responsibility.
+No approval-evidence field, JWS verifier, authority registration, hosted page,
+or approval-consumption table is part of M-G1. An `approved` field cannot widen
+permissions. Before dispatch, derive tenant/principal from the verified token,
+validate its audience and `execution:invoke`, check current policy and
+revocation, and verify the exact capability/binding/connection grant. Another
+workspace or principal's connection reference cannot be substituted.
 
-One format, two sources (ADR 009 decision 3). Approval evidence is a JWS
-(compact serialization, detached payload not used — full JWT envelope),
-signed with Ed25519 (EdDSA, `alg: EdDSA`), by either a registered external
-authority key or the Gist-hosted step (which signs with the same
-workload-issuer key class after the human decision).
-
-Claims:
-
-- `iss` — the authority identifier (registered authority ID, or the
-  gateway's own issuer for the hosted step).
-- `aud` — `registry.sire.run` (the resource audience; RFC 8707 alignment).
-- `sub` — the approving principal's subject.
-- `workspace_id` — string, must equal the execution's workspace.
-- `execution_binding` — the lowercase hex SHA-256 of the canonical execution
-  binding (see §5), so the approval is bound to the exact request.
-- `jti` — unique approval identifier; the single-use token.
-- `iat`, `exp` — `exp` at most 15 minutes after `iat` for the hosted step,
-  at most 1 hour for external authorities.
-- `decision` — `approve` or `deny`.
-
-Single-use: on first successful verification the gateway records the `jti`
-in `approvals_consumed` in the same transaction that dispatches the attempt;
-a replay is rejected with `409 approval_already_consumed`, even for the same
-execution. Key registration, rotation and revocation live on
-`POST|GET|DELETE /v1/approval-authorities`; a revoked authority key rejects
-all evidence, including evidence already presented for pending executions.
-
-Example (decoded claims):
-`{"iss":"sire","sub":"u_01J...","aud":"https://registry.sire.run",
-"workspace_id":"ws_01J...","execution_binding":"9f2a...","jti":"apr_01J...",
-"iat":1735...,"exp":1735...,"decision":"approve"}`.
+The gateway accepts a compromised caller's actions within its grants as a
+residual risk; restrictive grants, revocation, bounded egress, and execution
+records mitigate impact without claiming to prove human consent.
 
 ### 4. Idempotency binding
 
@@ -126,21 +100,29 @@ clock.
 
 ### 5. Scope and contracts layout
 
-`gist_invoke` is the fifth MCP tool, offered only to principals holding
-`execution:invoke` (the tool call is denied `403` without it). The REST
-surface and the tool accept the same request shape.
+The gateway OpenAPI specification is authoritative. Generate the selected MCP
+operations, including `gist_invoke`, from stable OpenAPI operation IDs. REST
+and MCP must share input validation, permission checks, result/error semantics,
+and execution idempotency. Generation uses an explicit exposure allowlist;
+admin/internal operations are not exposed implicitly. Registry v1's four tools
+remain compatible. Guide retrieval requires catalog authorization; execution
+submission and principal-bound status reads require `execution:invoke`.
 
-`contracts/gateway/v1/` layout, mirroring registry v1:
+`contracts/gateway/v1/` contains:
 
-- `openapi.yaml` — routes: `POST /v1/executions`,
-  `GET /v1/executions/{id}`, `POST /v1/approvals/{id}/decision` (page form
-  target), `GET /v1/approvals/{id}`, `POST|GET|DELETE
-  /v1/approval-authorities`. Error envelope identical to registry v1.
-- `route-matrix.json` — method/path/auth/scope matrix.
-- `lock.json` — SHA-256 of every contract file, re-frozen only through the
-  gate (`check.py gateway --freeze-check`).
-- `fixtures/` — golden request/response fixtures, including the approval
-  evidence and enum examples above.
+- `openapi.yaml`: `POST /v1/executions`, `GET /v1/executions/{id}`, and proposed
+  `POST /v1/tool-guides`; no approval routes. The guide response carries intent,
+  exact capability/tool/binding/recipe versions, authorized connection references,
+  readiness findings, expiry, and grounded instructions, never secret values.
+- `route-matrix.json`: method/path/auth/scope and explicit MCP exposure mapping.
+- `lock.json`: contract hashes checked by `check.py gateway --freeze-check`.
+- `fixtures/`: authorization denials, execution outcomes, guide provenance,
+  unsupported requirements, and REST/MCP parity cases.
+
+Derived guides do not grant execution permission. Sources must be validated,
+with deterministic assembly from maintained recipes; model-assisted selection
+is checked against authorized contracts. Cache isolation includes caller and
+workspace; execution revalidates even if a guide or resolution is cached.
 
 Registry v1 is unchanged; `check.py contracts` keeps rejecting `/execut`
 routes, and the new `gateway` subcommand owns the new routes.
@@ -185,17 +167,24 @@ Egress for the direct-API adapter goes through the §5 egress policy
 redirect re-validation); the remote-MCP fixture adapter is bound to the
 fixture server's allowlisted origin only.
 
+## Open credential-intake decision
+
+KMS envelope encryption is selected, but the founder has not selected
+stored-only provider connections versus one-shot caller-supplied credentials.
+The gateway contract must not expose credential values or a credential-ingress
+route until the choice is recorded. After selection, implementation must bind
+credential access to workspace, principal, provider, and capability scope; redact
+all traces; and prove rotation, revocation, and unknown-outcome behavior.
+
 ## Consequences
 
 - The evidence enums and state machine must be mirrored in
   `contracts/gateway/v1` fixtures and enforced in tests (G4.1); drift between
   this ADR and the contract is a review defect.
-- Registering `gist_invoke` amends the pinned four-tool MCP surface, its
-  client support record, and the acceptance test that asserts the tool count.
-- A compromised authority key can approve within its workspace until
-  revoked; the threat model (private, foundation) must cover registration,
-  rotation, revocation and single-use replay under that compromise.
-- The hosted approval step gives every runtime-less client a path, at the
-  cost of human friction on sensitive effects, which is intended.
+- Generated MCP tools require exposure, schema, scope, and result parity checks;
+  exact tool counts follow the explicit contract rather than handwritten lists.
+- Caller compromise within granted authority is an accepted boundary requiring
+  founder review; the private model no longer assumes per-action evidence.
+- Dynamic guides require provenance, isolation, freshness, and correctness tests.
 - Billing meter unit and publisher provenance remain M-G2 decisions and are
   not fixed here.
