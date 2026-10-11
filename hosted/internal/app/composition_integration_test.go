@@ -9,6 +9,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -267,6 +268,115 @@ func compositionHTTP(t *testing.T, handler http.Handler, method, target, bearer 
 	w := httptest.NewRecorder()
 	handler.ServeHTTP(w, req)
 	return w
+}
+
+type compositionRoundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f compositionRoundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) {
+	return f(r)
+}
+
+func TestComposedEnrollmentResumesOAuthConsent(t *testing.T) {
+	fixture := newCompositionPostgres(t)
+	fixture.seedTenant(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	_, err := fixture.adminPool.Exec(ctx, "INSERT INTO oauth_clients(client_id,client_name,redirect_uris,audience,scope,created_at) VALUES($1,$2,$3,$4,$5,$6)", "composition-client", "Composition Consumer", []string{"https://consumer.example/callback"}, compositionIssuer, []string{"catalog:read"}, time.Now().UTC())
+	if err != nil {
+		t.Fatalf("seed controlled OAuth client: %v", err)
+	}
+	objectRoot, err := os.MkdirTemp("", "gist-enrollment-consent-objects-")
+	if err != nil {
+		t.Fatalf("create owned object-store directory: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := os.RemoveAll(objectRoot); err != nil {
+			t.Errorf("remove owned object-store fixture: %v", err)
+		}
+	})
+	cfg := compositionConfig(fixture.runtimeURL, objectRoot, compositionSigningConfig(t))
+	cfg.GitHubEnrollment.WorkspaceID = "enrollment-workspace"
+	cfg.GitHubEnrollment.WorkspaceName = "Enrollment Fixture"
+	cfg.GitHubEnrollmentHTTPClient = &http.Client{Transport: compositionRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+		var body string
+		switch r.Method + " " + r.URL.Host + r.URL.Path {
+		case "POST github.com/login/oauth/access_token":
+			body = `{"access_token":"synthetic-github-token","token_type":"bearer"}`
+		case "GET api.github.com/user":
+			body = `{"id":123456,"login":"composition-founder"}`
+		default:
+			return nil, fmt.Errorf("unexpected GitHub request %s %s", r.Method, r.URL)
+		}
+		return &http.Response{StatusCode: http.StatusOK, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
+	})}
+	instance, err := New(ctx, cfg)
+	if err != nil {
+		t.Fatalf("start composed app: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := instance.Shutdown(context.Background()); err != nil {
+			t.Errorf("shutdown composed app: %v", err)
+		}
+	})
+
+	authorizeParams := url.Values{
+		"client_id":             {"composition-client"},
+		"redirect_uri":          {"https://consumer.example/callback"},
+		"response_type":         {"code"},
+		"scope":                 {"catalog:read"},
+		"state":                 {"consumer-state"},
+		"resource":              {compositionIssuer},
+		"code_challenge":        {strings.Repeat("A", 43)},
+		"code_challenge_method": {"S256"},
+	}
+	authorizeTarget := compositionIssuer + "/oauth/authorize?" + authorizeParams.Encode()
+	login := compositionHTTP(t, instance.Handler(), http.MethodGet, authorizeTarget, "", nil)
+	if login.Code != http.StatusFound {
+		t.Fatalf("unauthenticated authorize status=%d body=%s", login.Code, login.Body)
+	}
+	loginURL, err := url.Parse(login.Header().Get("Location"))
+	if err != nil || loginURL.Path != enrollment.StartPath {
+		t.Fatalf("authorize did not redirect to GitHub enrollment: location=%q err=%v", login.Header().Get("Location"), err)
+	}
+	returnTo := loginURL.Query().Get("return_to")
+	if returnTo != authorizeTarget {
+		t.Fatalf("authorize login return_to=%q, want exact request %q", returnTo, authorizeTarget)
+	}
+
+	startTarget := compositionIssuer + enrollment.StartPath + "?" + url.Values{"return_to": {returnTo}}.Encode()
+	start := compositionHTTP(t, instance.Handler(), http.MethodGet, startTarget, "", nil)
+	if start.Code != http.StatusFound {
+		t.Fatalf("enrollment start status=%d body=%s", start.Code, start.Body)
+	}
+	flowCookies := start.Result().Cookies()
+	if len(flowCookies) != 1 || flowCookies[0].Name != enrollment.FlowCookieName {
+		t.Fatalf("flow cookie missing: %#v", flowCookies)
+	}
+	githubURL, err := url.Parse(start.Header().Get("Location"))
+	if err != nil {
+		t.Fatalf("parse GitHub authorize URL: %v", err)
+	}
+	callbackTarget := compositionIssuer + enrollment.CallbackPath + "?" + url.Values{
+		"code":  {"synthetic-code"},
+		"state": {githubURL.Query().Get("state")},
+	}.Encode()
+	callbackRequest := httptest.NewRequest(http.MethodGet, callbackTarget, nil)
+	callbackRequest.AddCookie(flowCookies[0])
+	callback := httptest.NewRecorder()
+	instance.Handler().ServeHTTP(callback, callbackRequest)
+	if callback.Code != http.StatusFound || callback.Header().Get("Location") != authorizeTarget {
+		t.Fatalf("enrollment callback did not resume OAuth consent: status=%d location=%q want=%q body=%s", callback.Code, callback.Header().Get("Location"), authorizeTarget, callback.Body)
+	}
+
+	consentRequest := httptest.NewRequest(http.MethodGet, authorizeTarget, nil)
+	for _, cookie := range callback.Result().Cookies() {
+		consentRequest.AddCookie(cookie)
+	}
+	consent := httptest.NewRecorder()
+	instance.Handler().ServeHTTP(consent, consentRequest)
+	if consent.Code != http.StatusOK || !strings.Contains(consent.Body.String(), "Composition Consumer") {
+		t.Fatalf("resumed OAuth request did not reach consent: status=%d body=%s", consent.Code, consent.Body)
+	}
 }
 
 func assertCompositionRuntimeRole(t *testing.T, instance *App, wantRole string) {

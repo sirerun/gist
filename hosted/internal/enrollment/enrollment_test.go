@@ -167,9 +167,9 @@ func TestStartAndCallbackBootstrapFounderWithPKCE(t *testing.T) {
 	if leaked.Code != http.StatusBadRequest {
 		t.Fatalf("invitation query token accepted: %d", leaked.Code)
 	}
-	state, verifier, invite, _, err := h.openFlow(flow.Value)
-	if err != nil || invite != "" {
-		t.Fatalf("open flow: invite=%q err=%v", invite, err)
+	state, verifier, invite, returnTo, _, err := h.openFlow(flow.Value)
+	if err != nil || invite != "" || returnTo != "" {
+		t.Fatalf("open flow: invite=%q return_to=%q err=%v", invite, returnTo, err)
 	}
 	challenge := sha256.Sum256([]byte(verifier))
 	if q.Get("state") != state || q.Get("code_challenge") != base64.RawURLEncoding.EncodeToString(challenge[:]) {
@@ -223,6 +223,93 @@ func TestStartAndCallbackBootstrapFounderWithPKCE(t *testing.T) {
 		t.Fatalf("replay status=%d", replay.Code)
 	}
 }
+func TestAuthorizationReturnTargetSurvivesGitHubEnrollment(t *testing.T) {
+	store := newMemoryStore()
+	h, sessions := testHandler(t, store, fakeAuth{})
+	authorizeQuery := url.Values{
+		"client_id":             {"oauth-client"},
+		"redirect_uri":          {"https://consumer.example/callback"},
+		"response_type":         {"code"},
+		"scope":                 {"catalog:read"},
+		"state":                 {"consumer-state"},
+		"resource":              {"https://gist.example"},
+		"code_challenge":        {"abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGH"},
+		"code_challenge_method": {"S256"},
+	}
+	authorizeTarget := h.cfg.PublicOrigin + "/oauth/authorize?" + authorizeQuery.Encode()
+	startQuery := url.Values{"return_to": {authorizeTarget}}
+	start := httptest.NewRequest(http.MethodGet, StartPath+"?"+startQuery.Encode(), nil)
+	startResponse := httptest.NewRecorder()
+	h.start(startResponse, start)
+	if startResponse.Code != http.StatusFound {
+		t.Fatalf("enrollment start status=%d body=%s", startResponse.Code, startResponse.Body)
+	}
+	cookies := startResponse.Result().Cookies()
+	if len(cookies) != 1 || cookies[0].Name != FlowCookieName {
+		t.Fatalf("enrollment flow cookie missing: %#v", cookies)
+	}
+	state, _, _, returnTo, _, err := h.openFlow(cookies[0].Value)
+	if err != nil || returnTo != authorizeTarget {
+		t.Fatalf("encrypted flow return_to=%q, want %q (err=%v)", returnTo, authorizeTarget, err)
+	}
+	githubAuthorize, err := url.Parse(startResponse.Header().Get("Location"))
+	if err != nil || githubAuthorize.Query().Get("state") != state {
+		t.Fatalf("GitHub authorize state mismatch: location=%q err=%v", startResponse.Header().Get("Location"), err)
+	}
+
+	callback := httptest.NewRequest(http.MethodGet, CallbackPath+"?code=synthetic-code&state="+url.QueryEscape(state), nil)
+	callback.AddCookie(cookies[0])
+	callbackResponse := httptest.NewRecorder()
+	h.callback(callbackResponse, callback)
+	if callbackResponse.Code != http.StatusFound || callbackResponse.Header().Get("Location") != authorizeTarget {
+		t.Fatalf("callback did not resume exact OAuth authorization target: status=%d location=%q want=%q body=%s", callbackResponse.Code, callbackResponse.Header().Get("Location"), authorizeTarget, callbackResponse.Body)
+	}
+	if sessions.subject != "12345" {
+		t.Fatalf("session was not issued before redirect: subject=%q", sessions.subject)
+	}
+	sessionFound := false
+	flowCleared := false
+	for _, cookie := range callbackResponse.Result().Cookies() {
+		switch cookie.Name {
+		case "session":
+			sessionFound = cookie.Value == "issued"
+		case FlowCookieName:
+			flowCleared = cookie.MaxAge < 0
+		}
+	}
+	if !sessionFound || !flowCleared {
+		t.Fatalf("callback cookies: session=%t flow-cleared=%t", sessionFound, flowCleared)
+	}
+}
+
+func TestStartRejectsUnsafeOrAmbiguousReturnTarget(t *testing.T) {
+	authorizeTarget := "https://gist.example/oauth/authorize?client_id=example"
+	cases := []struct {
+		name  string
+		query string
+	}{
+		{name: "external origin", query: url.Values{"return_to": {"https://evil.example/oauth/authorize?client_id=example"}}.Encode()},
+		{name: "lookalike host", query: url.Values{"return_to": {"https://gist.example.evil/oauth/authorize?client_id=example"}}.Encode()},
+		{name: "userinfo", query: url.Values{"return_to": {"https://gist.example@evil.example/oauth/authorize?client_id=example"}}.Encode()},
+		{name: "wrong path", query: url.Values{"return_to": {"https://gist.example/operator/invitations"}}.Encode()},
+		{name: "escaped path", query: url.Values{"return_to": {"https://gist.example/oauth%2Fauthorize?client_id=example"}}.Encode()},
+		{name: "fragment", query: url.Values{"return_to": {"https://gist.example/oauth/authorize?client_id=example#fragment"}}.Encode()},
+		{name: "malformed query", query: url.Values{"return_to": {"https://gist.example/oauth/authorize?bad=%zz"}}.Encode()},
+		{name: "duplicate parameter", query: "return_to=" + url.QueryEscape(authorizeTarget) + "&return_to=" + url.QueryEscape(authorizeTarget)},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			store := newMemoryStore()
+			h, _ := testHandler(t, store, fakeAuth{})
+			rec := httptest.NewRecorder()
+			h.start(rec, httptest.NewRequest(http.MethodGet, StartPath+"?"+tc.query, nil))
+			if rec.Code != http.StatusBadRequest || len(rec.Result().Cookies()) != 0 || len(store.flows) != 0 || len(store.githubCalls) != 0 {
+				t.Fatalf("unsafe return target was accepted or had side effects: status=%d cookies=%v flows=%d github=%v", rec.Code, rec.Result().Cookies(), len(store.flows), store.githubCalls)
+			}
+		})
+	}
+}
+
 func TestCallbackRejectsExpiredFlowAndDeniedConsent(t *testing.T) {
 	t.Run("expired flow", func(t *testing.T) {
 		store := newMemoryStore()
@@ -230,7 +317,7 @@ func TestCallbackRejectsExpiredFlowAndDeniedConsent(t *testing.T) {
 		start := httptest.NewRecorder()
 		h.start(start, httptest.NewRequest(http.MethodGet, StartPath, nil))
 		cookie := start.Result().Cookies()[0]
-		state, _, _, expires, err := h.openFlow(cookie.Value)
+		state, _, _, _, expires, err := h.openFlow(cookie.Value)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -249,7 +336,7 @@ func TestCallbackRejectsExpiredFlowAndDeniedConsent(t *testing.T) {
 		start := httptest.NewRecorder()
 		h.start(start, httptest.NewRequest(http.MethodGet, StartPath, nil))
 		cookie := start.Result().Cookies()[0]
-		state, _, _, _, err := h.openFlow(cookie.Value)
+		state, _, _, _, _, err := h.openFlow(cookie.Value)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -264,19 +351,13 @@ func TestCallbackRejectsExpiredFlowAndDeniedConsent(t *testing.T) {
 }
 
 func TestStartCannotUseExternalReturnPath(t *testing.T) {
-	h, _ := testHandler(t, newMemoryStore(), fakeAuth{})
+	store := newMemoryStore()
+	h, _ := testHandler(t, store, fakeAuth{})
 	request := httptest.NewRequest(http.MethodGet, StartPath+"?return_to=https%3A%2F%2Fattacker.example%2F", nil)
 	got := httptest.NewRecorder()
 	h.start(got, request)
-	if got.Code != http.StatusFound {
-		t.Fatalf("start status=%d", got.Code)
-	}
-	location, err := url.Parse(got.Header().Get("Location"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if location.Host != "github.com" || location.Query().Get("redirect_uri") != h.cfg.CallbackURL || strings.Contains(location.String(), "attacker.example") {
-		t.Fatalf("caller-controlled external return path affected login redirect: %s", location)
+	if got.Code != http.StatusBadRequest || len(got.Result().Cookies()) != 0 || len(store.flows) != 0 || len(store.githubCalls) != 0 {
+		t.Fatalf("external return path was accepted or had side effects: status=%d cookies=%v flows=%d github=%v", got.Code, got.Result().Cookies(), len(store.flows), store.githubCalls)
 	}
 }
 
@@ -314,7 +395,7 @@ func TestInvitationBoundToNumericAccountAndOneUse(t *testing.T) {
 		t.Fatalf("invite start status=%d body=%s", rec.Code, rec.Body)
 	}
 	flow := rec.Result().Cookies()[0]
-	state, _, saved, _, err := h.openFlow(flow.Value)
+	state, _, saved, _, _, err := h.openFlow(flow.Value)
 	if err != nil || saved != raw {
 		t.Fatalf("invite not carried in encrypted cookie: saved=%q err=%v", saved, err)
 	}
@@ -423,7 +504,7 @@ func TestInvitedAccountReceivesOnlyInvitedWorkspace(t *testing.T) {
 	startRec := httptest.NewRecorder()
 	h.start(startRec, start)
 	flow := startRec.Result().Cookies()[0]
-	state, _, invitation, _, err := h.openFlow(flow.Value)
+	state, _, invitation, _, _, err := h.openFlow(flow.Value)
 	if err != nil || invitation != raw {
 		t.Fatalf("flow invitation=%q err=%v", invitation, err)
 	}

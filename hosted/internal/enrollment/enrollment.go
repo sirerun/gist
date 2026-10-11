@@ -134,15 +134,22 @@ func (h *Handler) start(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("Referrer-Policy", "no-referrer")
 	invite := ""
+	returnTo := ""
 	switch r.Method {
 	case http.MethodGet:
 		if r.URL.Query().Has("invite") {
 			http.Error(w, "invitation must be submitted in a same-origin form", http.StatusBadRequest)
 			return
 		}
+		var err error
+		returnTo, err = h.readReturnTo(r.URL.Query())
+		if err != nil {
+			http.Error(w, "invalid sign-in return target", http.StatusBadRequest)
+			return
+		}
 	case http.MethodPost:
-		if r.URL.Query().Has("invite") {
-			http.Error(w, "invitation must be submitted in the request body", http.StatusBadRequest)
+		if r.URL.Query().Has("invite") || r.URL.Query().Has("return_to") {
+			http.Error(w, "invitation and return target must be submitted in the request body", http.StatusBadRequest)
 			return
 		}
 		if r.Header.Get("Origin") != h.cfg.PublicOrigin {
@@ -160,6 +167,11 @@ func (h *Handler) start(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		invite = r.PostForm.Get("invite")
+		returnTo, err = h.readReturnTo(r.PostForm)
+		if err != nil {
+			http.Error(w, "invalid sign-in return target", http.StatusBadRequest)
+			return
+		}
 	default:
 		w.Header().Set("Allow", "GET, POST")
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -183,7 +195,7 @@ func (h *Handler) start(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	expires := h.now().UTC().Add(h.cfg.FlowTTL)
-	cookie, err := h.sealFlow(state, verifier, invite, expires)
+	cookie, err := h.sealFlow(state, verifier, invite, returnTo, expires)
 	if err != nil {
 		http.Error(w, "login unavailable", http.StatusInternalServerError)
 		return
@@ -204,6 +216,36 @@ func (h *Handler) start(w http.ResponseWriter, r *http.Request) {
 	u.RawQuery = q.Encode()
 	http.Redirect(w, r, u.String(), http.StatusFound)
 }
+
+func (h *Handler) readReturnTo(values url.Values) (string, error) {
+	raw, ok := values["return_to"]
+	if !ok {
+		return "", nil
+	}
+	if len(raw) != 1 {
+		return "", errors.New("enrollment: return target must be singular")
+	}
+	return h.validateReturnTo(raw[0])
+}
+
+func (h *Handler) validateReturnTo(raw string) (string, error) {
+	if raw == "" || len(raw) > maxRequestBytes || strings.Contains(raw, "#") {
+		return "", errors.New("enrollment: invalid return target")
+	}
+	target, err := url.Parse(raw)
+	if err != nil {
+		return "", errors.New("enrollment: invalid return target")
+	}
+	origin, err := url.Parse(h.cfg.PublicOrigin)
+	if err != nil || target.Scheme != origin.Scheme || !strings.EqualFold(target.Host, origin.Host) || target.User != nil || target.Opaque != "" || target.Fragment != "" || target.RawFragment != "" || target.Path != "/oauth/authorize" || target.EscapedPath() != "/oauth/authorize" || target.RawPath != "" {
+		return "", errors.New("enrollment: return target is outside the authorization endpoint")
+	}
+	if _, err := url.ParseQuery(target.RawQuery); err != nil {
+		return "", errors.New("enrollment: malformed return target query")
+	}
+	return raw, nil
+}
+
 func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("Referrer-Policy", "no-referrer")
@@ -219,7 +261,7 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "login denied", http.StatusBadRequest)
 		return
 	}
-	state, verifier, invite, expires, err := h.openFlow(cookie.Value)
+	state, verifier, invite, returnTo, expires, err := h.openFlow(cookie.Value)
 	if err != nil || !hmac.Equal([]byte(state), []byte(q.Get("state"))) || !h.now().Before(expires) {
 		http.Error(w, "login denied", http.StatusBadRequest)
 		return
@@ -255,6 +297,10 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.SetCookie(w, sessionCookie)
+	if returnTo != "" {
+		http.Redirect(w, r, returnTo, http.StatusFound)
+		return
+	}
 	writeJSON(w, http.StatusOK, map[string]any{"authenticated": true, "csrf_token": h.csrf(account)})
 }
 func (h *Handler) githubAccount(ctx context.Context, code, verifier string) (string, error) {
@@ -380,10 +426,11 @@ type flowClaims struct {
 	State      string
 	Verifier   string
 	Invitation string
+	ReturnTo   string
 	Expires    int64
 }
 
-func (h *Handler) sealFlow(state, verifier, invitation string, expires time.Time) (*http.Cookie, error) {
+func (h *Handler) sealFlow(state, verifier, invitation, returnTo string, expires time.Time) (*http.Cookie, error) {
 	block, err := aes.NewCipher(h.cfg.FlowKey)
 	if err != nil {
 		return nil, err
@@ -392,7 +439,7 @@ func (h *Handler) sealFlow(state, verifier, invitation string, expires time.Time
 	if err != nil {
 		return nil, err
 	}
-	raw, err := json.Marshal(flowClaims{State: state, Verifier: verifier, Invitation: invitation, Expires: expires.Unix()})
+	raw, err := json.Marshal(flowClaims{State: state, Verifier: verifier, Invitation: invitation, ReturnTo: returnTo, Expires: expires.Unix()})
 	if err != nil {
 		return nil, err
 	}
@@ -403,31 +450,38 @@ func (h *Handler) sealFlow(state, verifier, invitation string, expires time.Time
 	sealed := aead.Seal(nonce, nonce, raw, []byte(FlowCookieName))
 	return &http.Cookie{Name: FlowCookieName, Value: base64.RawURLEncoding.EncodeToString(sealed), Path: "/", Expires: expires, MaxAge: int(h.cfg.FlowTTL.Seconds()), Secure: true, HttpOnly: true, SameSite: http.SameSiteLaxMode}, nil
 }
-func (h *Handler) openFlow(value string) (string, string, string, time.Time, error) {
+func (h *Handler) openFlow(value string) (string, string, string, string, time.Time, error) {
 	sealed, err := base64.RawURLEncoding.DecodeString(value)
 	if err != nil {
-		return "", "", "", time.Time{}, errors.New("enrollment: malformed flow cookie")
+		return "", "", "", "", time.Time{}, errors.New("enrollment: malformed flow cookie")
 	}
 	block, err := aes.NewCipher(h.cfg.FlowKey)
 	if err != nil {
-		return "", "", "", time.Time{}, err
+		return "", "", "", "", time.Time{}, err
 	}
 	aead, err := cipher.NewGCM(block)
 	if err != nil {
-		return "", "", "", time.Time{}, err
+		return "", "", "", "", time.Time{}, err
 	}
 	if len(sealed) < aead.NonceSize() {
-		return "", "", "", time.Time{}, errors.New("enrollment: malformed flow cookie")
+		return "", "", "", "", time.Time{}, errors.New("enrollment: malformed flow cookie")
 	}
 	raw, err := aead.Open(nil, sealed[:aead.NonceSize()], sealed[aead.NonceSize():], []byte(FlowCookieName))
 	if err != nil {
-		return "", "", "", time.Time{}, errors.New("enrollment: invalid flow cookie")
+		return "", "", "", "", time.Time{}, errors.New("enrollment: invalid flow cookie")
 	}
 	var c flowClaims
 	if err = json.Unmarshal(raw, &c); err != nil || !canonicalToken(c.State) || !canonicalToken(c.Verifier) || (c.Invitation != "" && !canonicalToken(c.Invitation)) {
-		return "", "", "", time.Time{}, errors.New("enrollment: invalid flow claims")
+		return "", "", "", "", time.Time{}, errors.New("enrollment: invalid flow claims")
 	}
-	return c.State, c.Verifier, c.Invitation, time.Unix(c.Expires, 0).UTC(), nil
+	returnTo := ""
+	if c.ReturnTo != "" {
+		returnTo, err = h.validateReturnTo(c.ReturnTo)
+		if err != nil {
+			return "", "", "", "", time.Time{}, errors.New("enrollment: invalid flow return target")
+		}
+	}
+	return c.State, c.Verifier, c.Invitation, returnTo, time.Unix(c.Expires, 0).UTC(), nil
 }
 func clearFlowCookie(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{Name: FlowCookieName, Value: "", Path: "/", Expires: time.Unix(1, 0), MaxAge: -1, Secure: true, HttpOnly: true, SameSite: http.SameSiteLaxMode})
