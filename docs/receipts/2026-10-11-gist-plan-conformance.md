@@ -3,9 +3,9 @@
 Date: 2026-10-11
 Plan: docs/plan.md
 Candidate task count: 352
-Candidate plan SHA-256: sha256:de89f5754c18868ae210245fb7fa766515b7bfa45190299d7f6ad7a92279a8f0
-Authored revision: candidate-20261011-rfc003-graph-r1
-Current main reference: d12fd22b7d059629698a2d1c03ed0a0b69fb1860; candidate rebase and exact-head review remain pending
+Candidate plan SHA-256: sha256:f109376c22ece7d5d8d92589293724b8b90015a1c2eb72a0228e81094bfd5fee
+Authored revision: candidate-20261011-rfc003-graph-r3
+Rebased on current main d12fd22b7d059629698a2d1c03ed0a0b69fb1860; exact-head pair review remains pending
 
 ## Verification
 
@@ -16,7 +16,7 @@ version 0.0.1, and authorityAuthenticated=false.
 
 Command:
 
-    python3 /home/ndungu/worktrees/gist-plan-ship-20261008-root/tooling/plan/scripts/validate_plan.py docs/plan.md --wazi-dir /home/ndungu/Code/task-worktrees/zati-ws-plan-tools/wazi --wazi /home/ndungu/Code/task-worktrees/zati-ws-plan-tools/bin/wazi --validator /home/ndungu/Code/task-worktrees/zati-ws-plan-tools/bin/wazi-contract --plan-id gist:delivery --authority-id github:sirerun/gist --revision candidate-20261011-rfc003-graph-r1
+    python3 /home/ndungu/worktrees/gist-plan-ship-20261008-root/tooling/plan/scripts/validate_plan.py docs/plan.md --wazi-dir /home/ndungu/Code/task-worktrees/zati-ws-plan-tools/wazi --wazi /home/ndungu/Code/task-worktrees/zati-ws-plan-tools/bin/wazi --validator /home/ndungu/Code/task-worktrees/zati-ws-plan-tools/bin/wazi-contract --plan-id gist:delivery --authority-id github:sirerun/gist --revision candidate-20261011-rfc003-graph-r3
 
 Tool and contract digests:
 
