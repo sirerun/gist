@@ -39,3 +39,12 @@ Added TestRoutesServeLoginOverHTTP, which registers the public routes on an HTTP
 - GitHub Actions annotations on the follow-up PR run report that jobs were not started because the account is locked due to a billing issue. No repository self-hosted runners are registered. Local verification is the documented fallback; this does not replace independent review or runtime qualification.
 
 This follow-up remains component evidence. Application startup wiring, independent exact-head security review, merge, landed checks, named consumer qualification, and live production acceptance are still open.
+
+## Invitation authorization-scope regression at source head e07d1751990e817bbe1d540fb48427d3238e2e32
+
+Added TestInvitationCannotWidenMaintainerScopes. It creates a fresh workspace whose maintainer has catalog:read, attempts a catalog:publish invitation, asserts ErrDenied, and verifies no invitation row was persisted.
+
+- GOWORK=off go test -tags=integration ./internal/storage -run TestEnrollment -count=1 passed against the isolated PostgreSQL 16 cluster.
+- GOWORK=off go vet ./internal/enrollment ./internal/storage passed.
+- Pinned golangci-lint v2.14.0 on ./internal/enrollment and ./internal/storage reported zero issues.
+- The cluster was stopped after the run. These checks remain local component evidence; application composition, independent review, merge, landed verification, and production acceptance remain open.
