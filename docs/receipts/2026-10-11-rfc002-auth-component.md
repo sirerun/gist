@@ -72,3 +72,7 @@ Added explicit checks for expired and replayed persistent login flows, expired/d
 - `GOWORK=off go vet -tags=integration ./internal/enrollment ./internal/storage` passed.
 - Pinned golangci-lint v2.14.0 with integration build tags reported zero issues in `internal/enrollment` and `internal/storage`.
 - The PostgreSQL cluster was stopped after the run. Real client builds, live owner/workspace values, startup/route composition, and production acceptance remain open.
+
+### Formatting verification on the final component source
+
+The DGX selected Go 1.26.1 from the hosted module requirement. A task-local `goimports` built from `golang.org/x/tools/cmd/goimports` v0.52.0 and `gofmt` were run with `-d` on all five changed Go files. Both emitted no diff. This closes the import-format check that was unavailable during the initial run; no source file changed, so the tested source head remains `f74e5f1a461d5cb804a0085017be292d71632c5a`.
