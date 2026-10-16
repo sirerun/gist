@@ -87,6 +87,62 @@ class RegistryCheckTests(unittest.TestCase):
         with self.assertRaises(check.CheckError):
             check.check_source_amendment({"path": "contracts/registry/v1/common.schema.json"}, {"path": "contracts/registry/v1/common.schema.json"})
 
+    def test_library_relocation_preserves_baseline_and_v2_amendment(self):
+        root = check.ROOT
+        lock = check.read_json(root / "contracts/registry/v1/lock.json")
+        entries = {e["path"]: e for e in lock["files"]}
+        relocation = check.read_json(root / "contracts/registry/library-relocation.json")
+        amendment = check.read_json(root / "contracts/registry/implementation-v2.json")["files"][0]
+        for item in relocation["files"]:
+            with self.subTest(path=item["path"]):
+                change = amendment if item["path"] == amendment["path"] else None
+                check.check_library_relocation(entries[item["path"]], item, change)
+
+    def test_library_relocation_rejects_changed_bytes_missing_alias_and_wrong_target(self):
+        root = check.ROOT
+        original = "hosted/internal/ports/clock.go"
+        entry = next(e for e in check.read_json(root / "contracts/registry/v1/lock.json")["files"] if e["path"] == original)
+        relocation = {"path": original, "destination": "catalog/ports/clock.go", "baseline_sha256": entry["sha256"]}
+        source_bytes = (root / relocation["destination"]).read_bytes()
+        shim_text = (root / "hosted/internal/ports/compat.go").read_text()
+        with tempfile.TemporaryDirectory() as directory, mock.patch.object(check, "ROOT", Path(directory)):
+            source = Path(directory) / relocation["destination"]
+            source.parent.mkdir(parents=True)
+            source.write_bytes(source_bytes)
+            shim = Path(directory) / "hosted/internal/ports/compat.go"
+            shim.parent.mkdir(parents=True)
+            shim.write_text(shim_text)
+            check.check_library_relocation(entry, relocation, None)
+            source.write_bytes(source_bytes + b"// drift\n")
+            with self.assertRaises(check.CheckError):
+                check.check_library_relocation(entry, relocation, None)
+            source.write_bytes(source_bytes)
+            for bad_shim in (shim_text.replace("type Clock = shared.Clock\n", ""), shim_text.replace("type Clock = shared.Clock", "type Clock = shared.SystemClock")):
+                shim.write_text(bad_shim)
+                with self.assertRaises(check.CheckError):
+                    check.check_library_relocation(entry, relocation, None)
+            shim.write_text(shim_text)
+            for target in ("../../outside.go", "catalog/ports/policy.go"):
+                with self.assertRaises(check.CheckError):
+                    check.check_library_relocation(entry, dict(relocation, destination=target), None)
+            with self.assertRaises(check.CheckError):
+                check.check_library_relocation({"path": "contracts/registry/v1/common.schema.json", "sha256": entry["sha256"]}, relocation, None)
+
+    def test_library_module_only_allows_exact_additive_dependency(self):
+        root = check.ROOT
+        entry = next(e for e in check.read_json(root / "contracts/registry/v1/lock.json")["files"] if e["path"] == "hosted/go.mod")
+        change = check.read_json(root / "contracts/registry/library-relocation.json")["hosted_module"]
+        current = (root / "hosted/go.mod").read_bytes()
+        with tempfile.TemporaryDirectory() as directory, mock.patch.object(check, "ROOT", Path(directory)):
+            path = Path(directory) / "hosted/go.mod"
+            path.parent.mkdir(parents=True)
+            path.write_bytes(current)
+            check.check_library_module(entry, change)
+            for bad in (current.replace(b"go 1.26.1", b"go 1.25.0"), current.replace(b"=> ..", b"=> /tmp/evil"), current + b"\n"):
+                path.write_bytes(bad)
+                with self.assertRaises(check.CheckError):
+                    check.check_library_module(entry, change)
+
     def test_cli_reports_failure(self):
         output = io.StringIO()
         with contextlib.redirect_stderr(output):

@@ -61,23 +61,80 @@ def file_hash(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def check_source_amendment(entry: dict[str, Any], amendment: dict[str, Any]) -> None:
+def check_source_amendment(entry: dict[str, Any], amendment: dict[str, Any], source_path: Path | None = None) -> None:
     # ADR012 permits this internal additive projection only. Frozen wire files
     # and all other baseline ports never use this migration path.
     if entry["path"] != "hosted/internal/ports/catalog.go" or amendment.get("path") != entry["path"]:
         fail("unsupported v2 source amendment")
     if amendment.get("baseline_sha256") != entry.get("sha256"):
         fail("v2 source amendment is not bound to the frozen v1 baseline")
-    current = (ROOT / entry["path"]).read_text(encoding="utf-8")
+    source_path = source_path or ROOT / entry["path"]
+    current = source_path.read_text(encoding="utf-8")
     before, after = amendment.get("baseline_fragment"), amendment.get("amended_fragment")
     if not isinstance(before, str) or not isinstance(after, str) or not before or not after:
         fail("v2 source amendment requires exact baseline and amended fragments")
-    if current.count(after) != 1 or file_hash(ROOT / entry["path"]) != amendment.get("sha256"):
+    if current.count(after) != 1 or file_hash(source_path) != amendment.get("sha256"):
         fail("stale v2 source amendment")
     baseline = current.replace(after, before, 1).encode("utf-8")
     if hashlib.sha256(baseline).hexdigest() != entry["sha256"]:
         fail("v2 source amendment alters the frozen baseline outside the approved addition")
 
+
+
+def check_library_relocation(entry: dict[str, Any], relocation: dict[str, Any], amendment: dict[str, Any] | None) -> None:
+    original = entry["path"]
+    allowed = {"catalog.go", "clock.go", "connections.go", "contracts_test.go", "events.go", "identity.go", "policy.go", "search.go"}
+    name = original.removeprefix("hosted/internal/ports/")
+    destination = "catalog/ports/" + name
+    if name not in allowed or relocation.get("path") != original or relocation.get("destination") != destination:
+        fail("unsupported library source relocation")
+    if relocation.get("baseline_sha256") != entry.get("sha256"):
+        fail("library relocation is not bound to frozen baseline")
+    source = ROOT / destination
+    if not source.is_file():
+        fail("missing relocated source")
+    if amendment is not None:
+        check_source_amendment(entry, amendment, source)
+    elif file_hash(source) != entry["sha256"]:
+        fail("relocated source differs from frozen baseline")
+    if name.endswith("_test.go"):
+        return
+    # Aliasing retains Go type identity and methods, not merely matching names.
+    # Require a pure alias shim; arbitrary bodies/expressions cannot pass.
+    shim = ROOT / "hosted/internal/ports/compat.go"
+    if not shim.is_file():
+        fail("missing hosted compatibility aliases")
+    text = shim.read_text(encoding="utf-8")
+    if text.splitlines().count("package ports") != 1 or text.splitlines().count('import shared "github.com/sirerun/gist/catalog/ports"') != 1:
+        fail("hosted compatibility shim lacks its package or exact import")
+    aliases = {}
+    for line in text.splitlines():
+        if not line or line.startswith("//") or line == "package ports" or line == 'import shared "github.com/sirerun/gist/catalog/ports"':
+            continue
+        match = re.fullmatch(r"(type|const|var) ([A-Z]\w*) = shared\.([A-Z]\w*)", line)
+        if not match or match[2] != match[3] or match[2] in aliases:
+            fail("hosted compatibility shim is not an exact alias")
+        aliases[match[2]] = match[1]
+    current = source.read_text(encoding="utf-8")
+    symbols = [("type", value) for value in re.findall(r"(?m)^type ([A-Z]\w*)\b", current)]
+    symbols += [("var", value) for value in re.findall(r"(?m)^(?:func|var) ([A-Z]\w*)\b", current)]
+    for kind, body in re.findall(r"(?ms)^(const|var) \(\n(.*?)^\)", current):
+        symbols += [(kind, value) for value in re.findall(r"(?m)^\s*([A-Z]\w*)\b", body)]
+    symbols += [("const", value) for value in re.findall(r"(?m)^const ([A-Z]\w*)\b", current)]
+    for kind, name in symbols:
+        if aliases.get(name) != kind:
+            fail("hosted alias missing or changed: " + name)
+
+
+def check_library_module(entry: dict[str, Any], change: dict[str, Any]) -> None:
+    addition = "\nrequire github.com/sirerun/gist v0.0.0\n\nreplace github.com/sirerun/gist => ..\n"
+    if entry["path"] != "hosted/go.mod" or change.get("path") != entry["path"] or change.get("baseline_sha256") != entry["sha256"] or change.get("addition") != addition:
+        fail("unsupported hosted library dependency amendment")
+    current = (ROOT / entry["path"]).read_bytes()
+    if not current.endswith(addition.encode()):
+        fail("missing exact additive hosted library dependency")
+    if hashlib.sha256(current[:-len(addition.encode())]).hexdigest() != entry["sha256"]:
+        fail("hosted module amendment alters frozen dependencies")
 
 def check_contracts(freeze_check: bool) -> None:
     directory = ROOT / "contracts" / "registry" / "v1"
@@ -160,19 +217,45 @@ def check_contracts(freeze_check: bool) -> None:
                 if not isinstance(amendment, dict) or amendment.get("path") in amendments:
                     fail("invalid or duplicate v2 source amendment")
                 amendments[amendment.get("path")] = amendment
+        relocation_path = ROOT / "contracts/registry/library-relocation.json"
+        relocations = {}
+        module_change = None
+        if relocation_path.is_file():
+            relocation_doc = read_json(relocation_path)
+            if relocation_doc.get("relocation_version") != "1" or not isinstance(relocation_doc.get("files"), list):
+                fail("invalid library relocation document")
+            for item in relocation_doc["files"]:
+                if not isinstance(item, dict) or not isinstance(item.get("path"), str) or item["path"] in relocations:
+                    fail("invalid or duplicate library relocation")
+                relocations[item["path"]] = item
+            module_change = relocation_doc.get("hosted_module")
+            if not isinstance(module_change, dict):
+                fail("missing hosted module amendment")
         consumed = set()
+        relocated = set()
+        module_consumed = False
         for entry in entries:
             if not isinstance(entry, dict) or not isinstance(entry.get("path"), str):
                 fail("contract lock entries require path and sha256")
             path = ROOT / entry["path"]
             amendment = amendments.get(entry["path"])
-            if amendment is not None:
+            if entry["path"] in relocations:
+                check_library_relocation(entry, relocations[entry["path"]], amendment)
+                relocated.add(entry["path"])
+                if amendment is not None:
+                    consumed.add(entry["path"])
+            elif entry["path"] == "hosted/go.mod" and module_change is not None:
+                check_library_module(entry, module_change)
+                module_consumed = True
+            elif amendment is not None:
                 if not path.is_file():
                     fail("missing amended source file")
                 check_source_amendment(entry, amendment)
                 consumed.add(entry["path"])
             elif not path.is_file() or entry.get("sha256") != file_hash(path):
                 fail(f"stale or missing contract lock entry: {entry.get('path')}")
+        if relocated != set(relocations) or (module_change is not None and not module_consumed):
+            fail("unmatched library relocation or module amendment")
         if consumed != set(amendments):
             fail("unmatched v2 source amendment")
 
