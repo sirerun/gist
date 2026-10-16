@@ -56,3 +56,13 @@ hosted aliases, and permits only the declared additive root-module dependency.
 This correction changes Python compatibility validation and metadata only; tested
 Go source is unchanged. Final independent review and landing are recorded in the
 PR, not asserted by this source receipt.
+
+## Review correction
+
+Independent review of `d1361e9` found CI path filters omitted the newly shared
+catalog code. Accepted as CAT-R1: both Registry CI triggers now include catalog,
+shared lexical code and root dependency files. The hosted job also provisions
+its required isolated PostgreSQL service explicitly, matching the passing
+source recipe instead of relying on an unavailable default database. These are
+workflow changes, not evidence that hosted Actions ran. Final exact-head review
+is recorded in the PR.

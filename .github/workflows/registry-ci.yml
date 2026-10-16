@@ -2,10 +2,10 @@ name: Registry CI
 
 on:
   pull_request:
-    paths: ["hosted/**", "contracts/registry/**", "scripts/registry/**", ".github/workflows/registry-*.yml"]
+    paths: ["catalog/**", "internal/cataloglexical/**", "go.mod", "go.sum", "hosted/**", "contracts/registry/**", "scripts/registry/**", ".github/workflows/registry-*.yml"]
   push:
     branches: [main]
-    paths: ["hosted/**", "contracts/registry/**", "scripts/registry/**", ".github/workflows/registry-*.yml"]
+    paths: ["catalog/**", "internal/cataloglexical/**", "go.mod", "go.sum", "hosted/**", "contracts/registry/**", "scripts/registry/**", ".github/workflows/registry-*.yml"]
 
 permissions:
   contents: read
@@ -25,6 +25,22 @@ jobs:
   hosted-module:
     name: Hosted Go module
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: gist_test
+          POSTGRES_PASSWORD: fixture_only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U gist_test -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      GIST_DATABASE_URL: postgres://gist_test:fixture_only@127.0.0.1:5432/postgres?sslmode=disable
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
