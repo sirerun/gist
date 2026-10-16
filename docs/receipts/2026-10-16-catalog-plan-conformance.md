@@ -1,6 +1,6 @@
 # Catalog-only candidate conformance — 2026-10-16
 
-Candidate authored revision: `candidate-20261016-catalog-only-r3`.
+Candidate authored revision: `candidate-20261016-catalog-only-r4`.
 Plan ID: `gist:delivery`; authority ID: `github:sirerun/gist`.
 This is documentation validation only, not authenticated task completion,
 source implementation, library readiness, deployment or production qualification.
@@ -11,7 +11,7 @@ The full plan-skill gate returned exit 0: `valid`, `readerCompatible`,
 
 | Bound artifact | Digest |
 |---|---|
-| sourceDigest | `sha256:8fd5a8794c8218ef1ace72caf9b661eee205e9969b0fbe7d00d3a92884e8d6ec` |
+| sourceDigest | `sha256:1f5f34ef7817ed0fc3838b7e17d050aeba1edfa156e713999d0bcbafa60e7168` |
 | contractVersion | `0.0.1` |
 | contractDigest | `sha256:7582512f122d2f2a9c4461facc7541c9887053f137260d6ebe9c6dea611d039d` |
 | readerDigest | `sha256:0b1292cbe93af31531647f3e2ae28c37f12decbe89023192729e010d6d7e6d67` |
@@ -28,7 +28,7 @@ Validation command shape (environment-qualified tool locations):
 python3 "$PLAN_SKILL/scripts/validate_plan.py" docs/plan.md \
   --wazi-dir "$WAZI_DIR" --wazi "$WAZI_BIN" --validator "$WAZI_CONTRACT" \
   --plan-id gist:delivery --authority-id github:sirerun/gist \
-  --revision candidate-20261016-catalog-only-r3
+  --revision candidate-20261016-catalog-only-r4
 ```
 
 Direct source comparison: every one of 352 original rows is identical after
@@ -47,3 +47,19 @@ bytes; their old commands, statuses and claims do not supply present authority.
 No Go build, paid model/provider call or cloud mutation was needed for this
 candidate. Hosted CI must be reported according to its actual result, not
 inferred from these local documentation checks.
+
+## External review findings and correction evidence
+
+- P1: the current handover still instructed M-G1/M-G2 execution. Corrected in
+  `d184a45`; exact previous handover preserved as a historical source archive.
+- P1: placing E-PROVENANCE ahead of March history changed 18 normalized IDs
+  despite unchanged local IDs. The correction moves new epic blocks after all
+  existing task rows. A full parser comparison against `037e81d` now proves
+  all 352 original normalized IDs unchanged, with no missing original IDs;
+  [the manifest](2026-10-16-catalog-normalized-id-preservation.json) records
+  every baseline/candidate mapping and both source digests.
+
+The initial source-row-only comparison did not detect that normalized namespace
+change; it is superseded by the combined row and normalized-ID checks above.
+The full Wazi gate passes again on revision r4. External exact-head approval
+of this corrected candidate is still pending; these corrections do not claim it.
