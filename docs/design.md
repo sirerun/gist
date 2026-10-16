@@ -23,6 +23,16 @@ observations, not current provider availability. The coverage receipt is
 [here](receipts/2026-10-16-catalog-plan-coverage.md).
 
 
+## Task preparation evaluation — 2026-10-16
+
+ADR017 makes optional semantic retrieval and deterministic tool-use guides an
+explicit library evaluation direction. ADR018 requires paired whole-task evidence
+against lexical preparation and both Composio discovery/direct-tool baselines.
+EmbeddingGemma2 text-only is a candidate, not an adopted runtime dependency.
+Gist prepares exact authorized catalog context; Zati owns inference routing,
+credentials and execution. See [the protocol](evaluations/tool-preparation.md)
+and canonical E-PREP. No measured token or latency advantage is claimed.
+
 ## Overview
 
 Gist is a Go library and CLI that keeps raw data out of LLM context windows. Content is chunked and indexed into PostgreSQL (or an in-memory store for testing), then retrieved on demand using a three-tier search engine (porter stemming, trigram, fuzzy correction). Callers set token budgets and get back only the most relevant snippets.
