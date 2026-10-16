@@ -1,0 +1,51 @@
+{
+  "relocation_version": "1",
+  "decision": "Catalog library extraction preserves frozen v1 source at public paths and hosted type aliases; v2 amendment remains separately enforced.",
+  "files": [
+    {
+      "path": "hosted/internal/ports/catalog.go",
+      "destination": "catalog/ports/catalog.go",
+      "baseline_sha256": "11358de29fe578fb41a1c57d6b4b756777bce4eac580823acacfb980a63b028a"
+    },
+    {
+      "path": "hosted/internal/ports/clock.go",
+      "destination": "catalog/ports/clock.go",
+      "baseline_sha256": "145164cda2d4b7fe893c303c49199aa79591e2e7d0c9aa76ce08f87e9e6e9708"
+    },
+    {
+      "path": "hosted/internal/ports/connections.go",
+      "destination": "catalog/ports/connections.go",
+      "baseline_sha256": "652ab3b8a56f6a51bc74f5831c54130c50ff5b56a45b740594310c565534c1f7"
+    },
+    {
+      "path": "hosted/internal/ports/contracts_test.go",
+      "destination": "catalog/ports/contracts_test.go",
+      "baseline_sha256": "b8bd2821c8e6c7e6006ce4a23a254bb5c2e152af2faeed3523d1f1d080e43ea3"
+    },
+    {
+      "path": "hosted/internal/ports/events.go",
+      "destination": "catalog/ports/events.go",
+      "baseline_sha256": "13d373e63607d5b7197373d0095279a6f987850bcb413f1452d277ef2ae7bc0d"
+    },
+    {
+      "path": "hosted/internal/ports/identity.go",
+      "destination": "catalog/ports/identity.go",
+      "baseline_sha256": "32595f93e92a7caf359a0f401dfa9a07482bbbf15da6d60ae7db3156dcd51ac4"
+    },
+    {
+      "path": "hosted/internal/ports/policy.go",
+      "destination": "catalog/ports/policy.go",
+      "baseline_sha256": "c8d48048915984054c8851e5d628f3a94025fcac686e0ca5c3b04e296fb9f972"
+    },
+    {
+      "path": "hosted/internal/ports/search.go",
+      "destination": "catalog/ports/search.go",
+      "baseline_sha256": "01ae332194e65d9d2623e3a29e04a953a6e7472daf81b4c3c521617b42fc403d"
+    }
+  ],
+  "hosted_module": {
+    "path": "hosted/go.mod",
+    "baseline_sha256": "5becd1074a7e078dcae1ee1ca3b4e3af54876bdb6f8d48b63088ce060d95bffb",
+    "addition": "\nrequire github.com/sirerun/gist v0.0.0\n\nreplace github.com/sirerun/gist => ..\n"
+  }
+}
