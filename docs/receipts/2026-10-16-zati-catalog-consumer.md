@@ -108,3 +108,35 @@ own tool requirement. Targeted Skills/Execution/catalog and assembled Gist/MCP
 checks pass, as do renderer and all42 specification tests. Correction archive
 SHA256 matches at both ends:
 `cbd59bec757f2b610af2f68844c8316129e16703e9bcc3774853b988c0e23c02`.
+
+## Reviewed merge
+
+Non-author exact-head re-review approved Zati
+`054325383a15e7c19212fa171ad99e9ef563a9ab` and Gist documentation
+`be9898fc22da89960e8c9f105eae34df74af4589`; ZATI-CAT-R1 is closed.
+Final affected vet passed; uncapped lint remains identical to the157 baseline
+findings with no introduced issue.
+
+[Zati PR41](https://github.com/zati-run/zati/pull/41) rebase-merged to
+`aabfdc5e0d483c2196d32d95f7696ff9b1dc7b63`. Immediately before merge, main still
+matched reviewed base35ebe4df and PR head matched05432538. The head guard was
+used. Candidate check117164371996 confirmed the same billing lock; no required
+check or protection was bypassed. This receipt will record fresh-main tree and
+behavior verification separately before source closure.
+
+## Landed source verification
+
+Fresh Zati main reaches `aabfdc5e0d483c2196d32d95f7696ff9b1dc7b63`; its full tree
+exactly equals reviewed05432538. The landed tracked-source archive SHA256 matched
+at both ends: `a1c6533ab36d15b3ffa37dd1ce00a49e912f11e0986ca5133600d79e4f3a14ec`.
+On that source, renderer validation and focused CLI import, Skills, Execution,
+assembled inbox and governed MCP acceptance all passed (integration24.7s).
+The ordinary local Zati main checkout fast-forwarded to the landed commit while
+preserving its pre-existing untracked agent configuration.
+
+T-CATALOG.1-.6 are source-complete. Producer Gist PR66 and consumer Zati PR41
+have exact reviewed-tree and landed-behavior evidence. The Gist documentation
+closeout still follows independent review and guarded merge. T-CATALOG.7/.8
+remain open for separately authorized release and installed operational
+qualification; no missing Gmail setup, publisher signature, performance result
+or live-provider acceptance is relabeled complete.
