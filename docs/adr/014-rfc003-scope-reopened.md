@@ -1,5 +1,8 @@
 # ADR014 -- RFC-003 gateway scope and M-G1 direction
 
+> Superseded 2026-10-16 by [ADR016](016-zati-library-first-rfc003-gateway-boundary.md). Gateway execution is retired. The original decision below is historical and supplies no current dispatch or deployment authority. Catalog provenance is retained under RFC-002.
+
+
 Date: 2026-10-11
 Status: Accepted scope and M-G1 direction; exact design reconciliation and independent review remain open.
 

@@ -1,5 +1,28 @@
 # Gist development log
 
+## Catalog-only decision — 2026-10-16
+
+[ADR016](adr/016-zati-library-first-rfc003-gateway-boundary.md) supersedes earlier
+gateway and whole-project continuation statements below. Gist remains reusable,
+with a public library and Zati as first consumer. It owns skill/tool discovery,
+complete exact packages, schemas, provenance and capability resolution. Execution,
+provider credentials, approvals, journals and utility billing belong to external
+executors. RFC-003 is retired, not deferred. Existing root-library execution
+compatibility is unchanged; no runtime code is removed in this docs candidate.
+Hosted expansion is paused except repairs and existing consumer obligations;
+there is no shutdown or deployment authorization. Registry authentication and
+publisher verification remain required. Zati's existing v1.2.0 ranking is a
+starting point, not proof of full catalog integration.
+
+The canonical plan preserves original IDs/status/evidence with explicit blocked
+retired/held dispositions. Publisher provenance moves to catalog ownership;
+the CATALOG batch adds actual consumer verification and independent delivery
+gates. Real skill/asset/tool selection and exact test recipes remain preflight
+inputs. Historical infrastructure/access notes below describe their dated
+observations, not current provider availability. The coverage receipt is
+[here](receipts/2026-10-16-catalog-plan-coverage.md).
+
+
 ## 2026-10-04 — Registry recovery plan refinement
 
 Founder requested maximum parallel GPT-6-Luna agents and the entire SDLC as first-class plan items. Added docs/plans/registry-recovery.md and split epic files; appended links to existing plan/design records without altering historical task text/status. Selected ordinary unenrolled repository delivery. Worker dispatch fills qualified available slots (current harness three workers plus coordinator), with isolated external-SSD ownership, shared wiring/merge arbitration and existing build lease/load limits. Required requirements/design, per-candidate six-stage code delivery, independent review/corrections, release, rollout, actual consumer/provider acceptance and bounded operations are dependency-linked. Later M2b/M3 and gateway are single-trigger outline planning epics.

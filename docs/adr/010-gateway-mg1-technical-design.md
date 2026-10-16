@@ -1,5 +1,8 @@
 # ADR 010: Execution Gateway M-G1 Technical Design
 
+> Superseded 2026-10-16 by [ADR016](016-zati-library-first-rfc003-gateway-boundary.md). Gateway execution is retired. The original decision below is historical and supplies no current dispatch or deployment authority. Catalog provenance is retained under RFC-002.
+
+
 ## Status
 
 Technical design under revision; the founder approved the revised M-G1 direction

@@ -1,0 +1,308 @@
+# RFC-003: Optional Gist Execution Gateway — Independent Client Execution
+
+- **Status:** Re-scoped 2026-10-16. Gateway design exists; gateway
+  implementation has not started. It is not on the Zati library adoption or
+  Gist's current production critical path. Any future gateway implementation
+  requires a named independent client that cannot use its own admitted
+  execution machinery, plus a separately approved scope and delivery plan.
+  Current change scope is RFC/ADR/plan documentation only; no library or
+  gateway source implementation is authorized here.
+- **Updated:** 2026-10-16
+- **Depends on:** RFC-002 (`docs/rfc-002.md`) — the registry, its data model,
+  and its authorization model (§12 ADR). Nothing here is buildable until the
+  registry contract is frozen at M1.
+- **Provisional service origin:** same Gist deployment as RFC-002
+- **Consumers:** independent agent clients that report `requires_gateway` and
+  have an accepted need for Gist-hosted execution
+
+## 1. Purpose
+
+RFC-002 specifies catalog discovery, retrieval, and resolution. Its current
+implementation lives primarily under `hosted/internal`; the public Gist Go
+module currently exposes indexing and search. Zati already uses that public
+library for authorized tool shortlisting. The proposed additive library
+boundary would expose discovery, immutable artifact retrieval, integrity
+checks, and capability-resolution primitives; Zati owns skill lifecycle,
+caller authorization, context, credentials, approvals, effect records, and
+execution. This RFC does not make a hosted gateway a prerequisite for that
+integration.
+
+RFC-003 describes an optional hosted execution service for a separately
+identified client that lacks its own admitted execution machinery
+(`requires_gateway`). A library consumer with its own execution controls should
+call the library and use its own executor. The gateway becomes active only
+after that independent-client need and its bounded authority are accepted.
+
+If activated, the gateway routes capabilities across HTTPS providers and remote
+MCP servers on behalf of an authenticated caller. The caller handles user
+intent and approval; Gist enforces the caller's current permissions, authorized
+connection, capability contract, egress controls, and execution lifecycle. A
+client with its own execution engine should execute resolved bindings directly.
+
+Task-specific tool-use guidance belongs to the reusable catalog/library
+surface and its own acceptance. The optional gateway may consume that guidance
+but does not own a second guide lifecycle. Guidance is never an execution grant.
+
+## 2. Scope moved here from RFC-002 rev 1
+
+All of the following were removed from RFC-002 in the 2026-09-25 revision and
+are specified (or re-specified) here:
+
+1. **The governed execution gateway** — `gist_invoke` (MCP) and `POST
+   /v1/executions` (REST), execution lifecycle, and reconciliation semantics.
+2. **Credential custody** — the encrypted secret store and delegated-OAuth
+   connection ownership that RFC-002 rev 1 listed inconsistently (its §2
+   excluded a vault while §6 required one; RFC-002 rev 2 owns only the
+   connection-*initiation* surface).
+3. **The broad provider inventory** — the eight provider families (aggregators,
+   SaaS APIs, MCP servers, HTTP/generic, database, code-run, communication,
+   file/storage), the per-provider support states (`planned`, `catalog_only`,
+   `resolvable`, `executable`, `degraded`, `retired`), and the full adapter
+   contract. RFC-002 M1 launches with 3–5 providers; this RFC owns growth
+   beyond that, evidence-driven.
+4. **Utility billing** — metering, the ledger, and the billing routes, including
+   the "never silently switch provider, account, or billing route on retry"
+   rule carried from the design-review keep-list.
+5. **SSRF and egress controls** for arbitrary provider registration — the
+   registry accepts provider records; only the gateway actually calls out.
+6. **The original M4/M5 milestones** (rev 1 numbering), renumbered here as
+   M-G1 and M-G2 to avoid colliding with RFC-002's M4 (retrieval evaluation).
+7. **A publisher-signing / provenance scheme** — RFC-002 §7 blocks public
+   distribution until it exists; its design and verification procedure remain
+   a separate RFC-002 publication requirement, not a reason to activate this
+   optional gateway.
+
+## 3. Execution model
+
+### Surface
+
+| Endpoint | Contract |
+| --- | --- |
+| `POST /v1/executions` | Execute a resolved binding: exact skill, capability, tool, binding versions; tenant, principal, and connection references bound server-side |
+| `GET /v1/executions/{id}` | Status, result, terminal state |
+| `gist_invoke` (MCP) | Same operation on the MCP surface, for clients without direct REST |
+
+Gateway routes live in their own contract directory, `contracts/gateway/v1`,
+with its own lock and gate; registry v1 stays frozen and unchanged, and the
+registry gate keeps rejecting `/execut` routes. The OpenAPI specification is
+the source of truth for the generated MCP interface, including `gist_invoke`.
+Operation IDs, input validation, authorization, and response/error semantics
+must agree across REST and MCP; generation does not bypass middleware or
+expose every route automatically. Registry v1's four tools remain compatible;
+new gateway tools are generated from explicitly selected gateway operations.
+The gateway ships in the same service/image on `registry-aws` (ADR 008).
+
+An execution request must present a **current resolution** or the pinned
+reference tuple. Gist re-verifies at execution time: policy, revocation,
+binding currency, connection authority, and scope. A cached resolution never
+bypasses re-verification (RFC-002 §6).
+
+### Exactly-once, honestly
+
+- Idempotency keys are bound to tenant, principal, binding, connection, and
+  payload; reuse with a changed payload is a conflict, not a silent re-run.
+- Gist promises exactly-once **only as far as the provider backs it**. Where the
+  provider cannot confirm outcome, the execution record reports
+  `unknown_outcome` as a first-class state — never fabricated success, never
+  silent retry into a money-moving or mutating side effect.
+- A resolution is not an execution grant; an execution grant is created only
+  here, at this surface, against current policy.
+
+### Caller-owned approval and execution evidence
+
+The authenticated caller is responsible for obtaining any user approval its
+harness or product requires. Gist does not require a signed action approval,
+a caller-supplied `approved` flag, external approval-authority registration,
+or a second Gist-hosted approval step. Missing approval evidence is not a
+reason for Gist to reject a request; insufficient permissions still are.
+
+Gist verifies token audience, tenant and principal, `execution:invoke`, current
+policy, capability/binding currency, revocation, and exact connection grants
+before sending. Workspace membership alone does not authorize every connection.
+A caller's assertion of consent cannot expand these grants. Sensitive effects
+remain declared metadata for caller policy, disclosure, and grant restrictions.
+
+Trusting the caller accepts an explicit residual risk: a compromised or buggy
+caller can perform actions within its existing grants without Gist proving
+that a human consented to each action. Restrict grants, revoke identities and
+connections, and retain execution evidence to bound and diagnose that risk.
+
+Clients may execute directly through their own engines or invoke Gist for
+centralized custody and routing. Both use the same outcome vocabulary:
+`success`, `failure`, `accepted_unconfirmed`, `nonexecution`, `unknown`, and
+request-sent values `no`, `yes`, `unknown` (ADR 010). Gist never equates a
+harness approval with provider completion.
+
+## 4. Credential custody and connection ownership
+
+- Gist-issued access grants are never provider credentials. Caller-owned user
+  approval happens in the harness; the gateway cannot independently prove that
+  the caller displayed or received per-action consent. Gist enforces the
+  caller's bounded execution grant, capability/binding scope, policy, and
+  revocation, and records no approval JWS or hosted approval-page event.
+- KMS envelope encryption for provider credentials is selected. The intake mode
+  remains unresolved: stored-only connection setup versus one-shot
+  caller-supplied credentials. Until the owner records that choice, the
+  OpenAPI contract must expose no credential-value field or secret-ingress
+  route. Connection references, once established, bind workspace, principal,
+  provider, and capability scope.
+- Credentials and connected-account references are provider connections, not
+  user or operator identities. Treg and Composio remain separate provider
+  connections. A Composio connected-account reference is scoped to an authorized
+  integration/workspace; it does not prove user approval or identity.
+- Rotation and revocation must propagate through bindings and resolutions using
+  the RFC-002 §9 event feed (`connection_revoked`); failures produce disclosed
+  degraded state rather than silent fallback. Credential values never enter
+  ordinary logs, traces, guides, or model-facing results.
+- Connection ownership is explicit: every connected account record names the
+  workspace, principal, and capability scope it is authorized for; a binding
+  may not execute against a connection its resolution was not bound to.
+- Provider credential rotation/failure produces `degraded` provider state with
+  disclosed loss, not silent fallback to another account or provider.
+
+## 5. Egress, SSRF, and provider-registration controls
+
+Because the gateway performs server-side calls to registered providers:
+
+- Provider endpoints are allowlisted transports (HTTPS only), resolved through
+  a DNS/IP policy that blocks private, loopback, link-local, and metadata
+  addresses; redirects are re-validated per hop.
+- Response size, time, and content-type limits per binding; streaming is
+  bounded.
+- Result payloads from providers are untrusted content: they pass through the
+  same injection screening posture as published packages before reaching any
+  model-facing surface, and are never treated as instructions.
+- A registered provider record cannot cause the registry to fetch anything at
+  publication time; egress exists only on the execution path.
+
+## 6. Billing
+
+- Metered at the execution: binding version, provider route, duration,
+  outcome class (`success`, `failed`, `unknown_outcome`).
+- The ledger is append-only; billing entries reference the execution record and
+  never adjust retroactively without a compensating entry.
+- Retries, provider failover, and async completion all append to the same
+  execution's ledger trail. Silent route/account switching is prohibited — a
+  different provider route is a new, disclosed execution decision.
+
+## 7. Threat model (required before M-G1)
+
+A consolidated threat model is a deliverable of this RFC, not a checklist
+deferred to ops. Minimum coverage, drawing on the risks the registry review
+flagged:
+
+| Threat | Required control |
+| --- | --- |
+| Cross-tenant execution / payload confusion | Execution records bound to tenant+principal+connection server-side; isolation mechanism inherits RFC-002 §12 ADR and extends its test matrix to the execution and ledger paths |
+| Replay / double-spend | Idempotency binding above; `unknown_outcome` never auto-retries mutating effects |
+| Authority widening | A broader token, swapped cursor, or caller-supplied consent claim cannot widen scope; audience binding (RFC 8707) extends to the execution surface |
+| Credential exfiltration | Secrets never returned on any API; egress policy above; per-binding least privilege |
+| Prompt injection via provider results | Untrusted-content posture; screening; no instruction-following from results |
+| Revoked binding executes | Event-feed consumption + execution-time re-verification; revocation here is *not* advisory — the gateway is in the loop |
+| Ledger tampering | Append-only ledger; compensating entries only; audit of the ledger path |
+
+## 8. Milestones
+
+M-G1 and M-G2 describe a possible future hosted gateway, not current delivery
+commitments. They are dormant until an independent client is named, the
+client's missing execution capability is demonstrated, the library/direct
+integration path is shown insufficient, and a bounded RFC-003 scope and plan
+are accepted. A Zati library integration does not activate these milestones.
+The RFC-002/Gist library and Zati consumer acceptance remains the current
+priority. If the trigger is later met, the M-G1/M-G2 design and authority gates
+below must be reviewed against that client's actual contract before code or
+provider calls begin.
+
+### M-G1 — Gateway core, credential custody, threat model sign-off
+
+When the activation conditions above are met, the authoritative executable
+M-G1/M-G2 delivery graph must live in `docs/plan.md`; current gateway task
+inventory is preserved planning history, not admission to implementation.
+`docs/plans/gateway-buildout.md` is preserved as historical input. Under ADR
+009 decisions 1-2, independent review of the complete graph and threat model
+precedes any future G0.4 record and all build lanes.
+Provider adapters are limited to the two M-G1 proving adapters (ADR 009
+decision 7) — one HTTPS provider route (direct or aggregator-backed) and one
+remote MCP server we control as a fixture; the broad inventory is M-G2.
+
+- Execution surface, lifecycle, idempotency/reconciliation, caller and connection authorization, `unknown_outcome` semantics.
+- Credential store and delegated-OAuth connection ownership per §4.
+- Egress/SSRF controls per §5.
+- MCP generated from the gateway OpenAPI contract, with REST/MCP parity checks.
+- Consumption of the separately qualified catalog/library guidance from §11,
+  with no duplicate guide implementation lifecycle.
+- The §7 threat model written, reviewed, and signed off. **Gate: no
+  executable provider goes live before this.**
+
+### M-G2 — Provider inventory growth and billing (conditional)
+
+- Grow from the RFC-002 M1 launch set toward the eight-family inventory,
+  evidence-driven: each added provider ships its adapter contract, golden
+  fixtures, and support state; coverage claims are recorded per provider, never
+  aggregate.
+- Utility billing per §6, with the ledger live before any billed route.
+- Publisher signing/provenance remains a separate catalog-publication
+  obligation (§2.7); deferring M-G2 does not waive that requirement or qualify
+  public distribution.
+
+## 9. Non-goals (inherited)
+
+- Arbitrary hosted shell/Python/Node/Go execution as a general compute service.
+- Guaranteeing exactly-once beyond provider guarantees.
+- Gist acquiring authority beyond the authenticated caller's grants or hosting
+  a separate per-action approval workflow.
+- Native-tool hydration or context eviction (never in scope anywhere).
+
+## 10. Decisions required before any future M-G1
+
+| Decision | Resolution |
+| --- | --- |
+| Caller approval boundary | Founder-approved 2026-10-11: approval is caller-owned; Gist adds no hosted approval page or approval JWS and cannot independently prove per-action consent; Gist still enforces bounded grants, policy, binding, and revocation (ADR 009 amendment) |
+| Shared execution-evidence vocabulary with runtime protected-effects engines | Resolved 2026-09-27: outcome confirmation enum (`success`, `failure`, `accepted_unconfirmed`, `nonexecution`, `unknown`) and request-sent enum (`no`, `yes`, `unknown`) fixed in ADR 010; one evidence shape, two producers |
+| Credential encryption and intake mode | KMS envelope encryption is selected; stored-only versus one-shot caller-supplied intake remains an owner decision. Do not add credential values or secret-ingress routes until recorded (ADR 009/010) |
+| Billing meter unit and ledger schema | Deferred to M-G2 (unchanged): append-only ledger keyed by execution; meter unit decided with the first billed route |
+| Signing scheme for publisher provenance | Catalog-publication obligation, independent of gateway activation; the earlier Sigstore-class proposal remains unimplemented and requires separate qualification |
+
+## 11. Dynamic tool-use guidance (historical gateway proposal; scope moved)
+
+RFC-002's dynamic tool-use skill direction complements catalog/library use.
+Gist should return task-specific guidance grounded in resolved capabilities and
+maintained recipes, enabling a harness to use selected tools without
+repeatedly searching a provider catalog. This capability is owned by the
+RFC-002/library contract and its acceptance graph. RFC-003 may consume its
+output if a future gateway is activated, but does not define a second guide
+endpoint or implementation lifecycle. See [RFC-002's data model](rfc-002.md#dynamic-tool-use-skills-founder-direction-2026-10-01)
+for the distinction from authored craft skills and the provenance requirements.
+
+The guide must describe the actual executable contracts, authorized connection
+references, prerequisites, and error/uncertain-outcome handling. Guidance is not
+an execution grant; gateway checks remain authoritative at invocation time.
+Provider discovery and mapping should be reusable binding work rather than an
+unconditional natural-language search before every execution.
+
+The superseded M-G1 proposal used `POST /v1/tool-guides` to accept intent and
+an optional skill reference and return a derived guide with required
+capabilities, exact contracts, bindings, authorized connection references,
+readiness findings, recipe/source versions, and expiry. It proposed a generated
+MCP operation with the same contract; neither surface is shipped.
+The guide is a resolution artifact; it is not automatically published as an
+immutable skill or installed in a harness. Unsupported intent yields explicit
+missing requirements, not invented tools. A recipe may specify prerequisites
+without silently performing actions.
+
+Assembly uses maintained recipes and validated schemas; any model-assisted
+selection must be checked against the authorized catalog. Cache identity must
+include caller/workspace, source versions, and resolution context. Expiry and
+revocation prevent stale guides from granting access, and execution always
+rechecks current authority. No provider secrets appear in guides. Provider
+results remain untrusted data rather than recipe instructions.
+
+The authoritative `docs/plan.md` catalog/library graph must assign stable tasks for
+the guide contract, grounded source selection, safe assembly, provenance and
+freshness, transport integration, correctness/security tests, and evaluation.
+Measure provider-discovery calls and model turns alongside correctness. A
+covered, fully resolved workflow should require no further provider-tool
+discovery. The founder approved the guidance direction on 2026-10-11;
+contract details, threat cases, and evaluation remain subject to independent
+review. Catalog/library guidance does not depend on gateway G0.4 admission.
+No shipped guide implementation is claimed.
