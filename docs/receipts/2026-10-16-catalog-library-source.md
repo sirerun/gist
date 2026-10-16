@@ -66,3 +66,20 @@ its required isolated PostgreSQL service explicitly, matching the passing
 source recipe instead of relying on an unavailable default database. These are
 workflow changes, not evidence that hosted Actions ran. Final exact-head review
 is recorded in the PR.
+
+## Landed source foundation
+
+PR66 rebase-merged to `9e870c0a7b93990b166071ec061a27206afbda88` after independent
+final approval at `1d5f8cbed597d6eaaf3cb81e596fc638901f3b51`. Fresh remote main
+contains the landed revision and its complete tree equals the reviewed candidate.
+GitHub Actions did not start due to the account billing lock; branch policy had
+no required status checks and no protection was bypassed. Source checks above
+are the authorized fallback, not hosted Actions passes.
+
+The actual landed tracked-source archive had matching SHA256 at both ends:
+`c88c11708fb0001249fc59a94d29ea8a2bcd68c52b41e3a321a5065c1ad92914`.
+On that fresh source, frozen-source validation and
+`GOWORK=off go test -p 4 ./catalog/... ./internal/cataloglexical` passed.
+T-CATALOG.11/.12/.13 close this producer batch. The downstream Zati batch
+T-CATALOG.1/.2 pins this immutable producer and retains its own verification,
+independent review, merge and landed gates. No release tag was created.
