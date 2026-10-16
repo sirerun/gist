@@ -1,5 +1,8 @@
 # ADR 009: Execution Gateway M-G1 Foundations
 
+> Superseded 2026-10-16 by [ADR016](016-zati-library-first-rfc003-gateway-boundary.md). Gateway execution is retired. The original decision below is historical and supplies no current dispatch or deployment authority. Catalog provenance is retained under RFC-002.
+
+
 ## Status
 
 Founder approved the revised M-G1 direction for planning and implementation on 2026-10-11. Exact design reconciliation, independent review, and the G0.4 record against the reviewed revisions remain open.

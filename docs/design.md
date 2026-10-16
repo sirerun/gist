@@ -1,5 +1,28 @@
 # Gist -- Design Document
 
+## Catalog-only decision — 2026-10-16
+
+[ADR016](adr/016-zati-library-first-rfc003-gateway-boundary.md) supersedes earlier
+gateway and whole-project continuation statements below. Gist remains reusable,
+with a public library and Zati as first consumer. It owns skill/tool discovery,
+complete exact packages, schemas, provenance and capability resolution. Execution,
+provider credentials, approvals, journals and utility billing belong to external
+executors. RFC-003 is retired, not deferred. Existing root-library execution
+compatibility is unchanged; no runtime code is removed in this docs candidate.
+Hosted expansion is paused except repairs and existing consumer obligations;
+there is no shutdown or deployment authorization. Registry authentication and
+publisher verification remain required. Zati's existing v1.2.0 ranking is a
+starting point, not proof of full catalog integration.
+
+The canonical plan preserves original IDs/status/evidence with explicit blocked
+retired/held dispositions. Publisher provenance moves to catalog ownership;
+the CATALOG batch adds actual consumer verification and independent delivery
+gates. Real skill/asset/tool selection and exact test recipes remain preflight
+inputs. Historical infrastructure/access notes below describe their dated
+observations, not current provider availability. The coverage receipt is
+[here](receipts/2026-10-16-catalog-plan-coverage.md).
+
+
 ## Overview
 
 Gist is a Go library and CLI that keeps raw data out of LLM context windows. Content is chunked and indexed into PostgreSQL (or an in-memory store for testing), then retrieved on demand using a three-tier search engine (porter stemming, trigram, fuzzy correction). Callers set token budgets and get back only the most relevant snippets.
