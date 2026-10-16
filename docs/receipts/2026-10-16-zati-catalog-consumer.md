@@ -83,3 +83,28 @@ finding. Full-tree formatting reports only unchanged baseline
 `internal/configuration/schemas.go`; changed source formatting is clean.
 This is a qualified baseline comparison, not a claim that whole-repository lint
 or formatting is green. Final independent review and merge are not yet asserted.
+
+## Independent review
+
+Non-author review of Zati `bc9166803c8f1a216a74428fdeed515cde9aec46` and Gist
+documentation `d208efb89298e9251142449917d310da4fd5655a` accepted one P2 finding,
+ZATI-CAT-R1: mixing catalog and ordinary active skills could silently remove the
+ordinary skill's tools. The selected bounded correction explicitly refuses
+unsupported mixed composition rather than widening tool exposure. Correction,
+regression checks and exact-head re-review remain required before merge.
+No other blocking finding was reported in the full candidate review.
+
+Zati main Actions also cannot start because of the account billing lock, confirmed
+from check117143352354's annotation. This prevents hosted CI evidence. Main is
+reported unprotected; local fallback retains independent review and exact-head
+merge guards, without altering billing or repository policy. Native multi-OS,
+full race and Flutter qualification are not claimed by the source checks.
+
+ZATI-CAT-R1 correction `054325383a15e7c19212fa171ad99e9ef563a9ab` moves the
+composition check into the authoritative Skills owner before asset processing.
+Both mixed orderings return `capability_unsupported`; ordinary-only selection
+retains existing behavior. Regression tests include an ordinary skill with its
+own tool requirement. Targeted Skills/Execution/catalog and assembled Gist/MCP
+checks pass, as do renderer and all42 specification tests. Correction archive
+SHA256 matches at both ends:
+`cbd59bec757f2b610af2f68844c8316129e16703e9bcc3774853b988c0e23c02`.
