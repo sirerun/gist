@@ -1,5 +1,10 @@
 # Gist development log
 
+## 2026-10-16 — Task preparation evaluation planning
+
+Owner selected read-only inbox briefing, clarified Zati has no Gmail MCP yet, and requested an EmbeddingGemma2 evaluation plan, ADRs and RFC update. Added ADR017/018, a preregistered protocol and E-PREP lifecycle; retained hosted holds and retired execution. The protocol separates retrieval from guide effects and includes Composio direct tools. No model download, benchmark, paid provider call, live email read or performance result occurred. In-flight catalog extraction remains a separate unmerged code candidate.
+
+
 ## Catalog-only decision — 2026-10-16
 
 [ADR016](adr/016-zati-library-first-rfc003-gateway-boundary.md) supersedes earlier
