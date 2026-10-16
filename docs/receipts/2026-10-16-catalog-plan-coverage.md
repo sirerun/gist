@@ -375,3 +375,9 @@ Original rows: 352; candidate rows: 369. Proposed outcome batches: 2 (CATALOG pr
 Archive provenance: the October11 gateway-buildout.md.source preserves the later authored gateway draft, including its unique 17-line Banked product direction section; it is not a byte copy of base d12fd22. Its recorded digest identifies the actual preserved content. The October16 snapshots preserve the exact inherited uncommitted draft, not only HEAD.
 
 New T-PROVENANCE.0–5 retain verification, independent review, correction/re-review, merge, landed verification and release/operational trust acceptance for .31/.35. This separate batch does not block workspace-private trusted-source consumer adoption. No public distribution is qualified by digest-only local checks.
+
+Review correction: original source-row equality alone missed epic namespace
+changes to 18 historical tasks. New epic blocks now follow existing tasks;
+all 352 normalized IDs match baseline 037e81d exactly, including T1.1–T6.2.
+See the [full normalized-ID manifest](2026-10-16-catalog-normalized-id-preservation.json).
+No original local or normalized ID was renamed. External re-review is pending.
