@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/sirerun/gist/hosted/internal/ports"
+	"github.com/sirerun/gist/catalog/ports"
 )
 
 var ErrServiceUnavailable = errors.New("connection broker unavailable")

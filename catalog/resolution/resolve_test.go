@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sirerun/gist/hosted/internal/ports"
+	"github.com/sirerun/gist/catalog/ports"
 )
 
 type catalogDouble struct {

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sirerun/gist/hosted/internal/ports"
+	"github.com/sirerun/gist/catalog/ports"
 )
 
 var (

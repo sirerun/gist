@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sirerun/gist/hosted/internal/ports"
+	"github.com/sirerun/gist/catalog/ports"
 )
 
 type authDouble struct {
