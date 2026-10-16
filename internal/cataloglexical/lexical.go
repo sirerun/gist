@@ -122,13 +122,13 @@ type Document struct {
 // metadata is the subset of catalog metadata that lexical retrieval reads.
 // Unknown fields are ignored; malformed metadata is reported to the caller.
 type metadata struct {
-	LogicalName          string   `json:"logical_name"`
-	Summary              string   `json:"summary"`
-	Description          string   `json:"description"`
-	Tags                 []string `json:"tags"`
-	Taxonomy             []string `json:"taxonomy"`
-	RequiredCapabilities []string `json:"required_capabilities"`
-	CapabilityRef        string   `json:"capability_ref"`
+	LogicalName          string            `json:"logical_name"`
+	Summary              string            `json:"summary"`
+	Description          string            `json:"description"`
+	Tags                 []string          `json:"tags"`
+	Taxonomy             []string          `json:"taxonomy"`
+	RequiredCapabilities []json.RawMessage `json:"required_capabilities"`
+	CapabilityRef        string            `json:"capability_ref"`
 }
 
 // DocumentFromMetadata builds the searchable projection of a record from its
@@ -142,7 +142,17 @@ func DocumentFromMetadata(kind, id string, raw []byte) (Document, error) {
 	}
 	caps := make([]string, 0, len(m.RequiredCapabilities)+1)
 	for _, c := range m.RequiredCapabilities {
-		caps = append(caps, unpin(c))
+		var id string
+		if err := json.Unmarshal(c, &id); err != nil {
+			var requirement struct {
+				ID string `json:"id"`
+			}
+			if err := json.Unmarshal(c, &requirement); err != nil {
+				return Document{}, err
+			}
+			id = requirement.ID
+		}
+		caps = append(caps, unpin(id))
 	}
 	if m.CapabilityRef != "" {
 		caps = append(caps, unpin(m.CapabilityRef))

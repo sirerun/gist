@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/sirerun/gist/hosted/internal/ports"
+	"github.com/sirerun/gist/catalog/ports"
 )
 
 type searchDouble struct {
@@ -34,8 +34,8 @@ func TestSearchFiltersBeforeRankAndLimit(t *testing.T) {
 		return b
 	}
 	search := &searchDouble{page: ports.SearchPage{Records: []ports.CatalogRecord{
-		{Ref: ports.ArtifactRef{WorkspaceID: "w", Kind: ports.KindSkill, ID: "hidden", Version: "1"}, Metadata: makeMetadata("engineer resume", nil)},
-		{Ref: ports.ArtifactRef{WorkspaceID: "w", Kind: ports.KindSkill, ID: "visible", Version: "1"}, Metadata: makeMetadata("engineer", []string{"hr"})},
+		{State: "published", Ref: ports.ArtifactRef{WorkspaceID: "w", Kind: ports.KindSkill, ID: "hidden", Version: "1"}, Metadata: makeMetadata("engineer resume", nil)},
+		{State: "published", Ref: ports.ArtifactRef{WorkspaceID: "w", Kind: ports.KindSkill, ID: "visible", Version: "1"}, Metadata: makeMetadata("engineer", []string{"hr"})},
 	}}}
 	auth := &authDouble{allowed: map[string]bool{"visible": true}}
 	svc, err := New(search, auth)
@@ -55,7 +55,7 @@ func TestSearchFiltersBeforeRankAndLimit(t *testing.T) {
 }
 
 func TestSearchReturnsEmptyForNoMatch(t *testing.T) {
-	search := &searchDouble{page: ports.SearchPage{Records: []ports.CatalogRecord{{Ref: ports.ArtifactRef{WorkspaceID: "w", Kind: ports.KindSkill, ID: "one", Version: "1"}}}}}
+	search := &searchDouble{page: ports.SearchPage{Records: []ports.CatalogRecord{{State: "published", Ref: ports.ArtifactRef{WorkspaceID: "w", Kind: ports.KindSkill, ID: "one", Version: "1"}}}}}
 	auth := &authDouble{allowed: map[string]bool{"one": true}}
 	svc, err := New(search, auth)
 	if err != nil {
@@ -72,7 +72,7 @@ func TestSearchReturnsEmptyForNoMatch(t *testing.T) {
 
 func TestSearchRanksTokenizedTermsDeterministically(t *testing.T) {
 	record := func(kind ports.ArtifactKind, id, meta string) ports.CatalogRecord {
-		return ports.CatalogRecord{Ref: ports.ArtifactRef{WorkspaceID: "w", Kind: kind, ID: id, Version: "1.0.0"}, Metadata: []byte(meta)}
+		return ports.CatalogRecord{State: "published", Ref: ports.ArtifactRef{WorkspaceID: "w", Kind: kind, ID: id, Version: "1.0.0"}, Metadata: []byte(meta)}
 	}
 	records := []ports.CatalogRecord{
 		record(ports.KindSkill, "gist/skill/asset-skill", `{"logical_name":"asset-skill","summary":"Offline document parsing fixture.","tags":["document","fixture"],"required_capabilities":["gist/document/parse@1.0.0"]}`),

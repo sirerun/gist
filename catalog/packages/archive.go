@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"path"
 	"strings"
 )
@@ -39,7 +40,7 @@ func ReadArchive(data []byte, limits Limits) (Archive, error) {
 		if err != nil {
 			return Archive{}, err
 		}
-		if file.FileInfo().Mode()&0o170000 == 0o120000 {
+		if file.Mode()&fs.ModeSymlink != 0 {
 			return Archive{}, fmt.Errorf("packages: symlink is not allowed: %q", name)
 		}
 		if file.FileInfo().IsDir() {

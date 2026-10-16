@@ -4,7 +4,7 @@ import (
 	"container/list"
 	"sync"
 
-	"github.com/sirerun/gist/hosted/internal/ports"
+	"github.com/sirerun/gist/catalog/ports"
 )
 
 // defaultCacheEntries bounds the discovery cache. Keys include the query and

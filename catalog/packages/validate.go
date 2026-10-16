@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/sirerun/gist/hosted/internal/contract"
+	"github.com/sirerun/gist/catalog/integrity"
 )
 
 type Manifest struct {
@@ -18,7 +18,7 @@ type Manifest struct {
 		Algorithm string `json:"algorithm"`
 		Value     string `json:"value"`
 	} `json:"package_digest"`
-	Inventory   []contract.InventoryEntry `json:"inventory"`
+	Inventory   []integrity.InventoryEntry `json:"inventory"`
 	Publication struct {
 		Status     string `json:"status"`
 		Provenance string `json:"provenance"`
@@ -55,10 +55,10 @@ func Validate(a Archive, limits Limits) (Package, error) {
 	if m.Publication.Status != "screening" && m.Publication.Status != "approved" {
 		return Package{}, errors.New("packages: package is not in a reviewable state")
 	}
-	if _, err := contract.ValidateAgentSkillsCore(skill); err != nil {
+	if _, err := integrity.ValidateAgentSkillsCore(skill); err != nil {
 		return Package{}, fmt.Errorf("packages: validate SKILL.md: %w", err)
 	}
-	manifestDigest, _, err := contract.PackageDigest(m.Inventory)
+	manifestDigest, _, err := integrity.PackageDigest(m.Inventory)
 	if err != nil {
 		return Package{}, fmt.Errorf("packages: validate inventory: %w", err)
 	}
@@ -67,12 +67,12 @@ func Validate(a Archive, limits Limits) (Package, error) {
 	}
 	// VerifyPackage checks every declared byte, rejects undeclared members, and
 	// verifies the detached manifest transfer digest before publication.
-	if err := contract.VerifyPackage(contract.Package{
+	if err := integrity.VerifyPackage(integrity.Package{
 		Manifest:      manifestBytes,
 		Files:         a.FilesWithoutManifest(),
 		Inventory:     m.Inventory,
 		PackageDigest: m.PackageDigest.Value,
-		Transfer:      contract.DetachedTransfer{ManifestDigest: digestBytes(manifestBytes), ManifestSize: int64(len(manifestBytes))},
+		Transfer:      integrity.DetachedTransfer{ManifestDigest: digestBytes(manifestBytes), ManifestSize: int64(len(manifestBytes))},
 	}); err != nil {
 		return Package{}, fmt.Errorf("packages: verify package closure: %w", err)
 	}

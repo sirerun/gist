@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sirerun/gist/hosted/internal/lexical"
-	"github.com/sirerun/gist/hosted/internal/ports"
+	"github.com/sirerun/gist/catalog/ports"
+	"github.com/sirerun/gist/internal/cataloglexical"
 )
 
 // Authorizer is deliberately consumed here rather than embedded in a search
@@ -55,12 +55,12 @@ type Response struct {
 }
 
 type metadata struct {
-	LogicalName          string   `json:"logical_name"`
-	Summary              string   `json:"summary"`
-	Trust                string   `json:"trust"`
-	Tags                 []string `json:"tags"`
-	RequiredCapabilities []string `json:"required_capabilities"`
-	EstimatedBytes       int      `json:"estimated_bytes"`
+	LogicalName          string            `json:"logical_name"`
+	Summary              string            `json:"summary"`
+	Trust                string            `json:"trust"`
+	Tags                 []string          `json:"tags"`
+	RequiredCapabilities []json.RawMessage `json:"required_capabilities"`
+	EstimatedBytes       int               `json:"estimated_bytes"`
 }
 
 type Service struct {
@@ -84,8 +84,10 @@ func (s *Service) Search(ctx context.Context, req Request) (Response, error) {
 	if req.Limit <= 0 {
 		req.Limit = 20
 	}
-	key := cacheKey(req, s.version)
-	records, next, ok := s.cache.get(key)
+	// Fetch current records on every request; authorization alone cannot refresh
+	// cached lifecycle or immutable metadata after revocation.
+	var records []ports.CatalogRecord
+	var next ports.Cursor
 	if req.Cursor.ID != "" {
 		if req.Cursor.WorkspaceID != req.Principal.WorkspaceID || req.Cursor.ExpiresAt <= time.Now().Unix() {
 			return Response{}, fmt.Errorf("cursor expired or bound to another workspace")
@@ -94,13 +96,12 @@ func (s *Service) Search(ctx context.Context, req Request) (Response, error) {
 			return Response{}, fmt.Errorf("cursor bound to another principal")
 		}
 	}
-	if !ok {
+	{
 		page, err := s.search.Search(ctx, ports.SearchQuery{Principal: req.Principal, Text: req.Query, Kinds: req.Kinds, Tags: req.Tags, Cursor: req.Cursor, Limit: req.Limit, MaxBytes: req.MaxBytes})
 		if err != nil {
 			return Response{}, fmt.Errorf("search catalog: %w", err)
 		}
 		records, next = page.Records, page.Next
-		s.cache.put(key, records, next)
 	}
 
 	// Authorization is intentionally before ranking and limiting. A hidden
@@ -110,6 +111,12 @@ func (s *Service) Search(ctx context.Context, req Request) (Response, error) {
 	visible := make([]rankedCandidate, 0, len(records))
 	for _, record := range records {
 		ref := record.Ref
+		if ref.WorkspaceID != req.Principal.WorkspaceID {
+			return Response{}, fmt.Errorf("catalog returned another workspace")
+		}
+		if record.State != "published" && record.State != "deprecated" {
+			continue
+		}
 		decision, err := s.auth.Decide(ctx, req.Principal, ports.ActionRead, &ref)
 		if err != nil {
 			return Response{}, fmt.Errorf("authorize discovery record %s: %w", ref.ID, err)

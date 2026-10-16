@@ -50,3 +50,7 @@ require (
 	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
 )
+
+require github.com/sirerun/gist v0.0.0
+
+replace github.com/sirerun/gist => ..

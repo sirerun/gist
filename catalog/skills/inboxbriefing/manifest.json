@@ -1,0 +1,39 @@
+{
+  "id": "zati/inbox-briefing",
+  "version": "1.0.0",
+  "logical_name": "Read-only inbox briefing",
+  "summary": "Summarize recent unread email without changing the mailbox.",
+  "trust": "operator_asserted",
+  "publication": {
+    "status": "approved",
+    "provenance": "maintained-source; caller must admit this package"
+  },
+  "required_capabilities": [
+    {
+      "id": "mail/inbox/read",
+      "contract_version": "1.0.0"
+    }
+  ],
+  "runtime_requirements": {
+    "local_execution": false,
+    "filesystem": []
+  },
+  "package_digest": {
+    "algorithm": "sha256",
+    "value": "8737a6208c40af2008ac350f57d95ba0302e676ae5c34a4771a546b139d23374"
+  },
+  "inventory": [
+    {
+      "path": "SKILL.md",
+      "size": 1907,
+      "sha256": "4857359c597ff7049a953b8ee4275c4c488902e9be5dbde60b6ab79bc3dc6ac5",
+      "media_type": "text/markdown"
+    },
+    {
+      "path": "assets/briefing-template.md",
+      "size": 735,
+      "sha256": "f092c85644e73e737f82218d1786d0fd95633c3116afeec2a2a30580a8b2747c",
+      "media_type": "text/markdown"
+    }
+  ]
+}
