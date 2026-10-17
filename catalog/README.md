@@ -11,6 +11,7 @@ provider operation.
 | `resolution` | Exact capability/binding closure and explicit readiness findings |
 | `packages` | Bounded ZIP parsing, complete inventory verification and pinned retrieval |
 | `ports` | Shared catalog, artifact, policy and connection contracts |
+| `preparation` | Optional intent ranking and complete authorized skill/schema/guide context |
 | `provenance` | Detached publisher attestations with caller-owned signing and current trust |
 | `integrity` | Canonical digest and complete-package verification helpers |
 | `skills/inboxbriefing` | Maintained read-only briefing instructions and template |
@@ -63,6 +64,13 @@ Connection setup, credentials, mailbox consent and execution belong to the
 consumer. No provider credentials are included in the maintained package.
 
 Run the source consumer checks with `go test ./catalog/...`. They use controlled
-storage and bindings, not a live mailbox. Semantic retrieval and dynamic guide
-assembly are planned evaluation work; this library foundation makes no measured
-token or latency improvement claim.
+storage and bindings, not a live mailbox. Optional preparation is available as experimental source in `preparation`.
+Its caller supplies current catalog/policy, exact resolver, package retriever and
+optional scoped embedding adapter. Credentialed readiness additionally requires
+an explicit fresh `CurrentReadiness` port bound to principal/runtime/skill/closure;
+absence never means a connected account. Only the maintained inbox recipe is
+covered. Complete verified instructions/assets/schemas are returned or the budget
+is refused; no execution grant is returned. See ADR020 and `tools/evaluation`.
+The real pinned text-only embedding adapter is locally qualified, but held-out
+quality, whole-task comparisons, Zati integration/default enablement and release
+remain separate. No token or latency advantage is claimed.

@@ -1,6 +1,7 @@
 # Task preparation evaluation protocol
 
-Revision: proposal-1, 2026-10-16. No benchmark has been run.
+Revision: source-freeze-2, 2026-10-16. No held-out or whole-task benchmark has been run.
+Pinned local text-only model smoke qualification is recorded separately in tools/evaluation/qualification.
 Decision records: [ADR017](../adr/017-task-preparation-and-semantic-retrieval.md),
 [ADR018](../adr/018-tool-preparation-evaluation-and-adoption.md).
 Task ledger: [E-PREP in the canonical plan](../plan.md#e-prep--task-preparation-and-semantic-retrieval-evaluation).
@@ -174,8 +175,13 @@ follow that decision; no hosted deployment is required for a library experiment.
 
 Harness deliverables must include documented commands for corpus validation,
 offline ranking/preparation and end-to-end runs, a dry-run cost/call estimator,
-and a deterministic report command. Those commands do not exist yet; their
-implementation and actual exercise are acceptance of T-PREP.2, not claimed here.
+and a deterministic report command. The source commands are documented in `tools/evaluation/README.md`: corpus
+checking, explicit pinned local model qualification, source runner/dry-run,
+post-selection label grading and deterministic reports. The fixed shared catalog
+contains the maintained inbox skill plus static unsupported distractors. Its
+controlled source runs do not establish broader catalog coverage, held-out
+retrieval quality or whole-task performance. T-PREP.9 requires a separately frozen
+selection and admitted held-out manifest; missing scenarios remain NOT_RUN.
 Existing public-library and frozen-wire recipes remain regression checks.
 
 Before provider-backed runs, the run manifest records exact allowed account,
