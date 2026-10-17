@@ -14,5 +14,9 @@
     "heldout": 60
   },
   "template_isolation": "Independent review pending; unique workflow IDs are not proof of construction-family independence.",
-  "labels_status": "heldout replacement author1 sealed; blind author2 replacement annotation pending"
+  "labels_status": "heldout replacement author1 sealed; blind author2 replacement annotation pending",
+  "validation_status": "INVALID_SUPERSEDED",
+  "blocking_finding": "CORPUS-R2",
+  "actual_changed_intent_count": 0,
+  "reason": "New intent variable was not assigned to serialized row. Retained as failed preregistration audit; not a qualified corpus."
 }
