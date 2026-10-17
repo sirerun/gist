@@ -1,5 +1,4 @@
 {
-  "schema_version": "gist.composition-freeze/v1",
   "files": {
     "catalog/composition/consumer_test.go": "797bf2a47059ab5ef3c652e813e369223ef0ee4b16161e6f4d3deeea94f4b455",
     "catalog/composition/prepare.go": "318d19051dd08ce6dd746ab7ff9858ae4cf98780aaae4dc7b8b937ac4bbbfdbd",
@@ -62,9 +61,10 @@
     "go.sum": "3dd4b607c77852af22d9249999e8d3758ac4ae6745e6ddfc357d461944ec39f5",
     "internal/cataloglexical/lexical.go": "d4306c95dac579d12d97a1f69fb773cd692e30b566db4b4ec5c8757db5573ae6",
     "internal/cataloglexical/lexical_test.go": "50f42db27116d0926a49b6a70786c870bb8ac1f7add88c06a09a8829fe5a455b",
+    "tools/evaluation/cmd/compositionqual/README.md": "38198724a2a7443c55a72924c7fa11d8f4982a5e7f92478e5a9c956c231f4345",
     "tools/evaluation/cmd/compositionqual/fixtures.go": "eeb44bdc20c4a0560507b43734796c85f7b2835d6dff78de555242702571e157",
     "tools/evaluation/cmd/compositionqual/main.go": "6a99c6e4ceb4afc60a03a13f09988c8f8a85ec979eed2ddc9192e5ad0b704839",
-    "tools/evaluation/cmd/compositionqual/main_test.go": "f2e37d0e6bada92e9d57bd8572d3ca36a745543d8c0a3372c17c06613f4b1d17",
+    "tools/evaluation/cmd/compositionqual/main_test.go": "ea719b099b43c1c5ef2962e40e41d9c4ed89e2464427266c640c78f8aa544db1",
     "tools/evaluation/cmd/compositionqual/rss_linux.go": "0c0c694ecd57ec2d08959ebde54bbd654ef8ff977dae91bf0f897a0bf90d7b28",
     "tools/evaluation/cmd/compositionqual/rss_other.go": "ec100315be44c3c89aee9888e3622bf20546785136f32f3c7103239be3df1f2e",
     "tools/evaluation/cmd/compositionqual/run.go": "d985c3a7bd100836fdc7a94453cfb7811f24b168f6964c743ac95ff901581e8f",
@@ -78,5 +78,6 @@
     "tools/evaluation/composition-cohort/reconciliation.md": "04cb4877eaa8ed964ca014c2c8b3e52cf09c79ef1dfe22ba9ab1b6f6aa346fea",
     "tools/evaluation/composition-cohort/report.py": "2b3b9f4795e5f69e74608e2f6f9c2eb4942f76abcb3324ac2e04400ce38bc9db",
     "tools/evaluation/composition-cohort/test_report.py": "8118e80ef9c8f54dbb74f8fcc63f3f8873d32117fa7a7411cf841b8f24407c63"
-  }
+  },
+  "schema_version": "gist.composition-freeze/v1"
 }
