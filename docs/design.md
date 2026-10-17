@@ -42,8 +42,10 @@ mapping stays supported during immutable-version migration. Indexed discovery
 selects a bounded shortlist; exact resolution touches the selected requirements.
 The producer and bounded index landed in Gist PR83/84; the first consumer landed
 in Zati PR47. Source checks cover the typed and legacy workflows. The independently
-labeled composition cohort and 10k/100k measurements are the next qualification
-gates; no scale result or semantic default follows from source delivery.
+labeled synthetic composition cohort and 10k/100k index measurements passed their
+frozen targets; see the [qualification receipt](receipts/2026-10-17-composition-qualification.md).
+This measures the library on the declared host, not model tokens, provider
+performance or installed Zati latency. No semantic default is adopted.
 E-COMPOSE in the canonical plan owns remaining evaluation and separately
 authorized installation acceptance.
 
