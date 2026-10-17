@@ -13,7 +13,7 @@
     "development": 60,
     "heldout": 60
   },
-  "template_isolation": "Independent review pending; unique workflow IDs are not proof of construction-family independence.",
+  "template_isolation": "Independent review accepted the repaired construction split. Unique workflow IDs are not proof of statistical independence; use actual44/35 construction clusters.",
   "labels_status": "two independent annotations reconciled and final normalized artifacts reviewed",
   "validation_status": "independently_reconciled_synthetic_pilot",
   "verified_actual_changed_intent_count": 32,

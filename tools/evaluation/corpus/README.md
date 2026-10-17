@@ -1,9 +1,9 @@
 # Synthetic preparation pilot corpus
 
-This corpus is an **initial author-labelled pilot**, not reconciled evaluation
-truth or an evaluation result. A second annotator must label each input without
-reading author-1 labels, then resolve disagreements without retrieval/model
-scores before `label_status` changes.
+This corpus is an **independently reconciled synthetic source pilot**, not an
+evaluation result. Two annotators labelled inputs independently before comparing
+labels; disagreements were reconciled without retrieval/model scores. Original
+annotations and the failed intermediate repair remain separate audit artifacts.
 
 There are 60 development cases and 60 separately sealed held-out cases. Each
 split has ten cases in each disjoint primary stratum: straightforward,
