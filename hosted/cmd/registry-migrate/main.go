@@ -26,12 +26,13 @@ func main() {
 func run() error {
 	status := flag.Bool("status", false, "read-only schema status (default)")
 	apply := flag.Bool("apply", false, "apply pending embedded forward migrations")
+	provision := flag.Bool("provision-runtime-role", false, "provision the reviewed restricted runtime role after migration apply")
 	adopt := flag.Int("adopt-through", 0, "record an operator-audited existing migration prefix; never runs its SQL")
 	manifest := flag.String("expected-manifest-sha256", "", "required migration manifest SHA256 for adoption")
 	schema := flag.String("expected-schema-sha256", "", "required current schema SHA256 for adoption")
 	timeout := flag.Duration("timeout", 5*time.Minute, "overall deadline, at most 15 minutes")
 	flag.Parse()
-	if flag.NArg() != 0 || (*status && (*apply || *adopt != 0)) || (*apply && *adopt != 0) || *adopt < 0 || (*adopt == 0 && (*manifest != "" || *schema != "")) || *timeout <= 0 || *timeout > 15*time.Minute {
+	if flag.NArg() != 0 || (*status && (*apply || *adopt != 0 || *provision)) || (*apply && (*adopt != 0 || *provision)) || (*provision && *adopt != 0) || *adopt < 0 || (*adopt == 0 && (*manifest != "" || *schema != "")) || *timeout <= 0 || *timeout > 15*time.Minute {
 		return fmt.Errorf("invalid migration flags; choose status, apply, or explicit audited adoption")
 	}
 	if os.Getenv("GIST_DATABASE_URL") == "" {
@@ -55,6 +56,8 @@ func run() error {
 		_ = conn.Close(closeCtx)
 	}()
 	switch {
+	case *provision:
+		err = runner.ProvisionRuntimeRole(ctx, conn, os.Getenv("GIST_RUNTIME_DATABASE_URL"))
 	case *apply:
 		err = runner.Apply(ctx, conn)
 	case *adopt > 0:

@@ -36,3 +36,26 @@ five-minute deadline is configurable with `--timeout` up to fifteen minutes.
 Do not use the application runtime role for schema mutation. The one-shot task
 needs the approved migration owner and network boundary; it needs no GitHub App,
 OAuth, signing or provider credentials.
+
+## Runtime database role
+
+After the audited migration ledger is fully applied, run the separate explicit
+`--provision-runtime-role` operation. It requires `GIST_RUNTIME_DATABASE_URL`
+pointing at the exact same host, port and database with a distinct lowercase role
+name and a strong printable-ASCII password of at least 32 bytes. The application
+receives this URL; only the migration task retains the schema owner's URL.
+
+Provisioning creates a LOGIN role with NOSUPERUSER, NOBYPASSRLS, NOCREATEDB,
+NOCREATEROLE, NOINHERIT and NOREPLICATION. Unsafe existing role attributes,
+memberships, ownership, DDL powers or unreviewed grants refuse provisioning.
+Only a salted SCRAM verifier enters role SQL. Passwords and connection strings
+are never emitted in status or errors. Re-running this explicit operation can
+rotate that role's password.
+
+The dedicated registry database's PUBLIC CREATE/TEMP defaults and public-schema
+CREATE/default function EXECUTE are revoked transactionally. The source declares
+specific table, sequence and function grants; it gives no migration ledger or
+DDL access. Namespace reservation and trusted review tables are read-only. V2
+publication staging tables receive no runtime grant while that publisher remains
+disabled. New migrations that need new runtime access require an explicit source
+change and provisioning run; blanket future-object grants are not installed.
