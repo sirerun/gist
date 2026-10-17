@@ -101,3 +101,27 @@ class FrozenPolicyGridTests(unittest.TestCase):
                 changed = dict(row, **{field: "wrong"})
                 with self.assertRaises(ValueError):
                     validate_frozen_rows([changed], admission)
+
+class ReportBeforeLabelAccessTests(unittest.TestCase):
+    def test_mixed_policy_or_config_rejected_before_label_read(self):
+        import subprocess
+        import sys
+        import tempfile
+        import json
+        from pathlib import Path
+        for field in ("policy_version", "top_k"):
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                row = {"id": "a", "arm": "L0", "repeat": 1, "phase": "development",
+                       "source": "s", "inputs_sha256": "i", "catalog_sha256": "c",
+                       "catalog_version": "v", "recipe_version": "r", "policy_version": "p",
+                       "top_k": 4, "semantic_floor": .30, "rrf_constant": 60}
+                changed = dict(row, id="b", **{field: 8 if field == "top_k" else "other"})
+                attempts = root / "attempts.jsonl"
+                attempts.write_text(json.dumps(row) + "\n" + json.dumps(changed) + "\n")
+                result = subprocess.run([sys.executable, str(Path(__file__).with_name("report.py")),
+                                         "--attempts", str(attempts), "--labels", str(root / "DO_NOT_OPEN")],
+                                        capture_output=True, text=True, check=False)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("mixed or unsupported", result.stderr)
+                self.assertNotIn("DO_NOT_OPEN", result.stderr)

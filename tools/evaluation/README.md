@@ -182,3 +182,42 @@ independent caller task-coverage policy and substitute that policy through the
 public SDK in its evaluation driver, in addition to admitting a compatible frozen
 catalog/cohort. The existing60 development cases are not all caller-admitted
 workflows; running this source CLI does not qualify that future policy or pilot.
+
+### Independent evaluation policy and development grid
+
+The additive driver accepts an independently authored **evaluation fixture** task
+policy; it is not a live authority or a provider grant. This does not qualify the
+pilot inventory/cohort or admit held-out access. The maintained recipe, cosine
+floor0.30 and RRF60 remain fixed. `--top-k` accepts only4,8,16 (default4).
+
+```sh
+# No input queries or labels are read to export this deliberately invalid template.
+prepeval --export-task-policy-template > task-policy.json
+# Independently review the exact intended task and replace the placeholder with
+# SHA256 of its exact UTF-8 bytes. Retain all maintained caller/pin/capability fields.
+# Compute POLICY_SHA with sha256sum/shasum after review; do not derive from gold.
+prepeval --source SOURCE_SHA --inputs development.inputs.jsonl \
+  --catalog reviewed-catalog.json --catalog-sha256 CATALOG_SHA \
+  --task-policy task-policy.json --task-policy-sha256 POLICY_SHA \
+  --top-k 8 --vectors development-vectors.json > attempts-k8.jsonl
+```
+
+Policy schema is `gist.evaluation.task-policy/v1`, kind
+`evaluation_fixture_not_live_authority`. Entries bind `intent_sha256`, complete
+`principal` (including scopes/generation), `runtime_id`, exact `skill` archive and
+manifest pins, `required_capabilities`, and `recipe_version`. The template exports
+maintained source pins only. Unknown/duplicate JSON fields, trailing JSON, mixed
+caller contracts, nonregular/symlink files, wrong SHA, >1MiB or >1000 entries fail
+closed. Policies cannot contain labels, expected statuses or catalog synthesis.
+No external policy retains the two-literal source-smoke behavior, identified as
+`explicit-source-task-admission-v1`; an external policy is identified by
+`sha256:POLICY_SHA`. Every attempt records `policy_version` and actual `top_k`.
+
+Compare development configurations in separate reports; mixed policy/config/source
+records are rejected before labels are opened. Development must select one primary
+configuration before held-out admission. The frozen admission manifest now also
+requires matching `policy_version` and exact supported `top_k`, in both the runner
+and reporter. An external policy only admits exact independently reviewed intents;
+it does not make unrepresentable corpus scenarios eligible or provide whole-task,
+provider, quality or adoption evidence. The default catalog's composite tool still
+differs from Zati's two-role closure.
