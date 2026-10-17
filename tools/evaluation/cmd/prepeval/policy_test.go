@@ -40,7 +40,7 @@ func TestExactPolicyScope(t *testing.T) {
 	if err != nil || !decision.Admitted {
 		t.Fatalf("not admitted: %+v %v", decision, err)
 	}
-	for _, field := range []string{"intent", "subject", "scope", "generation", "workspace", "runtime", "recipe", "digest", "manifest", "capability"} {
+	for _, field := range []string{"intent", "subject", "scope", "generation", "workspace", "runtime", "recipe", "digest", "manifest", "capability", "capability_workspace", "capability_kind", "capability_missing", "capability_extra"} {
 		t.Run(field, func(t *testing.T) {
 			changed := q
 			changed.RequiredCapabilities = append(changed.RequiredCapabilities[:0:0], q.RequiredCapabilities...)
@@ -65,6 +65,14 @@ func TestExactPolicyScope(t *testing.T) {
 				changed.Skill.ManifestDigest.Value = "tamper"
 			case "capability":
 				changed.RequiredCapabilities[0].Version = "2.0.0"
+			case "capability_workspace":
+				changed.RequiredCapabilities[0].WorkspaceID = "other"
+			case "capability_kind":
+				changed.RequiredCapabilities[0].Kind = "tool"
+			case "capability_missing":
+				changed.RequiredCapabilities = nil
+			case "capability_extra":
+				changed.RequiredCapabilities = append(changed.RequiredCapabilities, changed.RequiredCapabilities[0])
 			}
 			d, err := loaded.AdmitTask(context.Background(), changed)
 			if err != nil || d.Admitted {
@@ -208,5 +216,22 @@ func TestHeldoutFrozenPolicyAndKBeforeInputAccess(t *testing.T) {
 		if err == nil || !strings.Contains(string(out), "manifest mismatch") || strings.Contains(string(out), "DO_NOT_OPEN") {
 			t.Fatalf("failed pre-input guard %s: %s", field, out)
 		}
+	}
+}
+
+func TestPolicyCatalogMismatchBeforeInput(t *testing.T) {
+	p, _ := reviewedPolicy(t)
+	p.CatalogSHA256 = strings.Repeat("a", 64)
+	raw, err := json.Marshal(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "policy.json")
+	if err := os.WriteFile(path, raw, 0600); err != nil {
+		t.Fatal(err)
+	}
+	out, err := cli(t, "--source", strings.Repeat("a", 40), "--phase", "heldout", "--inputs", "DO_NOT_OPEN", "--task-policy", path, "--task-policy-sha256", fixture.Hash(raw).Value)
+	if err == nil || !strings.Contains(string(out), "catalog SHA mismatch") || strings.Contains(string(out), "DO_NOT_OPEN") {
+		t.Fatalf("policy reused changed inventory: %s", out)
 	}
 }

@@ -22,10 +22,11 @@ const defaultPolicyIdentity = "explicit-source-task-admission-v1"
 
 // Evaluation policies are caller-supplied synthetic fixtures, never live authority.
 type taskPolicy struct {
-	Schema   string        `json:"schema"`
-	Kind     string        `json:"kind"`
-	Entries  []policyEntry `json:"entries"`
-	identity string
+	Schema        string        `json:"schema"`
+	Kind          string        `json:"kind"`
+	CatalogSHA256 string        `json:"catalog_sha256"`
+	Entries       []policyEntry `json:"entries"`
+	identity      string
 }
 type policyEntry struct {
 	IntentSHA256         string              `json:"intent_sha256"`
@@ -81,7 +82,7 @@ func decodePolicy(raw []byte, expected string) (*taskPolicy, error) {
 	if err := d.Decode(&struct{}{}); err != io.EOF {
 		return nil, errors.New("trailing policy JSON")
 	}
-	if p.Schema != policySchema || p.Kind != "evaluation_fixture_not_live_authority" || len(p.Entries) == 0 || len(p.Entries) > 1000 {
+	if !digestString(p.CatalogSHA256) || p.Schema != policySchema || p.Kind != "evaluation_fixture_not_live_authority" || len(p.Entries) == 0 || len(p.Entries) > 1000 {
 		return nil, errors.New("invalid evaluation task policy schema/kind/budget")
 	}
 	c, err := fixture.New("ready")
@@ -121,7 +122,11 @@ func policyTemplate() (taskPolicy, error) {
 		return taskPolicy{}, err
 	}
 	r := c.Records[fixture.Ref(ports.KindSkill, inboxbriefing.SkillID)]
-	return taskPolicy{Schema: policySchema, Kind: "evaluation_fixture_not_live_authority", Entries: []policyEntry{{IntentSHA256: "REPLACE_WITH_INDEPENDENTLY_REVIEWED_EXACT_INTENT_SHA256", Principal: fixture.Principal, RuntimeID: fixture.Request("").RuntimeID, Skill: ports.ArtifactPin{Ref: r.Ref, Digest: r.Digest, ManifestDigest: r.ManifestDigest}, RequiredCapabilities: []ports.ArtifactRef{fixture.Ref(ports.KindCapability, inboxbriefing.CapabilityID)}, RecipeVersion: preparation.RecipeVersion}}}, nil
+	raw, err := fixture.Export(c)
+	if err != nil {
+		return taskPolicy{}, err
+	}
+	return taskPolicy{CatalogSHA256: fixture.Hash(raw).Value, Schema: policySchema, Kind: "evaluation_fixture_not_live_authority", Entries: []policyEntry{{IntentSHA256: "REPLACE_WITH_INDEPENDENTLY_REVIEWED_EXACT_INTENT_SHA256", Principal: fixture.Principal, RuntimeID: fixture.Request("").RuntimeID, Skill: ports.ArtifactPin{Ref: r.Ref, Digest: r.Digest, ManifestDigest: r.ManifestDigest}, RequiredCapabilities: []ports.ArtifactRef{fixture.Ref(ports.KindCapability, inboxbriefing.CapabilityID)}, RecipeVersion: preparation.RecipeVersion}}}, nil
 }
 
 // Encoding/json otherwise silently accepts duplicate object keys. A policy
