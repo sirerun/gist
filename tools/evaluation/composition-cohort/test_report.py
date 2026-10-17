@@ -44,6 +44,32 @@ class ReportTest(unittest.TestCase):
         candidate['Tool']['Digest'] = 'drift'
         self.assertFalse(r.grade_cohort([self.label], [observation], inventory)['pass'])
 
+    def test_early_and_partial_scale_failure_retained(self):
+        import json
+        config = json.loads(Path(__file__).with_name('primary-config.json').read_text())
+        run = {'logical_records': 10000, 'private_partitions': 10,
+               'build_ns': 0, 'update_ns': 0, 'rebuild_ns': 0, 'rollback_ns': 0,
+               'peak_rss_bytes': 1024, 'snapshot_projection_bytes': 0,
+               'snapshot_projection_candidates': 0, 'query_classes': {}, 'cold': {},
+               'checks': {}, 'error': 'context deadline exceeded'}
+        result = r.grade_scale(config, [run])
+        self.assertFalse(result['pass'])
+        self.assertEqual(result['runs'][0]['error'], run['error'])
+        self.assertIsNone(result['runs'][0]['queries']['exact_hit']['p95_ms'])
+        self.assertEqual(len(result['runs'][0]['missing_query_classes']), 5)
+        run['query_classes']['exact_hit'] = [{'elapsed_ns': 10, 'result_bytes': 64, 'status': 'hit', 'candidates': 1, 'error': ''}]
+        result = r.grade_scale(config, [run])
+        self.assertFalse(result['pass'])
+        self.assertEqual(result['runs'][0]['queries']['exact_hit']['samples'], 1)
+        self.assertFalse(result['runs'][0]['checks']['exact_hit_sample_count'])
+
+    def test_setup_failure_is_not_qualified_refusal(self):
+        label = dict(self.label, ready=False, selected={})
+        observation = dict(self.observation, result={}, error='setup: unavailable')
+        result = r.grade_cohort([label], [observation])
+        self.assertFalse(result['pass'])
+        self.assertEqual(result['outcome_coverage'], 0)
+
     def test_percentiles(self):
         self.assertEqual(r.percentile(list(range(1, 101)), .95), 95)
         self.assertEqual(r.percentile(list(range(1, 101)), .5), 50)

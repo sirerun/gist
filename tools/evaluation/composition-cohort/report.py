@@ -30,7 +30,7 @@ def grade_cohort(labels, attempts, inventory=None):
         raise ValueError('duplicate labels')
     seen = set()
     rows = []
-    ready_hits = false_ready = exposures = 0
+    ready_hits = false_ready = exposures = completed = 0
     for row in attempts:
         case = row['id']
         if case in seen or case not in expected:
@@ -63,7 +63,9 @@ def grade_cohort(labels, attempts, inventory=None):
         exposed = any(token in disclosed for token in label['forbidden_disclosure'])
         false_ready += int(ready and not label['ready'])
         exposures += int(exposed)
-        correct = ready == label['ready'] and not exposed
+        executed = not row.get('error', '').startswith('setup:')
+        completed += int(executed)
+        correct = executed and ready == label['ready'] and not exposed
         if label['ready']:
             correct = correct and exact and tool_closure
             ready_hits += int(correct)
@@ -72,7 +74,7 @@ def grade_cohort(labels, attempts, inventory=None):
         rows.append({'id': case, 'expected_ready': label['ready'], 'observed_status': result.get('Status'), 'error': row.get('error'), 'exact_selected': exact, 'private_exposure': exposed, 'pass': correct, 'elapsed_ns': row['elapsed_ns'], 'response_bytes': row['response_bytes']})
     missing = sorted(set(expected) - seen)
     ready_total = sum(row['ready'] for row in labels)
-    return {'cases': rows, 'missing': missing, 'expected_cases': len(labels), 'observed_cases': len(attempts), 'outcome_coverage': len(seen) / len(labels), 'ready_hits': ready_hits, 'ready_total': ready_total, 'ready_recall': ready_hits / ready_total if ready_total else None, 'false_ready': false_ready, 'private_exposures': exposures, 'pass': not missing and all(row['pass'] for row in rows)}
+    return {'cases': rows, 'missing': missing, 'expected_cases': len(labels), 'observed_cases': len(attempts), 'outcome_coverage': completed / len(labels), 'ready_hits': ready_hits, 'ready_total': ready_total, 'ready_recall': ready_hits / ready_total if ready_total else None, 'false_ready': false_ready, 'private_exposures': exposures, 'pass': not missing and all(row['pass'] for row in rows)}
 
 
 def grade_scale(config, runs):
@@ -91,21 +93,21 @@ def grade_scale(config, runs):
         checks['run_completed'] = not run.get('error')
         checks['projection_complete'] = run['snapshot_projection_candidates'] == key[0]
         for name in config['query_classes']:
-            observations = run['query_classes'][name]
+            observations = run.get('query_classes', {}).get(name, [])
             latencies = [r['elapsed_ns'] / 1e6 for r in observations]
-            p95 = percentile(latencies, .95)
+            p95 = percentile(latencies, .95) if latencies else None
             limit = threshold['broad_p95_ms'] if name == 'common_lexical' else threshold['exact_narrow_p95_ms']
-            metrics[name] = {'samples': len(observations), 'p50_ms': percentile(latencies, .5), 'p95_ms': p95, 'max_result_bytes': max(r['result_bytes'] for r in observations), 'statuses': sorted(set(r['status'] for r in observations))}
+            metrics[name] = {'samples': len(observations), 'p50_ms': percentile(latencies, .5) if latencies else None, 'p95_ms': p95, 'max_result_bytes': max((r['result_bytes'] for r in observations), default=None), 'statuses': sorted(set(r['status'] for r in observations))}
             expected_status, expected_count = {'exact_hit': ('hit', 1), 'exact_miss': ('miss', 0), 'unique_lexical_hit': ('complete', 1), 'lexical_no_match': ('complete', 0), 'common_lexical': ('incomplete_budget', 0) if key[0] / key[1] * .8 > 4096 else ('complete', 64)}[name]
             checks[name + '_correct_outcome'] = all(not r.get('error') and r['status'] == expected_status and r['candidates'] == expected_count and 0 <= r['result_bytes'] <= 256 * 1024 and r['elapsed_ns'] >= 0 for r in observations)
-            checks[name + '_cold_complete'] = len(run['cold'][name]) == key[1] and all(not r.get('error') and r['status'] == expected_status and r['candidates'] == expected_count for r in run['cold'][name])
+            checks[name + '_cold_complete'] = len(run.get('cold', {}).get(name, [])) == key[1] and all(not r.get('error') and r['status'] == expected_status and r['candidates'] == expected_count for r in run.get('cold', {}).get(name, []))
             checks[name + '_sample_count'] = len(observations) == config['warm_samples_per_query_class']
-            checks[name + '_latency'] = p95 <= limit
+            checks[name + '_latency'] = p95 is not None and p95 <= limit
         checks['build_threshold'] = run['build_ns'] <= threshold['build_100k_seconds'] * 1e9
         checks['update_threshold'] = run['update_ns'] <= threshold['update_100_seconds'] * 1e9
         checks['rss_threshold'] = 0 < run['peak_rss_bytes'] <= threshold['peak_rss_bytes']
         checks['projection_measured'] = run['snapshot_projection_bytes'] > 0
-        rows.append({'logical_records': key[0], 'private_partitions': key[1], 'queries': metrics, 'build_seconds': run['build_ns'] / 1e9, 'update_seconds': run['update_ns'] / 1e9, 'rebuild_seconds': run['rebuild_ns'] / 1e9, 'rollback_seconds': run['rollback_ns'] / 1e9, 'peak_rss_bytes': run['peak_rss_bytes'], 'snapshot_projection_bytes': run['snapshot_projection_bytes'], 'checks': checks, 'pass': bool(run['checks']) and all(value is True for value in checks.values())})
+        rows.append({'logical_records': key[0], 'private_partitions': key[1], 'queries': metrics, 'error': run.get('error', ''), 'missing_query_classes': [name for name in config['query_classes'] if not run.get('query_classes', {}).get(name)], 'build_seconds': run['build_ns'] / 1e9, 'update_seconds': run['update_ns'] / 1e9, 'rebuild_seconds': run['rebuild_ns'] / 1e9, 'rollback_seconds': run['rollback_ns'] / 1e9, 'peak_rss_bytes': run['peak_rss_bytes'], 'snapshot_projection_bytes': run['snapshot_projection_bytes'], 'checks': checks, 'pass': bool(run['checks']) and all(value is True for value in checks.values())})
     missing = sorted(expected - seen)
     return {'runs': rows, 'missing': missing, 'pass': not missing and all(r['pass'] for r in rows)}
 
