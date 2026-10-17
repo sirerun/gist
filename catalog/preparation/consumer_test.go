@@ -413,3 +413,39 @@ func TestV2TypedDocumentAliasPreservesCompleteSchemas(t *testing.T) {
 		})
 	}
 }
+
+func TestUnsupportedSensitiveIntentNeverReachesEmbedding(t *testing.T) {
+	_, s, r := ready(t)
+	embed := &embedding{model: "controlled-unit-v1"}
+	s.Embedder = embed
+	s.ModelVersion = embed.model
+	r.Mode = preparation.Semantic
+	r.Intent = "Find secret credentials in my mailbox"
+	out, e := s.Prepare(context.Background(), r)
+	if e != nil || out.Status != "unsupported" || embed.calls != 0 {
+		t.Fatal("sensitive unsupported intent disclosed to adapter")
+	}
+}
+func TestMissingToolSchemaNeverBecomesPartialContext(t *testing.T) {
+	c, s, r := ready(t)
+	tool := fixture.Ref(ports.KindTool, "synthetic/mail-read")
+	record := c.Records[tool]
+	var metadata map[string]any
+	if e := json.Unmarshal(record.Metadata, &metadata); e != nil {
+		t.Fatal(e)
+	}
+	delete(metadata, "output_schema")
+	raw, e := json.Marshal(metadata)
+	if e != nil {
+		t.Fatal(e)
+	}
+	record.Metadata = raw
+	record.Digest = fixture.Hash(raw)
+	record.ManifestDigest = record.Digest
+	c.Records[tool] = record
+	c.Bytes[tool] = raw
+	out, e := s.Prepare(context.Background(), r)
+	if e == nil || out.Selected != nil {
+		t.Fatal("missing required output schema exposed as ready context")
+	}
+}

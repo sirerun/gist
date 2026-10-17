@@ -109,6 +109,10 @@ func run() error {
 	if *attemptIndex <= 0 || (*runKind != "source_cold" && *runKind != "source_warm" && *runKind != "recovery") {
 		return errors.New("invalid explicit attempt/run kind")
 	}
+	sourceBytes, sourceErr := hex.DecodeString(*source)
+	if sourceErr != nil || (len(sourceBytes) != 20 && len(sourceBytes) != 32) || hex.EncodeToString(sourceBytes) != *source {
+		return errors.New("exact immutable lowercase source SHA required")
+	}
 	if *inputs == "" || *source == "" {
 		return errors.New("--inputs and --source are required")
 	}
@@ -126,6 +130,10 @@ func run() error {
 		}
 		if e = json.Unmarshal(raw, &admission); e != nil {
 			return e
+		}
+		admittedModel, modelOK := admission["model_version"].(string)
+		if !modelOK || admittedModel == "" {
+			return errors.New("heldout requires frozen model/runtime version")
 		}
 		if admission["candidate_frozen"] != true || admission["model_version"] == "" || admission["candidate_source"] != *source || admission["catalog_version"] != fixture.CatalogVersion || admission["recipe_version"] != preparation.RecipeVersion || admission["semantic_floor"] != float64(0.30) || admission["top_k"] != float64(4) || admission["rrf_constant"] != float64(60) || !digestString(admission["development_selection_sha256"]) || !digestString(admission["inputs_sha256"]) || !digestString(admission["labels_sha256"]) {
 			return errors.New("heldout source/configuration/selection manifest mismatch")
