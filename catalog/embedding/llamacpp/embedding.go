@@ -57,7 +57,7 @@ var _ preparation.Embedder = (*Embedder)(nil)
 
 func New(c Config) (*Embedder, error) {
 	u, err := url.Parse(c.Origin)
-	if err != nil || u.Scheme != "http" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Path != "" && u.Path != "/") || u.RawPath != "" {
+	if err != nil || u.Scheme != "http" || u.User != nil || u.ForceQuery || strings.Contains(c.Origin, "#") || u.RawQuery != "" || u.Fragment != "" || (u.Path != "" && u.Path != "/") || u.RawPath != "" {
 		return nil, errors.New("llamacpp: explicit numeric loopback HTTP origin required")
 	}
 	address, err := netip.ParseAddr(u.Hostname())

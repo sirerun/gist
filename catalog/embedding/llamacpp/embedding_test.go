@@ -215,7 +215,7 @@ func TestBoundsBeforeInference(t *testing.T) {
 	}
 }
 func TestExplicitLocalConfigurationAndIdentity(t *testing.T) {
-	for _, origin := range []string{"https://127.0.0.1:1", "http://localhost:1", "http://192.0.2.1:1", "http://127.0.0.1", "http://127.0.0.1:1/path", "http://user:secret@127.0.0.1:1", "http://127.0.0.1:1?secret=x"} {
+	for _, origin := range []string{"https://127.0.0.1:1", "http://localhost:1", "http://192.0.2.1:1", "http://127.0.0.1", "http://127.0.0.1:1/path", "http://user:secret@127.0.0.1:1", "http://127.0.0.1:1?secret=x", "http://127.0.0.1:1?", "http://127.0.0.1:1#"} {
 		if _, err := llamacpp.New(config(origin, 256)); err == nil {
 			t.Fatalf("accepted %s", origin)
 		}
@@ -250,7 +250,9 @@ func TestRedirectNeverContactsForeignServer(t *testing.T) {
 	foreignCalls := 0
 	foreign := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) { foreignCalls++ }))
 	defer foreign.Close()
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { http.Redirect(w, r, foreign.URL, 307) }))
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, foreign.URL, http.StatusTemporaryRedirect)
+	}))
 	defer server.Close()
 	e, err := llamacpp.New(config(server.URL, 256))
 	if err != nil {
