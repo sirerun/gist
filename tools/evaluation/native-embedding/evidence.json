@@ -1,0 +1,162 @@
+{
+  "binary_runtime_closure": "system libstdc++, libm, libgcc_s, libc and ELF loader only; no local libllama/ggml/OpenMP/CUDA libraries",
+  "binary_sha256": "436cc65b98927488311f1682658ec8b14f4e833107a37f5ce546225e9a3f9fcc",
+  "build_service_seconds": 127.027,
+  "cmake_flags": [
+    "CMAKE_BUILD_TYPE=Release",
+    "BUILD_SHARED_LIBS=OFF",
+    "GGML_CUDA=OFF",
+    "GGML_BLAS=OFF",
+    "GGML_OPENMP=OFF",
+    "GGML_NATIVE=OFF",
+    "LLAMA_OPENSSL=OFF",
+    "LLAMA_BUILD_UI=OFF",
+    "LLAMA_USE_PREBUILT_UI=OFF",
+    "LLAMA_BUILD_TESTS=OFF"
+  ],
+  "default_change": false,
+  "engine_commit": "620d2225cc436ab0b001e3200e590e3b286ef9ab",
+  "engine_source_archive_bytes": 38195486,
+  "engine_source_archive_sha256": "1d4a987d9bd048f6e93107e838026438df70fbde237fc0c69c63d600512b4bd9",
+  "failed_source_checks": [
+    {
+      "reason": "strict index type compared to int without cast; fixed before final qualification",
+      "source": "565d70695d88580d920844722b988464fc2d0503"
+    },
+    {
+      "reason": "introduced numeric307 redirect test lint; fixed before final qualification",
+      "source": "b71e932ca490e109be790a8a03652d167c40b2b6"
+    }
+  ],
+  "final_checks": {
+    "affected_race": true,
+    "changed_source_golangci_2_14_0": true,
+    "cmd_gist_build": true,
+    "full_root_lint": "five preexisting unrelated findings from qualified baseline; not relabeled clean",
+    "go_mod_tidy_unchanged": true,
+    "gofmt": true,
+    "python_tests": 16,
+    "root_go_build": true,
+    "root_go_test": true,
+    "root_go_vet": true
+  },
+  "final_qualification_service_cpu_seconds": 150.696,
+  "final_qualification_service_seconds": 50.572,
+  "heldout_accessed": false,
+  "mac_qualification": false,
+  "model_bytes": 557950176,
+  "model_revision": "bfcd298762cc34d0357ece5ebdd31791a3a374d8",
+  "model_sha256": "68bae29d62fb8c7d23e98d21fd4662753ddd636e6b62b8a70dfe059a9844f216",
+  "native_checkpoint": {
+    "VmHWM_kib": 679856,
+    "VmRSS_kib": 677480,
+    "not_final_lifetime_RSS_claim": true,
+    "observed_while_final_qualification_active": true,
+    "total_threads_including_HTTP": 27
+  },
+  "portable_logs": [
+    {
+      "file": "affected-race.log.portable.gz",
+      "portable_gzip_sha256": "81729894a58b6fd32253e6129245bbbe4631fcc2be4918095ae4de831f96ef8f",
+      "portable_uncompressed_sha256": "522c6669a4005e8298b1691c7809e6dc6a2ce9ba8cc3eaddf16bfb6f8591a6a1",
+      "raw_sha256": "522c6669a4005e8298b1691c7809e6dc6a2ce9ba8cc3eaddf16bfb6f8591a6a1"
+    },
+    {
+      "file": "aggregate.raw.log.portable.gz",
+      "portable_gzip_sha256": "ee617a966c9c685d4b929ce7d1375466ede0b653a241bc8fcc0203480f4b8ecc",
+      "portable_uncompressed_sha256": "080c233bdf3f52d164185dedd909b9ef48e61e202f31d92dd7194c3e471cece2",
+      "raw_sha256": "080c233bdf3f52d164185dedd909b9ef48e61e202f31d92dd7194c3e471cece2"
+    },
+    {
+      "file": "build.raw.log.portable.gz",
+      "portable_gzip_sha256": "18de792d045b1b812cda566989f62c9979879f18c33dc2af4d95635293af7507",
+      "portable_uncompressed_sha256": "edd2f15d80b122358270f0b6b8f1d0db718ba24ee3347a12336b918068a71a04",
+      "raw_sha256": "521a9b8339eb096da5691cb6d4d30118b092281bb537ce5e4a183f2b22eb2af1"
+    },
+    {
+      "file": "changed-lint.log.portable.gz",
+      "portable_gzip_sha256": "bafcb04d67f6157ff3d4a1fdf228afd2df6cc6d786c61642c1125b1fe879e728",
+      "portable_uncompressed_sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+      "raw_sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    {
+      "file": "failed-565d706.raw.log.portable.gz",
+      "portable_gzip_sha256": "74c00ff16bf05e401ce39c5e00487009b1ffbb74c11a7b87a832f5532a794217",
+      "portable_uncompressed_sha256": "fc3547cf1f8afd25c3b1bb07bf79c8f521137b474c3ccb34518087087988b5c6",
+      "raw_sha256": "fc3547cf1f8afd25c3b1bb07bf79c8f521137b474c3ccb34518087087988b5c6"
+    },
+    {
+      "file": "failed-b71e932.raw.log.portable.gz",
+      "portable_gzip_sha256": "c251f9e702162c73d34114e49d17bb8161844e8325ba50c973c11882fe3e6773",
+      "portable_uncompressed_sha256": "4dcefd1bd9683aa42397bfbda332a5dc2690917a6493f0d839360eef7a48f915",
+      "raw_sha256": "4dcefd1bd9683aa42397bfbda332a5dc2690917a6493f0d839360eef7a48f915"
+    },
+    {
+      "file": "gist-build.log.portable.gz",
+      "portable_gzip_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "portable_uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "go-build.log.portable.gz",
+      "portable_gzip_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "portable_uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "go-test.log.portable.gz",
+      "portable_gzip_sha256": "85f8732767a477a779389cf0fdfe15e79602e6b0fbfc1feb00ab87b02746dc5b",
+      "portable_uncompressed_sha256": "451d70197deeea1228d85acd74d7b8e44cc782c1707e32ef514ff96a6c158587",
+      "raw_sha256": "451d70197deeea1228d85acd74d7b8e44cc782c1707e32ef514ff96a6c158587"
+    },
+    {
+      "file": "go-vet.log.portable.gz",
+      "portable_gzip_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "portable_uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "gofmt.log.portable.gz",
+      "portable_gzip_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "portable_uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "python.log.portable.gz",
+      "portable_gzip_sha256": "ecfd80536f58cc878327f52fb851ad602248bf6842ab77353142df27b2807945",
+      "portable_uncompressed_sha256": "ebab22e5e9868a74c63e548e83c275319bb7c00c36493e1b46d4954efaafd79f",
+      "raw_sha256": "ebab22e5e9868a74c63e548e83c275319bb7c00c36493e1b46d4954efaafd79f"
+    },
+    {
+      "file": "qualification.raw.log.portable.gz",
+      "portable_gzip_sha256": "b8221086a809bced17eef44b0eee40f936cc6475d590678ab545745410adcbad",
+      "portable_uncompressed_sha256": "8ba6aab44aff9f035d27199a48ddc60ab7ef8fc4de4a60e18e83f3e701f854c4",
+      "raw_sha256": "8ba6aab44aff9f035d27199a48ddc60ab7ef8fc4de4a60e18e83f3e701f854c4"
+    },
+    {
+      "file": "tidy-diff.log.portable.gz",
+      "portable_gzip_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "portable_uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "tidy.log.portable.gz",
+      "portable_gzip_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "portable_uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "provider_calls": 0,
+  "qualified_source": "b29492d4659a93b07d9b501ce664a8cbf6a84989",
+  "qualified_source_archive_sha256": "05bad18611616e93593fad2482898bfea9bebc06eb440a990cbf96d294353991",
+  "reported_version": "0.7.0-dev build0 commitunknown: immutable source archive lacks .git; provenance uses exact source/binary hashes",
+  "resource_envelope": {
+    "aggregate_timeout_seconds": 2700,
+    "cgroup_memory_max_bytes": 25769803776,
+    "cpu_quota": "400%",
+    "memory_swap_max_bytes": 0,
+    "model_threads": 4,
+    "per_job_timeout_seconds": 1200
+  },
+  "schema": "gist.native-embedding.qualification-evidence/v1"
+}

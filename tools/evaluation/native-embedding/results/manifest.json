@@ -1,0 +1,18 @@
+{
+  "binary_sha256": "436cc65b98927488311f1682658ec8b14f4e833107a37f5ce546225e9a3f9fcc",
+  "cohort_records": 840,
+  "elapsed_seconds": 50.36815925594419,
+  "engine_commit": "620d2225cc436ab0b001e3200e590e3b286ef9ab",
+  "heldout_accessed": false,
+  "model_downloads_during_qualification": 0,
+  "model_sha256": "68bae29d62fb8c7d23e98d21fd4662753ddd636e6b62b8a70dfe059a9844f216",
+  "native_identity": {
+    "256": "llamacpp-embeddinggemma2:sha256:d8f7cba7cd9e39c606a646048aac3bdb97034f2fea40c8c6f3d577842210a4c6",
+    "768": "llamacpp-embeddinggemma2:sha256:8661486cb9e4730e790a15a547c9923a1cd73979f67f752fb9f5d9cfffda5278"
+  },
+  "provider_calls": 0,
+  "source": "b29492d4659a93b07d9b501ce664a8cbf6a84989",
+  "status": "PASS",
+  "token_inputs": 39,
+  "vector_comparisons": 78
+}
