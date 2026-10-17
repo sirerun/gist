@@ -190,3 +190,12 @@ stale-index handling and authorization refresh with version-bound evidence.
 Rollback restores lexical selection without changing permissions or executing
 queued operations. No publisher-signature, live Gmail or Composio advantage is
 claimed by synthetic checks alone.
+
+## Source implementation freeze (2026-10-16)
+
+[ADR020](../adr/020-preparation-contract-and-offline-freeze.md) freezes the additive
+API, source anchor, initial ranking/fusion, context/resource targets and exact
+family-clustered conservative binary method before implementation and held-out
+access. Its source-test budgets are targets, not measurements. Runtime/model
+qualification and corpus reconciliation receipts must identify their real hashes.
+No held-out results or performance/adoption claims are added by this freeze.
