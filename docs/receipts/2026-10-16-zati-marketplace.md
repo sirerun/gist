@@ -166,3 +166,32 @@ Connectors → Connections → Services navigation. Renderer and42Python checks
 passed after that documentation change; functional source checks remain valid.
 T-MARKET.1-.4 are source/check complete. Independent review, correction/re-review,
 merge and landed verification remain open and are recorded below when observed.
+
+## Independent review, guarded merge and landed source
+
+Non-author full review approved Zati
+`3d8ff25bbf2714fa504ff294caba9167f17aaffd` againstaabfdc5e and Gist documentation
+`323a8a99b21987d90c925070e04bf432a0342116` againstd929055. No blocking finding;
+review covered connected owner/client/recovery code, schemas/tests, guide, plan,
+receipt and actual PNG. T-MARKET.6 required no additional correction after review.
+
+[Zati PR42](https://github.com/zati-run/zati/pull/42) rebase-merged at
+`aa379b6dbc3da65f5a8ae896a1984524a8497e11`. Immediately before merge, main still
+matched the reviewed base and the guarded head matched the approved candidate.
+Check117269904009 confirmed Actions did not start because of account billing;
+main was unprotected and no policy/billing/protection was changed. Local fallback
+checks above are not hosted CI, full race, full native or multi-OS passes.
+
+Fresh main reaches the landed SHA and its entire tree equals the reviewed tree.
+Landed tracked-source SHA256 matched locally/remotely:
+`a8fc4924a0bae1a4d3235fc8c8be80762c9883ed4a0bd862675b8f53efa47835`.
+Actual landed renderer, Skills/catalogue/Registry and realHTTP single-draft
+marketplace acceptance passed (integration2.806s). Unchanged exact Dart tree
+retains the passing final widget/analysis/visual evidence; no redundant UI rerun
+or full native claim is inferred. Local Zati main fast-forwarded preserving its
+pre-existing untracked agent configuration; running unrelated preview untouched.
+
+The source outcome is complete at T-MARKET.1-.8 once this reviewed delivery record
+lands. Gist documentation closeout follows independent delta review, guarded
+merge and exact-tree/plan validation. Separate release/installation and live
+Gmail/provider acceptance remain open; hosted expansion remains paused.
