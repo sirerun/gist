@@ -202,3 +202,15 @@ Hosted current-main run39008287473 could not start its specification job because
 GitHub reports failed account payments or an insufficient spending limit. No
 billing change, paid runner or retry was made. Local evidence is not CI-green;
 unchanged required checks and branch policy must still be satisfied at merge.
+
+
+Final source9ba393e833a239102fbadb2425e4bc22a9fe6ec9 passed the final
+workflow/bridge checks and exact static ARM64 compilation. Portable source-check
+receipt2026-10-17-inbox-workflow-source-checks.json records the precise commands,
+source/archive/executable digests, race proof and preserved failures. Untouched
+c9d77a43 reproduces the identical two tidy checksum deletions and three Narrate
+lock disagreements; dependency bytes remain unchanged. Existing immutable local
+lint2.14.0 reports165 identical findings on both trees, zero introduced; this is
+not the CI-pinned2.11.3 and not an overall lint pass. Independent source/check
+review admitted one bounded synthetic model trial, with result review still open.
+T-PREP.51 source implementation is complete; measurement and delivery remain open.
