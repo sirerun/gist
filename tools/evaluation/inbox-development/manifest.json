@@ -2,7 +2,7 @@
   "schema": "gist.inbox-development.cohort/v1",
   "cohort_id": "closed-menu-inbox-development-20261016",
   "kind": "positive_closed_menu_source_conformance_only",
-  "label_status": "independent_blind_freezes_complete_reconciliation_pending",
+  "label_status": "reconciled_pending_independent_final_artifact_check",
   "case_count": 30,
   "construction_family_count": 1,
   "family": "maintained-inbox-briefing-closed-menu-v1",
@@ -22,6 +22,18 @@
     },
     "development.inputs.jsonl": {
       "sha256": "eb05b86e2498835b1607704abd75ea0f021a8bb0c520ce1fea63067bd116011b"
+    },
+    "development.labels.author1.jsonl": {
+      "sha256": "98d31bf9596771b8ab2e8d3a0ffa2abab3786c74d9050c6b808e8d4bb099ea97"
+    },
+    "development.labels.author2.jsonl": {
+      "sha256": "c9d8931915797c32b48a8054aa7fc79c0937a5391048322c05cddb67138be5bb"
+    },
+    "development.labels.jsonl": {
+      "sha256": "b8dce1bf1c8675cbd8c1714b6fde17bc037bf930f2759adcb0b07b56f9f56619"
+    },
+    "reconciliation.json": {
+      "sha256": "67b507f60c192a23e0925756eef9b8187d05b3cb77df848e5037b2706e37f347"
     }
   },
   "canonical_labels_file": "development.labels.jsonl",
@@ -36,5 +48,13 @@
     "One correlated construction family, no negative or heldout coverage.",
     "Actual composite-tool fixture differs from Zati two-role consumer.",
     "No task-performance, generalization, live Gmail or adoption claim."
-  ]
+  ],
+  "reconciliation_counts": {
+    "cases": 30,
+    "construction_families": 1,
+    "core_truth_disagreements": 0,
+    "evidence_class_metadata_differences": 30,
+    "safety_and_rubric_union_cases": 30,
+    "conditional_locale_normalizations": 30
+  }
 }

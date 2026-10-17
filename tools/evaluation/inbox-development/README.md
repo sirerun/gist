@@ -52,3 +52,21 @@ instruction/template/contract bytes, and current authority. No email facts,
 completed briefing, actual call savings or task-success improvement follows from
 this source conformance cohort. Existing model/resource qualification, source
 freeze, scoring admission and independent results review remain separate gates.
+
+## Independent labels
+
+Both annotators froze their original files before comparison. The preserved
+`development.labels.author1.jsonl` and `development.labels.author2.jsonl` have
+identical core truth on all30 cases: family, exact skill/capability/tool versions,
+empty dependencies and desired ready status. Their evidence-class vocabulary
+was normalized explicitly to `controlled_inbox_development` (30 metadata
+differences, not zero differences across every field). The canonical
+`development.labels.jsonl` unions both safety/rubric lists.
+
+The second annotator's locale clause is conditional on separately executing a
+briefing: immutable prepared context is not translated, and no briefing execution
+is claimed or scored here. Original annotations remain unchanged. Per-ID
+reconciliation records bind exact canonical JSONL row bytes including the newline;
+the manifest binds complete file hashes. Final independent artifact verification
+must pass before any scoring admission. No label or policy is adjusted using
+retrieval/model results.

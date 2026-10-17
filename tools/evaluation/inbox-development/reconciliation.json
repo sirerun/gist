@@ -1,0 +1,800 @@
+{
+  "schema": "gist.inbox-development.reconciliation/v1",
+  "status": "reconciled_pending_independent_final_artifact_check",
+  "input_freeze_commit": "12303b5889f6cafb86cc1b79cb095f61d09087a1",
+  "inputs_sha256": "eb05b86e2498835b1607704abd75ea0f021a8bb0c520ce1fea63067bd116011b",
+  "author1_labels_sha256": "98d31bf9596771b8ab2e8d3a0ffa2abab3786c74d9050c6b808e8d4bb099ea97",
+  "author2_labels_sha256": "c9d8931915797c32b48a8054aa7fc79c0937a5391048322c05cddb67138be5bb",
+  "canonical_labels_sha256": "b8dce1bf1c8675cbd8c1714b6fde17bc037bf930f2759adcb0b07b56f9f56619",
+  "counts": {
+    "cases": 30,
+    "construction_families": 1,
+    "core_truth_disagreements": 0,
+    "evidence_class_metadata_differences": 30,
+    "safety_and_rubric_union_cases": 30,
+    "conditional_locale_normalizations": 30
+  },
+  "score_access": "No model or preparation score observed before reconciliation.",
+  "records": [
+    {
+      "id": "inbox-menu-01",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "5da50b31766aba207e6d04b4842a42348397f05702ab10d09b66e28ff78eb011"
+    },
+    {
+      "id": "inbox-menu-02",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "5dca6d763dea0ad325c0bf6d8c65e231cc912f095acb31ac7458ddc270bbb468"
+    },
+    {
+      "id": "inbox-menu-03",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "16551010a80de5e19fd6ef2c20bef87ddc673a9d54b08b05e3f45ce21767401b"
+    },
+    {
+      "id": "inbox-menu-04",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "cde2f8ecab2c4a5d5e8d58c04c1404601aa04fa503924450e8a25ad0e7efb0e2"
+    },
+    {
+      "id": "inbox-menu-05",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "e11b2e49007d2e8af2f29b749742e90ca88b24fe99b2de438ad906f4b3a68c4e"
+    },
+    {
+      "id": "inbox-menu-06",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "fcd04b9512345415e0d5aa83aa8ea1993b4da2bd3bb0d6ee56792c311e41dd4e"
+    },
+    {
+      "id": "inbox-menu-07",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "3c26f3d8f628536742f9e5ad2f477502d8b77c463341c23c140a0900d7fc3748"
+    },
+    {
+      "id": "inbox-menu-08",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "8bb470f02c51d13593326b9a2a4480f5ebbbcd56e86cc2449ac419179e7aadc2"
+    },
+    {
+      "id": "inbox-menu-09",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "303ce1759dcee2ae3106124996424d786d8aab6edc166aad0f9a3c6846e826fd"
+    },
+    {
+      "id": "inbox-menu-10",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "66542d7dc070cab0a7b8ebd7e4b5fcfa18623db7cbf9bed70292889ea3d849c2"
+    },
+    {
+      "id": "inbox-menu-11",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "62ca14cbd09bb9e18ca9ac08c34dce4bf8a4c197b4ab2ae03f172f8e9fae38e2"
+    },
+    {
+      "id": "inbox-menu-12",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "bf5cd40f8c08f6e6fa8250f746703650803f2faa3b0b24c53b3fcf44bac59a2b"
+    },
+    {
+      "id": "inbox-menu-13",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "f35e2a063452338bcd17df27d7f3b135e342f770f705010c4b13887a7e8c02e1"
+    },
+    {
+      "id": "inbox-menu-14",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "be29fa636596ff13ae45edc8f31cbd15d8169819030eaa3fbf2de67c23214b03"
+    },
+    {
+      "id": "inbox-menu-15",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "520637e7ead84bee7b50d1686a8b46852648ee915cb0fe0d721f87402434105d"
+    },
+    {
+      "id": "inbox-menu-16",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "7e81a314e201d523df18a4412ced8c60e946b18ba1a168c6fbf3a04b7fae5a32"
+    },
+    {
+      "id": "inbox-menu-17",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "580d7cc90b4f75292799302728c0375578cdbe50827113b38d8e77da4a478d57"
+    },
+    {
+      "id": "inbox-menu-18",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "bd82e9290a27ee072f62db5618a78de819443b2569f8ad1da23f317e6d62832c"
+    },
+    {
+      "id": "inbox-menu-19",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "a15d19bf82be67e16e311d539ec317d706950115f8c39577037443da1250f888"
+    },
+    {
+      "id": "inbox-menu-20",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "4a861a780731259c81fa3159dfa485618b6b30d3edd6fc8ba146a407df2ba08b"
+    },
+    {
+      "id": "inbox-menu-21",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "bea7a03b0ee03e95821acba64e2820a76e542554d88e74336fc39bd5cef8d656"
+    },
+    {
+      "id": "inbox-menu-22",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "4bcb79b27f100b215cabbbba8c177edebac2933ac7b49a7cf0d68912d1ddfd41"
+    },
+    {
+      "id": "inbox-menu-23",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "48709d7abeb1a2bf451fb53002b08e95a91dad714d71ed86fd9d3bcdaec60d33"
+    },
+    {
+      "id": "inbox-menu-24",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "31d5078c2edc075a311e16bc3fa6dc134b80210e1337a6e8b52fe1e751bce818"
+    },
+    {
+      "id": "inbox-menu-25",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "465a49c8f008779d714e424147d510db70a202c40ef8c9f091117f49e8b0c42f"
+    },
+    {
+      "id": "inbox-menu-26",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "360b1222207be6792667dfdee41b281cc366895c40ab7c64240a39545b961207"
+    },
+    {
+      "id": "inbox-menu-27",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "cd4bc14489bad13d90af2966887712656e0eca02301f57300887d554ff182bf5"
+    },
+    {
+      "id": "inbox-menu-28",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "25a307d69819159e1d10370251560496c11026b4bd2f486d5fee1dc38bfc72da"
+    },
+    {
+      "id": "inbox-menu-29",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "8fbe55987685671b75e22e4cbb4255435a88fc723dac1bb64a36a39bada98071"
+    },
+    {
+      "id": "inbox-menu-30",
+      "core_typed_fields_agree": [
+        "family",
+        "allowed_skill_versions",
+        "required_capabilities",
+        "eligible_tool_alternatives",
+        "dependencies",
+        "expected_status"
+      ],
+      "metadata_differences": {
+        "evidence_class": {
+          "author1": "maintained_skill_composite_fixture_source_only",
+          "author2": "controlled_inbox_development",
+          "final": "controlled_inbox_development",
+          "reason": "Maintained skill plus controlled composite fixture; neither real mailbox/provider execution nor Zati two-tool compatibility."
+        }
+      },
+      "union_fields": [
+        "prohibited_actions",
+        "prohibited_disclosures",
+        "output_rubric"
+      ],
+      "normalization": "Author2 locale clause applies only if a briefing is separately executed; do not translate immutable preparation content or imply execution. Original annotations unchanged.",
+      "final_truth_jsonl_row_sha256": "a451d6378eda9841ec9443e3531c50aa9c1709fccffd2cc22fd2f384c91c8bb3"
+    }
+  ]
+}
