@@ -54,6 +54,30 @@ maintained recipe only for the admitted inbox skill: complete instructions/asset
 exact contracts, read-only prerequisites/list-before-read call order and refusal
 rules. No arbitrary generative planning. L0/E0/H0 omit this guide; L1/H1 include it.
 
+## Current connection port correction (before source acceptance)
+
+The legacy resolver's `OwnedConnections` boolean is never defaulted true.
+`Service.CurrentReadiness` is optional; absent it, resolution uses false, so a
+credentialed tool remains nonready. The additive `CurrentReadiness` interface is
+`CheckCurrentReadiness(context.Context,ReadinessRequest)(ReadinessDecision,error)`.
+The request carries principal, runtime, exact skill, current resolved closure and
+`ReadinessScope` (principal digest including scope/policy, runtime, skill and
+canonical closure-pin digest). The response repeats that exact scope plus Ready,
+policy Generation, authoritative CheckedAt and ValidUntil. When configured,
+explicit `Service.Clock` and positive `MaxReadinessAge` are required. Missing,
+mismatched, unavailable, stale, expired or false assertions fail closed.
+
+First resolve with false, obtain the current scoped decision, then resolve with
+its true assertion only if admitted. Compare immutable closure before/after that
+assertion. After package/contract I/O repeat the entire fresh check and compare
+closure plus connection generation before exposure. Retain legacy finding
+provenance `client_asserted`; this remains caller evidence, not Gist OAuth or
+provider qualification. Current catalog/policy/trust observations are point in
+time, not atomic with later execution. Caller rechecks at use. Verified skill
+manifest bytes must match the metadata consumed by the resolver; altered metadata
+cannot remove required capabilities. This recipe rejects verified local execution
+or filesystem requirements explicitly.
+
 ## Frozen pilot protocol
 
 Minimum120 independently reconciled synthetic cases,60 development and60 held
