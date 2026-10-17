@@ -41,9 +41,10 @@ fixtures and cannot establish real-model quality, token savings or charges.
 An actual local-model development run needs its exact frozen route/model,
 settings, synthetic cases/rubric, balanced arm order, call/time/cost bounds and
 cleanup contract before prompts. No paid model, mailbox/Composio calls or new
-downloads are admitted. The unavailable former local Qwen service is not silently
-started: owner authority for a bounded cached-model start is a separate pending
-question. Preserve unavailable/failed attempts and report the narrow development
+downloads are admitted. The owner explicitly approved a bounded start of cached pinned Qwen,
+with no downloads/paid calls, at most60 requests and one-hour service lifetime,
+followed by stopping only that owned service. Asset/capacity/manifest/driver
+qualification still precedes any launch or prompts. Preserve unavailable/failed attempts and report the narrow development
 scope. Original held-out data, decision targets and adoption gates remain intact.
 
 ## Dataset and preregistration
