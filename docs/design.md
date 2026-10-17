@@ -40,8 +40,12 @@ semantic capabilities composed by skills, with typed connection affinity,
 bounded dataflow and current caller-owned readiness. Existing Zati inbox list/read
 mapping stays supported during immutable-version migration. Indexed discovery
 selects a bounded shortlist; exact resolution touches the selected requirements.
-This is planned work, not a 100k-scale qualification or adopted semantic default.
-E-COMPOSE in the canonical plan owns producer, consumer and scale acceptance.
+The producer and bounded index landed in Gist PR83/84; the first consumer landed
+in Zati PR47. Source checks cover the typed and legacy workflows. The independently
+labeled composition cohort and 10k/100k measurements are the next qualification
+gates; no scale result or semantic default follows from source delivery.
+E-COMPOSE in the canonical plan owns remaining evaluation and separately
+authorized installation acceptance.
 
 ## Overview
 

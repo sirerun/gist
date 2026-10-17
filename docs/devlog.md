@@ -155,3 +155,20 @@ atomic composition; one reviewer preferred generic implementation profiles.
 The chair incorrectly suggested missing Zati role distinctness; direct source
 inspection confirms distinct IDs and unique list/read roles are already checked.
 No performance evidence or renewed runtime authority follows from the panel.
+
+## 2026-10-17 — Composition source delivery and evaluation freeze
+
+Gist producer PR83 landed d0e97da, bounded index PR84 landed ab6b6c6, and
+Zati consumer PR47 landed fc68df88 after independent exact-head review. Each
+landed tree matches its reviewed candidate. Fresh affected race checks passed;
+Zati's actual scripted controller-to-persisted-briefing checks passed for typed
+full/partial and legacy paths. Zati's main checkout was fast-forwarded while
+preserving existing untracked material. Receipts distinguish baseline lint/tidy
+findings, the broad race timeout, hosted CI billing failure and passing checks.
+No native installation, live Gmail, real-model or performance claim follows.
+
+The next evaluation separates index scale from composition readiness. Protocol
+and primary configuration were committed before any scoring; independent labels
+will be reconciled against exact inventory before the final freeze review.
+This is a new synthetic development cohort with one maintained composition
+family. Old datasets and expired model envelopes remain unchanged.

@@ -1,6 +1,8 @@
 # Composition v1 producer contract
 
-Status: proposed implementation freeze for T-COMPOSE.1; ADR021 governs.
+Status: implemented producer contract (Gist PR83, landed d0e97da); ADR021 governs.
+Zati PR47 landed the first consumer at fc68df88. Source acceptance does not
+establish provider conformance, scale qualification or installation.
 
 ## Additive API and compatibility
 
