@@ -78,6 +78,11 @@ manifest bytes must match the metadata consumed by the resolver; altered metadat
 cannot remove required capabilities. This recipe rejects verified local execution
 or filesystem requirements explicitly.
 
+The `inbox-v1` recipe also binds the exact maintained source manifest digest;
+an independently admitted package copying its logical ID/version cannot acquire
+that static recipe merely by naming itself the same. Repacked archives of the
+same verified manifest/inventory remain valid immutable byte instances.
+
 ## Frozen pilot protocol
 
 Minimum120 independently reconciled synthetic cases,60 development and60 held

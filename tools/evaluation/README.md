@@ -111,7 +111,8 @@ JSON admission manifest with:
   "development_selection_sha256": "64_HEX",
   "inputs_sha256": "SEALED_INPUT_64_HEX",
   "labels_sha256": "SEALED_LABEL_64_HEX",
-  "catalog_version": "source-smoke-shared-catalog-v1",
+  "catalog_version": "sha256:CATALOG_CONTENT_64_HEX",
+  "catalog_sha256": "CATALOG_CONTENT_64_HEX",
   "recipe_version": "inbox-v1",
   "model_version": "EXACT_QUALIFIED_MODEL_RUNTIME_FILESET_VERSION",
   "top_k": 4,
@@ -129,3 +130,39 @@ identity/authorization service. The coordinator controls release of sealed data.
 Current source catalog coverage remains limited; T-PREP.9 must qualify the shared
 catalog/distractor adequacy before claiming a retrieval benchmark. No unsupported
 scenario or unavailable arm is counted as successful task evidence.
+
+## Explicit frozen shared catalog injection
+
+`--export-catalog` exports the built-in shared catalog as
+`gist.evaluation.catalog/v1`. Every record includes its typed SDK record and
+inline retained artifact bytes (JSON base64), preserving exact metadata and
+manifest/document domains. Static distractors have real inert validated packages,
+with no maintained execution recipe. No artifact filesystem paths are followed.
+
+```sh
+go run ./tools/evaluation/cmd/prepeval --source SOURCE_SHA \
+  --inputs tools/evaluation/corpus/development.inputs.jsonl --export-catalog > catalog.json
+# Compute CAT_SHA with sha256sum/shasum, review and freeze this catalog independently.
+go run ./tools/evaluation/cmd/prepeval --source SOURCE_SHA \
+  --inputs tools/evaluation/corpus/development.inputs.jsonl \
+  --catalog catalog.json --catalog-sha256 CAT_SHA --vectors development-vectors.json > attempts.jsonl
+```
+
+The loader requires an exact external content SHA, one synthetic workspace,
+bounded regular file (8MiB/100records), unique typed references, coherent identity,
+exact retained-byte digests and real complete skill packages. It rejects symlink
+manifest files, malformed/trailing JSON, missing/tampered bytes, foreign workspaces
+and unsupported kinds. The actual catalog SHA/version are recorded and required
+in held-out admission (`catalog_sha256: CAT_SHA`,
+`catalog_version: sha256:CAT_SHA`). The catalog is fixed independently of queries
+and labels; cases only apply supported state overlays to a cloned catalog.
+
+A source smoke result is retained even when that catalog cannot represent a
+case's declared skill/tool-alternative/dependency inventory. Such comparisons are
+explicit `comparison_status: NOT_RUN`, reason `fixture_unrepresentable`; graders
+exclude them from algorithm-quality denominators and count the environment/catalog
+mismatch. In particular the built-in composite inbox-read tool does not represent
+the pilot's declared two-tool inbox closure. Do not rewrite gold labels to erase
+that mismatch. A richer reviewed shared catalog is a real T-PREP.9 prerequisite;
+this loader makes that future data admission executable without new recipes or
+provider execution. Whole-task success/adoption remains unqualified.

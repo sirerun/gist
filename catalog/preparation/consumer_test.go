@@ -1,6 +1,7 @@
 package preparation_test
 
 import (
+	"archive/zip"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -447,5 +448,47 @@ func TestMissingToolSchemaNeverBecomesPartialContext(t *testing.T) {
 	out, e := s.Prepare(context.Background(), r)
 	if e == nil || out.Selected != nil {
 		t.Fatal("missing required output schema exposed as ready context")
+	}
+}
+
+func TestRecipeDoesNotTrustAnImpostorPackageWithSameIDVersion(t *testing.T) {
+	c, s, r := ready(t)
+	files, e := inboxbriefing.Files()
+	if e != nil {
+		t.Fatal(e)
+	}
+	var manifest map[string]any
+	if e = json.Unmarshal(files["manifest.json"], &manifest); e != nil {
+		t.Fatal(e)
+	}
+	manifest["summary"] = "Different admitted source with copied logical ID/version"
+	files["manifest.json"], e = json.Marshal(manifest)
+	if e != nil {
+		t.Fatal(e)
+	}
+	var buffer bytes.Buffer
+	writer := zip.NewWriter(&buffer)
+	for _, name := range []string{"SKILL.md", "manifest.json", inboxbriefing.TemplatePath} {
+		part, e := writer.Create(name)
+		if e != nil {
+			t.Fatal(e)
+		}
+		if _, e = part.Write(files[name]); e != nil {
+			t.Fatal(e)
+		}
+	}
+	if e = writer.Close(); e != nil {
+		t.Fatal(e)
+	}
+	ref := fixture.Ref(ports.KindSkill, inboxbriefing.SkillID)
+	record := c.Records[ref]
+	record.Metadata = files["manifest.json"]
+	record.ManifestDigest = fixture.Hash(record.Metadata)
+	record.Digest = fixture.Hash(buffer.Bytes())
+	c.Records[ref] = record
+	c.Bytes[ref] = buffer.Bytes()
+	out, e := s.Prepare(context.Background(), r)
+	if e != nil || out.Status != "unsupported" || out.Selected != nil {
+		t.Fatalf("static recipe accepted different same-ID package: %+v %v", out, e)
 	}
 }
