@@ -1715,7 +1715,8 @@ merge never passes an unresolved review. Preserve historical IDs/evidence.
 | --- | --- | --- |
 | Producer | .1–.7 | Strict additive composition API with immutable fixtures and compatibility |
 | Consumer | .8–.14 | Zati accepts new skill versions through ordinary authority/effects |
-| Scale and evaluation | .15–.21 | Indexed bounded discovery and frozen reproducible scale evidence |
+| Index source | .15–.16, .29–.32 | Independently delivered bounded discovery API |
+| Scale and evaluation | .17–.21 | Frozen reproducible scale and composition evidence |
 | Operational handoff | .22–.25 | Explicit release, installation, acceptance and support gates |
 
 Shared verification: Gist focused resolution/preparation/package and new CLI
@@ -1732,20 +1733,20 @@ and target-host capacity before scoring, never invented here or tuned afterward.
 - [x] T-COMPOSE.2 Implement typed composition validation and exact resolution  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.1]  acc: [Strict bounded DAG and JSON Pointer validation, capability-indexed alternatives, connection-group intersection, per-capability and composition evidence, scoped freshness and complete-schema budgets implement UC-COMP-1 and UC-COMP-2 without Cartesian search or authority grants]
 - [x] T-COMPOSE.3 Publish local immutable fixtures and migration contracts  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.1]  acc: [New list/read contracts and inbox package/recipe fixtures have pinned digests and conformance examples; old bytes remain unchanged; this is repository fixture publication only, not registry upload or a module release]
 - [x] T-COMPOSE.4 Verify producer behavior and compatibility  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.2, T-COMPOSE.3]  acc: [Current required checks plus missing optional/required capability, duplicate roles/keys, cycles, type mismatch, bounded iteration, partial results, same-connection/account mismatch, ambiguity, schema drift, revocation, cancellation and insufficient context pass; unsupported consumers and legacy paths covered]
-- [ ] T-COMPOSE.5 Independently review producer composition candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.4]  acc: [Independent non-author reviews .1-.4 exact base/head with source and checks; findings/dispositions recorded and all blockers resolved]
-- [ ] T-COMPOSE.6 Merge reviewed producer candidate  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.5, T-COMPOSE.28]  acc: [Exact reviewed head rebases through GitHub with current base and required checks; no bypass and landed SHA recorded]
-- [ ] T-COMPOSE.7 Verify landed producer composition  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.6]  acc: [Fresh main reaches reviewed tree and affected additive API, immutable fixtures and legacy checks pass]
-- [ ] T-COMPOSE.8 Freeze Zati migration and owning lifecycle bindings  Owner: zati-coordinator  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-COMPOSE.7]  acc: [Current Zati contract and plan authority reconciled; exact producer revision, new skill version and typed readiness mapping selected; legacy fallback and verification recipes fixed without executing an enrolled lifecycle from this ledger]
+- [x] T-COMPOSE.5 Independently review producer composition candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.4]  acc: [Independent non-author reviews .1-.4 exact base/head with source and checks; findings/dispositions recorded and all blockers resolved]
+- [x] T-COMPOSE.6 Merge reviewed producer candidate  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.5, T-COMPOSE.28]  acc: [Exact reviewed head rebases through GitHub with current base and required checks; no bypass and landed SHA recorded]
+- [x] T-COMPOSE.7 Verify landed producer composition  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.6]  acc: [Fresh main reaches reviewed tree and affected additive API, immutable fixtures and legacy checks pass]
+- [x] T-COMPOSE.8 Freeze Zati migration and owning lifecycle bindings  Owner: zati-coordinator  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-COMPOSE.7]  acc: [Current Zati contract and plan authority reconciled; exact producer revision, new skill version and typed readiness mapping selected; legacy fallback and verification recipes fixed without executing an enrolled lifecycle from this ledger]
 - [ ] T-COMPOSE.9 Implement generic Zati admission and recipe enforcement  Owner: zati-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.8]  acc: [Remove inbox-only restriction for negotiated new version; validate all required capabilities and affinity, bind typed dataflow and enforce bounded actual calls/output; preserve ordinary permissions, schema pins, effect recovery and legacy list/read mapping]
 - [ ] T-COMPOSE.10 Migrate marketplace and consumer documentation  Owner: zati-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.8]  acc: [Explicit new-version admission and assignment flow preserves old selections; incompatible consumers refuse readiness; user guidance explains connection setup, partial briefing, upgrade and rollback without claiming live Gmail]
 - [ ] T-COMPOSE.11 Verify joined Zati composition path  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.9, T-COMPOSE.10]  acc: [Actual scripted controller to tool dispatch to persisted briefing succeeds for new and legacy paths; mixed mailbox, denied/revoked tool, stale schema, hostile mail, missing capability and bounded partial failure refuse or report correctly; source/race/spec checks pass without claiming real-model/provider acceptance]
 - [ ] T-COMPOSE.12 Independently review consumer migration candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.11]  acc: [Independent non-author reviews .8-.11 exact Zati base/head and producer pins with findings resolved and ownership boundaries intact]
 - [ ] T-COMPOSE.13 Merge reviewed Zati migration  Owner: zati-coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.12]  acc: [Owning repository permits exact-head guarded rebase with current checks and recorded landed SHA; no parallel lifecycle advancement]
 - [ ] T-COMPOSE.14 Verify landed Zati migration  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.13]  acc: [Fresh consumer main verifies reviewed source, exact producer dependency and joined legacy/new behavior; installation and provider qualification remain distinct]
-- [ ] T-COMPOSE.15 Freeze indexed discovery workload and scale thresholds  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-COMPOSE.7]  acc: [Synthetic 10k/100k mixtures, skew, candidate and fan-out budgets, target host, baseline, latency/RSS/update thresholds, independent labels and no-leak/false-ready invariants fixed before runs; resource limits and exact commands recorded without paid calls or held-out access]
-- [ ] T-COMPOSE.16 Implement bounded indexing and generation-aware retrieval  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.15]  acc: [Capability lookup and authorized shortlist indexes avoid per-request full schema/vector materialization; updates/rebuild/rollback, cache isolation/invalidation, cancellation and incomplete-budget outcomes preserve current policy and exact readiness; optional semantic route does not become default]
-- [ ] T-COMPOSE.17 Qualify new composition inventory and evaluation cohort  Owner: evaluation-author  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.14, T-COMPOSE.15]  acc: [Independent fixed inventory and caller-policy manifest use new immutable skills and actual two-tool contracts; non-author labels reconcile before scores; primary configuration and split frozen; old composite pilot remains unchanged and original held-out access ungranted]
-- [ ] T-COMPOSE.18 Verify scale and composition evaluation evidence  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.16, T-COMPOSE.17]  acc: [Declared synthetic 10k/100k runs report all attempts, latency percentiles, RSS/index/update cost, recall/coverage, false readiness, exposure, token availability and cold/warm phases; thresholds and failure dispositions retained; full safety and compatibility checks pass without post-score retuning]
+- [x] T-COMPOSE.15 Freeze indexed discovery workload and scale thresholds  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-COMPOSE.7]  acc: [Synthetic 10k/100k mixtures, skew, candidate and fan-out budgets, target host, baseline, latency/RSS/update thresholds, independent labels and no-leak/false-ready invariants fixed before runs; resource limits and exact commands recorded without paid calls or held-out access]
+- [x] T-COMPOSE.16 Implement bounded indexing and generation-aware retrieval  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.15]  acc: [Capability lookup and authorized shortlist indexes avoid per-request full schema/vector materialization; updates/rebuild/rollback, cache isolation/invalidation, cancellation and incomplete-budget outcomes preserve current policy and exact readiness; optional semantic route does not become default]
+- [ ] T-COMPOSE.17 Qualify new composition inventory and evaluation cohort  Owner: evaluation-author  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.14, T-COMPOSE.15, T-COMPOSE.32]  acc: [Independent fixed inventory and caller-policy manifest use new immutable skills and actual two-tool contracts; non-author labels reconcile before scores; primary configuration and split frozen; old composite pilot remains unchanged and original held-out access ungranted]
+- [ ] T-COMPOSE.18 Verify scale and composition evaluation evidence  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.16, T-COMPOSE.17, T-COMPOSE.32]  acc: [Declared synthetic 10k/100k runs report all attempts, latency percentiles, RSS/index/update cost, recall/coverage, false readiness, exposure, token availability and cold/warm phases; thresholds and failure dispositions retained; full safety and compatibility checks pass without post-score retuning]
 - [ ] T-COMPOSE.19 Independently review index and evaluation candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.18]  acc: [Independent non-author reviews .15-.18 exact base/head, label independence, reproducibility, all failures and limited claims; blockers resolved before merge]
 - [ ] T-COMPOSE.20 Merge reviewed scale and evaluation candidate  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.19]  acc: [Exact approved source and artifacts rebase through unchanged GitHub policy with landed SHA and check provenance]
 - [ ] T-COMPOSE.21 Verify landed scale evidence and publish handoff  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.20]  acc: [Fresh main matches reviewed source and deterministic report regeneration; producer and consumer compatibility recorded; results state measured envelope and remaining bottlenecks, never adoption or provider acceptance]
@@ -1782,7 +1783,7 @@ accept fractional values. These are tracked corrections, not accepted delivery.
 
 - [x] T-COMPOSE.26 Correct producer compatibility and safety findings  Owner: gist-implementer  Est: TBD  kind: agent  stage: fix  blocked-by: [T-COMPOSE.2, T-COMPOSE.3]  acc: [All accepted producer review findings have precise fixes; frozen schema conformance, exact numeric validation and any required package/runtime preservation corrections retain regression coverage and finding dispositions]
 - [x] T-COMPOSE.27 Verify corrected producer behavior  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.26]  acc: [Affected regression checks and aggregate required candidate checks pass or retain explicit inherited failure comparison; exact head and source evidence recorded]
-- [ ] T-COMPOSE.28 Independently re-review corrected producer candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: rereview  blocked-by: [T-COMPOSE.27]  acc: [Non-author approves exact corrected base/head covering all accepted findings and complete producer source before merge; no unresolved blocking findings remain]
+- [x] T-COMPOSE.28 Independently re-review corrected producer candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: rereview  blocked-by: [T-COMPOSE.27]  acc: [Non-author approves exact corrected base/head covering all accepted findings and complete producer source before merge; no unresolved blocking findings remain]
 
 Producer source checkpoint: 51e9785 implements the additive composition package
 and new inbox v2 fixture; legacy bytes/wire formats remain unchanged. Corrections
@@ -1797,3 +1798,65 @@ pass; new fixture schema checks2 pass. Full lint remains failing on exactly the
 same5 unchanged baseline findings, zero introduced. Independent source re-review
 resolved COMPOSE-R2/R3/R4; exact final documentation approval and guarded landing
 remain gates. See receipts/2026-10-17-composition-producer.md.
+
+Producer delivery: independent composition_doc_audit approved final b91764e
+against d013516; PR83 guarded rebase landed d0e97da with exact tree equality.
+Fresh landed race tests for composition/new inbox/legacy inbox and fixture-schema
+checks pass. Hosted CI could not start due existing billing lock; no required
+status checks configured, unchanged authorized local fallback used. .1-.7 and
+.26-.28 are source delivery complete, not release or consumer acceptance.
+
+Next admitted assignments under ceiling25: consumer .8-.11 (three implementation/
+verification members, one integration owner in isolated Zati worktree) and scale
+preflight/index .15-.16 (one implementer, separate Gist worktree). They depend on
+verified producer landing, now complete. Scale cohort .17 and aggregate .18 still
+wait for consumer .14; index source may proceed independently. Coordinator owns
+this canonical plan and its claim. Each concrete contract/preflight is reviewed
+before implementation. Source checks use existing bounded Linux capacity;
+consumer shared spec and root dependency updates serialize within its owner.
+No new release, deployment, model or provider authority is supplied.
+
+Index preimplementation freeze: coordinator reviewed composition-scale.md at
+SHA2566594ae3f52311fc9d2c49daa2dba8bcf828f2e3e2bb175979f3c224dd82fdbe9.
+10k/100k sizes are total logical entries, with private partitions and a separate
+single-scope worst case. Numerical limits are engineering targets, not measured
+baseline results. Copy-on-write top-level O(N) cost and current-policy rollback
+semantics are explicit. .17/.18 remain gated on consumer landing and independent
+cohort qualification; source tests do not establish scale performance.
+
+Consumer preimplementation freeze: independent composition_doc_audit approved
+Zati ADR019 digest e0570c8f0b55e7c8bb5bce4f8fa042886f63a5916f77636a21e340a1a2c6c4e1.
+V2 initially requires identity-compatible canonical structured tool schemas;
+arbitrary legacy MCP shapes stay v1 until a separately admitted typed adapter.
+Private authenticated output evidence and transactional call/dataflow fences
+are required, not model instruction compliance. Necessary Connections metadata
+propagation exposes retained structured output schemas separately, preserving
+legacy MCP envelope schema pins and conservative effect classification.
+
+Index source is a separate coherent delivery boundary from independently authored
+consumer evaluation data. Preserve .17-.21 unchanged in scope; add source-only
+verification/review/merge/landed obligations and make cohort/scoring wait for
+actual index landing. No workload results or acceptance thresholds are weakened.
+
+- [x] T-COMPOSE.29 Verify bounded index source  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.16]  acc: [Focused lexical/exact, isolation, current policy, incomplete budget, ownership and concurrent publication tests pass on exact source; aggregate checks retain explicit comparison for unchanged inherited failures with zero introduced lint findings; no 10k/100k evaluation result inferred]
+- [ ] T-COMPOSE.30 Independently review bounded index candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.29]  acc: [Non-author exact base/head review covers .15-.16 source and .29 evidence; concrete findings resolved without implying scale or consumer readiness]
+- [ ] T-COMPOSE.31 Merge reviewed bounded index source  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.30, T-COMPOSE.35]  acc: [Exact approved source merges via guarded rebase under unchanged checks and policy, with landed SHA recorded]
+- [ ] T-COMPOSE.32 Verify landed bounded index source  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.31]  acc: [Fresh main reaches reviewed tree and affected index/composition compatibility checks pass; .17-.21 qualification remains pending]
+
+Index candidate16699bd source implementation is complete; aggregate checks found
+a test fixture tagged its unrelated calendar document as mail, invalidating the
+expected two-hit assertion, and one new De Morgan lint finding. Actual failure
+is retained; verification/review/merge remain pending correction. All other
+root suites/vet/build/contracts/registry/tidy passed; inherited5 lint findings
+remain distinct from the new finding.
+
+- [x] T-COMPOSE.33 Correct index source verification findings  Owner: gist-index-implementer  Est: TBD  kind: agent  stage: fix  blocked-by: [T-COMPOSE.16]  acc: [Incorrect lexical fixture and introduced lint finding corrected without weakening rank/isolation/budget behavior; failure retained and exact corrected head recorded]
+- [x] T-COMPOSE.34 Verify corrected bounded index source  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.33]  acc: [Affected discovery race suite and lint delta pass; unchanged aggregate evidence remains source-bound, no scale result inferred]
+- [ ] T-COMPOSE.35 Independently re-review corrected index candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: rereview  blocked-by: [T-COMPOSE.34]  acc: [Non-author exact corrected head approval covers fixes and final plan/evidence, with no remaining blockers before merge]
+
+Index correction e4697fe fixes the fixture without weakening ranking assertions
+and removes the introduced lint finding. Exact-source discovery race tests pass;
+full lint still exits1 with exactly5 inherited findings and zero introduced.
+All unchanged passing aggregate checks remain tied to16699bd. Receipt:
+receipts/2026-10-17-composition-index.md. Independent corrected-source review found
+no blockers; final full documentation-head review and landing remain pending.
