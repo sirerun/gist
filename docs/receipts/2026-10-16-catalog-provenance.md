@@ -46,8 +46,7 @@ Supplementary logs are retained on the qualified host under the candidate's
 `verification-logs` directory. Frozen contract check and all12Python registry
 regressions passed locally. No dependencies, frozen wire or hosted behavior changed.
 Non-author independent review approved exact source base/head with no blocking
-findings. No correction was necessary. Final plan/receipt exact-head review,
-guarded merge and fresh-main landed verification remain pending.
+findings. No correction was necessary. Final exact-head independent review approved8f63a139b39ebf1428434d90c80ff5e611e2c70f with no blocking findings.
 
 GitHub PR69: candidate hosted CI failed to start because the account is locked
 by billing (check117274948325 annotation confirmed). The repository has no
@@ -78,3 +77,23 @@ Controller binary SHA256:
 No build lease remains held; native qualification claim released while
 capacity-held. The unrelated existing native Flutter preview and installed controller remain
 unchanged.
+
+## Merge and landed verification
+
+PR69: https://github.com/sirerun/gist/pull/69
+Reviewed base/pre-merge main: `16245c67a667447ee3a5d139e7d9a04f16a91ba6`.
+Reviewed head: `8f63a139b39ebf1428434d90c80ff5e611e2c70f`.
+Guarded GitHub rebase landed `e0182846ff48e69acf25c8b48820bb2ae53ece06`.
+Fresh main reaches that SHA; complete reviewed/landed tree comparison is equal.
+No required checks/approval or unresolved review thread was bypassed. Hosted CI
+remains billing-unavailable; source fallback evidence and baseline lint limits
+above apply.
+
+Actual landed tracked archive SHA256 matched local/remote:
+`609ec87941c774a52a1ed1bdca11fdfab6b5d6e97cea5414143a929810cb889c`.
+On the qualified Linux host, bounded `go test -p 4 ./catalog/provenance
+./catalog/packages ./catalog/integrity` passed (integrity has no standalone tests).
+Frozen checker and Wazi404-task validation passed against the identical landed
+plan/source. Retained source members and review/fix/merge/landed gates are complete.
+No release, enrolled production publisher or public-distribution qualification is
+claimed. Native desktop build/visible acceptance and live Gmail stay pending.
