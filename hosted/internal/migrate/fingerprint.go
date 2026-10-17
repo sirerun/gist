@@ -16,7 +16,7 @@ SELECT json_build_array('relation',c.relname,c.relkind,c.relpersistence,c.relisp
 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname<>'registry_schema_migrations' AND c.relkind IN ('r','p','v','m','S','f')
 UNION ALL
 SELECT json_build_array('column',c.relname,a.attnum,a.attname,format_type(a.atttypid,a.atttypmod),a.attnotnull,a.attidentity,a.attgenerated,a.attcollation,pg_get_expr(d.adbin,d.adrelid))::text
-FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace LEFT JOIN pg_attrdef d ON d.adrelid=c.oid AND d.adnum=a.attnum WHERE n.nspname='public' AND c.relname<>'registry_schema_migrations' AND a.attnum>0 AND NOT a.attisdropped
+FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace LEFT JOIN pg_attrdef d ON d.adrelid=c.oid AND d.adnum=a.attnum WHERE n.nspname='public' AND c.relname<>'registry_schema_migrations' AND c.relkind IN ('r','p','v','m','S','f') AND a.attnum>0 AND NOT a.attisdropped
 UNION ALL
 SELECT json_build_array('constraint',c.relname,x.conname,pg_get_constraintdef(x.oid,true))::text FROM pg_constraint x JOIN pg_class c ON c.oid=x.conrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname<>'registry_schema_migrations'
 UNION ALL
