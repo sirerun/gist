@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"sort"
@@ -204,8 +203,8 @@ func Overlay(c *Catalog, scenario string) error {
 		}
 		return nil
 	case "unsupported_runtime":
-		return fmt.Errorf("NOT_RUN: genuine unsupported runtime transition not represented by catalog fixture")
+		return errors.New("NOT_RUN: genuine unsupported runtime transition not represented by catalog fixture")
 	default:
-		return fmt.Errorf("NOT_RUN: scenario transition not implemented by controlled fixture")
+		return errors.New("NOT_RUN: scenario transition not implemented by controlled fixture")
 	}
 }
