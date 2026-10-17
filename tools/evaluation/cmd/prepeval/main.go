@@ -212,6 +212,24 @@ func run() error {
 			return errors.New("heldout source/configuration/selection manifest mismatch")
 		}
 	}
+	var vec *vectors
+	if *vectorFile != "" {
+		raw, e := readBounded(*vectorFile, 64<<20)
+		if e != nil {
+			return e
+		}
+		var value vectors
+		if e := json.Unmarshal(raw, &value); e != nil {
+			return e
+		}
+		if value.ModelVersion == "" {
+			return errors.New("unversioned vector artifact")
+		}
+		vec = &value
+	}
+	if *phase == "heldout" && (vec == nil || admission["model_version"] != vec.ModelVersion) {
+		return errors.New("heldout model/runtime/index mismatch")
+	}
 	inputBytes, e := readBounded(*inputs, 16<<20)
 	if e != nil {
 		return e
@@ -267,24 +285,6 @@ func run() error {
 			}
 		}
 		return nil
-	}
-	var vec *vectors
-	if *vectorFile != "" {
-		raw, e := readBounded(*vectorFile, 64<<20)
-		if e != nil {
-			return e
-		}
-		var value vectors
-		if e := json.Unmarshal(raw, &value); e != nil {
-			return e
-		}
-		if value.ModelVersion == "" {
-			return errors.New("unversioned vector artifact")
-		}
-		vec = &value
-	}
-	if *phase == "heldout" && (vec == nil || admission["model_version"] != vec.ModelVersion) {
-		return errors.New("heldout model/runtime/index mismatch")
 	}
 	for _, item := range cases {
 		for _, arm := range []string{"L0", "L1", "E0", "H0", "H1", "C0", "C1"} {

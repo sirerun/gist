@@ -167,6 +167,10 @@ def main():
     if len(identities) != 1 or any(not row.get("policy_version") or row.get("top_k") not in (4, 8, 16)
                                    or row.get("semantic_floor") != 0.30 or row.get("rrf_constant") != 60 for row in rows):
         raise ValueError("mixed or unsupported source/policy/configuration identities")
+    semantic_models = {row.get("model_version") for row in rows
+                       if row.get("arm") in ("E0", "H0", "H1") and row.get("model_version")}
+    if len(semantic_models) > 1:
+        raise ValueError("mixed semantic model/runtime identities")
     result = aggregate(rows)
     if any(row.get("phase") != args.phase for row in rows):
         raise ValueError("attempt phase differs from report phase")
