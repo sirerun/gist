@@ -1,0 +1,157 @@
+{
+  "schema": "zati.inbox_workflow_source_checks/v1",
+  "source": {
+    "head": "9ba393e833a239102fbadb2425e4bc22a9fe6ec9",
+    "base": "c9d77a434c031d28ebe597ce1243b7cb892bf73a",
+    "archive_sha256": "2224ab54a0d64d0143b33a197396df4acfdeca17e00fa928f9db73291b4aecf4",
+    "case_manifest_sha256": "575f36f9596f78c32e40074dbeec9d930112085e912ea0a9ee897f186b3fe28f",
+    "production_logic_same_as_race_head": "06f9609445a3bbbb0e9f62b33504d6523b876a96",
+    "final_delta": "Two test files: named HTTP constants and checked evidence-file/body closure only"
+  },
+  "binary": {
+    "platform": "linux/arm64",
+    "go_version": "go1.26.2",
+    "cgo_enabled": false,
+    "bytes": 52469714,
+    "sha256": "13f878978e319a6a8c717e982c45dba542644c58180ae91a293bc9437f0c13c8",
+    "kind": "statically linked integration test executable"
+  },
+  "envelope": {
+    "cpu_quota_percent": 400,
+    "memory_max_bytes": 25769803776,
+    "memory_swap_max_bytes": 0,
+    "per_check_timeout_seconds": 600,
+    "aggregate_timeout_seconds": 1200,
+    "host": "existing Linux runner",
+    "mac_heavy_jobs": 0
+  },
+  "passing_checks": [
+    {
+      "head": "06f96094",
+      "command": "go test -p 4 ./internal/adapters/responses ./internal/controller -count=1",
+      "package_seconds": {
+        "responses": 0.399,
+        "controller": 31.446
+      }
+    },
+    {
+      "head": "06f96094",
+      "command": "go test -p 4 ./internal/execution -run ^Test(Inbox|MCPInterpretationPreparesAuthoritativeCostAndTurnCallback|ModelResponseSequenceReachesRealDomainOwnersWithOneFinalReport) -count=1",
+      "seconds": 4.057
+    },
+    {
+      "head": "06f96094",
+      "command": "go test -p 4 ./internal/effects ./tests/integration -run ^Test(AdmitRejectsRevokedAuthority|StaleWorkerStillBlocksOrdinaryDispatch|GistInboxBriefingRefusesMissingOrStaleAuthority|InboxChatBridge|GistInboxWorkflow) -count=1",
+      "package_seconds": {
+        "effects": 3.131,
+        "integration": 26.61
+      }
+    },
+    {
+      "head": "06f96094",
+      "command": "go test -race -p 4 ./internal/controller ./internal/execution ./tests/integration -run ^Test(Inbox|GistInboxWorkflow) -count=1",
+      "package_seconds": {
+        "controller": 1.665,
+        "execution": 15.4,
+        "integration": 111.384
+      }
+    },
+    {
+      "head": "06f96094",
+      "command": "go vet -p 4 ./internal/controller ./internal/execution ./internal/adapters/responses ./tests/integration"
+    },
+    {
+      "head": "06f96094",
+      "command": "go mod verify"
+    },
+    {
+      "head": "9ba393e8",
+      "command": "go test -p 4 ./tests/integration -run ^Test(InboxChatBridge|GistInboxWorkflow) -count=1",
+      "seconds": 15.567
+    },
+    {
+      "head": "9ba393e8",
+      "command": "go vet -p 4 ./tests/integration"
+    },
+    {
+      "head": "9ba393e8",
+      "command": "GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go test -p 4 -c ./tests/integration"
+    },
+    {
+      "head": "9ba393e8",
+      "command": "python3 tools/specgen/render.py --check",
+      "files": 50,
+      "operations": 356
+    },
+    {
+      "head": "06f96094",
+      "command": "python3 -m unittest discover -s tools/specgen -p test_*.py",
+      "tests": 42,
+      "seconds": 1.98
+    }
+  ],
+  "baseline_failures": {
+    "tidy": {
+      "command": "go mod tidy -diff",
+      "candidate_and_exact_base_same": true,
+      "difference": "Removes only two obsolete remote Narrate go.sum checksums after upstream local replacement",
+      "dependency_files_unchanged": true
+    },
+    "lock": {
+      "command": "go run ./.github/workflows/cigate lock -go-version go1.26.2",
+      "candidate_and_exact_base_same": true,
+      "disagreements": 3,
+      "dependency": "Narrate vendored source replacement and snapshot manifest"
+    },
+    "lint": {
+      "version": "2.14.0",
+      "build_go_version": "go1.27.0",
+      "binary_sha256": "3b857abaf7445aef6ba030f845acc6385dd626778258c8b3621bbab7d4352036",
+      "command": "golangci-lint run --max-same-issues=0 --max-issues-per-linter=0 ./... ./.github/workflows/...",
+      "candidate_raw_issues": 165,
+      "exact_base_raw_issues": 165,
+      "introduced": 0,
+      "removed": 0,
+      "comparison": "multiset of linter, repository-relative filename and diagnostic text; line-number shifts ignored",
+      "not_ci_version": "CI specifies 2.11.3; this is qualified existing 2.14.0 local evidence"
+    }
+  },
+  "red_to_green": [
+    {
+      "finding": "INBOX-R1",
+      "observed": "Second tool proposal reused turn-wide effect source and conflicted with first action",
+      "repair": "Stable per-turn/step/proposal source; exact callback turn remains unchanged; repeated-read/replay and callback-fence regressions"
+    },
+    {
+      "finding": "INBOX-R2",
+      "observed": "Audit plus result publication lost unique model-visible tool result",
+      "repair": "Match unique staged tool_result purpose to exact controller publication ledger; ambiguous/missing/forged references refused"
+    },
+    {
+      "finding": "INBOX-R6",
+      "observed": "Race misclassified unseen tool operation as model callback and durably refused it",
+      "repair": "Typed exact persisted execution owner lookup; normal bounded recovery of proven refused misroute without physical resend; original fault preserved"
+    },
+    {
+      "finding": "Intentional existing assertion update",
+      "observed": "Full execution suite at prior source failed only old SourceID==turn invariant",
+      "repair": "Assert exact stable proposal effect source and unchanged callback turn; corrected targeted regression passed"
+    },
+    {
+      "finding": "Introduced lint",
+      "observed": "Nine test-only diagnostics above fresh baseline",
+      "repair": "Named HTTP status constants and checked closure; final introduced diagnostics zero"
+    }
+  ],
+  "scope": {
+    "mailbox": "synthetic TLS MCP list/read only",
+    "model_evaluation": "NOT_RUN at receipt freeze",
+    "live_gmail_calls": 0,
+    "composio_calls": 0,
+    "paid_provider_calls": 0,
+    "scripted_usage": "synthetic protocol fixture only; never savings evidence",
+    "comparison": "Known selected workflow versus immediate direct-tools control; same exact tool schemas and bindings; no forced discovery",
+    "qualification": "Source and controlled protocol tests only; no release, installation, native Responses provider or adoption claim",
+    "hosted_ci": "Not claimed; coordinator separately retains billing-unavailable evidence"
+  }
+}
