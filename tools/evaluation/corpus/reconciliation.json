@@ -1,6 +1,6 @@
 {
   "schema": "gist.evaluation.reconciliation/v3",
-  "status": "two_annotator_reconciled_pending_final_independent_check",
+  "status": "independently_reconciled",
   "author_hashes": {
     "development": {
       "author1": "56cc9f83231cda70acae792e18d509970eb2ee1569d872a614afefe001908941",
@@ -3576,8 +3576,16 @@
   ],
   "heldout_record_artifact": {
     "artifact_id": "gist-preparation-heldout-reconciliation-v3",
-    "sha256": "51a072013f2a43e0192c058f896fd81b23d9573fc7716e31bfed519cc4135d11",
+    "sha256": "316e2846cb186bbf7d619d0662d1f219b762cf75118424b962cce3bae9adb013",
     "count": 60,
     "label_access": "sealed; not for implementation or tuning"
+  },
+  "independent_review": {
+    "reviewer": "independent-second-annotator-marketplace_final_review",
+    "reviewed_source_commit": "75ecc3bcd6d39aa3ead395157af23b0d8c017fc5",
+    "reviewed_normalized_record_sha256": "51a072013f2a43e0192c058f896fd81b23d9573fc7716e31bfed519cc4135d11",
+    "result": "passed",
+    "scope": "All120 normalized typed labels, safety/rubric union, per-ID reconciliation truth, repaired construction-family split and audit preservation. Synthetic source pilot only.",
+    "score_access": "No model or retrieval scores consulted."
   }
 }
