@@ -59,3 +59,24 @@ DDL access. Namespace reservation and trusted review tables are read-only. V2
 publication staging tables receive no runtime grant while that publisher remains
 disabled. New migrations that need new runtime access require an explicit source
 change and provisioning run; blanket future-object grants are not installed.
+
+## Read-only deployment qualification
+
+`--verify-runtime-role` authenticates through `GIST_RUNTIME_DATABASE_URL` and
+returns a small JSON attestation containing only the runtime username and boolean
+observations. The complete operation uses a repeatable-read READ ONLY transaction:
+role attributes, memberships, nonownership, required/forbidden grants, forced RLS,
+and reads with empty and freshly generated nonexistent workspace context. Scope
+settings are transaction-local; no rows, roles or definitions are changed. Row
+hiding can be vacuous on an empty production database, so seeded integration
+qualification remains separate evidence. A failed check emits a sanitized error
+and no successful attestation. The migration-owner URL is used only to bind the
+expected host, port, database and distinct identity.
+
+`--schema-definitions` is an explicit read-only audit mode for legacy-baseline
+review. It reports sorted public-schema definition metadata and the exact SHA256
+used by `--status`. It includes columns, constraints, indexes, policies, functions
+and ACL metadata, never application row contents. Treat this diagnostic as an
+operator audit artifact. Compare those actual definitions with the selected
+source prefix before authorizing adoption; relation names alone are insufficient.
+The default status output remains unchanged and excludes full definitions.
