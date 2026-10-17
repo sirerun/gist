@@ -1,0 +1,300 @@
+{
+  "actual_model_files_bytes": 1525807806,
+  "failed_attempts": [
+    {
+      "backend": "SentenceTransformer6.1.0 loader",
+      "error": "EmbeddingGemma2VideoProcessor requires absent torchvision despite text-only config",
+      "resolution": "Use official Transformers AutoModel/AutoTokenizer with official standalone maintained Pooling/Normalize; no multimedia processor",
+      "status": "FAILED_BEFORE_INFERENCE"
+    }
+  ],
+  "heldout_accessed": false,
+  "host_class": "Linux ARM64 NVIDIA GB10 unified-memory; CPU-only reference",
+  "paid_model_calls": 0,
+  "provider_calls": 0,
+  "qualification_kind": "synthetic local smoke, not held-out benchmark or native acceptance",
+  "runs": [
+    {
+      "adapter_sha256": "1ea286e3a483c26475bcab287faa83a2e400b74874a11aee4eec33851f9c9659",
+      "cold_inference_seconds": 0.1880135330138728,
+      "device": "cpu",
+      "dimension": 256,
+      "dtype": "bfloat16",
+      "file_sha256": {
+        "1_Pooling/config.json": "8759bdf7c77efc7df7723f64856a593c8943b71ee38baf2a88771fbaf78438f9",
+        "2_Normalize/config.json": "cdb09dfca347a56aa2d691744e38d5ad3c7cbc2834e7181272b9a15328b82524",
+        "README.md": "b677a0ee2818c36f091b65fd3d9b4baea9f04d53b02b49cae916c74bf9682037",
+        "config.json": "b8f1e9931b57fbc054acdb445c41765d55b0074c58d145fa82839941ad1b5bb3",
+        "config_sentence_transformers.json": "031e56a498d33c349ab489a21885bcfe25b4fcba841149dc99e1e90d4a7c28f5",
+        "model.safetensors": "197a32965d4b1105faf060417baa899e193fb73cd401f42ec9295234d5553d79",
+        "modules.json": "3d02572a0455b832de67fb8e63a54981bc7e8b46e337c95e917bd8122a533bfd",
+        "preprocessor_config.json": "ea2ae257e901064abdd98dceb19f2b0da06af600bed15e0f99f5c85c37ee9d78",
+        "processor_config.json": "168f6a08522f3ce5dea596d94d003af2fd691742d4f41fe1f9d8cce76bfbf69c",
+        "sentence_bert_config.json": "b1bcd9f2dce3ae863b359e87d0710b5dbc3314a59ecb4e2f97c7778fc8e4b228",
+        "tokenizer.json": "4d777ef5bdc1aa36227abdfb77c3e49e7b9c892d16e1b6bda41c393504828be4",
+        "tokenizer.model": "e594c8a90eb08d8bda498ff4747977dc827ae0c3c56b5c0d41a605a22d02ef03",
+        "tokenizer_config.json": "17bd5d6e9364ca49a534e1502076593317c298d4a663623091ed45388f004874"
+      },
+      "implementation_sha256": {
+        "sentence_normalize": "70df2751f2b7af5312ff5ea52c1650eb566e186bc08312a89457e587c059024f",
+        "sentence_pooling": "b6e96e0eac50ebc33d6310ef3b8d35b7cd2b7e0e521809552bba34c05c13d43d",
+        "transformers_model": "f0376b13fb5230b349ce269c4fb40906931744a84df57c1d208f46032941eda7"
+      },
+      "load_seconds": 1.2236813299823552,
+      "loaded_parameters": 271002624,
+      "model": "google/embeddinggemma-2",
+      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:bfloat16:256d",
+      "peak_rss_bytes": 1516716032,
+      "pooling": {
+        "embedding_dimension": 768,
+        "include_prompt": true,
+        "pooling_mode": "mean"
+      },
+      "prefixes": {
+        "document": "title: none | text: ",
+        "query": "task: search result | query: "
+      },
+      "projection": "official model forward projects per-token512to768 before maintained masked-mean pooling; prompts included; maintained normalization then truncate and renormalize",
+      "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
+      "runtime": {
+        "huggingface-hub": "1.33.0",
+        "safetensors": "0.8.0",
+        "sentence-transformers": "6.1.0",
+        "torch": "2.12.0.dev20260326+cu128",
+        "transformers": "5.20.1"
+      },
+      "synthetic_smoke_only": true,
+      "targets": {
+        "load_30s_pass": true,
+        "rss_4gib_pass": true
+      },
+      "text_only": true,
+      "threads": 4,
+      "usage": {
+        "dollars": null,
+        "model_tokens": null,
+        "paid_model_calls": 0,
+        "provider_calls": 0
+      },
+      "warm_inference_seconds": [
+        0.03763542708475143,
+        0.03297374804969877,
+        0.02556569396983832,
+        0.02475702005904168,
+        0.02503718005027622
+      ]
+    },
+    {
+      "adapter_sha256": "1ea286e3a483c26475bcab287faa83a2e400b74874a11aee4eec33851f9c9659",
+      "cold_inference_seconds": 0.17732737201731652,
+      "device": "cpu",
+      "dimension": 768,
+      "dtype": "bfloat16",
+      "file_sha256": {
+        "1_Pooling/config.json": "8759bdf7c77efc7df7723f64856a593c8943b71ee38baf2a88771fbaf78438f9",
+        "2_Normalize/config.json": "cdb09dfca347a56aa2d691744e38d5ad3c7cbc2834e7181272b9a15328b82524",
+        "README.md": "b677a0ee2818c36f091b65fd3d9b4baea9f04d53b02b49cae916c74bf9682037",
+        "config.json": "b8f1e9931b57fbc054acdb445c41765d55b0074c58d145fa82839941ad1b5bb3",
+        "config_sentence_transformers.json": "031e56a498d33c349ab489a21885bcfe25b4fcba841149dc99e1e90d4a7c28f5",
+        "model.safetensors": "197a32965d4b1105faf060417baa899e193fb73cd401f42ec9295234d5553d79",
+        "modules.json": "3d02572a0455b832de67fb8e63a54981bc7e8b46e337c95e917bd8122a533bfd",
+        "preprocessor_config.json": "ea2ae257e901064abdd98dceb19f2b0da06af600bed15e0f99f5c85c37ee9d78",
+        "processor_config.json": "168f6a08522f3ce5dea596d94d003af2fd691742d4f41fe1f9d8cce76bfbf69c",
+        "sentence_bert_config.json": "b1bcd9f2dce3ae863b359e87d0710b5dbc3314a59ecb4e2f97c7778fc8e4b228",
+        "tokenizer.json": "4d777ef5bdc1aa36227abdfb77c3e49e7b9c892d16e1b6bda41c393504828be4",
+        "tokenizer.model": "e594c8a90eb08d8bda498ff4747977dc827ae0c3c56b5c0d41a605a22d02ef03",
+        "tokenizer_config.json": "17bd5d6e9364ca49a534e1502076593317c298d4a663623091ed45388f004874"
+      },
+      "implementation_sha256": {
+        "sentence_normalize": "70df2751f2b7af5312ff5ea52c1650eb566e186bc08312a89457e587c059024f",
+        "sentence_pooling": "b6e96e0eac50ebc33d6310ef3b8d35b7cd2b7e0e521809552bba34c05c13d43d",
+        "transformers_model": "f0376b13fb5230b349ce269c4fb40906931744a84df57c1d208f46032941eda7"
+      },
+      "load_seconds": 1.2689419960370287,
+      "loaded_parameters": 271002624,
+      "model": "google/embeddinggemma-2",
+      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:bfloat16:768d",
+      "peak_rss_bytes": 1506844672,
+      "pooling": {
+        "embedding_dimension": 768,
+        "include_prompt": true,
+        "pooling_mode": "mean"
+      },
+      "prefixes": {
+        "document": "title: none | text: ",
+        "query": "task: search result | query: "
+      },
+      "projection": "official model forward projects per-token512to768 before maintained masked-mean pooling; prompts included; maintained normalization then truncate and renormalize",
+      "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
+      "runtime": {
+        "huggingface-hub": "1.33.0",
+        "safetensors": "0.8.0",
+        "sentence-transformers": "6.1.0",
+        "torch": "2.12.0.dev20260326+cu128",
+        "transformers": "5.20.1"
+      },
+      "synthetic_smoke_only": true,
+      "targets": {
+        "load_30s_pass": true,
+        "rss_4gib_pass": true
+      },
+      "text_only": true,
+      "threads": 4,
+      "usage": {
+        "dollars": null,
+        "model_tokens": null,
+        "paid_model_calls": 0,
+        "provider_calls": 0
+      },
+      "warm_inference_seconds": [
+        0.03649790305644274,
+        0.030731117934919894,
+        0.037677603075280786,
+        0.02698000194504857,
+        0.028349879081360996
+      ]
+    },
+    {
+      "adapter_sha256": "1ea286e3a483c26475bcab287faa83a2e400b74874a11aee4eec33851f9c9659",
+      "cold_inference_seconds": 0.22424189595039934,
+      "device": "cpu",
+      "dimension": 256,
+      "dtype": "float32",
+      "file_sha256": {
+        "1_Pooling/config.json": "8759bdf7c77efc7df7723f64856a593c8943b71ee38baf2a88771fbaf78438f9",
+        "2_Normalize/config.json": "cdb09dfca347a56aa2d691744e38d5ad3c7cbc2834e7181272b9a15328b82524",
+        "README.md": "b677a0ee2818c36f091b65fd3d9b4baea9f04d53b02b49cae916c74bf9682037",
+        "config.json": "b8f1e9931b57fbc054acdb445c41765d55b0074c58d145fa82839941ad1b5bb3",
+        "config_sentence_transformers.json": "031e56a498d33c349ab489a21885bcfe25b4fcba841149dc99e1e90d4a7c28f5",
+        "model.safetensors": "197a32965d4b1105faf060417baa899e193fb73cd401f42ec9295234d5553d79",
+        "modules.json": "3d02572a0455b832de67fb8e63a54981bc7e8b46e337c95e917bd8122a533bfd",
+        "preprocessor_config.json": "ea2ae257e901064abdd98dceb19f2b0da06af600bed15e0f99f5c85c37ee9d78",
+        "processor_config.json": "168f6a08522f3ce5dea596d94d003af2fd691742d4f41fe1f9d8cce76bfbf69c",
+        "sentence_bert_config.json": "b1bcd9f2dce3ae863b359e87d0710b5dbc3314a59ecb4e2f97c7778fc8e4b228",
+        "tokenizer.json": "4d777ef5bdc1aa36227abdfb77c3e49e7b9c892d16e1b6bda41c393504828be4",
+        "tokenizer.model": "e594c8a90eb08d8bda498ff4747977dc827ae0c3c56b5c0d41a605a22d02ef03",
+        "tokenizer_config.json": "17bd5d6e9364ca49a534e1502076593317c298d4a663623091ed45388f004874"
+      },
+      "implementation_sha256": {
+        "sentence_normalize": "70df2751f2b7af5312ff5ea52c1650eb566e186bc08312a89457e587c059024f",
+        "sentence_pooling": "b6e96e0eac50ebc33d6310ef3b8d35b7cd2b7e0e521809552bba34c05c13d43d",
+        "transformers_model": "f0376b13fb5230b349ce269c4fb40906931744a84df57c1d208f46032941eda7"
+      },
+      "load_seconds": 1.2765666419873014,
+      "loaded_parameters": 271002624,
+      "model": "google/embeddinggemma-2",
+      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:float32:256d",
+      "peak_rss_bytes": 2943430656,
+      "pooling": {
+        "embedding_dimension": 768,
+        "include_prompt": true,
+        "pooling_mode": "mean"
+      },
+      "prefixes": {
+        "document": "title: none | text: ",
+        "query": "task: search result | query: "
+      },
+      "projection": "official model forward projects per-token512to768 before maintained masked-mean pooling; prompts included; maintained normalization then truncate and renormalize",
+      "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
+      "runtime": {
+        "huggingface-hub": "1.33.0",
+        "safetensors": "0.8.0",
+        "sentence-transformers": "6.1.0",
+        "torch": "2.12.0.dev20260326+cu128",
+        "transformers": "5.20.1"
+      },
+      "synthetic_smoke_only": true,
+      "targets": {
+        "load_30s_pass": true,
+        "rss_4gib_pass": true
+      },
+      "text_only": true,
+      "threads": 4,
+      "usage": {
+        "dollars": null,
+        "model_tokens": null,
+        "paid_model_calls": 0,
+        "provider_calls": 0
+      },
+      "warm_inference_seconds": [
+        0.03802627697587013,
+        0.035776047967374325,
+        0.03585331002250314,
+        0.03578636806923896,
+        0.036299958010204136
+      ]
+    },
+    {
+      "adapter_sha256": "1ea286e3a483c26475bcab287faa83a2e400b74874a11aee4eec33851f9c9659",
+      "cold_inference_seconds": 0.17888420796953142,
+      "device": "cpu",
+      "dimension": 768,
+      "dtype": "float32",
+      "file_sha256": {
+        "1_Pooling/config.json": "8759bdf7c77efc7df7723f64856a593c8943b71ee38baf2a88771fbaf78438f9",
+        "2_Normalize/config.json": "cdb09dfca347a56aa2d691744e38d5ad3c7cbc2834e7181272b9a15328b82524",
+        "README.md": "b677a0ee2818c36f091b65fd3d9b4baea9f04d53b02b49cae916c74bf9682037",
+        "config.json": "b8f1e9931b57fbc054acdb445c41765d55b0074c58d145fa82839941ad1b5bb3",
+        "config_sentence_transformers.json": "031e56a498d33c349ab489a21885bcfe25b4fcba841149dc99e1e90d4a7c28f5",
+        "model.safetensors": "197a32965d4b1105faf060417baa899e193fb73cd401f42ec9295234d5553d79",
+        "modules.json": "3d02572a0455b832de67fb8e63a54981bc7e8b46e337c95e917bd8122a533bfd",
+        "preprocessor_config.json": "ea2ae257e901064abdd98dceb19f2b0da06af600bed15e0f99f5c85c37ee9d78",
+        "processor_config.json": "168f6a08522f3ce5dea596d94d003af2fd691742d4f41fe1f9d8cce76bfbf69c",
+        "sentence_bert_config.json": "b1bcd9f2dce3ae863b359e87d0710b5dbc3314a59ecb4e2f97c7778fc8e4b228",
+        "tokenizer.json": "4d777ef5bdc1aa36227abdfb77c3e49e7b9c892d16e1b6bda41c393504828be4",
+        "tokenizer.model": "e594c8a90eb08d8bda498ff4747977dc827ae0c3c56b5c0d41a605a22d02ef03",
+        "tokenizer_config.json": "17bd5d6e9364ca49a534e1502076593317c298d4a663623091ed45388f004874"
+      },
+      "implementation_sha256": {
+        "sentence_normalize": "70df2751f2b7af5312ff5ea52c1650eb566e186bc08312a89457e587c059024f",
+        "sentence_pooling": "b6e96e0eac50ebc33d6310ef3b8d35b7cd2b7e0e521809552bba34c05c13d43d",
+        "transformers_model": "f0376b13fb5230b349ce269c4fb40906931744a84df57c1d208f46032941eda7"
+      },
+      "load_seconds": 1.253354322980158,
+      "loaded_parameters": 271002624,
+      "model": "google/embeddinggemma-2",
+      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:float32:768d",
+      "peak_rss_bytes": 2943098880,
+      "pooling": {
+        "embedding_dimension": 768,
+        "include_prompt": true,
+        "pooling_mode": "mean"
+      },
+      "prefixes": {
+        "document": "title: none | text: ",
+        "query": "task: search result | query: "
+      },
+      "projection": "official model forward projects per-token512to768 before maintained masked-mean pooling; prompts included; maintained normalization then truncate and renormalize",
+      "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
+      "runtime": {
+        "huggingface-hub": "1.33.0",
+        "safetensors": "0.8.0",
+        "sentence-transformers": "6.1.0",
+        "torch": "2.12.0.dev20260326+cu128",
+        "transformers": "5.20.1"
+      },
+      "synthetic_smoke_only": true,
+      "targets": {
+        "load_30s_pass": true,
+        "rss_4gib_pass": true
+      },
+      "text_only": true,
+      "threads": 4,
+      "usage": {
+        "dollars": null,
+        "model_tokens": null,
+        "paid_model_calls": 0,
+        "provider_calls": 0
+      },
+      "warm_inference_seconds": [
+        0.035793430055491626,
+        0.034620763966813684,
+        0.03483624791260809,
+        0.034534828970208764,
+        0.03466007602401078
+      ]
+    }
+  ],
+  "schema": "gist.embedding-qualification/v1",
+  "source_anchor": "76d9c5f"
+}
