@@ -11,6 +11,7 @@ provider operation.
 | `resolution` | Exact capability/binding closure and explicit readiness findings |
 | `packages` | Bounded ZIP parsing, complete inventory verification and pinned retrieval |
 | `ports` | Shared catalog, artifact, policy and connection contracts |
+| `provenance` | Detached publisher attestations with caller-owned signing and current trust |
 | `integrity` | Canonical digest and complete-package verification helpers |
 | `skills/inboxbriefing` | Maintained read-only briefing instructions and template |
 
@@ -33,7 +34,22 @@ than silently dropping unknown metadata.
 Digest verification is not publisher authentication. The bundled skill declares
 operator-asserted provenance; the consumer must decide whether to trust its
 pinned source, import it as a draft, and admit it through its own policy. Public
-publisher signing remains a separate qualification track.
+publisher signing is available as an additive source API in `provenance`; public
+release qualification remains separate. See [ADR019](../docs/adr/019-catalog-publisher-provenance.md).
+
+`provenance.Sign` accepts a caller-owned Ed25519 `crypto.Signer` and a complete
+immutable statement. `provenance.Verifier.VerifySkill` takes an independently
+selected expected subject, detached envelope, retained ZIP and explicit archive
+limits. Configure its `TrustResolver`, clock, maximum authoritative trust age and
+retired-key policy. The resolver authenticates exact workspace/publisher/key
+identity and current revocation with freshness evidence; Gist discovers no trust
+or keys. The verifier authenticates the statement, checks every declared package
+byte, then rechecks trust. Its result is point-in-time publisher evidence, not
+execution authority or an automatic manifest-trust upgrade. The public consumer
+example and negative cases are in [`provenance/consumer_test.go`](provenance/consumer_test.go).
+Source/schema claims are signed assertions; consumers still select the expected
+schema/source and enforce their own schema validation and admission. Public
+distribution remains blocked pending the separately qualified release.
 
 Resolution is not execution permission. Consumers must recheck their current
 connection, tool contract, scope and effect policy before exposing or executing
