@@ -33,6 +33,17 @@ class ReportTest(unittest.TestCase):
         observation = dict(self.observation, result={'Status': 'requires_selection', 'Bundle': self.observation['result']['Bundle']})
         self.assertFalse(r.grade_cohort([label], [observation])['pass'])
 
+    def test_inventory_pins_reject_same_id_drift(self):
+        observation = copy.deepcopy(self.observation)
+        observation['result']['Bundle']['Skill'] = {'Digest': 'skill'}
+        candidate = observation['result']['Bundle']['Selected']['list']
+        candidate['Tool']['Digest'] = 'original'
+        observation['result']['Bundle']['Tools'][0]['Pin']['Digest'] = 'original'
+        inventory = {'cases': [{'input': {'id': 'C01'}, 'request': {'Skill': {'Digest': 'skill'}}, 'admitted_candidates': {'list': [copy.deepcopy(candidate)]}}]}
+        self.assertTrue(r.grade_cohort([self.label], [observation], inventory)['pass'])
+        candidate['Tool']['Digest'] = 'drift'
+        self.assertFalse(r.grade_cohort([self.label], [observation], inventory)['pass'])
+
     def test_percentiles(self):
         self.assertEqual(r.percentile(list(range(1, 101)), .95), 95)
         self.assertEqual(r.percentile(list(range(1, 101)), .5), 50)
