@@ -1,0 +1,21 @@
+{
+  "schema": "gist.inbox-development.catalog-freeze/v1",
+  "kind": "closed_menu_development_source_conformance_only",
+  "qualified_source": "34c03b067e14116cdbef056b2dea17951a10dbf7",
+  "catalog_sha256": "dd769302f83ac062af19bb465baf48b2f6ac9a3146da7d302e40f5c51e7db67a",
+  "task_policy_template_sha256": "15c70ed9e4049e1613bf7a5ab102c9b12f2e933c2f74356189e0a0e6f87aa375",
+  "input_or_label_access": "No cohort query or label authored/read before export and this freeze. No old corpus/gold read.",
+  "export_failures": [
+    {
+      "operation": "export-catalog without required source/inputs flags",
+      "exit_code": 1,
+      "error": "exact immutable lowercase source SHA required",
+      "retained": "Authoring tool record; no input or catalog data produced by failed command."
+    }
+  ],
+  "successful_exports": [
+    "export-task-policy-template before input access",
+    "export-catalog with exact qualified source SHA and /dev/null required flag; export exits before opening inputs"
+  ],
+  "scope": "Exports only. No preparation attempt, model, provider or mailbox call."
+}
