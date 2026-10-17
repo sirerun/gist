@@ -1,12 +1,12 @@
 {
   "schema": "gist.evaluation.corpus/v1",
   "corpus_id": "preparation-synthetic-pilot-20261016",
-  "label_status": "v2_blind_reconciliation_pending",
+  "label_status": "v3_blind_reconciliation_pending",
   "two_annotator_reconciliation_required": true,
-  "family_design": "family is a conservatively clustered construction class; workflow_family is a distinct task identity. Distinct row IDs are not independent families. V2 repair precedes any model/retrieval scores; independent template-isolation review is pending.",
+  "family_design": "family is a conservatively clustered construction class; workflow_family is a distinct task identity. Distinct row IDs are not independent families. V3 repair precedes any model/retrieval scores; independent template-isolation review is pending.",
   "splits": {
     "development": {
-      "artifact_id": "gist-preparation-development-v2-20261016",
+      "artifact_id": "gist-preparation-development-v3-20261016",
       "count": 60,
       "family_count": 44,
       "strata": {
@@ -17,14 +17,14 @@
         "missing_stale_revoked": 10,
         "unauthorized_adversarial": 10
       },
-      "inputs_sha256": "7ed6921f9096908c7b1da38285b88274bf32a69a4b19d79824c7058c9c5f8ad5",
+      "inputs_sha256": "907610cbe4881ff188b5147d16c3867f3fad5630d04f6012cc08306ead4f1866",
       "author1_labels_sha256": "56cc9f83231cda70acae792e18d509970eb2ee1569d872a614afefe001908941",
       "product_cases": 1,
       "labels_visible_to_implementer": true,
       "workflow_family_count": 60
     },
     "heldout": {
-      "artifact_id": "gist-preparation-heldout-v2-20261016",
+      "artifact_id": "gist-preparation-heldout-v3-20261016",
       "count": 60,
       "family_count": 35,
       "strata": {
@@ -35,8 +35,8 @@
         "missing_stale_revoked": 10,
         "unauthorized_adversarial": 10
       },
-      "inputs_sha256": "f92960461defa4b9d85648df2c1cd8608ddba467b2365cbb086f3d9f8e234889",
-      "author1_labels_sha256": "824130683a8f5235fa8bdc84b789139472b58481bfce276a9fb75d2432a2b1cc",
+      "inputs_sha256": "29db0344368bc96ed0603b582e2101f75f23a83b71e21cbf675486a7485817e0",
+      "author1_labels_sha256": "53e20c13ab12983731afc55fb8ae386d98d2bdf47ddd52631c45052e8d368934",
       "product_cases": 1,
       "labels_visible_to_implementer": false,
       "workflow_family_count": 60
@@ -48,6 +48,13 @@
     "A richer independently labelled and preregistered inbox cohort is required before any positive product adoption decision; register it before exposing its results.",
     "Construction-family counts are44 development and35 held-out after conservative clustering; statistical power uses actual clusters, never120 task IDs or360 repeats. Independence beyond the reviewed construction separation is not proven."
   ],
-  "corpus_revision": "v2",
-  "prior_revision_manifest": "manifest.v1.json"
+  "corpus_revision": "v3",
+  "prior_revision_manifest": "manifest.v1.json",
+  "invalid_superseded_revisions": [
+    {
+      "revision": "v2",
+      "finding": "CORPUS-R2",
+      "reason": "Replacement intent variable was not serialized;32 original intents contradicted changed fixture metadata. V3 actual-intent diff count verified32."
+    }
+  ]
 }

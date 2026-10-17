@@ -1,0 +1,25 @@
+{
+  "schema": "gist.evaluation.corpus-repair/v3",
+  "changed_heldout_intents": 32,
+  "development_input_changes": "construction-family clustering and corpus revision metadata only; intents unchanged",
+  "heldout_input_artifact_id": "gist-preparation-heldout-inputs-v3",
+  "heldout_inputs_sha256": "29db0344368bc96ed0603b582e2101f75f23a83b71e21cbf675486a7485817e0",
+  "heldout_author1_labels_sha256": "53e20c13ab12983731afc55fb8ae386d98d2bdf47ddd52631c45052e8d368934",
+  "construction_families": {
+    "development": 44,
+    "heldout": 35
+  },
+  "workflow_family_ids": {
+    "development": 60,
+    "heldout": 60
+  },
+  "template_isolation": "Independent review pending; unique workflow IDs are not proof of construction-family independence.",
+  "labels_status": "heldout replacement author1 sealed; blind author2 replacement annotation pending",
+  "validation_status": "input_only_independent_review_pending",
+  "verified_actual_changed_intent_count": 32,
+  "supersedes": {
+    "revision": "v2",
+    "finding": "CORPUS-R2",
+    "repair": "Assign replacement intent into serialized row; assert32 actual changed strings and32 changed capability closures againstv1."
+  }
+}

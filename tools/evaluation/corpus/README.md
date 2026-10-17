@@ -11,7 +11,7 @@ paraphrase/multilingual, multiple capabilities/prerequisites, ambiguous/no-match
 missing/stale/revoked, unauthorized/adversarial. Each case retains a distinct workflow identity (`workflow_family`), chosen before
 wording. `family` now clusters correlated construction templates conservatively:
 44 development groups and35 held-out groups, not60 independent families per
-split. Unique IDs never establish independence. A v2 preregistration repair
+split. Unique IDs never establish independence. A v3 preregistration repair
 replaced32 held-out prompts before any scores, and independent construction-split
 review is pending. Shared capability infrastructure does not by itself mean
 shared task output. Manual intents vary
@@ -74,7 +74,7 @@ fixtures do not turn synthetic capabilities into product support.
 
 `manifest.json` records counts and exact SHA-256 file hashes. It includes only
 an opaque held-out artifact ID and hashes/counts, never held-out intents, labels,
-family names or storage locations. `v2_blind_reconciliation_pending` must not be interpreted as two-annotator
+family names or storage locations. `v3_blind_reconciliation_pending` must not be interpreted as two-annotator
 qualification. `manifest.v1.json` and retained source history preserve the
 superseded initial corpus. Both original label sets remain intact; reconciled
 artifacts are separate files. V1 reconciliation clarified requested-versus-
@@ -101,3 +101,10 @@ The source harness owner consumes the frozen development schema. Any fixture
 limitation is reported explicitly; it is not repaired by changing gold answers
 after observing scores. No run, model access or adoption is authorized by this
 corpus alone.
+
+Revision v2 is invalid and superseded: CORPUS-R2 found that32 replacement intent
+variables were not serialized, leaving old intent text against new fixture
+metadata. The frozen failed revision is retained for audit. V3 assigns the new
+intent strings and explicitly verifies32 actual input-text changes and32 changed
+capability closures against v1; independent input review/re-annotation remains
+pending. No scores were observed during either preregistration repair.
