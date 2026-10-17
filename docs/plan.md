@@ -1739,10 +1739,10 @@ and target-host capacity before scoring, never invented here or tuned afterward.
 - [x] T-COMPOSE.8 Freeze Zati migration and owning lifecycle bindings  Owner: zati-coordinator  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-COMPOSE.7]  acc: [Current Zati contract and plan authority reconciled; exact producer revision, new skill version and typed readiness mapping selected; legacy fallback and verification recipes fixed without executing an enrolled lifecycle from this ledger]
 - [x] T-COMPOSE.9 Implement generic Zati admission and recipe enforcement  Owner: zati-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.8]  acc: [Remove inbox-only restriction for negotiated new version; validate all required capabilities and affinity, bind typed dataflow and enforce bounded actual calls/output; preserve ordinary permissions, schema pins, effect recovery and legacy list/read mapping]
 - [x] T-COMPOSE.10 Migrate marketplace and consumer documentation  Owner: zati-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.8]  acc: [Explicit new-version admission and assignment flow preserves old selections; incompatible consumers refuse readiness; user guidance explains connection setup, partial briefing, upgrade and rollback without claiming live Gmail]
-- [ ] T-COMPOSE.11 Verify joined Zati composition path  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.9, T-COMPOSE.10]  acc: [Actual scripted controller to tool dispatch to persisted briefing succeeds for new and legacy paths; mixed mailbox, denied/revoked tool, stale schema, hostile mail, missing capability and bounded partial failure refuse or report correctly; source/race/spec checks pass without claiming real-model/provider acceptance]
-- [ ] T-COMPOSE.12 Independently review consumer migration candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.11]  acc: [Independent non-author reviews .8-.11 exact Zati base/head and producer pins with findings resolved and ownership boundaries intact]
-- [ ] T-COMPOSE.13 Merge reviewed Zati migration  Owner: zati-coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.12, T-COMPOSE.38]  acc: [Owning repository permits exact-head guarded rebase with current checks and recorded landed SHA; no parallel lifecycle advancement]
-- [ ] T-COMPOSE.14 Verify landed Zati migration  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.13]  acc: [Fresh consumer main verifies reviewed source, exact producer dependency and joined legacy/new behavior; installation and provider qualification remain distinct]
+- [x] T-COMPOSE.11 Verify joined Zati composition path  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.9, T-COMPOSE.10]  acc: [Actual scripted controller to tool dispatch to persisted briefing succeeds for new and legacy paths; mixed mailbox, denied/revoked tool, stale schema, hostile mail, missing capability and bounded partial failure refuse or report correctly; source/race/spec checks pass without claiming real-model/provider acceptance]
+- [x] T-COMPOSE.12 Independently review consumer migration candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.11]  acc: [Independent non-author reviews .8-.11 exact Zati base/head and producer pins with findings resolved and ownership boundaries intact]
+- [x] T-COMPOSE.13 Merge reviewed Zati migration  Owner: zati-coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.12, T-COMPOSE.38]  acc: [Owning repository permits exact-head guarded rebase with current checks and recorded landed SHA; no parallel lifecycle advancement]
+- [x] T-COMPOSE.14 Verify landed Zati migration  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.13]  acc: [Fresh consumer main verifies reviewed source, exact producer dependency and joined legacy/new behavior; installation and provider qualification remain distinct]
 - [x] T-COMPOSE.15 Freeze indexed discovery workload and scale thresholds  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-COMPOSE.7]  acc: [Synthetic 10k/100k mixtures, skew, candidate and fan-out budgets, target host, baseline, latency/RSS/update thresholds, independent labels and no-leak/false-ready invariants fixed before runs; resource limits and exact commands recorded without paid calls or held-out access]
 - [x] T-COMPOSE.16 Implement bounded indexing and generation-aware retrieval  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.15]  acc: [Capability lookup and authorized shortlist indexes avoid per-request full schema/vector materialization; updates/rebuild/rollback, cache isolation/invalidation, cancellation and incomplete-budget outcomes preserve current policy and exact readiness; optional semantic route does not become default]
 - [ ] T-COMPOSE.17 Qualify new composition inventory and evaluation cohort  Owner: evaluation-author  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.14, T-COMPOSE.15, T-COMPOSE.32]  acc: [Independent fixed inventory and caller-policy manifest use new immutable skills and actual two-tool contracts; non-author labels reconcile before scores; primary configuration and split frozen; old composite pilot remains unchanged and original held-out access ungranted]
@@ -1875,9 +1875,9 @@ also found exact-integer mapping rounding, oversized result recovery failure and
 missing explicit unread/pending coverage. These are accepted corrections, not
 consumer completion. Joined source verification and final approval remain gates.
 
-- [ ] T-COMPOSE.36 Correct consumer compile and runtime review findings  Owner: zati-implementer  Est: TBD  kind: agent  stage: fix  blocked-by: [T-COMPOSE.8]  acc: [Restore helper compatibility; preserve exact JSON numbers through mapped inputs; verify oversized artifacts without truncated-digest loops and settle bounded failure; derive expected/completed/pending/failed coverage and resolve all accepted consumer review findings with regressions]
-- [ ] T-COMPOSE.37 Verify corrected consumer boundaries  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.36, T-COMPOSE.11]  acc: [Exact corrected source passes affected numeric/output/recovery/coverage regressions and joined consumer checks; all failures and inherited baseline differences remain documented without model/provider claims]
-- [ ] T-COMPOSE.38 Independently re-review corrected consumer source  Owner: independent-reviewer  Est: TBD  kind: agent  stage: rereview  blocked-by: [T-COMPOSE.37]  acc: [Independent non-author approves final consumer base/head and all accepted findings plus evidence before merge; no unresolved blockers remain]
+- [x] T-COMPOSE.36 Correct consumer compile and runtime review findings  Owner: zati-implementer  Est: TBD  kind: agent  stage: fix  blocked-by: [T-COMPOSE.8]  acc: [Restore helper compatibility; preserve exact JSON numbers through mapped inputs; verify oversized artifacts without truncated-digest loops and settle bounded failure; derive expected/completed/pending/failed coverage and resolve all accepted consumer review findings with regressions]
+- [x] T-COMPOSE.37 Verify corrected consumer boundaries  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.36, T-COMPOSE.11]  acc: [Exact corrected source passes affected numeric/output/recovery/coverage regressions and joined consumer checks; all failures and inherited baseline differences remain documented without model/provider claims]
+- [x] T-COMPOSE.38 Independently re-review corrected consumer source  Owner: independent-reviewer  Est: TBD  kind: agent  stage: rereview  blocked-by: [T-COMPOSE.37]  acc: [Independent non-author approves final consumer base/head and all accepted findings plus evidence before merge; no unresolved blockers remain]
 
 Consumer source checkpoint09817654 implements .9–.10, including explicit desktop
 v1/v2 selection and public import, authenticated runtime evidence, persistent
@@ -1889,3 +1889,29 @@ import schema-equality report was retracted after checking the exact revision;
 existing validation already enforced it. Source tests also exposed shared schema
 mirror and allowlist fixture errors, now corrected for affected verification.
 No consumer landing, installed app, provider or performance claim is made here.
+
+Consumer delivery candidate: Zati source5c0f5e28 passed full five-owner non-race,
+focused composition race, joined controller/Responses/Effects/TLS-MCP/persisted
+reply checks for complete/partial v2, missing binding, legacy workflow and reviewed
+marketplace activation. Widget tests9 passed. Vet/spec/mirrors passed. Broad race
+attempt timed out and is not counted as passing; lint189 is unchanged baseline.
+Checksum-only a10e5ba1 verifies modules and leaves tidy byte-identical to baseline
+four Narrate removals. Accepted fixes include immutable byte transport and
+canonical complete plan identity across actual command boundaries.
+
+Independent composition_doc_audit APPROVED exact final Zati cee4f395 against
+f7baa9fa. Zati PR47 guarded rebase landedfc68df88, exact reviewed tree verified.
+Hosted CI could not start due billing restriction; unchanged authorized local
+fallback applied. Fresh landed behavior checks remain
+T-COMPOSE.14's gate; .17 remains blocked until that gate passes. Full receipt:
+Zati docs/receipts/2026-10-17-gist-composition.md. No release, installation or live
+provider acceptance follows from source delivery.
+
+Fresh consumer landing verification: fc68df88 passed composition race checks in
+Skills/Connections/Execution, new complete/partial plus legacy joined workflow
+race tests, specification generation and runtime mirrors. Exact archived source
+SHA25651fe43171ef5e343209eebae8754914ed691f17b2cc4a2eb58552f544c5e3759;
+bounded service completed successfully and stopped. T-COMPOSE.8–.14 and .36–.38
+are source delivery complete. Composition cohort .17 is now eligible, followed
+by .18 scoring only after inventory, independent labels and primary configuration
+are frozen. Existing thresholds and original held-out restrictions remain intact.
