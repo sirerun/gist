@@ -14,8 +14,13 @@ def records(path):
 def validate(inputs, labels):
     if len(inputs) != 60 or len(labels) != 60:
         raise ValueError("pilot development split requires exactly60 inputs and60 labels")
-    if len({record["id"] for record in inputs}) != 60 or len({record["family"] for record in inputs}) != 60:
-        raise ValueError("development IDs and family membership must be unique")
+    if len({record["id"] for record in inputs}) != 60:
+        raise ValueError("development IDs must be unique")
+    if len({record["workflow_family"] for record in inputs}) != 60:
+        raise ValueError("development workflow identities must be unique")
+    family_groups = Counter(record["family"] for record in inputs)
+    if any(not family for family in family_groups):
+        raise ValueError("construction family grouping must be explicit")
     if any(record.get("split") != "development" for record in inputs):
         raise ValueError("implementation checker refuses non-development inputs")
     if any(not isinstance(record.get("intent"), str) or not record["intent"].strip() for record in inputs):
@@ -31,7 +36,12 @@ def validate(inputs, labels):
                 "dependencies", "expected_status", "prohibited_actions", "prohibited_disclosures", "output_rubric")
     if any(any(field not in record for field in required) for record in labels):
         raise ValueError("incomplete labels")
-    return {"cases": 60, "families": 60, "strata": dict(sorted(strata.items())), "heldout_opened": False}
+    families_by_id = {record["id"]: record["family"] for record in inputs}
+    if any(record.get("family") != families_by_id[record["id"]] for record in labels):
+        raise ValueError("labels must preserve actual construction-family grouping")
+    return {"cases": 60, "families": len(family_groups), "workflow_identities": 60,
+            "family_case_counts": dict(sorted(family_groups.items())),
+            "strata": dict(sorted(strata.items())), "heldout_opened": False}
 
 
 def main():
