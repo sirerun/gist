@@ -79,7 +79,8 @@ def aggregate(rows):
         for category in ("main_model_tokens", "cached_tokens", "embedding_tokens", "dollars"):
             values = [row["usage"].get(category) for row in items]
             usage[category] = sum(values) if all(isinstance(value, (int, float)) for value in values) else None
-        result["arms"][arm] = {"attempts": len(items), "statuses": dict(sorted(Counter(row["status"] for row in items).items())),
+        result["arms"][arm] = {"attempts": len(items), "source_statuses": dict(sorted(Counter(row["status"] for row in items).items())),
+                               "comparison_statuses": dict(sorted(Counter(row.get("comparison_status", "NOT_RUN") for row in items).items())),
                                "all_attempt_elapsed_seconds": sum(elapsed),
                                "source_lookup_p50_seconds": elapsed[(len(elapsed)-1)//2],
                                "source_lookup_p95_seconds": elapsed[math.ceil(0.95*len(elapsed))-1],
@@ -104,8 +105,10 @@ def grade(rows, labels):
         key = (row["arm"], row["stratum"], label.get("evidence_class", "unspecified"))
         counts = groups[key]
         counts["attempts"] += 1
-        if row["status"] == "NOT_RUN":
+        if row["status"] == "NOT_RUN" or row.get("comparison_status") == "NOT_RUN":
             counts["not_run"] += 1
+            if row.get("comparison_reason", "").startswith("fixture_unrepresentable"):
+                counts["environment_catalog_mismatch"] += 1
             continue
         counts["evaluated"] += 1
         positive = label["expected_status"] == "ready"
