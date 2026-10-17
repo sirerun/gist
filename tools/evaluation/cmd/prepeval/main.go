@@ -11,6 +11,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -176,21 +177,16 @@ func run() error {
 			return errors.New("heldout source/configuration/selection manifest mismatch")
 		}
 	}
-	bytes, e := os.ReadFile(*inputs)
+	inputBytes, e := readBounded(*inputs, 16<<20)
 	if e != nil {
 		return e
 	}
-	sum := sha256.Sum256(bytes)
+	sum := sha256.Sum256(inputBytes)
 	inputHash := hex.EncodeToString(sum[:])
 	if *phase == "heldout" && admission["inputs_sha256"] != inputHash {
 		return errors.New("heldout input hash differs from frozen manifest")
 	}
-	file, err := os.Open(*inputs)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = file.Close() }()
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(strings.NewReader(string(inputBytes)))
 	scanner.Buffer(make([]byte, 4096), 1<<20)
 	cases := []input{}
 	for scanner.Scan() {
@@ -239,7 +235,7 @@ func run() error {
 	}
 	var vec *vectors
 	if *vectorFile != "" {
-		raw, e := os.ReadFile(*vectorFile)
+		raw, e := readBounded(*vectorFile, 64<<20)
 		if e != nil {
 			return e
 		}
@@ -397,4 +393,27 @@ func representable(c *fixture.Catalog, item input) bool {
 		return false
 	}
 	return true
+}
+
+func readBounded(path string, max int64) ([]byte, error) {
+	file, e := os.Open(path)
+	if e != nil {
+		return nil, e
+	}
+	defer func() { _ = file.Close() }()
+	info, e := file.Stat()
+	if e != nil {
+		return nil, e
+	}
+	if !info.Mode().IsRegular() || info.Size() > max {
+		return nil, errors.New("evaluation input must be a bounded regular file")
+	}
+	raw, e := io.ReadAll(io.LimitReader(file, max+1))
+	if e != nil {
+		return nil, e
+	}
+	if int64(len(raw)) > max {
+		return nil, errors.New("evaluation input exceeds byte budget")
+	}
+	return raw, nil
 }
