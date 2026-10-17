@@ -128,3 +128,17 @@ independent secondary label/check author and separate non-author reviewer had
 bounded roles. Agent token/cost totals and acceleration are unavailable; task
 count is not a performance metric. Final candidate review/merge/landed evidence
 is recorded in the canonical plan separately from these source-bound scores.
+
+## Landed delivery
+
+[PR85](https://github.com/sirerun/gist/pull/85) independently approved head
+`66537d98e530c5697cdfb8aa56a52373a2ed80e8` against
+`ab6b6c66ff82201309723ace1ac711ff6734119c`, then guarded rebase landed
+`3889cbefa7c93466699e1c958af65f1d0c64ff79`. Reviewed and landed trees match.
+Fresh landed runner, discovery, composition, new-inbox and legacy-inbox race
+tests pass, as do six reporter tests, exact inventory regeneration, all78
+freeze hashes, result checksums and byte-identical report reproduction.
+The landed archive SHA256 is
+`224b4b81d85899d9180ba6cebb4879fd8e705e566f1d849166c93eae125a2411`.
+The bounded service completed successfully and is inactive. No scored attempt
+was replayed; these checks verify the landed source and retained evidence.
