@@ -141,3 +141,27 @@ verification9cfdfccf0fd7c9370215b124ef8d287955076fedc125f4ccb6477a868c228e32.
 Final full-document approval, guarded merge and landed reproduction remain open.
 T-PREP.9 full evaluation and human authority/adoption gates remain pending; these
 controlled development results do not claim their completion.
+
+
+## Guarded merge and landed verification
+
+Independent complete-candidate approval covered
+14010397b155d905feae813183571a12cd637f42 against
+68eac7ce172943ff82f868a0e5fc944e6baab2b3. PR76
+(https://github.com/sirerun/gist/pull/76) rebase merged at
+dbab099cac13da17bfbbc2d768615ebd36dcf324. Immediate pre-merge base/head
+matched review; no required statuses, zero required approvals and no unresolved
+review threads. Hosted job117299211766 could not start because the account is
+locked for billing. The authorized local/qualified-host verification fallback
+was used without retrying CI, changing policy or claiming CI green.
+
+Fresh fetched main contains the merged commit and its complete tree equals the
+approved head. Actual fresh-main standalone verification reproduced2520 attempt
+identities, all12 reports and selection; the worktree remained clean afterward.
+This did not rerun models or access held-out/provider data.
+
+T-PREP.30-.38 are complete for the four-outcome controlled development slice.
+Remaining full evaluation, representative independent families/negative cases,
+whole-task/model/provider authority, human adoption and conditional consumer/
+release gates remain open. Primary H1 has not met the proposed coverage threshold
+here. No result in this delivery changes the Zati default.
