@@ -35,11 +35,26 @@ GOMAXPROCS=4 GOWORK=off timeout 600 go vet -p 4 ./...
 GOMAXPROCS=4 GOWORK=off timeout 120 go mod tidy -diff
 ```
 
-All passed; tidy produced no diff. Frozen contract check and all12Python registry
+All passed; tidy produced no diff. Supplementary changed-package race passed
+(1.151s), full root and explicit cmd/gist builds passed, changed-file gofmt is
+clean. Exact CI golangci-lint2.14.0 Linux ARM64 official archive checksum was
+verified. Candidate full lint reports five findings, reproduced identically on untouched
+base16245c6: three errcheck, one staticcheck and one unused. Coordinator inspected
+both complete outputs; no introduced finding. Provenance-only lint passes.
+Whole-repository lint is not reported green; no exclusions or policy weakened.
+Supplementary logs are retained on the qualified host under the candidate's
+`verification-logs` directory. Frozen contract check and all12Python registry
 regressions passed locally. No dependencies, frozen wire or hosted behavior changed.
 Non-author independent review approved exact source base/head with no blocking
 findings. No correction was necessary. Final plan/receipt exact-head review,
 guarded merge and fresh-main landed verification remain pending.
+
+GitHub PR69: candidate hosted CI failed to start because the account is locked
+by billing (check117274948325 annotation confirmed). The repository has no
+required status checks and zero required approving reviews; no policy was
+changed. The owner-authorized local/qualified-host fallback is used, with
+independent review and exact-head merge retained. Hosted CI is unavailable,
+not passed.
 
 ## Independent native Zati qualification
 
@@ -58,5 +73,8 @@ proof first asserted a wrong response wrapper; inspecting the saved response
 confirmed the actual data.items shape and its package identity. No provider calls.
 Native compilation remains held while one-minute load exceeds10. Visible acceptance,
 installation, release and live Gmail acceptance are not yet qualified.
-The unrelated existing native Flutter preview and installed controller remain
+Controller binary SHA256:
+`cc786bf170c6a764814bf86226df6daf802f989a9bad2a41af76e24c014ff508`.
+No build lease remains held; native qualification claim released while
+capacity-held. The unrelated existing native Flutter preview and installed controller remain
 unchanged.
