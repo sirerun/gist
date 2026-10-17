@@ -2087,8 +2087,8 @@ acceptance. Foundation PR 280 is merged with an identical Pulumi source tree.
 #### Read-only deployment inspection
 
 - [x] T-HOSTED.18 Implement read-only production database inspection  Owner: registry-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-HOSTED.14, T-HOSTED.15]  acc: [Explicit runtime verification authenticates only as the runtime role and checks live privileges, ownership and forced tenant RLS; explicit sorted schema-definition output supports a legacy-prefix audit without reading application row values; default status unchanged]
-- [ ] T-HOSTED.19 Verify exact database inspection source  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-HOSTED.18]  acc: [PostgreSQL race integration covers seeded tenant isolation, denied unsafe grants or disabled forced RLS and definition digest with no private row marker; hosted vet and build pass for final candidate]
-- [ ] T-HOSTED.20 Independently review read-only database inspection  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-HOSTED.19]  acc: [Non-author approves exact source and actual checks; output is privately retained and does not overstate empty live row probes or OAuth acceptance]
+- [x] T-HOSTED.19 Verify exact database inspection source  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-HOSTED.18]  acc: [PostgreSQL race integration covers seeded tenant isolation, denied unsafe grants or disabled forced RLS and definition digest with no private row marker; hosted vet and build pass for final candidate]
+- [x] T-HOSTED.20 Independently review read-only database inspection  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-HOSTED.19]  acc: [Non-author approves exact source and actual checks; output is privately retained and does not overstate empty live row probes or OAuth acceptance]
 - [ ] T-HOSTED.21 Merge and verify landed database inspection inputs  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-HOSTED.20]  acc: [Guarded rebase respects repository policy and exact reviewed source; fresh landed checks pass before an immutable follow-on image is built and pinned]
 
 #### Observed staging state
@@ -2104,3 +2104,8 @@ succeeded from the merged commit. An encrypted pre-migration recovery snapshot
 was requested; availability is checked before SQL mutation. Serving configuration
 has not switched. Read-only inspection supports live privilege verification and
 auditing any untracked legacy migration prefix before adoption.
+
+Read-only inspection candidate passed final-source PostgreSQL race integration,
+vet and build; non-author review approved its exact source. Migration-only
+Foundation PR 281 merged and applied three isolated task resources with no
+serving change; the canonical TLS and application switch are still pending.
