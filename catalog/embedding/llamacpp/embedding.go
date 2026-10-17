@@ -89,6 +89,8 @@ func (e *Embedder) ModelVersion() string { return e.version }
 func (e *Embedder) Close() { e.client.CloseIdleConnections() }
 
 func (e *Embedder) Embed(ctx context.Context, q preparation.EmbeddingRequest) (preparation.EmbeddingResult, error) {
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
 	empty := preparation.EmbeddingResult{}
 	if q.ModelVersion != e.version || len(q.Texts) == 0 || len(q.Texts) > MaxTexts {
 		return empty, errors.New("llamacpp: model identity or batch mismatch")
