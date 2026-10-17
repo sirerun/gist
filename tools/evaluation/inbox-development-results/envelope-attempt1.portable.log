@@ -1,0 +1,8 @@
+Running as unit: gist-inbox-development-3676aa1.service; invocation ID: 25818bb8d3c745a3a344ce9526b2f21a
+/usr/bin/python3: can't open file '$UNSET_WORKDIR/tools/evaluation/inbox-development-results/run.py': [Errno 2] No such file or directory
+Finished with result: exit-code
+Main processes terminated with: code=exited/status=2
+Service runtime: 17ms
+CPU time consumed: 17ms
+Memory peak: 256.0K
+Memory swap peak: 0B

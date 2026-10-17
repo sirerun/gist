@@ -1,0 +1,252 @@
+{
+  "arms": {
+    "C0": {
+      "actual_families": 1,
+      "all_attempt_elapsed_seconds": 0,
+      "attempts": 30,
+      "comparison_statuses": {
+        "NOT_RUN": 30
+      },
+      "inference_latency_included": false,
+      "source_lookup_p50_seconds": 0,
+      "source_lookup_p95_seconds": 0,
+      "source_statuses": {
+        "NOT_RUN": 30
+      },
+      "strata": {
+        "covered_positive_closed_menu": 30
+      },
+      "usage": {
+        "cached_tokens": null,
+        "dollars": null,
+        "embedding_tokens": null,
+        "main_model_tokens": null
+      }
+    },
+    "C1": {
+      "actual_families": 1,
+      "all_attempt_elapsed_seconds": 0,
+      "attempts": 30,
+      "comparison_statuses": {
+        "NOT_RUN": 30
+      },
+      "inference_latency_included": false,
+      "source_lookup_p50_seconds": 0,
+      "source_lookup_p95_seconds": 0,
+      "source_statuses": {
+        "NOT_RUN": 30
+      },
+      "strata": {
+        "covered_positive_closed_menu": 30
+      },
+      "usage": {
+        "cached_tokens": null,
+        "dollars": null,
+        "embedding_tokens": null,
+        "main_model_tokens": null
+      }
+    },
+    "E0": {
+      "actual_families": 1,
+      "all_attempt_elapsed_seconds": 0.014631464,
+      "attempts": 30,
+      "comparison_statuses": {
+        "ELIGIBLE": 30
+      },
+      "inference_latency_included": false,
+      "source_lookup_p50_seconds": 0.000499631,
+      "source_lookup_p95_seconds": 0.000927919,
+      "source_statuses": {
+        "ready": 30
+      },
+      "strata": {
+        "covered_positive_closed_menu": 30
+      },
+      "usage": {
+        "cached_tokens": null,
+        "dollars": null,
+        "embedding_tokens": null,
+        "main_model_tokens": null
+      }
+    },
+    "H0": {
+      "actual_families": 1,
+      "all_attempt_elapsed_seconds": 0.013023386,
+      "attempts": 30,
+      "comparison_statuses": {
+        "ELIGIBLE": 30
+      },
+      "inference_latency_included": false,
+      "source_lookup_p50_seconds": 0.000483807,
+      "source_lookup_p95_seconds": 0.000695823,
+      "source_statuses": {
+        "ready": 26,
+        "requires_selection": 4
+      },
+      "strata": {
+        "covered_positive_closed_menu": 30
+      },
+      "usage": {
+        "cached_tokens": null,
+        "dollars": null,
+        "embedding_tokens": null,
+        "main_model_tokens": null
+      }
+    },
+    "H1": {
+      "actual_families": 1,
+      "all_attempt_elapsed_seconds": 0.013524219,
+      "attempts": 30,
+      "comparison_statuses": {
+        "ELIGIBLE": 30
+      },
+      "inference_latency_included": false,
+      "source_lookup_p50_seconds": 0.000488783,
+      "source_lookup_p95_seconds": 0.001106446,
+      "source_statuses": {
+        "ready": 26,
+        "requires_selection": 4
+      },
+      "strata": {
+        "covered_positive_closed_menu": 30
+      },
+      "usage": {
+        "cached_tokens": null,
+        "dollars": null,
+        "embedding_tokens": null,
+        "main_model_tokens": null
+      }
+    },
+    "L0": {
+      "actual_families": 1,
+      "all_attempt_elapsed_seconds": 0.010882543,
+      "attempts": 30,
+      "comparison_statuses": {
+        "ELIGIBLE": 30
+      },
+      "inference_latency_included": false,
+      "source_lookup_p50_seconds": 0.000338912,
+      "source_lookup_p95_seconds": 0.000754671,
+      "source_statuses": {
+        "no_match": 3,
+        "ready": 23,
+        "unsupported": 4
+      },
+      "strata": {
+        "covered_positive_closed_menu": 30
+      },
+      "usage": {
+        "cached_tokens": null,
+        "dollars": null,
+        "embedding_tokens": null,
+        "main_model_tokens": null
+      }
+    },
+    "L1": {
+      "actual_families": 1,
+      "all_attempt_elapsed_seconds": 0.010494993,
+      "attempts": 30,
+      "comparison_statuses": {
+        "ELIGIBLE": 30
+      },
+      "inference_latency_included": false,
+      "source_lookup_p50_seconds": 0.000328271,
+      "source_lookup_p95_seconds": 0.000591855,
+      "source_statuses": {
+        "no_match": 3,
+        "ready": 23,
+        "unsupported": 4
+      },
+      "strata": {
+        "covered_positive_closed_menu": 30
+      },
+      "usage": {
+        "cached_tokens": null,
+        "dollars": null,
+        "embedding_tokens": null,
+        "main_model_tokens": null
+      }
+    }
+  },
+  "attempts": 210,
+  "kind": "controlled source smoke; not whole-task or held-out retrieval evidence",
+  "performance_or_adoption_claim": false,
+  "schema": "gist.preparation.source-report/v1",
+  "selected_semantic_model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:files=e3faeaceb35dcd6de5edb05a700a55e827ecb35c503faf9d75e272cfe195703d:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:tokenizers=0.23.3:numpy=2.4.2:python=3.12.3:bfloat16:768d",
+  "source_readiness_grading": [
+    {
+      "arm": "C0",
+      "attempts": 30,
+      "evidence_class": "controlled_inbox_development",
+      "not_run": 30,
+      "stratum": "covered_positive_closed_menu"
+    },
+    {
+      "arm": "C1",
+      "attempts": 30,
+      "evidence_class": "controlled_inbox_development",
+      "not_run": 30,
+      "stratum": "covered_positive_closed_menu"
+    },
+    {
+      "arm": "E0",
+      "attempts": 30,
+      "complete_toolset_covered": 30,
+      "evaluated": 30,
+      "evidence_class": "controlled_inbox_development",
+      "exact_readiness_classification": 30,
+      "positive_attempts": 30,
+      "required_capability_instances": 30,
+      "retrieved_capability_instances": 30,
+      "stratum": "covered_positive_closed_menu"
+    },
+    {
+      "arm": "H0",
+      "attempts": 30,
+      "complete_toolset_covered": 26,
+      "evaluated": 30,
+      "evidence_class": "controlled_inbox_development",
+      "exact_readiness_classification": 26,
+      "positive_attempts": 30,
+      "required_capability_instances": 30,
+      "retrieved_capability_instances": 26,
+      "stratum": "covered_positive_closed_menu"
+    },
+    {
+      "arm": "H1",
+      "attempts": 30,
+      "complete_toolset_covered": 26,
+      "evaluated": 30,
+      "evidence_class": "controlled_inbox_development",
+      "exact_readiness_classification": 26,
+      "positive_attempts": 30,
+      "required_capability_instances": 30,
+      "retrieved_capability_instances": 26,
+      "stratum": "covered_positive_closed_menu"
+    },
+    {
+      "arm": "L0",
+      "attempts": 30,
+      "complete_toolset_covered": 23,
+      "evaluated": 30,
+      "evidence_class": "controlled_inbox_development",
+      "exact_readiness_classification": 23,
+      "positive_attempts": 30,
+      "required_capability_instances": 30,
+      "retrieved_capability_instances": 23,
+      "stratum": "covered_positive_closed_menu"
+    },
+    {
+      "arm": "L1",
+      "attempts": 30,
+      "complete_toolset_covered": 23,
+      "evaluated": 30,
+      "evidence_class": "controlled_inbox_development",
+      "exact_readiness_classification": 23,
+      "positive_attempts": 30,
+      "required_capability_instances": 30,
+      "retrieved_capability_instances": 23,
+      "stratum": "covered_positive_closed_menu"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "aggregate_timeout_seconds": 2700,
+  "attempts": [
+    {
+      "attempt": 1,
+      "model_jobs": 0,
+      "portable_log_sha256": "058f56f454667ab8d69af24ea2cfdb266fa4693c22faa2052bb014ec5562e519",
+      "raw_log_sha256": "b5c166412d5859f9cf23c34857cc11c5fd87bee4c58f917e8ab9b3ebbe7fce3e",
+      "redacted": true,
+      "returncode": 2,
+      "source_attempt_records": 0
+    },
+    {
+      "attempt": 2,
+      "model_jobs": 2,
+      "portable_log_sha256": "f0b46d9d0b8ec8fad9cf31aecde21756c185d67ae90ec822bbed36505e3ef5b5",
+      "raw_log_sha256": "f0b46d9d0b8ec8fad9cf31aecde21756c185d67ae90ec822bbed36505e3ef5b5",
+      "redacted": false,
+      "returncode": 0,
+      "source_attempt_records": 2520
+    }
+  ],
+  "cpu_max": "400000 100000",
+  "failure_note": "Launch1 failed before runner/model because transient service did not inherit cwd. Launch2 explicitly sets working directory; same frozen source and no hidden query/model retry.",
+  "memory_max_bytes": 25769803776,
+  "memory_swap_max_bytes": 0,
+  "observed_service_memory_peak_note": "systemd reported1.5M charged memory; use adapter ru_maxrss for process RSS, not this shared-cache-dependent cgroup observation.",
+  "per_model_timeout_seconds": 1200,
+  "schema": "gist.inbox-development.envelope/v1",
+  "source_archive_sha256": "eaa2cda40df328387f238535345138eaf2bc76b577f318bb3d57f479d6e664bc",
+  "successful_service_cpu_seconds": 24.497,
+  "successful_service_runtime_seconds": 16.3
+}
