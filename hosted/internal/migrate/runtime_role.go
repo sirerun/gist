@@ -38,7 +38,7 @@ var runtimeTables = map[string]string{
 	"event_outbox":              "SELECT, INSERT, UPDATE, DELETE",
 	"event_cursors":             "SELECT, INSERT, UPDATE, DELETE",
 	"event_retention_floors":    "SELECT, INSERT, UPDATE, DELETE",
-	"github_login_flows":        "SELECT, INSERT, UPDATE",
+	"github_login_flows":        "SELECT, INSERT, UPDATE, DELETE",
 	"workspace_invitations":     "SELECT, INSERT, UPDATE",
 	"founder_bootstrap":         "SELECT, INSERT",
 }
