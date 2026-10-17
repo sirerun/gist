@@ -2,7 +2,7 @@
   "schema": "gist.inbox-development.cohort/v1",
   "cohort_id": "closed-menu-inbox-development-20261016",
   "kind": "positive_closed_menu_source_conformance_only",
-  "label_status": "reconciled_pending_independent_final_artifact_check",
+  "label_status": "independently_reviewed_before_scores",
   "case_count": 30,
   "construction_family_count": 1,
   "family": "maintained-inbox-briefing-closed-menu-v1",
@@ -56,5 +56,14 @@
     "evidence_class_metadata_differences": 30,
     "safety_and_rubric_union_cases": 30,
     "conditional_locale_normalizations": 30
+  },
+  "independent_review": {
+    "reviewed_cohort_commit": "2ffcd4cef01f04d5ca9a0e0d35ee8c4cb28ac961",
+    "canonical_labels_sha256": "b8dce1bf1c8675cbd8c1714b6fde17bc037bf930f2759adcb0b07b56f9f56619",
+    "reviewer": "independent-blind-author2-and-final-artifact-review",
+    "result": "passed",
+    "scope": "Thirty canonical label rows, preserved independent originals, union/normalization reasons, exact artifact hashes and catalog-before-menu-before-label provenance. ONE construction family; closed-menu positive development source conformance only.",
+    "score_access": "Independent artifact qualification completed before any model/preparation scoring admission.",
+    "delivery_status": "Data candidate reviewed; no PR merge or run outcome asserted."
   }
 }
