@@ -153,8 +153,7 @@ func Start(ctx context.Context) (func(context.Context) error, error) {
 
 // WrapHandler adds panic recovery and HTTP tracing only when OTLP is enabled.
 // When telemetry is off, returns next unchanged so panic/error behavior matches
-// the pre-otelboot server. Canary induction is not installed here — register it
-// on the authenticated mux via api.Server.RegisterOTELCanary.
+// the pre-otelboot server. Canary induction is not installed here.
 func WrapHandler(next http.Handler) http.Handler {
 	if !Enabled() {
 		return next
@@ -188,7 +187,7 @@ func RecoverHandler(next http.Handler) http.Handler {
 }
 
 // InduceCanaryError writes a controlled 500 with an error span. Call only from
-// an auth-gated route (see api.Server.RegisterOTELCanary).
+// an auth-gated route when a canary is intentionally enabled.
 func InduceCanaryError(w http.ResponseWriter, r *http.Request) {
 	ctx, span := otel.Tracer("gist").Start(r.Context(), "canary.error")
 	defer span.End()
