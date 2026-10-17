@@ -87,7 +87,7 @@ func TestPublicAdapterProtocolAndDimensions(t *testing.T) {
 	}
 }
 func TestMalformedRuntimeResponsesFailClosed(t *testing.T) {
-	for _, kind := range []string{"missing-index", "duplicate-index", "wrong-model", "wrong-count", "wrong-dimension", "zero", "wrong-norm", "unknown", "alias-key", "duplicate-key", "trailing", "oversize", "status"} {
+	for _, kind := range []string{"missing-index", "duplicate-index", "wrong-model", "wrong-count", "wrong-dimension", "zero", "wrong-norm", "unknown", "alias-key", "duplicate-key", "unicode-key", "trailing", "oversize", "status"} {
 		t.Run(kind, func(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.URL.Path == "/tokenize" {
@@ -129,6 +129,8 @@ func TestMalformedRuntimeResponsesFailClosed(t *testing.T) {
 					raw = []byte(strings.Replace(string(raw), `"model":`, `"MODEL":`, 1))
 				case "duplicate-key":
 					raw = []byte(strings.Replace(string(raw), `"model":`, `"model":"alias","model":`, 1))
+				case "unicode-key":
+					raw = []byte(strings.Replace(string(raw), `"total_tokens":`, `"total_tokenſ":`, 1))
 				case "trailing":
 					raw = append(raw, []byte(" {}")...)
 				}
