@@ -1,0 +1,47 @@
+{
+  "schema": "gist.evaluation.inbox-development-preflight/v1",
+  "state": "PREPARED_NOT_RUN",
+  "inspected_source": "f6c0d563813c4791a1164a4a8d25da2eec4333a6",
+  "source_freeze_pending_independent_label_reconciliation": true,
+  "heldout_accessed": false,
+  "provider_calls": 0,
+  "paid_model_calls": 0,
+  "model_downloads": 0,
+  "adapter_sha256": "35b118e9b23d726528a3dc248b0aaaf3e7178d077140956aacbeeaaad83a7e94",
+  "trusted_model_manifest_sha256": "599abc270efac36a5bfe7c6f398be09007c5ae657671c227c46a789b7132cd0d",
+  "model_revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
+  "runtime": {
+    "python": "3.12.3",
+    "torch": "2.12.0.dev20260326+cu128",
+    "transformers": "5.20.1",
+    "sentence-transformers": "6.1.0",
+    "tokenizers": "0.23.3",
+    "numpy": "2.4.2"
+  },
+  "qualified_envelope": {
+    "mechanism": "isolated transient user systemd cgroup2 service; no global settings changed",
+    "memory_max_bytes": 25769803776,
+    "memory_swap_max_bytes": 0,
+    "cpu_max": "400000 100000",
+    "preflight_command_status": 0,
+    "preflight_runtime_ms": 7,
+    "per_embedding_job_timeout_seconds": 1200,
+    "aggregate_timeout_seconds": 2700,
+    "threads": 4,
+    "rss_note": "cgroup memory.max enforces a ceiling on total charged memory including RSS; observed RSS is reported separately"
+  },
+  "planned_grid": {
+    "dtype": "bfloat16",
+    "dimensions": [256, 768],
+    "top_k": [4, 8, 16],
+    "semantic_floor": 0.30,
+    "rrf_constant": 60,
+    "source_process_labels": ["source_cold", "source_warm"],
+    "arms": ["L0", "L1", "E0", "H0", "H1", "C0", "C1"],
+    "provider_arms": "C0/C1 NOT_RUN",
+    "planned_records_if_all_jobs_complete": 2520,
+    "source_timing_note": "separate CLI process labels, no inference-cache claim; embedding load/inference/RSS retained separately"
+  },
+  "selection": "H1 maximum eligible ready complete-context rate, then exact closure correctness; ties prefer256 then k4; zero eligible means no selection",
+  "inference_limit": "one conservative construction-family cluster, development only; no generalization/noninferiority/adoption claim"
+}
