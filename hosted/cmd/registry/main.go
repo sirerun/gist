@@ -42,6 +42,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer func() {
+		flushCtx, flushCancel := context.WithTimeout(context.Background(), 10*time.Second)
+		_ = otelShutdown(flushCtx)
+		flushCancel()
+	}()
 	a, err := app.New(ctx, cfg)
 	if err != nil {
 		log.Fatal(err)
@@ -55,9 +60,6 @@ func main() {
 	shutdown, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := a.Shutdown(shutdown); err != nil {
-		log.Fatal(err)
-	}
-	if err := otelShutdown(shutdown); err != nil {
 		log.Fatal(err)
 	}
 }
