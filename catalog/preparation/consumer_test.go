@@ -492,3 +492,31 @@ func TestRecipeDoesNotTrustAnImpostorPackageWithSameIDVersion(t *testing.T) {
 		t.Fatalf("static recipe accepted different same-ID package: %+v %v", out, e)
 	}
 }
+
+type fixedClock struct{ at time.Time }
+
+func (c fixedClock) Now() time.Time { return c.at }
+
+type advancingClock struct {
+	at    time.Time
+	calls int
+}
+
+func (c *advancingClock) Now() time.Time {
+	c.calls++
+	if c.calls > 1 {
+		return c.at.Add(2 * time.Minute)
+	}
+	return c.at
+}
+func TestReadinessExpiryDuringResolverIOCannotEscape(t *testing.T) {
+	_, s, r := credentialed(t)
+	now := time.Now().UTC()
+	s.CurrentReadiness = &currentConnection{ready: true, now: fixedClock{now}}
+	s.Clock = &advancingClock{at: now}
+	s.MaxReadinessAge = time.Minute
+	out, e := s.Prepare(context.Background(), r)
+	if e == nil || out.Selected != nil {
+		t.Fatal("expired current decision escaped resolver IO")
+	}
+}
