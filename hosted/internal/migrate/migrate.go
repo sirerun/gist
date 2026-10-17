@@ -98,7 +98,7 @@ func (r Runner) Status(ctx context.Context, conn *pgx.Conn) (Status, error) {
 	if err != nil {
 		return Status{}, errors.New("cannot start read-only migration status")
 	}
-	defer func() { _ = tx.Rollback(context.Background()) }()
+	defer rollback(tx)
 	status, err := r.status(ctx, tx)
 	if err != nil {
 		return Status{}, err
@@ -237,7 +237,7 @@ func (r Runner) Apply(ctx context.Context, conn *pgx.Conn) error {
 				return nil
 			}()
 			if failed != nil {
-				_ = tx.Rollback(context.Background())
+				rollback(tx)
 				return failed
 			}
 			ledgerExists = true
@@ -267,7 +267,7 @@ func (r Runner) Adopt(ctx context.Context, conn *pgx.Conn, through int, manifest
 		if err != nil {
 			return errors.New("cannot start adoption transaction")
 		}
-		defer func() { _ = tx.Rollback(context.Background()) }()
+		defer rollback(tx)
 		if !status.LedgerExists {
 			if _, err := tx.Exec(ctx, createLedger); err != nil {
 				return errors.New("cannot create migration ledger")
@@ -287,4 +287,11 @@ func (r Runner) Adopt(ctx context.Context, conn *pgx.Conn, through int, manifest
 func validHash(raw string) bool {
 	decoded, err := hex.DecodeString(raw)
 	return err == nil && len(decoded) == 32 && hex.EncodeToString(decoded) == raw
+}
+
+// Cleanup uses an independent bounded deadline after a cancelled release task.
+func rollback(tx pgx.Tx) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_ = tx.Rollback(ctx)
 }
