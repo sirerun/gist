@@ -69,6 +69,9 @@ func decodePolicy(raw []byte, expected string) (*taskPolicy, error) {
 	if len(raw) > maxPolicyBytes || fixture.Hash(raw).Value != expected {
 		return nil, errors.New("task policy digest/size mismatch")
 	}
+	if err := rejectDuplicateFields(json.NewDecoder(bytes.NewReader(raw))); err != nil {
+		return nil, err
+	}
 	d := json.NewDecoder(bytes.NewReader(raw))
 	d.DisallowUnknownFields()
 	var p taskPolicy
@@ -119,4 +122,45 @@ func policyTemplate() (taskPolicy, error) {
 	}
 	r := c.Records[fixture.Ref(ports.KindSkill, inboxbriefing.SkillID)]
 	return taskPolicy{Schema: policySchema, Kind: "evaluation_fixture_not_live_authority", Entries: []policyEntry{{IntentSHA256: "REPLACE_WITH_INDEPENDENTLY_REVIEWED_EXACT_INTENT_SHA256", Principal: fixture.Principal, RuntimeID: fixture.Request("").RuntimeID, Skill: ports.ArtifactPin{Ref: r.Ref, Digest: r.Digest, ManifestDigest: r.ManifestDigest}, RequiredCapabilities: []ports.ArtifactRef{fixture.Ref(ports.KindCapability, inboxbriefing.CapabilityID)}, RecipeVersion: preparation.RecipeVersion}}}, nil
+}
+
+// Encoding/json otherwise silently accepts duplicate object keys. A policy
+// snapshot must have only one interpretation, including nested caller fields.
+func rejectDuplicateFields(d *json.Decoder) error {
+	token, err := d.Token()
+	if err != nil {
+		return err
+	}
+	delim, ok := token.(json.Delim)
+	if !ok {
+		return nil
+	}
+	switch delim {
+	case '{':
+		seen := map[string]bool{}
+		for d.More() {
+			key, err := d.Token()
+			if err != nil {
+				return err
+			}
+			name, ok := key.(string)
+			if !ok || seen[name] {
+				return errors.New("duplicate/invalid policy JSON field")
+			}
+			seen[name] = true
+			if err := rejectDuplicateFields(d); err != nil {
+				return err
+			}
+		}
+	case '[':
+		for d.More() {
+			if err := rejectDuplicateFields(d); err != nil {
+				return err
+			}
+		}
+	default:
+		return errors.New("invalid policy JSON delimiter")
+	}
+	_, err = d.Token()
+	return err
 }

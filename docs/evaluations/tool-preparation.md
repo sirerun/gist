@@ -205,3 +205,14 @@ family-clustered conservative binary method before implementation and held-out
 access. Its source-test budgets are targets, not measurements. Runtime/model
 qualification and corpus reconciliation receipts must identify their real hashes.
 No held-out results or performance/adoption claims are added by this freeze.
+
+
+### Evaluation input adapter availability
+
+The source driver now accepts hash-bound independently authored evaluation task
+policies through the existing TaskAdmitter port and exposes development k4/8/16
+with floor0.30/RRF60 unchanged. See the [actual CLI contract](../../tools/evaluation/README.md#independent-evaluation-policy-and-development-grid).
+Policy identity and exact k are recorded per attempt and checked by held-out
+admission and reporting before input/label access. Default two-literal source
+admission remains unchanged. These adapters do not qualify a representative
+inventory/cohort, admit held-out data, select a configuration or change Zati.

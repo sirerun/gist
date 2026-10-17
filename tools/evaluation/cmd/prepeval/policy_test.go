@@ -94,7 +94,7 @@ func TestPolicyFileFailClosed(t *testing.T) {
 	if _, err := loadPolicy(link, sha); err == nil {
 		t.Fatal("symlink accepted")
 	}
-	for _, bad := range [][]byte{[]byte(`{"schema":"unknown"}`), append(raw, []byte(` {}`)...), []byte(strings.Replace(string(raw), `"schema":`, `"expected_status":"ready","schema":`, 1)), []byte(strings.Repeat(" ", maxPolicyBytes+1))} {
+	for _, bad := range [][]byte{[]byte(`{"schema":"unknown"}`), []byte(strings.Replace(string(raw), `"schema":`, `"schema":"duplicate","schema":`, 1)), append(raw, []byte(` {}`)...), []byte(strings.Replace(string(raw), `"schema":`, `"expected_status":"ready","schema":`, 1)), []byte(strings.Repeat(" ", maxPolicyBytes+1))} {
 		if _, err := decodePolicy(bad, fixture.Hash(bad).Value); err == nil {
 			t.Fatal("invalid policy accepted")
 		}
@@ -121,6 +121,7 @@ func cli(t *testing.T, args ...string) ([]byte, error) {
 	t.Helper()
 	cmd := exec.Command(os.Args[0], append([]string{"-test.run=TestCLIHelper", "--"}, args...)...)
 	cmd.Env = append(os.Environ(), "GIST_PREPEVAL_HELPER=1")
+	cmd.Dir = t.TempDir()
 	return cmd.CombinedOutput()
 }
 func TestCLIExternalPolicyAndConfiguration(t *testing.T) {
@@ -166,6 +167,46 @@ func TestCLIExternalPolicyAndConfiguration(t *testing.T) {
 		out, err := cli(t, append([]string{"--source", strings.Repeat("a", 40), "--phase", "heldout", "--inputs", filepath.Join(dir, "DO_NOT_OPEN")}, args...)...)
 		if err == nil || strings.Contains(string(out), "DO_NOT_OPEN") {
 			t.Fatalf("invalid configuration read input: %s", out)
+		}
+	}
+}
+
+func TestHeldoutFrozenPolicyAndKBeforeInputAccess(t *testing.T) {
+	_, raw := reviewedPolicy(t)
+	dir := t.TempDir()
+	policy := filepath.Join(dir, "policy.json")
+	if err := os.WriteFile(policy, raw, 0600); err != nil {
+		t.Fatal(err)
+	}
+	c, err := fixture.New("ready")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cat, err := fixture.Export(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := strings.Repeat("a", 40)
+	sha := fixture.Hash(raw).Value
+	catSHA := fixture.Hash(cat).Value
+	frozen := map[string]any{"candidate_frozen": true, "candidate_source": source, "model_version": "model", "catalog_version": "sha256:" + catSHA, "catalog_sha256": catSHA, "recipe_version": preparation.RecipeVersion, "semantic_floor": .30, "top_k": 8, "rrf_constant": 60, "policy_version": "sha256:" + sha, "development_selection_sha256": strings.Repeat("b", 64), "inputs_sha256": strings.Repeat("c", 64), "labels_sha256": strings.Repeat("d", 64)}
+	for _, field := range []string{"policy_version", "top_k"} {
+		changed := map[string]any{}
+		for k, v := range frozen {
+			changed[k] = v
+		}
+		changed[field] = "wrong"
+		manifest := filepath.Join(dir, "manifest.json")
+		b, err := json.Marshal(changed)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(manifest, b, 0600); err != nil {
+			t.Fatal(err)
+		}
+		out, err := cli(t, "--source", source, "--phase", "heldout", "--inputs", filepath.Join(dir, "DO_NOT_OPEN"), "--admission", manifest, "--task-policy", policy, "--task-policy-sha256", sha, "--top-k", "8")
+		if err == nil || !strings.Contains(string(out), "manifest mismatch") || strings.Contains(string(out), "DO_NOT_OPEN") {
+			t.Fatalf("failed pre-input guard %s: %s", field, out)
 		}
 	}
 }
