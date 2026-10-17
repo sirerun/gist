@@ -67,8 +67,8 @@ host memory remain unverified. The documented6CPU/84Gi profile exceeds reported
 available4CPU/85700MiB; allocation counters are not live memory evidence. The
 existing generator also uses restart Always without a bounded deadline. No model
 was started, reconfigured or downloaded and no other workload was interrupted.
-A separate owner question requests a bounded cached-model start, one-hour total
-limit and stopping only that owned service; it remains pending. Source/fixture
+The owner subsequently approved a bounded cached-model start, one-hour total
+limit and stopping only that owned service, as recorded below. Source/fixture
 work continues independently. Actual reasoning comparison is not yet run.
 
 ## Open delivery evidence
@@ -118,3 +118,23 @@ authority and unique trusted tool_result selection must survive. Full real
 list→read→stored-reply acceptance and independent corrected review remain open.
 Wazi local conformance passed442 tasks, source digest
 f1b85e33d7016046ee6c24068f8033e91b8b33e249c308b2458091f9e9fa94d3.
+
+## Corrected source and pre-inference review
+
+Zati candidate e5741d6d45c1f85e0fe8d73c3b8d55667e58d41d repairs both
+production defects without changing public contracts. The joined controlled
+list→read→stored-reply fixture passed at its preceding source checkpoint; this
+is synthetic executor/controller evidence, not real-model qualification. Focused
+replay, worker authority, current-step fencing and trusted publication tests
+cover the fixes. Current-head aggregate checks and exact executable verification
+remain required before inference and full delivery approval.
+
+Prelaunch review also found and corrected INBOX-R3–R5 in the test harness:
+failed attempts now cancel their exact HTTP context before metrics drain and
+stop the entire run; actual-model identity survives failure; each physical HTTP
+exchange retains bounded raw response evidence, including non-200 errors.
+Independent exact-source rereview approved these corrections conditionally on
+current checks and executable integrity. No model prompt has yet been sent.
+
+A fresh coordinator run of the five Gist diagnostic regressions passed. The
+four ambiguity cases remain unchanged, and no ranking default was modified.
