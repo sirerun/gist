@@ -48,6 +48,20 @@ func run() error {
 	defer stop()
 	ctx, cancel := context.WithTimeout(signalCtx, *timeout)
 	defer cancel()
+	if *verify {
+		ownerConfig, err := pgx.ParseConfig(os.Getenv("GIST_DATABASE_URL"))
+		if err != nil {
+			return fmt.Errorf("invalid migration database binding")
+		}
+		report, err := runner.VerifyRuntimeRole(ctx, ownerConfig, os.Getenv("GIST_RUNTIME_DATABASE_URL"))
+		if err != nil {
+			return err
+		}
+		if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
+			return fmt.Errorf("cannot write runtime verification")
+		}
+		return nil
+	}
 	conn, err := pgx.Connect(ctx, os.Getenv("GIST_DATABASE_URL"))
 	if err != nil {
 		return fmt.Errorf("cannot connect to migration database")
@@ -67,16 +81,7 @@ func run() error {
 		}
 		return nil
 	}
-	if *verify {
-		report, err := runner.VerifyRuntimeRole(ctx, conn.Config(), os.Getenv("GIST_RUNTIME_DATABASE_URL"))
-		if err != nil {
-			return err
-		}
-		if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
-			return fmt.Errorf("cannot write runtime verification")
-		}
-		return nil
-	}
+
 	switch {
 	case *provision:
 		err = runner.ProvisionRuntimeRole(ctx, conn, os.Getenv("GIST_RUNTIME_DATABASE_URL"))
