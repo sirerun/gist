@@ -48,7 +48,8 @@ def main():
     from sentence_transformers.base.modules.normalize import Normalize
     torch.set_num_threads(4)
     versions = {name: importlib.metadata.version(name) for name in
-                ("torch", "transformers", "sentence-transformers", "huggingface-hub", "safetensors")}
+                ("torch", "transformers", "sentence-transformers", "huggingface-hub", "safetensors", "tokenizers", "numpy")}
+    versions["python"] = sys.version.split()[0]
     if versions["transformers"] != "5.20.1" or versions["sentence-transformers"] != "6.1.0":
         raise SystemExit("runtime pin mismatch")
     started = time.monotonic()
@@ -66,7 +67,7 @@ def main():
     pooler = Pooling(**pooling_config)
     normalizer = Normalize()
     load_seconds = time.monotonic() - started
-    version = f"{MODEL}@{REVISION}:transformers={versions['transformers']}:sentence-transformers={versions['sentence-transformers']}:torch={versions['torch']}:{args.dtype}:{args.dimension}d"
+    version = f"{MODEL}@{REVISION}:transformers={versions['transformers']}:sentence-transformers={versions['sentence-transformers']}:torch={versions['torch']}:tokenizers={versions['tokenizers']}:numpy={versions['numpy']}:python={versions['python']}:{args.dtype}:{args.dimension}d"
 
     def embed(purpose, texts):
         if purpose not in PREFIXES or not isinstance(texts, list) or any(not isinstance(t, str) or len(t) > 8192 for t in texts):
