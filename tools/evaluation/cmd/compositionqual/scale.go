@@ -277,17 +277,37 @@ func runScale(ctx context.Context, cfg configuration, n, partitionCount int, sou
 	p.auth.mu.Lock()
 	delete(p.auth.denied, ref)
 	p.auth.mu.Unlock()
-	ob.Checks["denial"] = denied.Error != "" && denied.Candidates == 0
-	ob.CheckDetails["denial"] = denied
+	deniedScopes := []d.IndexScope{p.scope, p.scope, p.scope}
+	deniedScopes[0].Principal.Subject = "another-principal"
+	deniedScopes[1].RuntimeID = "another-runtime"
+	deniedScopes[2].Principal.PolicyGeneration++
+	scopeResults := []map[string]any{}
+	allDenied := denied.Error != "" && denied.Candidates == 0
+	for _, scope := range deniedScopes {
+		result, err := p.index.Search(ctx, d.IndexSearch{Scope: scope, Query: "common", Limit: 64, MaxExamined: 4096, MaxBytes: 256 << 10})
+		errorText := ""
+		if err != nil {
+			errorText = err.Error()
+		}
+		scopeResults = append(scopeResults, map[string]any{"scope": scope, "result": result, "error": errorText})
+		allDenied = allDenied && err != nil && len(result.Candidates) == 0
+	}
+	ob.Checks["denial"] = allDenied
+	ob.CheckDetails["denial"] = map[string]any{"exact_ref": denied, "foreign_scopes": scopeResults}
 	cancelled, cancel := context.WithCancel(ctx)
 	cancel()
 	cancelResult := scaleQuery(cancelled, p, "exact_hit", 0)
 	ob.Checks["cancellation"] = cancelResult.Error != "" && cancelResult.Candidates == 0
 	ob.CheckDetails["cancellation"] = cancelResult
 	broad := scaleQuery(ctx, p, "common_lexical", 0)
+	exhausted, exhaustErr := p.index.Search(ctx, d.IndexSearch{Scope: p.scope, Query: "common", Limit: 64, MaxExamined: 1, MaxBytes: 256 << 10})
 	exact := scaleQuery(ctx, p, "exact_hit", 0)
-	ob.Checks["exact_after_broad_exhaustion"] = exact.Error == "" && exact.Status == "hit"
-	ob.CheckDetails["exact_after_broad_exhaustion"] = map[string]any{"broad": broad, "exact": exact}
+	exhaustionError := ""
+	if exhaustErr != nil {
+		exhaustionError = exhaustErr.Error()
+	}
+	ob.Checks["exact_after_broad_exhaustion"] = exhaustErr == nil && exhausted.Status == "incomplete_budget" && len(exhausted.Candidates) == 0 && exact.Error == "" && exact.Status == "hit"
+	ob.CheckDetails["exact_after_broad_exhaustion"] = map[string]any{"normal_broad": broad, "forced_max_examined": 1, "forced_result": exhausted, "forced_error": exhaustionError, "exact": exact}
 	// Hold one actual old-snapshot reader across update AND rebuild so peak RSS
 	// includes a generation older than the immediately previous snapshot.
 	p.auth.mu.Lock()
