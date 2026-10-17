@@ -34,7 +34,10 @@ type IndexScope struct {
 
 // IndexPolicy must reject stale or revoked scope/connection admission state.
 // It is checked before and after successful reads, including empty/incomplete
-// outcomes. It is not an authority lease; callers recheck at actual tool use.
+// outcomes. PolicyGeneration must advance on connection/admission authority
+// changes as well as catalog grants; the gate must reject the old scope. A new
+// authority scope requires a new index. Content updates never renew authority.
+// It is not an authority lease; callers recheck at actual tool use.
 type IndexPolicy interface {
 	Check(context.Context, IndexScope) error
 }
