@@ -250,7 +250,7 @@ func strictKeys(d *json.Decoder) error {
 				return err
 			}
 			name, ok := key.(string)
-			if !ok || name != strings.ToLower(name) || seen[name] {
+			if !ok || !asciiKey(name) || seen[name] {
 				return errors.New("ambiguous response key")
 			}
 			seen[name] = true
@@ -269,4 +269,16 @@ func strictKeys(d *json.Decoder) error {
 	}
 	_, err = d.Token()
 	return err
+}
+
+func asciiKey(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		if (r < 'a' || r > 'z') && r != '_' {
+			return false
+		}
+	}
+	return true
 }
