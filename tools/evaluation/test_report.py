@@ -39,3 +39,17 @@ class ReportTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class FrozenLabelGradingTests(unittest.TestCase):
+    def test_labels_only_grade_actual_closure_never_construct_it(self):
+        from report import grade
+        label = {"id": "one", "family": "construction", "expected_status": "ready",
+                 "allowed_skill_versions": ["skill@1"], "required_capabilities": ["read@1"],
+                 "eligible_tool_alternatives": [["list@1", "read@1"]], "evidence_class": "synthetic"}
+        row = {"id": "one", "family": "construction", "arm": "H1", "stratum": "test",
+               "status": "ready", "selected": "skill@1", "complete_context": True,
+               "capabilities": ["read@1"], "tools": ["list@1"]}
+        result = grade([row], [label])[0]
+        self.assertEqual(result["complete_toolset_covered"], 0)
+        row["tools"].append("read@1")
+        self.assertEqual(grade([row], [label])[0]["complete_toolset_covered"], 1)
