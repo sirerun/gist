@@ -135,9 +135,9 @@ def grade(rows, labels):
 def validate_frozen_rows(rows, admission):
     expected = {"source": admission["candidate_source"], "inputs_sha256": admission["inputs_sha256"],
                 "catalog_sha256": admission["catalog_sha256"], "catalog_version": admission["catalog_version"],
-                "recipe_version": admission["recipe_version"], "top_k": admission["top_k"],
+                "recipe_version": admission["recipe_version"], "policy_version": admission["policy_version"], "top_k": admission["top_k"],
                 "semantic_floor": admission["semantic_floor"], "rrf_constant": admission["rrf_constant"]}
-    if admission["top_k"] != 4 or admission["semantic_floor"] != 0.30 or admission["rrf_constant"] != 60:
+    if admission["top_k"] not in (4, 8, 16) or admission["semantic_floor"] != 0.30 or admission["rrf_constant"] != 60:
         raise ValueError("unsupported frozen semantic configuration")
     for row in rows:
         if any(row.get(field) != value for field, value in expected.items()):
@@ -161,6 +161,12 @@ def main():
         if admission.get("candidate_frozen") is not True or not admission.get("development_selection_sha256"):
             raise ValueError("candidate/development selection not frozen")
     rows = [json.loads(line) for line in Path(args.attempts).read_text().splitlines() if line.strip()]
+    identities = {(row.get("source"), row.get("inputs_sha256"), row.get("catalog_sha256"),
+                   row.get("catalog_version"), row.get("recipe_version"), row.get("policy_version"),
+                   row.get("top_k"), row.get("semantic_floor"), row.get("rrf_constant")) for row in rows}
+    if len(identities) != 1 or any(not row.get("policy_version") or row.get("top_k") not in (4, 8, 16)
+                                   or row.get("semantic_floor") != 0.30 or row.get("rrf_constant") != 60 for row in rows):
+        raise ValueError("mixed or unsupported source/policy/configuration identities")
     result = aggregate(rows)
     if any(row.get("phase") != args.phase for row in rows):
         raise ValueError("attempt phase differs from report phase")

@@ -69,6 +69,7 @@ func (v vectors) Embed(_ context.Context, request preparation.EmbeddingRequest) 
 }
 
 type attempt struct {
+	PolicyVersion    string         `json:"policy_version"`
 	TopK             int            `json:"top_k"`
 	SemanticFloor    float64        `json:"semantic_floor"`
 	RRFConstant      int            `json:"rrf_constant"`
@@ -121,7 +122,33 @@ func run() error {
 	catalogFile := flag.String("catalog", "", "explicit frozen catalog manifest; no query/gold-derived inventory")
 	catalogSHA := flag.String("catalog-sha256", "", "required exact content SHA for external manifest")
 	exportCatalog := flag.Bool("export-catalog", false, "export default fixed shared catalog for review/roundtrip")
+	policyFile := flag.String("task-policy", "", "independently reviewed evaluation fixture policy, never live authority")
+	policySHA := flag.String("task-policy-sha256", "", "required exact policy content SHA256")
+	exportPolicy := flag.Bool("export-task-policy-template", false, "export maintained pins without admitting any input query")
+	topK := flag.Int("top-k", 4, "development candidate count: 4, 8 or 16; frozen for heldout")
 	flag.Parse()
+	if *topK != 4 && *topK != 8 && *topK != 16 {
+		return errors.New("unsupported top-k; require 4, 8 or 16")
+	}
+	if *exportPolicy {
+		p, err := policyTemplate()
+		if err != nil {
+			return err
+		}
+		return json.NewEncoder(os.Stdout).Encode(p)
+	}
+	var policy *taskPolicy
+	policyVersion := defaultPolicyIdentity
+	if *policyFile != "" {
+		var err error
+		policy, err = loadPolicy(*policyFile, *policySHA)
+		if err != nil {
+			return err
+		}
+		policyVersion = policy.identity
+	} else if *policySHA != "" {
+		return errors.New("task-policy-sha256 requires task-policy")
+	}
 	if *attemptIndex <= 0 || (*runKind != "source_cold" && *runKind != "source_warm" && *runKind != "recovery") {
 		return errors.New("invalid explicit attempt/run kind")
 	}
@@ -178,7 +205,7 @@ func run() error {
 		if !modelOK || admittedModel == "" {
 			return errors.New("heldout requires frozen model/runtime version")
 		}
-		if admission["candidate_frozen"] != true || admission["model_version"] == "" || admission["candidate_source"] != *source || admission["catalog_version"] != catalogVersion || admission["catalog_sha256"] != actualCatalogSHA || admission["recipe_version"] != preparation.RecipeVersion || admission["semantic_floor"] != float64(0.30) || admission["top_k"] != float64(4) || admission["rrf_constant"] != float64(60) || !digestString(admission["development_selection_sha256"]) || !digestString(admission["inputs_sha256"]) || !digestString(admission["labels_sha256"]) {
+		if admission["candidate_frozen"] != true || admission["model_version"] == "" || admission["candidate_source"] != *source || admission["catalog_version"] != catalogVersion || admission["catalog_sha256"] != actualCatalogSHA || admission["recipe_version"] != preparation.RecipeVersion || admission["semantic_floor"] != float64(0.30) || admission["top_k"] != float64(*topK) || admission["policy_version"] != policyVersion || admission["rrf_constant"] != float64(60) || !digestString(admission["development_selection_sha256"]) || !digestString(admission["inputs_sha256"]) || !digestString(admission["labels_sha256"]) {
 			return errors.New("heldout source/configuration/selection manifest mismatch")
 		}
 	}
@@ -209,7 +236,7 @@ func run() error {
 	}
 	enc := json.NewEncoder(os.Stdout)
 	if *dry {
-		return enc.Encode(map[string]any{"schema": "gist.preparation.dry-run/v1", "cases": len(cases), "source_attempts": len(cases) * 5, "unavailable_provider_attempts": len(cases) * 2, "provider_calls": 0, "paid_model_calls": 0, "maximum_adapter_lookup_calls": len(cases) * 6, "token_estimate": nil, "dollar_estimate": nil, "reason": "Source smoke uses existing local vectors; whole-task/provider comparisons are NOT_RUN; no token/rate oracle", "context_budget_bytes": 65536})
+		return enc.Encode(map[string]any{"schema": "gist.preparation.dry-run/v1", "policy_version": policyVersion, "top_k": *topK, "cases": len(cases), "source_attempts": len(cases) * 5, "unavailable_provider_attempts": len(cases) * 2, "provider_calls": 0, "paid_model_calls": 0, "maximum_adapter_lookup_calls": len(cases) * 6, "token_estimate": nil, "dollar_estimate": nil, "reason": "Source smoke uses existing local vectors; whole-task/provider comparisons are NOT_RUN; no token/rate oracle", "context_budget_bytes": 65536})
 	}
 	if *docs {
 		c := fixture.Clone(base)
@@ -258,7 +285,7 @@ func run() error {
 	}
 	for _, item := range cases {
 		for _, arm := range []string{"L0", "L1", "E0", "H0", "H1", "C0", "C1"} {
-			row := attempt{TopK: 4, SemanticFloor: 0.30, RRFConstant: 60, AttemptIndex: *attemptIndex, RunKind: *runKind, Phase: *phase, InputsSHA256: inputHash, Schema: "gist.preparation.attempt/v1", ID: item.ID, Family: item.Family, Stratum: item.Stratum, Arm: arm, Repeat: 1, Source: *source, CatalogVersion: catalogVersion, CatalogSHA256: actualCatalogSHA, RecipeVersion: preparation.RecipeVersion, Kind: "controlled_source_smoke_not_retrieval_or_whole_task_benchmark", Usage: map[string]any{"provider_calls": 0, "paid_model_calls": 0, "main_model_tokens": nil, "cached_tokens": nil, "embedding_tokens": nil, "dollars": nil, "embedding_execution": "precomputed real pinned local vectors; separately qualified; lookup latency excludes inference"}}
+			row := attempt{PolicyVersion: policyVersion, TopK: *topK, SemanticFloor: 0.30, RRFConstant: 60, AttemptIndex: *attemptIndex, RunKind: *runKind, Phase: *phase, InputsSHA256: inputHash, Schema: "gist.preparation.attempt/v1", ID: item.ID, Family: item.Family, Stratum: item.Stratum, Arm: arm, Repeat: 1, Source: *source, CatalogVersion: catalogVersion, CatalogSHA256: actualCatalogSHA, RecipeVersion: preparation.RecipeVersion, Kind: "controlled_source_smoke_not_retrieval_or_whole_task_benchmark", Usage: map[string]any{"provider_calls": 0, "paid_model_calls": 0, "main_model_tokens": nil, "cached_tokens": nil, "embedding_tokens": nil, "dollars": nil, "embedding_execution": "precomputed real pinned local vectors; separately qualified; lookup latency excludes inference"}}
 			if vec != nil && (arm == "E0" || arm == "H0" || arm == "H1") {
 				row.ModelVersion = vec.ModelVersion
 			}
@@ -301,7 +328,11 @@ func run() error {
 			if e != nil {
 				return e
 			}
+			if policy != nil {
+				service.TaskAdmitter = policy
+			}
 			request := fixture.Request(item.Intent)
+			request.TopK = *topK
 			request.CatalogVersion = catalogVersion
 			request.Guide = arm == "L1" || arm == "H1"
 			switch arm {
