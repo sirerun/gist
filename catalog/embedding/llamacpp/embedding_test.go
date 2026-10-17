@@ -262,3 +262,44 @@ func TestRedirectNeverContactsForeignServer(t *testing.T) {
 		t.Fatal("redirect followed")
 	}
 }
+
+func TestNullNumericResponsesAreNotZero(t *testing.T) {
+	for _, kind := range []string{"token-null", "token-string", "embedding-null", "embedding-string"} {
+		t.Run(kind, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/tokenize" {
+					raw := `{"tokens":[2,42,1]}`
+					if kind == "token-null" {
+						raw = `{"tokens":[2,null,1]}`
+					}
+					if kind == "token-string" {
+						raw = `{"tokens":[2,"42",1]}`
+					}
+					_, _ = w.Write([]byte(raw))
+					return
+				}
+				p := payload(1)
+				raw, _ := json.Marshal(p)
+				// The existing unit vector has zero coordinates. Replacing one by null
+				// must be rejected even though float64's ordinary decoder would make zero.
+				if kind == "embedding-null" {
+					raw = []byte(strings.Replace(string(raw), ",0,", ",null,", 1))
+				}
+				if kind == "embedding-string" {
+					raw = []byte(strings.Replace(string(raw), ",0,", `,"0",`, 1))
+				}
+				_, _ = w.Write(raw)
+			}))
+			defer server.Close()
+			e, err := llamacpp.New(config(server.URL, 256))
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer e.Close()
+			got, err := e.Embed(context.Background(), request(e, "one"))
+			if err == nil || len(got.Vectors) != 0 {
+				t.Fatalf("coerced invalid numeric %s", kind)
+			}
+		})
+	}
+}
