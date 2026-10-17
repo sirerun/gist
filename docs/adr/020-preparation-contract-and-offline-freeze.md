@@ -79,10 +79,13 @@ bounds: for each family, candidate-only and baseline-only success fractions are
 bounded conservatively by any candidate-only benefit and any baseline-only harm
 across repeats. Lower benefit uses the event "all repeats candidate-only";
 upper harm uses "any repeat baseline-only". Use Clopper–Pearson one-sided bounds,
-alpha/2 per event (union bound95% total); lower effect=lower benefit-upper harm.
-This is intentionally conservative and respects family clustering. At zero
-observed discordance among60families the upper harm bound is
-`1-(0.025)^(1/60)` (about5.96pp), so it cannot establish a2pp margin. Register
+alpha/4 per event for four bounds (union bound95% total). The lower effect is
+CP-lower(all candidate-only wins) minus CP-upper(any baseline-only losses);
+the upper effect is CP-upper(any candidate-only wins) minus CP-lower(all
+baseline-only losses). This bounds the mean paired success difference despite
+within-family repeat dependence; independent families are the sampling units.
+At zero observed discordance among60families the upper harm bound is
+`1-(0.0125)^(1/60)` (about7.04pp), so it cannot establish a2pp margin. Register
 additional independent families before evaluating them; never relax the margin.
 Candidate/baseline success definition and excluded/NOT_RUN denominators remain
 fixed; no bootstrap degeneracy or pseudo-replication across repeats.
