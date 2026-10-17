@@ -251,3 +251,19 @@ func TestNoncanonicalPolicyKeysRejected(t *testing.T) {
 		}
 	}
 }
+
+func TestPolicyKeysAreCanonicalAtTheirExactPath(t *testing.T) {
+	_, raw := reviewedPolicy(t)
+	for _, pair := range [][2]string{
+		{`"kind":`, `"Kind":`},
+		{`"kind":`, `"Kind":"alias","kind":`},
+		{`"Kind":`, `"kind":`},
+		{`"Kind":`, `"kind":"alias","Kind":`},
+		{`"ID":`, `"id":"alias","ID":`},
+	} {
+		bad := []byte(strings.Replace(string(raw), pair[0], pair[1], 1))
+		if _, err := decodePolicy(bad, fixture.Hash(bad).Value); err == nil {
+			t.Fatalf("path-specific case alias accepted: %s", pair[1])
+		}
+	}
+}
