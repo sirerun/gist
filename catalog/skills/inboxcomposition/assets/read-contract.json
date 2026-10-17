@@ -1,0 +1,71 @@
+{
+  "id": "mail/message/read",
+  "version": "1.0.0",
+  "input_schema": {
+    "type": "object",
+    "required": [
+      "message_id"
+    ],
+    "properties": {
+      "message_id": {
+        "type": "string",
+        "maxLength": 256
+      }
+    },
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "required": [
+      "sender",
+      "subject",
+      "body"
+    ],
+    "properties": {
+      "sender": {
+        "type": "string",
+        "maxLength": 1024
+      },
+      "subject": {
+        "type": "string",
+        "maxLength": 4096
+      },
+      "body": {
+        "type": "string",
+        "maxLength": 65536
+      }
+    },
+    "additionalProperties": false
+  },
+  "effects": {
+    "vocabulary_version": "1",
+    "terms": [
+      {
+        "id": "mail.read",
+        "class": "read_only",
+        "sensitivity": "sensitive"
+      }
+    ],
+    "aggregate": {
+      "class": "read_only",
+      "sensitivity": "sensitive"
+    }
+  },
+  "required_scopes": [
+    "mail:read"
+  ],
+  "error_semantics": {
+    "not_found": "Report missing message as partial; never invent contents.",
+    "denied": "Stop this operation; do not retry without new caller authority.",
+    "unavailable": "Report provider failure; caller owns retry policy."
+  },
+  "forbidden_effects": [
+    "mark_read",
+    "send",
+    "draft",
+    "label",
+    "delete",
+    "attachments",
+    "linked_content"
+  ]
+}

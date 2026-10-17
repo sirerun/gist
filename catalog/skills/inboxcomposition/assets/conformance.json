@@ -1,0 +1,53 @@
+{
+  "scope": "Synthetic contract examples, not provider conformance or admission.",
+  "list": [
+    {
+      "input": {
+        "query": "unread"
+      },
+      "output": {
+        "message_ids": [
+          "message-1"
+        ],
+        "has_more": false
+      },
+      "valid": true
+    },
+    {
+      "input": {
+        "query": "unread"
+      },
+      "output": {
+        "message_ids": [],
+        "has_more": true
+      },
+      "valid": true,
+      "partial": true
+    }
+  ],
+  "read": [
+    {
+      "input": {
+        "message_id": "message-1"
+      },
+      "output": {
+        "sender": "synthetic@example.invalid",
+        "subject": "Weekly update",
+        "body": "Project is on schedule."
+      },
+      "valid": true
+    },
+    {
+      "input": {
+        "message_id": "message-1"
+      },
+      "output": {
+        "sender": "x",
+        "subject": "x",
+        "body": "x",
+        "attachment": "forbidden"
+      },
+      "valid": false
+    }
+  ]
+}
