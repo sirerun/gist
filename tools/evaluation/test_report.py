@@ -53,3 +53,18 @@ class FrozenLabelGradingTests(unittest.TestCase):
         self.assertEqual(result["complete_toolset_covered"], 0)
         row["tools"].append("read@1")
         self.assertEqual(grade([row], [label])[0]["complete_toolset_covered"], 1)
+
+class ComparisonEnvironmentTests(unittest.TestCase):
+    def test_fixture_mismatch_is_unavailable_not_algorithm_failure(self):
+        from report import grade
+        label = {"id": "one", "family": "construction", "expected_status": "ready",
+                 "allowed_skill_versions": ["skill@1"], "required_capabilities": ["read@1"],
+                 "eligible_tool_alternatives": [["list@1", "read@1"]], "evidence_class": "synthetic"}
+        row = {"id": "one", "family": "construction", "arm": "H1", "stratum": "test",
+               "status": "ready", "selected": "skill@1", "complete_context": True,
+               "capabilities": ["read@1"], "tools": ["combined-read@1"],
+               "comparison_status": "NOT_RUN", "comparison_reason": "fixture_unrepresentable: different tool set"}
+        result = grade([row], [label])[0]
+        self.assertEqual(result["environment_catalog_mismatch"], 1)
+        self.assertEqual(result["not_run"], 1)
+        self.assertNotIn("evaluated", result)

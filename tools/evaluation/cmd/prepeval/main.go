@@ -27,7 +27,11 @@ type input struct {
 	Stratum string `json:"stratum"`
 	Intent  string `json:"intent"`
 	Fixture struct {
-		Status string `json:"status"`
+		SkillID          string     `json:"skill_id"`
+		SkillVersion     string     `json:"skill_version"`
+		ToolAlternatives [][]string `json:"tool_alternatives"`
+		Dependencies     []string   `json:"dependencies"`
+		Status           string     `json:"status"`
 	} `json:"fixture"`
 }
 type vectorEntry struct {
@@ -62,31 +66,34 @@ func (v vectors) Embed(_ context.Context, request preparation.EmbeddingRequest) 
 }
 
 type attempt struct {
-	AttemptIndex    int            `json:"attempt_index"`
-	RunKind         string         `json:"run_kind"`
-	Phase           string         `json:"phase"`
-	InputsSHA256    string         `json:"inputs_sha256"`
-	Capabilities    []string       `json:"capabilities,omitempty"`
-	Tools           []string       `json:"tools,omitempty"`
-	CompleteContext bool           `json:"complete_context"`
-	ResultSHA256    string         `json:"result_sha256,omitempty"`
-	Schema          string         `json:"schema"`
-	ID              string         `json:"id"`
-	Family          string         `json:"family"`
-	Stratum         string         `json:"stratum"`
-	Arm             string         `json:"arm"`
-	Repeat          int            `json:"repeat"`
-	Status          string         `json:"status"`
-	Error           string         `json:"error,omitempty"`
-	Source          string         `json:"source"`
-	CatalogVersion  string         `json:"catalog_version"`
-	RecipeVersion   string         `json:"recipe_version"`
-	ModelVersion    string         `json:"model_version,omitempty"`
-	ElapsedSeconds  float64        `json:"elapsed_seconds"`
-	ContextBytes    int            `json:"context_bytes"`
-	Selected        string         `json:"selected,omitempty"`
-	Kind            string         `json:"kind"`
-	Usage           map[string]any `json:"usage"`
+	CatalogSHA256    string         `json:"catalog_sha256"`
+	ComparisonStatus string         `json:"comparison_status"`
+	ComparisonReason string         `json:"comparison_reason,omitempty"`
+	AttemptIndex     int            `json:"attempt_index"`
+	RunKind          string         `json:"run_kind"`
+	Phase            string         `json:"phase"`
+	InputsSHA256     string         `json:"inputs_sha256"`
+	Capabilities     []string       `json:"capabilities,omitempty"`
+	Tools            []string       `json:"tools,omitempty"`
+	CompleteContext  bool           `json:"complete_context"`
+	ResultSHA256     string         `json:"result_sha256,omitempty"`
+	Schema           string         `json:"schema"`
+	ID               string         `json:"id"`
+	Family           string         `json:"family"`
+	Stratum          string         `json:"stratum"`
+	Arm              string         `json:"arm"`
+	Repeat           int            `json:"repeat"`
+	Status           string         `json:"status"`
+	Error            string         `json:"error,omitempty"`
+	Source           string         `json:"source"`
+	CatalogVersion   string         `json:"catalog_version"`
+	RecipeVersion    string         `json:"recipe_version"`
+	ModelVersion     string         `json:"model_version,omitempty"`
+	ElapsedSeconds   float64        `json:"elapsed_seconds"`
+	ContextBytes     int            `json:"context_bytes"`
+	Selected         string         `json:"selected,omitempty"`
+	Kind             string         `json:"kind"`
+	Usage            map[string]any `json:"usage"`
 }
 
 func main() {
@@ -105,6 +112,9 @@ func run() error {
 	runKind := flag.String("run-kind", "source_cold", "source_cold, source_warm or recovery; does not describe inference cache")
 	phase := flag.String("phase", "development", "development or heldout; heldout requires frozen admission")
 	admissionFile := flag.String("admission", "", "frozen run manifest for heldout admission")
+	catalogFile := flag.String("catalog", "", "explicit frozen catalog manifest; no query/gold-derived inventory")
+	catalogSHA := flag.String("catalog-sha256", "", "required exact content SHA for external manifest")
+	exportCatalog := flag.Bool("export-catalog", false, "export default fixed shared catalog for review/roundtrip")
 	flag.Parse()
 	if *attemptIndex <= 0 || (*runKind != "source_cold" && *runKind != "source_warm" && *runKind != "recovery") {
 		return errors.New("invalid explicit attempt/run kind")
@@ -118,6 +128,33 @@ func run() error {
 	}
 	if *phase != "development" && *phase != "heldout" {
 		return errors.New("invalid evaluation phase")
+	}
+	base, err := fixture.New("ready")
+	if err != nil {
+		return err
+	}
+	rawCatalog, err := fixture.Export(base)
+	if err != nil {
+		return err
+	}
+	actualCatalogSHA := fixture.Hash(rawCatalog).Value
+	if *catalogFile != "" {
+		if !digestString(*catalogSHA) {
+			return errors.New("external catalog requires exact SHA256")
+		}
+		base, err = fixture.LoadManifest(*catalogFile, *catalogSHA)
+		if err != nil {
+			return err
+		}
+		actualCatalogSHA = *catalogSHA
+	}
+	catalogVersion := "sha256:" + actualCatalogSHA
+	if *exportCatalog {
+		if *catalogFile != "" {
+			return errors.New("export only applies to default fixed catalog")
+		}
+		_, err := os.Stdout.Write(rawCatalog)
+		return err
 	}
 	admission := map[string]any{}
 	if *phase == "heldout" {
@@ -135,7 +172,7 @@ func run() error {
 		if !modelOK || admittedModel == "" {
 			return errors.New("heldout requires frozen model/runtime version")
 		}
-		if admission["candidate_frozen"] != true || admission["model_version"] == "" || admission["candidate_source"] != *source || admission["catalog_version"] != fixture.CatalogVersion || admission["recipe_version"] != preparation.RecipeVersion || admission["semantic_floor"] != float64(0.30) || admission["top_k"] != float64(4) || admission["rrf_constant"] != float64(60) || !digestString(admission["development_selection_sha256"]) || !digestString(admission["inputs_sha256"]) || !digestString(admission["labels_sha256"]) {
+		if admission["candidate_frozen"] != true || admission["model_version"] == "" || admission["candidate_source"] != *source || admission["catalog_version"] != catalogVersion || admission["catalog_sha256"] != actualCatalogSHA || admission["recipe_version"] != preparation.RecipeVersion || admission["semantic_floor"] != float64(0.30) || admission["top_k"] != float64(4) || admission["rrf_constant"] != float64(60) || !digestString(admission["development_selection_sha256"]) || !digestString(admission["inputs_sha256"]) || !digestString(admission["labels_sha256"]) {
 			return errors.New("heldout source/configuration/selection manifest mismatch")
 		}
 	}
@@ -174,10 +211,7 @@ func run() error {
 		return enc.Encode(map[string]any{"schema": "gist.preparation.dry-run/v1", "cases": len(cases), "source_attempts": len(cases) * 5, "unavailable_provider_attempts": len(cases) * 2, "provider_calls": 0, "paid_model_calls": 0, "maximum_adapter_lookup_calls": len(cases) * 6, "token_estimate": nil, "dollar_estimate": nil, "reason": "Source smoke uses existing local vectors; whole-task/provider comparisons are NOT_RUN; no token/rate oracle", "context_budget_bytes": 65536})
 	}
 	if *docs {
-		c, e := fixture.New("ready")
-		if e != nil {
-			return e
-		}
+		c := fixture.Clone(base)
 		page, e := c.Search(context.Background(), structSearch())
 		if e != nil {
 			return e
@@ -223,29 +257,38 @@ func run() error {
 	}
 	for _, item := range cases {
 		for _, arm := range []string{"L0", "L1", "E0", "H0", "H1", "C0", "C1"} {
-			row := attempt{AttemptIndex: *attemptIndex, RunKind: *runKind, Phase: *phase, InputsSHA256: inputHash, Schema: "gist.preparation.attempt/v1", ID: item.ID, Family: item.Family, Stratum: item.Stratum, Arm: arm, Repeat: 1, Source: *source, CatalogVersion: fixture.CatalogVersion, RecipeVersion: preparation.RecipeVersion, Kind: "controlled_source_smoke_not_retrieval_or_whole_task_benchmark", Usage: map[string]any{"provider_calls": 0, "paid_model_calls": 0, "main_model_tokens": nil, "cached_tokens": nil, "embedding_tokens": nil, "dollars": nil, "embedding_execution": "precomputed real pinned local vectors; separately qualified; lookup latency excludes inference"}}
+			row := attempt{AttemptIndex: *attemptIndex, RunKind: *runKind, Phase: *phase, InputsSHA256: inputHash, Schema: "gist.preparation.attempt/v1", ID: item.ID, Family: item.Family, Stratum: item.Stratum, Arm: arm, Repeat: 1, Source: *source, CatalogVersion: catalogVersion, CatalogSHA256: actualCatalogSHA, RecipeVersion: preparation.RecipeVersion, Kind: "controlled_source_smoke_not_retrieval_or_whole_task_benchmark", Usage: map[string]any{"provider_calls": 0, "paid_model_calls": 0, "main_model_tokens": nil, "cached_tokens": nil, "embedding_tokens": nil, "dollars": nil, "embedding_execution": "precomputed real pinned local vectors; separately qualified; lookup latency excludes inference"}}
 			if arm == "C0" || arm == "C1" {
 				row.Status = "NOT_RUN"
+				row.ComparisonStatus = "NOT_RUN"
 				row.Error = "No admitted provider/model/account/call-dollar-expiry manifest; C0 native discovery and C1 preregistered direct tools remain distinct"
 				if err := enc.Encode(row); err != nil {
 					return err
 				}
 				continue
 			}
-			c, e := fixture.New(item.Fixture.Status)
+			c := fixture.Clone(base)
+			e := fixture.Overlay(c, item.Fixture.Status)
 			if e != nil {
 				row.Status = "NOT_RUN"
+				row.ComparisonStatus = "NOT_RUN"
 				row.Error = e.Error()
 				if err := enc.Encode(row); err != nil {
 					return err
 				}
 				continue
 			}
+			row.ComparisonStatus = "ELIGIBLE"
+			if !representable(c, item) {
+				row.ComparisonStatus = "NOT_RUN"
+				row.ComparisonReason = "fixture_unrepresentable: frozen catalog lacks declared skill/tool-alternative/dependency inventory; actual source smoke result retained separately"
+			}
 			service, e := c.Service()
 			if e != nil {
 				return e
 			}
 			request := fixture.Request(item.Intent)
+			request.CatalogVersion = catalogVersion
 			request.Guide = arm == "L1" || arm == "H1"
 			switch arm {
 			case "E0":
@@ -256,6 +299,7 @@ func run() error {
 			if request.Mode != preparation.Lexical {
 				if vec == nil {
 					row.Status = "NOT_RUN"
+					row.ComparisonStatus = "NOT_RUN"
 					row.Error = "pinned real local vectors unavailable"
 					if err := enc.Encode(row); err != nil {
 						return err
@@ -313,4 +357,44 @@ func digestString(value any) bool {
 	}
 	decoded, e := hex.DecodeString(text)
 	return e == nil && hex.EncodeToString(decoded) == text && strings.TrimSpace(text) == text
+}
+
+func representable(c *fixture.Catalog, item input) bool {
+	if item.Fixture.SkillID != "" {
+		ref := fixture.Ref(ports.KindSkill, item.Fixture.SkillID)
+		if item.Fixture.SkillVersion != "" {
+			ref.Version = item.Fixture.SkillVersion
+		}
+		if _, ok := c.Records[ref]; !ok {
+			return false
+		}
+	}
+	available := map[string]bool{}
+	tools := map[string]bool{}
+	for ref := range c.Records {
+		available[ref.ID+"@"+ref.Version] = true
+		if ref.Kind == ports.KindTool {
+			tools[ref.ID+"@"+ref.Version] = true
+		}
+	}
+	for _, dependency := range item.Fixture.Dependencies {
+		if !available[dependency] {
+			return false
+		}
+	}
+	if len(item.Fixture.ToolAlternatives) > 0 {
+		for _, alternative := range item.Fixture.ToolAlternatives {
+			complete := true
+			for _, tool := range alternative {
+				if !tools[tool] {
+					complete = false
+				}
+			}
+			if complete {
+				return true
+			}
+		}
+		return false
+	}
+	return true
 }

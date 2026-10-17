@@ -134,36 +134,16 @@ func New(scenario string) (*Catalog, error) {
 		{"synthetic/send-mail", "Send an email message", "Compose and send outbound email to a recipient."},
 		{"synthetic/files", "Search local files", "Locate filesystem documents and inspect their content."},
 	} {
-		if err := c.add(ports.KindSkill, d.id, map[string]any{"id": d.id, "version": "1.0.0", "logical_name": d.name, "summary": d.summary, "trust": "operator_asserted"}); err != nil {
-			return nil, err
-		}
-	}
-	switch scenario {
-	case "ready", "no_match":
-	case "missing_connection":
-		delete(c.Records, Ref(ports.KindBinding, "synthetic/mail-binding"))
-	case "revoked":
-		r := c.Records[Ref(ports.KindProvider, "synthetic/provider")]
-		r.State = "revoked"
-		c.Records[r.Ref] = r
-	case "unauthorized":
-		c.Deny = true
-	case "tampered":
-		c.Bytes[skill] = []byte("tampered archive")
-	case "unsupported_runtime":
-		var meta map[string]any
-		if err := json.Unmarshal(c.Records[skill].Metadata, &meta); err != nil {
-			return nil, err
-		}
-		meta["runtime_requirements"] = map[string]any{"local_execution": true}
-		r := c.Records[skill]
-		r.Metadata, err = json.Marshal(meta)
+		archive, manifest, err := syntheticSkill(d.id, d.name, d.summary)
 		if err != nil {
 			return nil, err
 		}
-		c.Records[skill] = r
-	default:
-		return nil, errors.New("NOT_RUN: scenario transition not implemented by controlled fixture")
+		ref := Ref(ports.KindSkill, d.id)
+		c.Records[ref] = ports.CatalogRecord{Ref: ref, State: "published", Digest: Hash(archive), ManifestDigest: Hash(manifest), Metadata: manifest}
+		c.Bytes[ref] = archive
+	}
+	if err := Overlay(c, scenario); err != nil {
+		return nil, err
 	}
 	return c, nil
 }

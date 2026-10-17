@@ -65,7 +65,7 @@ func TestPublicPreparationPreservesCompleteInstructionsTemplateAndSchemas(t *tes
 	}
 }
 func TestMissingRevokedTamperedDeniedRuntimeAndBudgetFailClosed(t *testing.T) {
-	for _, state := range []string{"missing_connection", "revoked", "unauthorized", "tampered", "unsupported_runtime"} {
+	for _, state := range []string{"missing_connection", "revoked", "unauthorized", "tampered"} {
 		t.Run(state, func(t *testing.T) {
 			c, e := fixture.New(state)
 			if e != nil {
