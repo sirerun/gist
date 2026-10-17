@@ -47,7 +47,10 @@ func newIndexTest(t *testing.T, entries ...IndexEntry) *ScopedIndex {
 
 func TestScopedIndexLexicalAndExact(t *testing.T) {
 	ctx := context.Background()
-	x := newIndexTest(t, indexTestEntry("mail/read", "Inspect messages"), indexTestEntry("messages/inspect", "Read mail"), indexTestEntry("calendar", "Schedules"))
+	calendar := indexTestEntry("calendar", "Schedules")
+	// This negative candidate must not inherit the mail tag from the mail fixture.
+	calendar.Record.Metadata = []byte(`{"summary":"Schedules","tags":["calendar"]}`)
+	x := newIndexTest(t, indexTestEntry("mail/read", "Inspect messages"), indexTestEntry("messages/inspect", "Read mail"), calendar)
 	r, e := x.Search(ctx, indexQuery("read mail"))
 	if e != nil || r.Status != "complete" || len(r.Candidates) != 2 || r.Candidates[0].ID != "mail/read" {
 		t.Fatalf("%+v %v", r, e)
