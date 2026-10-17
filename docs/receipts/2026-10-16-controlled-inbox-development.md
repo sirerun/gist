@@ -80,3 +80,64 @@ Root admits only the preregistered bounded development jobs after this review,
 with exact frozen data/model/source identities. No input, policy or gold may be
 changed after scores; failed attempts remain retained. This is not admission
 for original held-out, whole-task/provider runs, Zati integration or adoption.
+
+
+## Actual run and result
+
+Runner/source freeze3676aa17e05cf7c813a2000068bc413e99738eb4 tracked archive
+eaa2cda40df328387f238535345138eaf2bc76b577f318bb3d57f479d6e664bc
+matched both hosts. Immediate capacity was load0.99 with111GiB available memory.
+Infrastructure attempt1 failed in17ms before runner/model/queries because the
+transient service did not inherit its working directory. Its failure envelope
+and raw hash are retained separately with zero model/source attempts. Attempt2
+sets an explicit working directory using the same frozen bytes and succeeded
+in16.300s (runner elapsed16.2294s). There were no hidden query retries.
+
+Two sequential real BF16 adapter jobs produced256/768 vectors. Load times were
+1.259/1.255s and peak RSS1,595,772,928/1,595,473,920 bytes. Per-job enforced
+cgroup limits remain recorded separately from observed RSS. CLI source timings
+exclude inference and execution; process labels do not demonstrate cache warmth.
+
+All2520 records are retained:1800 local preparations and720 unavailable C0/C1.
+There are30 unique requests and one construction family. The two process passes
+repeat these cases; they do not create60 independent cases. Every configuration
+has the same unique-case result in each pass:
+
+| Arm | Ready complete preparation | Other outcomes |
+| --- | --- | --- |
+| E0, exploratory embeddings-only |30/30 | None |
+| H0/H1, hybrid |26/30 |4 requires_selection |
+| L0/L1, lexical |23/30 |3 no_match,4 unsupported |
+
+H1 is the preregistered primary; its86.7percent preparation coverage is below the
+proposed95percent target even in this restricted cohort. Six configurations tie,
+so the declared rule selects256/k4 for development only. Exploratory E0 cannot
+replace the primary after outcomes are known or authorize default adoption.
+No input, gold, policy, ranking threshold, fusion or recipe was retuned. Unknown
+model tokens/dollars remain null. No whole-task, negative-case, held-out, Composio
+superiority, generalization or actual Gmail claim is supported.
+
+## Reproduction and review
+
+Result candidate15eb7a157d110c6c752ae1450c59d21d85d5ae3d retains deterministic
+gzip vectors/attempts, reports, selection, portable envelopes and raw-file hashes.
+Production preparation/harness source and frozen data are unchanged from the
+run snapshot. The public text and decompressed payload privacy scan passed.
+
+Independent review verified all71 checksum entries, frozen identities, finite
+normalized35-entry vector artifacts per dimension, and exact complete skill,
+capability and composite-tool closure for every ready result. It independently
+reproduced all12 reports, selection and verification byte-for-byte in a private
+temporary copy without modifying originals or executing a model. Root also ran
+the standalone reproduction successfully. No blocking findings; .35 is an
+explicit zero-finding no-op, not an omitted correction stage.
+
+SHA256 evidence: checksum index
+901fffc65f45902e2c11184d5db2ef3abe71d3b9742dead0067258687881ec14;
+selection7fba637d7cdf3c7eb694ef3fe98a01e97b760cbfef0e25fb03b398aa55f2ce51;
+run manifest8c36a2bfda1ef0f45b350740ef0569cd15ef4e77194f478a056216e532b5df32;
+verification9cfdfccf0fd7c9370215b124ef8d287955076fedc125f4ccb6477a868c228e32.
+
+Final full-document approval, guarded merge and landed reproduction remain open.
+T-PREP.9 full evaluation and human authority/adoption gates remain pending; these
+controlled development results do not claim their completion.
