@@ -33,6 +33,16 @@ Gist prepares exact authorized catalog context; Zati owns inference routing,
 credentials and execution. See [the protocol](evaluations/tool-preparation.md)
 and canonical E-PREP. No measured token or latency advantage is claimed.
 
+## Capability composition and large catalogs — 2026-10-17
+
+[ADR021](adr/021-capability-composition-and-bounded-discovery.md) selects reusable
+semantic capabilities composed by skills, with typed connection affinity,
+bounded dataflow and current caller-owned readiness. Existing Zati inbox list/read
+mapping stays supported during immutable-version migration. Indexed discovery
+selects a bounded shortlist; exact resolution touches the selected requirements.
+This is planned work, not a 100k-scale qualification or adopted semantic default.
+E-COMPOSE in the canonical plan owns producer, consumer and scale acceptance.
+
 ## Overview
 
 Gist is a Go library and CLI that keeps raw data out of LLM context windows. Content is chunked and indexed into PostgreSQL (or an in-memory store for testing), then retrieved on demand using a three-tier search engine (porter stemming, trigram, fuzzy correction). Callers set token budgets and get back only the most relevant snippets.

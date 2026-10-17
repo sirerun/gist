@@ -311,3 +311,15 @@ If you're building AI agents and fighting context limits, give Gist a try. Star 
 ## License
 
 Apache 2.0 — see [LICENSE](LICENSE) for details.
+
+## Skill and tool catalog composition
+
+The additive catalog library supports exact packages and capability resolution;
+Zati currently integrates a selected inbox skill with an admitted list/read pair.
+[ADR021](docs/adr/021-capability-composition-and-bounded-discovery.md) and the
+[delivery plan](docs/plan.md#e-compose--reusable-capability-composition-and-scale)
+define the planned general composition and 10k/100k discovery work. These are
+not shipped scale or performance claims. Catalog preparation retains complete
+required tool schemas or refuses readiness when they exceed the context budget.
+Zati owns credentials, permission checks and execution; Gist does not execute
+recipes or generate new authoritative capabilities from model requests.

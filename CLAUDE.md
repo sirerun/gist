@@ -1,9 +1,10 @@
 
-## Shared Docs Repo
+## Gist documentation authority
 
-Cross-repo planning and documentation lives in a dedicated git repo: `github.com/sirerun/docs`, checked out at `/Users/dndungu/Code/sirerun/docs/`. This is the single source of truth for `plan.md` (cross-repo execution plan used by /plan and /apply), `adr/` (cross-repo ADRs), `devlog.md` (investigations/benchmarks), `usecases.md`, `design.md`, and `content-classification.md`.
-
-Work in this project is typically cross-repo. Always read/update the plan in the shared docs repo, not a per-repo copy. Commit docs changes via PR to `sirerun/docs` independently from code PRs.
+Gist repository delivery is governed by `docs/plan.md` (plan ID `gist:delivery`,
+authority `github:sirerun/gist`). Architecture lives in `docs/design.md`, accepted
+decisions in `docs/adr/`, and historical evidence in `docs/devlog.md` and receipts.
+Cross-project documents do not replace this canonical Gist delivery plan.
 
 ## Staging Environment — HIBERNATED
 

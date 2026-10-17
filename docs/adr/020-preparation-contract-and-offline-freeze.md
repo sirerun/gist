@@ -1,5 +1,10 @@
 # ADR020 — Additive preparation and offline evaluation contract
 
+Composition evolution: [ADR021](021-capability-composition-and-bounded-discovery.md)
+defines the planned reusable capability/recipe and indexed-discovery path. This
+ADR's frozen pilot and initial inbox recipe remain historical source contracts;
+they do not establish generic multi-tool coverage or 100k-scale performance.
+
 Date: 2026-10-16
 Status: Source contract frozen before corpus/model/harness implementation.
 Source anchor: `76d9c5f` (parent library/provenance source).

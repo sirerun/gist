@@ -10,6 +10,15 @@ This single-file plan consolidates all 266 existing tasks from main ad6b3fa, inc
 
 Current owner direction (2026-10-16): reusable Gist, library and Zati first, catalog only with execution elsewhere. [ADR016](adr/016-zati-library-first-rfc003-gateway-boundary.md) retires RFC-003 execution, provider-token custody, approvals/journals and utility billing. Registry authentication and publisher provenance remain. Hosted expansion pauses except repairs and existing consumer obligations, with no service shutdown. The PR62 decision candidate changed documents only. Later explicitly recorded ship scope and evaluation planning below supersede that implementation hold only for their named library work; deployment and spending remain separately gated.
 
+
+Current composition direction (2026-10-17): [ADR021](adr/021-capability-composition-and-bounded-discovery.md)
+and E-COMPOSE below own new reusable capability composition, Zati migration and
+10k/100k qualification. Earlier inbox/composite source and evaluation sections
+are retained historical evidence, not generic composition readiness. All old
+Qwen launch envelopes below are CLOSED/EXPIRED; the retained outcome has zero
+model requests and 12 NOT_RUN attempts. Fresh runtime authority is required.
+E-COMPOSE does not reopen hosted expansion, execution or semantic adoption.
+
 ### Dispatch disposition and precedence
 
 This section supersedes older continuation instructions, milestone tables and unqualified “current” infrastructure notes below, which are dated historical records. All original task rows, IDs, completion states and acceptance evidence remain. Unfinished gateway rows depend on the permanently non-dispatchable retirement sentinel; catalog provenance rows .31/.35 are retained under catalog ownership with replacement prerequisites. Unfinished prior hosted/guidance rows depend on the hold sentinel. A bounded repair/current-consumer obligation requires a separately recorded scoped resumption, not blanket reactivation. No held or retired row is counted complete. The library terminal depends on neither the retired graph nor hosted production.
@@ -1592,7 +1601,7 @@ Source verification uses existing Linux capacity after a fresh preflight, tracke
 
 #### Wave 15: Evaluation and adoption decision
 
-- [ ] T-PREP.9 Run frozen offline retrieval and preparation evaluation  Owner: evaluation-runner  Est: TBD  kind: agent  stage: verify  blocked-by: [T-PREP.8, T-PREP.29]  acc: [Development selects one primary configuration before held-out access; pinned offline runs produce complete records, family-clustered uncertainty, strata, abstention, coverage, memory and cold/warm metrics; unavailable or inconclusive evidence is explicit and no live-provider advantage is claimed]
+- [ ] T-PREP.9 Run frozen offline retrieval and preparation evaluation  Owner: evaluation-runner  Est: TBD  kind: agent  stage: verify  blocked-by: [T-PREP.8, T-PREP.29, T-COMPOSE.21]  acc: [Development selects one primary configuration before held-out access; pinned offline runs produce complete records, family-clustered uncertainty, strata, abstention, coverage, memory and cold/warm metrics; unavailable or inconclusive evidence is explicit and no live-provider advantage is claimed]
 - [ ] T-PREP.10 Admit bounded model and provider comparison  Owner: owner-with-coordinator  Est: TBD  kind: human  stage: preflight  acc: [Run manifest records explicit authority, same executor/catalog pairing, allowed read-only account and operations, enforceable call/dollar/expiry limits, host capacity, retention and stop conditions before any paid or private-data run; alternatively record offline-only disposition and unavailable arms as NOT_RUN without inventing account or spending authority]
 - [ ] T-PREP.11 Run paired whole-task and Composio comparisons  Owner: evaluation-runner  Est: TBD  kind: agent  stage: verify  blocked-by: [T-PREP.9, T-PREP.10]  acc: [Frozen tasks repeat3times per arm with identical model/settings/executor/state/budgets where possible; full attempt tokens, latency, cost and success include preparation and recovery; C0 native discovery and C1 preregistered direct tools are preserved; confounds, unavailable arms, failed runs and paired denominators are disclosed; an offline-only disposition records unavailable comparisons NOT_RUN and forwards available evidence for review, not a fabricated completed run]
 - [ ] T-PREP.12 Independently review results and reproducibility  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-PREP.11]  acc: [Non-author reproduces aggregate report from source-bound redacted records, checks blind grading, family split, baseline fairness, uncertainty and all proposed gates; accepted findings trigger corrected analysis and fresh exact-artifact review without retuning test data]
@@ -1671,3 +1680,76 @@ Parallel Work: current attended executor, explicitly selected engineering work p
 Material limitations: only the maintained inbox skill is qualified initially. Gmail MCP service provisioning/OAuth and live mailbox acceptance are separate; existing Services setup remains the connection path. Public publisher trust, commerce, model evaluation, library/consumer release, installation and hosted rollout are outside this batch. A UI may report assigned/configured but cannot claim a working mailbox or ready execution without actual current authorization and provider evidence.
 
 Marketplace source/check evidence: [2026-10-16 marketplace delivery](receipts/2026-10-16-zati-marketplace.md). Non-author exact-head review approved source; Zati PR42 landed aa379b6dbc3da65f5a8ae896a1984524a8497e11 with identical reviewed tree and passing landed API/context/spec checks. The documentation record follows its own reviewed merge/landed verification. Installation, full native build and a live mailbox remain unqualified.
+
+### E-COMPOSE -- Reusable capability composition and scale
+fidelity: executable
+Acceptance: New immutable atomic inbox contracts compose safely in the Gist
+library and Zati; exact legacy behavior remains available; independently reviewed
+synthetic 10k/100k results establish the measured envelope with no unsupported
+provider, model, adoption, installed-runtime or production claim.
+
+Authority: ordinary repository delivery; executor current/attended, inherited
+session selection and independent review. Go, Python, Git and gh are available;
+actual compiler/host capacity, build lease, dependencies and checks are qualified
+at implementation preflight. No Kazi/Foundry route is admitted by this plan.
+Requested scope is design and planning documents now; every task below remains
+pending implementation. Scope references are ADR021 and RFC-002 §19. Consumer
+rows name Zati deliverables and landing evidence here, not a second executable
+scheduler for any enrolled Zati lifecycle; consumer preflight reconciles the
+owning repository's contract before dispatch.
+
+Use cases: UC-COMP-1 selected inbox preparation with reusable list/read contracts;
+UC-COMP-2 safe exact resolution under missing/ambiguous/stale bindings;
+UC-COMP-3 discover skills from a large authorized catalog within explicit budgets;
+UC-COMP-4 migrate old admitted inbox skills without changing immutable records.
+Manual discovery inspected Gist resolution/preparation/package APIs and Zati
+skills admission/execution consumers. Existing inbox safeguards are reused.
+
+Batches are outcomes, not task-count quotas. Producer precedes consumer. Index
+work can follow producer landing independently of consumer migration. Independent
+review covers all implementation and verification rows of its named batch on an
+exact base/head. Findings create appended fix, verification and re-review rows;
+merge never passes an unresolved review. Preserve historical IDs/evidence.
+
+| Batch | Rows | Observable result |
+| --- | --- | --- |
+| Producer | .1–.7 | Strict additive composition API with immutable fixtures and compatibility |
+| Consumer | .8–.14 | Zati accepts new skill versions through ordinary authority/effects |
+| Scale and evaluation | .15–.21 | Indexed bounded discovery and frozen reproducible scale evidence |
+| Operational handoff | .22–.25 | Explicit release, installation, acceptance and support gates |
+
+Shared verification: Gist focused resolution/preparation/package and new CLI
+fixture checks, affected Python report tests, and repository-required checks;
+Zati focused skills/execution/controller plus joined list/read workflow/race,
+revocation/schema-drift cases and specgen checks. Preflight freezes exact commands
+and required environment from current CI and maintained receipts. Documentation
+uses Wazi reader/schema/semantic validation and link/history checks. Synthetic
+scale workloads are new data; original sealed held-out inputs stay closed.
+Numerical latency/RSS/index-size targets are frozen in .15 from measured baseline
+and target-host capacity before scoring, never invented here or tuned afterward.
+
+- [ ] T-COMPOSE.1 Freeze producer schemas, API and verification contract  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  acc: [ADR021 requirements become canonical composition and capability schemas with digest rules, statuses, limits, compatibility cases and exact verification commands; no provider calls or wire changes; requirements and design reviewed before coding]
+- [ ] T-COMPOSE.2 Implement typed composition validation and exact resolution  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.1]  acc: [Strict bounded DAG and JSON Pointer validation, capability-indexed alternatives, connection-group intersection, per-capability and composition evidence, scoped freshness and complete-schema budgets implement UC-COMP-1 and UC-COMP-2 without Cartesian search or authority grants]
+- [ ] T-COMPOSE.3 Publish local immutable fixtures and migration contracts  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.1]  acc: [New list/read contracts and inbox package/recipe fixtures have pinned digests and conformance examples; old bytes remain unchanged; this is repository fixture publication only, not registry upload or a module release]
+- [ ] T-COMPOSE.4 Verify producer behavior and compatibility  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.2, T-COMPOSE.3]  acc: [Current required checks plus missing optional/required capability, duplicate roles/keys, cycles, type mismatch, bounded iteration, partial results, same-connection/account mismatch, ambiguity, schema drift, revocation, cancellation and insufficient context pass; unsupported consumers and legacy paths covered]
+- [ ] T-COMPOSE.5 Independently review producer composition candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.4]  acc: [Independent non-author reviews .1-.4 exact base/head with source and checks; findings/dispositions recorded and all blockers resolved]
+- [ ] T-COMPOSE.6 Merge reviewed producer candidate  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.5]  acc: [Exact reviewed head rebases through GitHub with current base and required checks; no bypass and landed SHA recorded]
+- [ ] T-COMPOSE.7 Verify landed producer composition  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.6]  acc: [Fresh main reaches reviewed tree and affected additive API, immutable fixtures and legacy checks pass]
+- [ ] T-COMPOSE.8 Freeze Zati migration and owning lifecycle bindings  Owner: zati-coordinator  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-COMPOSE.7]  acc: [Current Zati contract and plan authority reconciled; exact producer revision, new skill version and typed readiness mapping selected; legacy fallback and verification recipes fixed without executing an enrolled lifecycle from this ledger]
+- [ ] T-COMPOSE.9 Implement generic Zati admission and recipe enforcement  Owner: zati-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.8]  acc: [Remove inbox-only restriction for negotiated new version; validate all required capabilities and affinity, bind typed dataflow and enforce bounded actual calls/output; preserve ordinary permissions, schema pins, effect recovery and legacy list/read mapping]
+- [ ] T-COMPOSE.10 Migrate marketplace and consumer documentation  Owner: zati-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.8]  acc: [Explicit new-version admission and assignment flow preserves old selections; incompatible consumers refuse readiness; user guidance explains connection setup, partial briefing, upgrade and rollback without claiming live Gmail]
+- [ ] T-COMPOSE.11 Verify joined Zati composition path  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.9, T-COMPOSE.10]  acc: [Actual scripted controller to tool dispatch to persisted briefing succeeds for new and legacy paths; mixed mailbox, denied/revoked tool, stale schema, hostile mail, missing capability and bounded partial failure refuse or report correctly; source/race/spec checks pass without claiming real-model/provider acceptance]
+- [ ] T-COMPOSE.12 Independently review consumer migration candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.11]  acc: [Independent non-author reviews .8-.11 exact Zati base/head and producer pins with findings resolved and ownership boundaries intact]
+- [ ] T-COMPOSE.13 Merge reviewed Zati migration  Owner: zati-coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.12]  acc: [Owning repository permits exact-head guarded rebase with current checks and recorded landed SHA; no parallel lifecycle advancement]
+- [ ] T-COMPOSE.14 Verify landed Zati migration  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.13]  acc: [Fresh consumer main verifies reviewed source, exact producer dependency and joined legacy/new behavior; installation and provider qualification remain distinct]
+- [ ] T-COMPOSE.15 Freeze indexed discovery workload and scale thresholds  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-COMPOSE.7]  acc: [Synthetic 10k/100k mixtures, skew, candidate and fan-out budgets, target host, baseline, latency/RSS/update thresholds, independent labels and no-leak/false-ready invariants fixed before runs; resource limits and exact commands recorded without paid calls or held-out access]
+- [ ] T-COMPOSE.16 Implement bounded indexing and generation-aware retrieval  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.15]  acc: [Capability lookup and authorized shortlist indexes avoid per-request full schema/vector materialization; updates/rebuild/rollback, cache isolation/invalidation, cancellation and incomplete-budget outcomes preserve current policy and exact readiness; optional semantic route does not become default]
+- [ ] T-COMPOSE.17 Qualify new composition inventory and evaluation cohort  Owner: evaluation-author  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.14, T-COMPOSE.15]  acc: [Independent fixed inventory and caller-policy manifest use new immutable skills and actual two-tool contracts; non-author labels reconcile before scores; primary configuration and split frozen; old composite pilot remains unchanged and original held-out access ungranted]
+- [ ] T-COMPOSE.18 Verify scale and composition evaluation evidence  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.16, T-COMPOSE.17]  acc: [Declared synthetic 10k/100k runs report all attempts, latency percentiles, RSS/index/update cost, recall/coverage, false readiness, exposure, token availability and cold/warm phases; thresholds and failure dispositions retained; full safety and compatibility checks pass without post-score retuning]
+- [ ] T-COMPOSE.19 Independently review index and evaluation candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.18]  acc: [Independent non-author reviews .15-.18 exact base/head, label independence, reproducibility, all failures and limited claims; blockers resolved before merge]
+- [ ] T-COMPOSE.20 Merge reviewed scale and evaluation candidate  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.19]  acc: [Exact approved source and artifacts rebase through unchanged GitHub policy with landed SHA and check provenance]
+- [ ] T-COMPOSE.21 Verify landed scale evidence and publish handoff  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.20]  acc: [Fresh main matches reviewed source and deterministic report regeneration; producer and consumer compatibility recorded; results state measured envelope and remaining bottlenecks, never adoption or provider acceptance]
+- [ ] T-COMPOSE.22 Authorize composition release and installation scope  Owner: owner-with-coordinator  Est: TBD  kind: human  stage: preflight  blocked-by: [T-COMPOSE.14, T-COMPOSE.21]  blocked: Separate release and installation authority required  acc: [Explicit module/consumer release versions, target platform, signing/custody, rollout and rollback authority recorded; no semantic-default, hosted or provider authority inferred]
+- [ ] T-COMPOSE.23 Release library and install approved consumer  Owner: release-owner  Est: TBD  kind: agent  stage: release  blocked-by: [T-COMPOSE.22]  acc: [Qualified release/installation binding publishes only approved artifacts, records signatures and dependency pins, verifies installed version and rollback; generic dispatch stays blocked until route and authority are qualified]
+- [ ] T-COMPOSE.24 Accept installed workflow within approved provider scope  Owner: owner-with-verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.23]  acc: [Actual installed UI and workflow evidence recorded; synthetic-only versus live provider scope explicit; live inbox requires separate read-only account/call/cost/expiry authority, otherwise remains unqualified]
+- [ ] T-COMPOSE.25 Record operational handoff and recovery ownership  Owner: maintainer  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.24]  acc: [Runbook covers index generations, cache invalidation, connection revocation, unsupported upgrades, rollback and incident ownership; installed evidence and unresolved provider limits recorded; no hosted rollout or semantic adoption implied]

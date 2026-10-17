@@ -1,5 +1,7 @@
 # ADR018 — Evidence required to adopt task preparation
 
+New composition versions follow [ADR021](021-capability-composition-and-bounded-discovery.md): matching immutable inventory, caller policy and independently reviewed cohort precede scoring. Existing thresholds and adoption gates remain unchanged.
+
 Date: 2026-10-16
 Status: Accepted evaluation protocol; production/default adoption undecided.
 Depends on: ADR017 and RFC-002; executable task authority is docs/plan.md.

@@ -134,3 +134,24 @@ public command tables exposed private tool/config paths. PUBLISH.21/22/23
 track portable command-form repair across both new current receipts, verification
 and independent re-review. Exact private records/results and public Git history
 remain intact; no historical erasure, source/code or production change is claimed.
+
+## 2026-10-17 — Capability composition design and documentation reconciliation
+
+Owner requested design and planning after Quorum brainstorming and inspection of
+Zati e2dbcd41. ADR021 selects atomic semantic capabilities composed through a
+strict versioned asset, preserving legacy inbox roles and caller-owned execution.
+E-COMPOSE decomposes producer, consumer, indexed scale qualification and separately
+authorized release/installation handoff. No implementation task is marked done.
+
+Pruned stale active guidance: RFC-002 no longer describes first inbox selection
+as unknown; evaluation protocol closes the expired Qwen envelope; preparation
+ADRs point to the successor composition contract; repository instructions name
+the actual canonical Gist plan. Historical ADRs, receipts, completed tasks,
+immutable packages and datasets remain intact. Existing T-PREP.9 gains an
+explicit composition qualification dependency; no old acceptance is relabeled.
+
+Quorum was advisory: three independent reviews completed and the chair selected
+atomic composition; one reviewer preferred generic implementation profiles.
+The chair incorrectly suggested missing Zati role distinctness; direct source
+inspection confirms distinct IDs and unique list/read roles are already checked.
+No performance evidence or renewed runtime authority follows from the panel.
