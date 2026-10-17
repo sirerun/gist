@@ -149,7 +149,7 @@ func rejectDuplicateFields(d *json.Decoder) error {
 				return err
 			}
 			name, ok := key.(string)
-			if !ok || seen[name] {
+			if !ok || !canonicalPolicyField(name) || seen[name] {
 				return errors.New("duplicate/invalid policy JSON field")
 			}
 			seen[name] = true
@@ -168,4 +168,18 @@ func rejectDuplicateFields(d *json.Decoder) error {
 	}
 	_, err = d.Token()
 	return err
+}
+
+// Ports use their published Go JSON names (no json tags). Admit only these exact
+// spellings plus this manifest's explicitly tagged keys. The typed decoder still
+// enforces which of these fields is valid at each nesting level.
+func canonicalPolicyField(name string) bool {
+	switch name {
+	case "schema", "kind", "catalog_sha256", "entries", "intent_sha256", "principal", "runtime_id", "skill", "required_capabilities", "recipe_version",
+		"Issuer", "Subject", "Audience", "WorkspaceID", "Scopes", "PolicyGeneration", "SubjectType",
+		"Ref", "Digest", "ManifestDigest", "Algorithm", "Value", "Kind", "ID", "Version":
+		return true
+	default:
+		return false
+	}
 }

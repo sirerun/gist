@@ -235,3 +235,19 @@ func TestPolicyCatalogMismatchBeforeInput(t *testing.T) {
 		t.Fatalf("policy reused changed inventory: %s", out)
 	}
 }
+
+func TestNoncanonicalPolicyKeysRejected(t *testing.T) {
+	_, raw := reviewedPolicy(t)
+	for _, pair := range [][2]string{{`"schema":`, `"SCHEMA":`}, {`"entries":`, `"ENTRIES":`}, {`"Subject":`, `"subject":`}, {`"WorkspaceID":`, `"workspaceid":`}, {`"ID":`, `"id":`}, {`"Digest":`, `"digest":`}} {
+		bad := []byte(strings.Replace(string(raw), pair[0], pair[1], 1))
+		if _, err := decodePolicy(bad, fixture.Hash(bad).Value); err == nil {
+			t.Fatalf("case alias accepted: %s", pair[1])
+		}
+	}
+	for _, pair := range [][2]string{{`"schema":`, `"SCHEMA":"alias","schema":`}, {`"Subject":`, `"subject":"alias","Subject":`}} {
+		bad := []byte(strings.Replace(string(raw), pair[0], pair[1], 1))
+		if _, err := decodePolicy(bad, fixture.Hash(bad).Value); err == nil {
+			t.Fatalf("case duplicate accepted: %s", pair[1])
+		}
+	}
+}
