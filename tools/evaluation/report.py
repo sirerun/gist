@@ -63,7 +63,7 @@ def aggregate(rows):
     arms = defaultdict(list)
     keys = set()
     for row in rows:
-        key = (row["id"], row["arm"], row["repeat"])
+        key = (row["id"], row["arm"], row["repeat"], row.get("attempt_index", 1))
         if key in keys:
             raise ValueError("duplicate attempt identity; retries need distinct explicit attempt IDs")
         keys.add(key)

@@ -62,6 +62,8 @@ func (v vectors) Embed(_ context.Context, request preparation.EmbeddingRequest) 
 }
 
 type attempt struct {
+	AttemptIndex    int            `json:"attempt_index"`
+	RunKind         string         `json:"run_kind"`
 	Phase           string         `json:"phase"`
 	InputsSHA256    string         `json:"inputs_sha256"`
 	Capabilities    []string       `json:"capabilities,omitempty"`
@@ -99,9 +101,14 @@ func run() error {
 	dry := flag.Bool("dry-run", false, "no inference/provider calls; estimate source attempts")
 	docs := flag.Bool("embedding-inputs", false, "emit fixed catalog descriptions and actual query text for local adapter")
 	source := flag.String("source", "", "exact tracked source SHA")
+	attemptIndex := flag.Int("attempt-index", 1, "explicit retry/attempt identity, never hidden replacement")
+	runKind := flag.String("run-kind", "source_cold", "source_cold, source_warm or recovery; does not describe inference cache")
 	phase := flag.String("phase", "development", "development or heldout; heldout requires frozen admission")
 	admissionFile := flag.String("admission", "", "frozen run manifest for heldout admission")
 	flag.Parse()
+	if *attemptIndex <= 0 || (*runKind != "source_cold" && *runKind != "source_warm" && *runKind != "recovery") {
+		return errors.New("invalid explicit attempt/run kind")
+	}
 	if *inputs == "" || *source == "" {
 		return errors.New("--inputs and --source are required")
 	}
@@ -208,7 +215,7 @@ func run() error {
 	}
 	for _, item := range cases {
 		for _, arm := range []string{"L0", "L1", "E0", "H0", "H1", "C0", "C1"} {
-			row := attempt{Phase: *phase, InputsSHA256: inputHash, Schema: "gist.preparation.attempt/v1", ID: item.ID, Family: item.Family, Stratum: item.Stratum, Arm: arm, Repeat: 1, Source: *source, CatalogVersion: fixture.CatalogVersion, RecipeVersion: preparation.RecipeVersion, Kind: "controlled_source_smoke_not_retrieval_or_whole_task_benchmark", Usage: map[string]any{"provider_calls": 0, "paid_model_calls": 0, "main_model_tokens": nil, "cached_tokens": nil, "embedding_tokens": nil, "dollars": nil, "embedding_execution": "precomputed real pinned local vectors; separately qualified; lookup latency excludes inference"}}
+			row := attempt{AttemptIndex: *attemptIndex, RunKind: *runKind, Phase: *phase, InputsSHA256: inputHash, Schema: "gist.preparation.attempt/v1", ID: item.ID, Family: item.Family, Stratum: item.Stratum, Arm: arm, Repeat: 1, Source: *source, CatalogVersion: fixture.CatalogVersion, RecipeVersion: preparation.RecipeVersion, Kind: "controlled_source_smoke_not_retrieval_or_whole_task_benchmark", Usage: map[string]any{"provider_calls": 0, "paid_model_calls": 0, "main_model_tokens": nil, "cached_tokens": nil, "embedding_tokens": nil, "dollars": nil, "embedding_execution": "precomputed real pinned local vectors; separately qualified; lookup latency excludes inference"}}
 			if arm == "C0" || arm == "C1" {
 				row.Status = "NOT_RUN"
 				row.Error = "No admitted provider/model/account/call-dollar-expiry manifest; C0 native discovery and C1 preregistered direct tools remain distinct"
