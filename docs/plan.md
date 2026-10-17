@@ -19,6 +19,15 @@ Qwen launch envelopes below are CLOSED/EXPIRED; the retained outcome has zero
 model requests and 12 NOT_RUN attempts. Fresh runtime authority is required.
 E-COMPOSE does not reopen hosted expansion, execution or semantic adoption.
 
+Current scoped hosting resumption (2026-10-17): the owner explicitly instructed
+writing proper IaC and deploying through AWS CLI and Cloudflare MCP. E-HOSTED
+below resumes only the existing registry-aws catalog service at gist.sire.run,
+including required startup/auth configuration and live acceptance. Historical
+hosted holds remain for unselected expansion, provider comparisons and gateway
+execution. The accepted ADR008 stack architecture, standing apply grant and
+data protections apply. No Zati marketplace rollout is implied by this hosting
+request.
+
 ### Dispatch disposition and precedence
 
 This section supersedes older continuation instructions, milestone tables and unqualified “current” infrastructure notes below, which are dated historical records. All original task rows, IDs, completion states and acceptance evidence remain. Unfinished gateway rows depend on the permanently non-dispatchable retirement sentinel; catalog provenance rows .31/.35 are retained under catalog ownership with replacement prerequisites. Unfinished prior hosted/guidance rows depend on the hold sentinel. A bounded repair/current-consumer obligation requires a separately recorded scoped resumption, not blanket reactivation. No held or retired row is counted complete. The library terminal depends on neither the retired graph nor hosted production.
@@ -1969,3 +1978,55 @@ tracked repairs .26-.41 are complete. Next .22 remains an explicit human release
 and installation gate; .23-.25 cannot proceed from a source ship alone. No module
 release tag, installed application, live provider or model-default decision is
 claimed. Prior held-out/model evaluation authority is not reopened by these scores.
+
+### E-HOSTED -- Deploy the existing AWS catalog at the canonical Gist origin
+
+fidelity: executable
+Acceptance: Reviewed IaC preserves the existing registry account/database/bucket,
+deploys an exact source/image at gist.sire.run, verifies TLS and authenticated
+catalog/MCP behavior, and records rollback plus unresolved client/provider limits.
+
+The owner has supplied deployment authority, AWSCLI and CloudflareMCP are
+authenticated, and the existing member-account deployment role is assumable.
+Existing service is healthy on the old registry origin with an older image.
+The canonical hostname has no DNS record. New source requires durable signing
+and enrollment configuration absent from the old task. GitHubApp credentials
+are an unresolved external input, not permission to invent identity or disable
+authentication. No credential values enter source, logs or public receipts.
+
+The existing Pulumi stack in sirerun/foundation owns AWS resources. Cloudflare
+records follow its certificate/ALB outputs with an idempotent reconciliation
+record and read-only drift check. Stage new certificate alongside the old one;
+activate canonical origin/audience together only after issuance and source/image
+qualification. Preserve old image/configuration for rollback and all existing data.
+Mac load prevents heavy local builds; qualified bounded Linux capacity supplies
+checks and a cross-compiled Pulumi program without credential transfer.
+
+A cold-start defect may require explicit enrollment-only bootstrap: preconfigured
+founder identity is verified by GitHub; catalog access and grants remain denied
+until normal persisted maintainer authority and maintenance readiness succeed.
+Default strict startup remains. No fake membership seeding or asserted identity.
+Publication v2 stays disabled until a real trusted production binding verifier
+is supplied; do not infer fixture-only conformance is production qualification.
+
+- [x] T-HOSTED.1 Reconcile hosting authority and current infrastructure  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  acc: [Current source, dirty worktrees, stack outputs, AWS role, existing ECS revision, DNS, secret names and protected data identified without secret disclosure; narrow owner-authorized scope recorded]
+- [ ] T-HOSTED.2 Implement staged canonical origin and runtime IaC  Owner: infrastructure-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-HOSTED.1]  acc: [Foundation owns staged certificate/TLS, exact image, strict origin/audience, Secrets Manager references, least-privilege roles, correct parent-module container build, migration task and rollback without data replacement]
+- [ ] T-HOSTED.3 Correct required hosted startup bootstrap  Owner: registry-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-HOSTED.1]  acc: [Explicit first-enrollment mode solves cold-start only through real verified founder enrollment; all catalog and grants fail closed until current maintainer readiness; default startup and revocation behavior retain meaningful regressions]
+- [ ] T-HOSTED.4 Verify exact source and infrastructure changes  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-HOSTED.2, T-HOSTED.3]  acc: [Relevant Pulumi mocks/buildspec checks and hosted unit/integration/race/security checks pass; credential-free remote build provenance and actual preview changes retained; no destructive or unrelated resource changes]
+- [ ] T-HOSTED.5 Independently review final IaC and runtime candidates  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-HOSTED.4]  acc: [Non-author reviews exact base/head across both repositories, staged migration, first-start authority, credential custody, data protection and verification; accepted findings corrected and re-reviewed before merge]
+- [ ] T-HOSTED.6 Merge and verify landed deployment inputs  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-HOSTED.5]  acc: [Guarded rebase preserves repository policies, exact approved trees and immutable source provenance; fresh landed checks verify affected behavior and plan conformance]
+- [ ] T-HOSTED.7 Stage canonical certificate and reconcile validation DNS  Owner: deployment-owner  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-HOSTED.6]  acc: [Merged preview matches exact existing-stack apply; new ACM certificate and Cloudflare validation records are owned, idempotent and issued while old serving configuration remains available]
+- [ ] T-HOSTED.8 Qualify enrollment and durable secret configuration  Owner: coordinator-with-owner  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-HOSTED.1]  acc: [Existing or explicitly provisioned GitHubApp client reference, canonical callback, exact founder numeric identity/workspace, persistent signing/flow/CSRF/session custody and maintenance target recorded; no unrelated secrets borrowed or secret values published]
+- [ ] T-HOSTED.9 Build and pin the reviewed registry image  Owner: deployment-owner  Est: TBD  kind: agent  stage: release  blocked-by: [T-HOSTED.6]  acc: [Existing CodeBuild/ECR produces ARM64 image from exact merged source and reviewed Containerfile, retains build/digest and failure receipts; no moving image tags]
+- [ ] T-HOSTED.10 Run owned versioned migrations and deploy canonical service  Owner: deployment-owner  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-HOSTED.7, T-HOSTED.8, T-HOSTED.9]  acc: [Version-aware migration workflow preserves existing production data; merged exact image/config preview applies only reviewed stack resources and canonical origin/audience together; ECS stabilizes and rollback remains available]
+- [ ] T-HOSTED.11 Verify external HTTPS and authenticated catalog journey  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-HOSTED.10]  acc: [Canonical DNS/TLS/issuer/resource metadata, real operator enrollment, workload authorization, exact artifact retrieval/MCP and unauthenticated/wrong-audience/tenant/revocation denials observed; health alone cannot close acceptance]
+- [ ] T-HOSTED.12 Independently accept deployed service and operational handoff  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-HOSTED.11]  acc: [Source/image/config/live receipts agree, bounded recovery/backup/rotation/monitoring/ownership and actual remaining client/provider/publication limits are documented without claiming all historical RFC milestones complete]
+- [ ] T-HOSTED.13 Record and verify landed hosting handoff  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-HOSTED.12]  acc: [Independently reviewed evidence and canonical plan merge with source-bound production receipt; fresh main and running revision align, no ongoing watcher or unsupported marketplace completion is claimed]
+
+#### Hosted execution notes
+
+Execution: current-session inherited model/effort, one infrastructure implementer
+and one registry implementer with disjoint isolated worktrees; coordinator owns
+cloud changes/plan and non-author review is a separate gate. No agent changes
+AWS or DNS concurrently. Requested outcome is deployed service; missing real
+identity configuration blocks only its dependent activation, not reviewable IaC.
