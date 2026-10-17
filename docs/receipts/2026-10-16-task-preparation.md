@@ -156,3 +156,154 @@ split. Unsupported state transitions are NOT_RUN, never fabricated ready results
 The corpus and runtime halves now satisfy source prerequisite .1, permitting
 retained implementation .2/.3. Full-candidate review, merge and landed acceptance
 remain pending. No held-out ranking or model/task scores have been opened.
+
+## Assembled API findings
+
+- PREP-R2: prototype hardcoded OwnedConnections=true, which the legacy resolver
+  treats as a client assertion. Corrected with explicit caller-owned current
+  scoped readiness, freshness/clock/expiry and before/after checks; absent port
+  cannot claim a credentialed connection. Tests cover absent/false/true/revoked
+  and mismatched scope. Frozen finding provenance remains client_asserted.
+- PREP-R3: search nominations could expose stale metadata to an embedding adapter
+  before Catalog.Get. Corrected with authoritative identity/admission/pin/metadata
+  verification before exposure and fresh policy checks at adapter boundaries.
+  Tests cover revoked current records and changed metadata behind stale search.
+- PREP-R4: hybrid fusion originally omitted lexical-only hits absent from semantic
+  ranking. Required correction is a true reciprocal-rank union retaining exact
+  lexical hits, with focused regression; semantic threshold is frozen, not tuned.
+- PREP-R5: initial contract materialization compared raw manifest pins, rejecting
+  valid v2 non-skill records using the existing DocumentDigest compatibility alias.
+  Required correction reuses exactly that policy initially/finally and exercises
+  real v2 typed bytes, complete schemas and tamper/revocation refusal.
+
+R2/R3 source corrections are committed at2420ad1. R4/R5 checks and final independent
+candidate review remain pending; no unfinished finding is counted as accepted.
+Offline grading must consume labels only after selection against a fixed shared
+catalog. Controlled source smoke is separate from held-out retrieval/whole-task
+comparison; unavailable state transitions/provider arms stay NOT_RUN.
+
+## Initial aggregate and real-vector pipeline checkpoint
+
+Source checkpointc542828 passed full root Go tests, vet and builds; preparation
+race passed1.089s. Official CI golangci2.14 reports exactly the five unchanged
+baseline findings; changed packages pass. Frozen checker and12 registry Python
+regressions pass. A newer exact candidate will refresh affected checks.
+
+Actual pinned BF16/256 vectors for60 development queries and five fixed catalog
+descriptions exercised all five local preparation arms.420 attempt records were
+retained including120 C0/C1 NOT_RUN records. The source path prepares the maintained
+inbox package, assets and complete composite-read schema in each local arm.
+No held-out data or provider calls were used.
+
+That fixed smoke inventory does not represent the independently labelled corpus:
+even its composite inbox contract differs from the labelled two-tool alternative.
+Such environment/catalog mismatch cannot be interpreted as algorithm quality or
+product coverage. Required final correction retains actual smoke outcomes and
+all elapsed/usage records but classifies ineligible comparisons NOT_RUN. A bounded
+hash-bound external frozen-catalog loader is being added within .2 so later .9
+can use reviewed inventory without changing source or consuming gold to construct
+candidates. The current corpus/catalog cohort remains unqualified for a meaningful
+held-out retrieval comparison. Gold labels are not changed to chase a passing run.
+
+
+## Independent full-source review checkpoint
+
+Independent review ofc1d9c0c identified four reachable blockers. They are accepted
+for correction and exact-head re-review; this checkpoint is not approval:
+
+- PREP-R6: a declared transition/scenario could be replaced by an upfront final
+  state overlay. Unsupported mechanics must be NOT_RUN, never an eligible
+  comparison.
+- PREP-R7: TopK=1 truncated equal-score candidates before ambiguity detection.
+  Ambiguity must be detected before presentation limits.
+- PREP-R8: held-out report admission did not bind every attempt to frozen catalog,
+  recipe and semantic runtime identities. Mixed identities must be rejected.
+- PREP-R9: ranking an inbox skill could incorrectly establish coverage for an
+  unrelated read-only task. Positive caller-owned task/recipe admission is
+  required; similarity alone is insufficient.
+
+The reviewer separately inspectedc1d9c0c..9960a1d: single-snapshot dataset hashing,
+credentialed connection distinction and readiness expiry after resolver I/O had
+no additional blocker. Full correction checks and re-review remain pending.
+
+
+Aggregate checkpoint9960a1d passed full-root Go test/vet/build, preparation and
+catalog-loader race checks, changed-package golangci2.14, tidy-diff and gofmt;
+Python11 checks passed. Its tracked source archive SHA256 was
+602da862c42028e4bac09bf2d3ffb72ab92c1d46be92d4406d4bd5bc803efb61.
+Actual external-catalog export/load round-trip and420-record source pipeline ran
+on the existing qualified Linux host. No held-out or provider run occurred.
+These checks precede R6-R9 corrections and cannot approve the corrected head.
+
+
+Corrected source freeze02323b875f4ee0fd9c594f823ec2ac412a85a074 addresses
+R6-R9 with focused regressions. Unknown fixture mechanics are NOT_RUN before
+overlay; equal-score ambiguity precedes TopK; every held-out attempt must match
+frozen catalog/recipe/model/config identities. Positive caller-owned TaskAdmitter
+is mandatory for readiness, binds exact intent/principal/runtime/immutable skill
+pin and required capabilities, and is rechecked for freshness and generation
+after I/O. Absence or denial remains non-ready; a controlled unrelated read-only
+intent cannot become ready merely through a high similarity score. The fixture
+uses two independent literal admitted requests, never corpus text or gold labels
+as a coverage oracle. Python12 checks pass; final aggregate and re-review pending.
+
+
+Evaluation admission remains separate: .9 needs compatible independently reviewed
+catalog inventory and a caller task-coverage admission policy for its cohort. The
+current CLI policy admits only two literal smoke requests; it is not a general
+benchmark policy. Missing policy must be reported as environment unavailability,
+not as algorithm failure. Broader independently labelled inbox coverage remains
+necessary for positive adoption. No held-out dataset was opened by implementation.
+
+
+Post-correction checkpoint02323b8 passed full-root Go tests/vet/build and race
+checks for all three changed Go packages. Changed-package lint then caught a
+test-only DeMorgan simplification. Equivalent predicate correction and explicit
+README caller-policy qualification prerequisite are committed at691cced; the
+reviewer found no additional blocker in that bounded delta. Fresh exact-head
+aggregate and pipeline checks remain required. The five unrelated baseline lint
+findings remain disclosed rather than represented as a clean full-root lint run.
+
+
+## Final source verification
+
+Exact source691cced823bb4d09ceea84c188c7b92c373ac45e passed on the
+qualified Linux Go1.26.1 host with GOWORK=off, GOMAXPROCS=4:
+
+- Full-root `go test -p 4 ./...`, `go vet -p 4 ./...`, `go build -p 4 ./...`.
+- Race checks for preparation, fixture loader and prepeval packages.
+- Changed-package golangci2.14, gofmt and tidy-diff; Python12 regressions.
+- Actual external-catalog export/load round-trip, pinned real-vector420-attempt
+  source pipeline, grading and reporting. No held-out or provider calls.
+
+Final check/pipeline stage measured9seconds using warmed qualified tooling. It
+is not an end-to-end runtime or model performance measurement. Requested batch
+ceiling10, actual4 outcome members .0-.3; source implementation and independently
+owned corpus/review work used inherited session settings without model overrides.
+Exact token/cost telemetry is unavailable. Review rework R1-R9 is retained above;
+no acceleration claim follows from member or worker counts.
+
+Portable SHA256 evidence:
+
+- Tracked source archive: e12ccf4669ddd8e5c07136446fb88d3baaef6bb4ed96e093a1c5bb638cd99ce8
+- Aggregate log: c99d230edc8a46266b3431c4c78d6172efb352b9bf445bbb9f03f833fd852709
+- Go test log: 525d0aa1a3826b4ac047ebef316349331d078f3751eccd878fb9ad0e48e3e8a8
+- Race log: fe70f5bc5e770f9e41fc8114a3864f74a61d1d04633b862793abc5b11ea25120
+- Changed lint log: e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47
+- Python log: 6084b874a4258c3fb3f96b54c3338739f7c443689cfd7f35262327e858ed5d80
+- Catalog: dd769302f83ac062af19bb465baf48b2f6ac9a3146da7d302e40f5c51e7db67a
+- Vectors: f2213418f90eec6e6959bfbe354d8d910d238b1de2f9f514f854bf32bc439386
+- Attempts: 3e2798a24748c552feb1e97c8d2df177dd9eacbf9101eb2bf87f0bceb7989924
+- Report: 04aad2515d9d905e195a013e6e3023af7536ba750a876a2c2fd8d51f5fef6c33
+
+All420 comparison statuses are NOT_RUN: inventory/caller-policy mismatch, or
+unavailable C0/C1. Actual smoke statuses and timing remain preserved separately.
+This is successful source/accounting verification, not successful benchmark
+qualification. Public API regressions exercise positive admitted preparation;
+the corpus pipeline does not establish readiness or algorithm quality.
+
+Full-root lint still has five unchanged baseline findings: two unchecked cache
+assertions, deferred retrieval Close, integrity QF1001 and unused discovery
+cacheKey. Changed packages introduce none. Frozen checker and12 registry Python
+checks passed. T-PREP.2-.5 are source/check/review-findings complete; exact final
+document approval, guarded merge and landed acceptance remain open.
