@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -67,7 +68,7 @@ func main() {
 		os.Exit(1)
 	}
 }
-func run() error {
+func run() (resultErr error) {
 	flags := flag.NewFlagSet("compositionqual", flag.ContinueOnError)
 	mode := flags.String("mode", "inventory", "inventory, cohort, or scale")
 	configPath := flags.String("config", "tools/evaluation/composition-cohort/primary-config.json", "frozen configuration")
@@ -113,7 +114,7 @@ func run() error {
 			if e != nil {
 				return e
 			}
-			defer output.Close()
+			defer func() { resultErr = errors.Join(resultErr, output.Close()) }()
 		}
 		enc := json.NewEncoder(output)
 		if *mode == "cohort" {
