@@ -1,0 +1,75 @@
+{
+  "schema": "zati.inbox_workflow_landed_acceptance/v1",
+  "landed_head": "1a53077d6239e04c68a13d20406fb0f10de55ec5",
+  "reviewed_head": "607d914ec03c222cfaa3bd57f97c4afe98fc1806",
+  "fresh_origin_main": "1a53077d6239e04c68a13d20406fb0f10de55ec5",
+  "landed_and_reviewed_tree": "002905068e38b9fa4d434d2d17986542d2a17230",
+  "exact_tree_equality": true,
+  "landed_reachable_from_fresh_origin_main": true,
+  "tracked_archive_sha256": "2856c996f7c4bdd5aedfda702fc79add02afe4a417f599da919c3c85b0c7bfd9",
+  "archive_transfer_sha256_equal": true,
+  "checks": [
+    {
+      "command": "go test -p 4 ./internal/controller ./internal/execution -run ^Test(Inbox|MCPInterpretationPreparesAuthoritativeCostAndTurnCallback) -count=1",
+      "result": "PASS",
+      "package_seconds": {
+        "controller": 0.37,
+        "execution": 3.607
+      }
+    },
+    {
+      "command": "go test -p 4 ./tests/integration -run ^Test(InboxChatBridge|GistInboxWorkflow) -count=1",
+      "result": "PASS",
+      "seconds": 15.837,
+      "scope": "Actual controlled controller/Responses/Effects/TLS-MCP/stored-reply path and transparent bridge fixtures; local-model test skipped without explicit configuration"
+    },
+    {
+      "command": "python3 tools/specgen/render.py --check",
+      "result": "PASS",
+      "files": 50,
+      "operations": 356
+    }
+  ],
+  "resource_envelope": {
+    "host": "existing Linux runner",
+    "go_version": "go1.26.2",
+    "GOWORK": "off",
+    "GOMAXPROCS": 4,
+    "cpu_quota_percent": 400,
+    "memory_max_bytes": 25769803776,
+    "memory_swap_max_bytes": 0,
+    "per_check_timeout_seconds": 600,
+    "unit_timeout_seconds": 1200,
+    "observed_unit_seconds": 26.602,
+    "observed_cpu_seconds": 45.346
+  },
+  "scope": {
+    "fresh_tracked_archive": true,
+    "source_edits": false,
+    "broad_suite_or_race_repeated": false,
+    "mac_heavy_jobs": 0,
+    "main_model_workloads": 0,
+    "model_comparison": "NOT_RUN; all 12 planned attempts remain unrun",
+    "model_performance_token_usage": "unmeasured",
+    "live_mailbox_or_paid_provider_calls": 0
+  },
+  "existing_caveats": {
+    "source_check_receipt_sha256": "031113634d2fc8a698ec615ec414fee11eae43ee957377495e3742d6f00f646b",
+    "lint": "Existing 2.14.0: candidate/base 165 issues, zero introduced; distinct from CI 2.11.3",
+    "dependency_lock": "Three identical Narrate snapshot disagreements proven on fresh base and candidate; not repaired by this slice",
+    "tidy": "Same two obsolete Narrate checksum removals proven on fresh base and candidate; dependency files unchanged",
+    "hosted_ci": "Billing unavailable; local evidence is not hosted CI, release or production acceptance"
+  },
+  "original_checkout": {
+    "branch": "main",
+    "before_head": "c9d77a434c031d28ebe597ce1243b7cb892bf73a",
+    "before_ahead": 0,
+    "before_behind": 3,
+    "tracked_changes": false,
+    "only_untracked": ".codex/",
+    "action": "git merge --ff-only origin/main",
+    "result": "PASS",
+    "after_head": "1a53077d6239e04c68a13d20406fb0f10de55ec5",
+    "untracked_codex_preserved": true
+  }
+}
