@@ -1,0 +1,557 @@
+{
+  "checks": [
+    {
+      "cosine": 0.9999669674851259,
+      "dimension": 256,
+      "index": 0,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999707722277812,
+      "dimension": 256,
+      "index": 1,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999517143252382,
+      "dimension": 256,
+      "index": 2,
+      "native_norm": 1.0,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999312508005416,
+      "dimension": 256,
+      "index": 3,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999188381204309,
+      "dimension": 256,
+      "index": 4,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999190212746671,
+      "dimension": 256,
+      "index": 5,
+      "native_norm": 1.0,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999606007289,
+      "dimension": 256,
+      "index": 6,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999633003218376,
+      "dimension": 256,
+      "index": 7,
+      "native_norm": 0.9999999999999999,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999560006746565,
+      "dimension": 256,
+      "index": 8,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.999963956726298,
+      "dimension": 256,
+      "index": 9,
+      "native_norm": 0.9999999999999996,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999619028117218,
+      "dimension": 256,
+      "index": 10,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999390516053133,
+      "dimension": 256,
+      "index": 11,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999521313332158,
+      "dimension": 256,
+      "index": 12,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999498003434943,
+      "dimension": 256,
+      "index": 13,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999538840200379,
+      "dimension": 256,
+      "index": 14,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999654208220792,
+      "dimension": 256,
+      "index": 15,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999486637156861,
+      "dimension": 256,
+      "index": 16,
+      "native_norm": 1.0,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999505922873442,
+      "dimension": 256,
+      "index": 17,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999297453068632,
+      "dimension": 256,
+      "index": 18,
+      "native_norm": 1.0,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999302368095243,
+      "dimension": 256,
+      "index": 19,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999560933236061,
+      "dimension": 256,
+      "index": 20,
+      "native_norm": 1.0,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999649293467813,
+      "dimension": 256,
+      "index": 21,
+      "native_norm": 1.0,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999571477845363,
+      "dimension": 256,
+      "index": 22,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999299098565373,
+      "dimension": 256,
+      "index": 23,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999477085594205,
+      "dimension": 256,
+      "index": 24,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999508548108348,
+      "dimension": 256,
+      "index": 25,
+      "native_norm": 1.0,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999484452658749,
+      "dimension": 256,
+      "index": 26,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.999952202110713,
+      "dimension": 256,
+      "index": 27,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999632070543829,
+      "dimension": 256,
+      "index": 28,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.999944192145294,
+      "dimension": 256,
+      "index": 29,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999362664410087,
+      "dimension": 256,
+      "index": 30,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999239992256285,
+      "dimension": 256,
+      "index": 31,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999497554743887,
+      "dimension": 256,
+      "index": 32,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999563516329324,
+      "dimension": 256,
+      "index": 33,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.999952304040185,
+      "dimension": 256,
+      "index": 34,
+      "native_norm": 0.9999999999999999,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999583032289333,
+      "dimension": 256,
+      "index": 35,
+      "native_norm": 1.0,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999716230121685,
+      "dimension": 256,
+      "index": 36,
+      "native_norm": 1.0,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999626230192675,
+      "dimension": 256,
+      "index": 37,
+      "native_norm": 0.9999999999999998,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999470859909884,
+      "dimension": 256,
+      "index": 38,
+      "native_norm": 0.9999999999999998,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999618693032903,
+      "dimension": 768,
+      "index": 0,
+      "native_norm": 1.0000000000000007,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999687316382291,
+      "dimension": 768,
+      "index": 1,
+      "native_norm": 1.0000000000000009,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999442347748193,
+      "dimension": 768,
+      "index": 2,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.999924767808606,
+      "dimension": 768,
+      "index": 3,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999128421061798,
+      "dimension": 768,
+      "index": 4,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999130692900234,
+      "dimension": 768,
+      "index": 5,
+      "native_norm": 1.0000000000000007,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999533463426431,
+      "dimension": 768,
+      "index": 6,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.999955193320817,
+      "dimension": 768,
+      "index": 7,
+      "native_norm": 1.0000000000000007,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999417429643097,
+      "dimension": 768,
+      "index": 8,
+      "native_norm": 0.9999999999999999,
+      "passed": true
+    },
+    {
+      "cosine": 0.999953343051171,
+      "dimension": 768,
+      "index": 9,
+      "native_norm": 1.0,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999561297336245,
+      "dimension": 768,
+      "index": 10,
+      "native_norm": 1.0000000000000007,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999311987929758,
+      "dimension": 768,
+      "index": 11,
+      "native_norm": 0.9999999999999998,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999503841611743,
+      "dimension": 768,
+      "index": 12,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999466152895552,
+      "dimension": 768,
+      "index": 13,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999447068849149,
+      "dimension": 768,
+      "index": 14,
+      "native_norm": 1.0,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999628203565409,
+      "dimension": 768,
+      "index": 15,
+      "native_norm": 1.0000000000000007,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999432647394069,
+      "dimension": 768,
+      "index": 16,
+      "native_norm": 0.9999999999999997,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999429288153249,
+      "dimension": 768,
+      "index": 17,
+      "native_norm": 1.0000000000000007,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999202359873378,
+      "dimension": 768,
+      "index": 18,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999154141232396,
+      "dimension": 768,
+      "index": 19,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999538782760083,
+      "dimension": 768,
+      "index": 20,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999618621719611,
+      "dimension": 768,
+      "index": 21,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999450397309596,
+      "dimension": 768,
+      "index": 22,
+      "native_norm": 1.0000000000000007,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999245243988129,
+      "dimension": 768,
+      "index": 23,
+      "native_norm": 1.0000000000000009,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999445934901946,
+      "dimension": 768,
+      "index": 24,
+      "native_norm": 1.0,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999424346623828,
+      "dimension": 768,
+      "index": 25,
+      "native_norm": 1.0000000000000009,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999432387836154,
+      "dimension": 768,
+      "index": 26,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999368202287058,
+      "dimension": 768,
+      "index": 27,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999588343667258,
+      "dimension": 768,
+      "index": 28,
+      "native_norm": 1.0000000000000007,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999346980292109,
+      "dimension": 768,
+      "index": 29,
+      "native_norm": 0.9999999999999998,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999347224951038,
+      "dimension": 768,
+      "index": 30,
+      "native_norm": 1.0,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999121453298294,
+      "dimension": 768,
+      "index": 31,
+      "native_norm": 1.0000000000000007,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999394384703421,
+      "dimension": 768,
+      "index": 32,
+      "native_norm": 1.0,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999522887463693,
+      "dimension": 768,
+      "index": 33,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999506803712859,
+      "dimension": 768,
+      "index": 34,
+      "native_norm": 1.0,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999564494080868,
+      "dimension": 768,
+      "index": 35,
+      "native_norm": 1.0000000000000004,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999703138787317,
+      "dimension": 768,
+      "index": 36,
+      "native_norm": 1.0000000000000002,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999558771408312,
+      "dimension": 768,
+      "index": 37,
+      "native_norm": 0.9999999999999992,
+      "passed": true
+    },
+    {
+      "cosine": 0.9999363639037037,
+      "dimension": 768,
+      "index": 38,
+      "native_norm": 0.9999999999999999,
+      "passed": true
+    }
+  ],
+  "cosine_threshold": 0.9999,
+  "fixed_inputs": 35,
+  "minimum_cosine": 0.9999121453298294,
+  "norm_tolerance": 1e-05,
+  "probe_inputs": 4,
+  "status": "PASS",
+  "token_inputs": 39
+}
