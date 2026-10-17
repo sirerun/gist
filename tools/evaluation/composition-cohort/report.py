@@ -24,7 +24,7 @@ def identities(selected):
             for key, value in selected.items()}
 
 
-def grade_cohort(labels, attempts):
+def grade_cohort(labels, attempts, inventory=None):
     expected = {row['id']: row for row in labels}
     if len(expected) != len(labels):
         raise ValueError('duplicate labels')
@@ -42,6 +42,19 @@ def grade_cohort(labels, attempts):
         ready = result.get('Status') == 'ready' and not row.get('error')
         actual_selected = identities(bundle.get('Selected', {})) if bundle else {}
         exact = actual_selected == label['selected']
+        if inventory is not None and label['ready']:
+            case_inventory = next(c for c in inventory['cases'] if c['input']['id'] == case)
+            frozen = {}
+            for requirement, identity in label['selected'].items():
+                matches = [candidate for candidate in case_inventory['admitted_candidates'][requirement]
+                           if identities({requirement: candidate})[requirement] == identity]
+                if len(matches) != 1:
+                    raise ValueError('label does not name exactly one inventory candidate: ' + case)
+                frozen[requirement] = matches[0]
+            exact = exact and bundle.get('Selected') == frozen and bundle.get('Skill') == case_inventory['request']['Skill']
+            actual_tools = sorted(json.dumps({'pin': tool['Pin'], 'connection': tool['Connection']}, sort_keys=True) for tool in bundle.get('Tools', [])) if bundle else []
+            frozen_tools = sorted(json.dumps({'pin': candidate['Tool'], 'connection': candidate['Connection']}, sort_keys=True) for candidate in frozen.values())
+            exact = exact and actual_tools == frozen_tools
         tool_closure = False
         if bundle:
             tools = bundle.get('Tools') or []
@@ -74,12 +87,18 @@ def grade_scale(config, runs):
         seen.add(key)
         metrics = {}
         checks = dict(run['checks'])
+        checks['complete_safety_checks'] = all(run['checks'].get(name) is True for name in config['additional_checks'])
+        checks['run_completed'] = not run.get('error')
+        checks['projection_complete'] = run['snapshot_projection_candidates'] == key[0]
         for name in config['query_classes']:
             observations = run['query_classes'][name]
             latencies = [r['elapsed_ns'] / 1e6 for r in observations]
             p95 = percentile(latencies, .95)
             limit = threshold['broad_p95_ms'] if name == 'common_lexical' else threshold['exact_narrow_p95_ms']
             metrics[name] = {'samples': len(observations), 'p50_ms': percentile(latencies, .5), 'p95_ms': p95, 'max_result_bytes': max(r['result_bytes'] for r in observations), 'statuses': sorted(set(r['status'] for r in observations))}
+            expected_status, expected_count = {'exact_hit': ('hit', 1), 'exact_miss': ('miss', 0), 'unique_lexical_hit': ('complete', 1), 'lexical_no_match': ('complete', 0), 'common_lexical': ('incomplete_budget', 0) if key[0] / key[1] * .8 > 4096 else ('complete', 64)}[name]
+            checks[name + '_correct_outcome'] = all(not r.get('error') and r['status'] == expected_status and r['candidates'] == expected_count and 0 <= r['result_bytes'] <= 256 * 1024 and r['elapsed_ns'] >= 0 for r in observations)
+            checks[name + '_cold_complete'] = len(run['cold'][name]) == key[1] and all(not r.get('error') and r['status'] == expected_status and r['candidates'] == expected_count for r in run['cold'][name])
             checks[name + '_sample_count'] = len(observations) == config['warm_samples_per_query_class']
             checks[name + '_latency'] = p95 <= limit
         checks['build_threshold'] = run['build_ns'] <= threshold['build_100k_seconds'] * 1e9
@@ -95,11 +114,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', required=True)
     parser.add_argument('--labels', required=True)
+    parser.add_argument('--inventory', required=True)
     parser.add_argument('--cohort', required=True)
     parser.add_argument('--scale', action='append', required=True)
     args = parser.parse_args()
     config = json.loads(Path(args.config).read_text())
-    cohort = grade_cohort(jsonl(args.labels), jsonl(args.cohort))
+    cohort = grade_cohort(jsonl(args.labels), jsonl(args.cohort), json.loads(Path(args.inventory).read_text()))
     scale = grade_scale(config, [json.loads(Path(p).read_text()) for p in args.scale])
     print(json.dumps({'cohort': cohort, 'scale': scale, 'pass': cohort['pass'] and scale['pass'], 'tokens': None, 'model_calls': 0, 'provider_calls': 0, 'claim_limits': config['claim_limits']}, indent=2, sort_keys=True))
 
