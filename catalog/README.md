@@ -76,3 +76,9 @@ is refused; no execution grant is returned. See ADR020 and `tools/evaluation`.
 The real pinned text-only embedding adapter is locally qualified, but held-out
 quality, whole-task comparisons, Zati integration/default enablement and release
 remain separate. No token or latency advantage is claimed.
+
+The optional [llama.cpp embedding adapter](embedding/llamacpp/README.md) plugs into
+preparation's existing Embedder port using an explicitly owned, digest-verified
+local native process. It provides bounded token/vector validation and stable
+pipeline identity; process custody and runtime qualification remain caller-owned.
+It does not change default retrieval, task admission or provider execution.

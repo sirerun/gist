@@ -117,7 +117,7 @@ func (e *Embedder) Embed(ctx context.Context, q preparation.EmbeddingRequest) (p
 	// Tokenize every complete prefixed input before sending any inference request.
 	for _, text := range texts {
 		var tokens struct {
-			Tokens []int `json:"tokens"`
+			Tokens []protocolInt `json:"tokens"`
 		}
 		if err := e.post(ctx, "/tokenize", map[string]any{"content": text, "add_special": true, "parse_special": true, "with_pieces": false}, &tokens); err != nil {
 			return empty, err
@@ -139,9 +139,9 @@ func (e *Embedder) Embed(ctx context.Context, q preparation.EmbeddingRequest) (p
 		Model  string `json:"model"`
 		Object string `json:"object"`
 		Data   []struct {
-			Index     *int      `json:"index"`
-			Object    string    `json:"object"`
-			Embedding []float64 `json:"embedding"`
+			Index     *protocolInt    `json:"index"`
+			Object    string          `json:"object"`
+			Embedding []protocolFloat `json:"embedding"`
 		} `json:"data"`
 		Usage struct {
 			PromptTokens int `json:"prompt_tokens"`
@@ -165,7 +165,8 @@ func (e *Embedder) Embed(ctx context.Context, q preparation.EmbeddingRequest) (p
 		}
 		seen[*item.Index] = true
 		fullNorm := 0.0
-		for _, v := range item.Embedding {
+		for _, number := range item.Embedding {
+			v := float64(number)
 			if math.IsNaN(v) || math.IsInf(v, 0) {
 				return empty, errors.New("llamacpp: nonfinite vector")
 			}
@@ -174,7 +175,10 @@ func (e *Embedder) Embed(ctx context.Context, q preparation.EmbeddingRequest) (p
 		if fullNorm <= 0 || math.IsInf(fullNorm, 0) || math.Abs(math.Sqrt(fullNorm)-1) > 1e-5 {
 			return empty, errors.New("llamacpp: invalid normalized native vector")
 		}
-		vector := append([]float64(nil), item.Embedding[:e.dimension]...)
+		vector := make([]float64, e.dimension)
+		for i := range vector {
+			vector[i] = float64(item.Embedding[i])
+		}
 		norm := 0.0
 		for _, v := range vector {
 			norm += v * v
@@ -283,4 +287,34 @@ func asciiKey(s string) bool {
 		}
 	}
 	return true
+}
+
+// JSON null is not numeric zero. Custom numeric decoders preserve this boundary
+// before the ordinary typed response decoder can coerce it silently.
+type protocolInt int
+
+func (n *protocolInt) UnmarshalJSON(raw []byte) error {
+	if bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		return errors.New("null integer")
+	}
+	var value int
+	if err := json.Unmarshal(raw, &value); err != nil {
+		return err
+	}
+	*n = protocolInt(value)
+	return nil
+}
+
+type protocolFloat float64
+
+func (n *protocolFloat) UnmarshalJSON(raw []byte) error {
+	if bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		return errors.New("null float")
+	}
+	var value float64
+	if err := json.Unmarshal(raw, &value); err != nil {
+		return err
+	}
+	*n = protocolFloat(value)
+	return nil
 }
