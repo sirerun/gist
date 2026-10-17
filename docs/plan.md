@@ -2014,8 +2014,8 @@ is supplied; do not infer fixture-only conformance is production qualification.
 - [x] T-HOSTED.1 Reconcile hosting authority and current infrastructure  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  acc: [Current source, dirty worktrees, stack outputs, AWS role, existing ECS revision, DNS, secret names and protected data identified without secret disclosure; narrow owner-authorized scope recorded]
 - [x] T-HOSTED.2 Implement staged canonical origin and runtime IaC  Owner: infrastructure-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-HOSTED.1]  acc: [Foundation owns staged certificate/TLS, exact image, strict origin/audience, Secrets Manager references, least-privilege roles, correct parent-module container build, migration task and rollback without data replacement]
 - [x] T-HOSTED.3 Correct required hosted startup bootstrap  Owner: registry-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-HOSTED.1]  acc: [Explicit first-enrollment mode solves cold-start only through real verified founder enrollment; all catalog and grants fail closed until current maintainer readiness; default startup and revocation behavior retain meaningful regressions]
-- [ ] T-HOSTED.4 Verify exact source and infrastructure changes  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-HOSTED.2, T-HOSTED.3, T-HOSTED.14, T-HOSTED.15]  acc: [Relevant Pulumi mocks/buildspec checks and hosted unit/integration/race/security checks pass; credential-free remote build provenance and actual preview changes retained; no destructive or unrelated resource changes]
-- [ ] T-HOSTED.5 Independently review final IaC and runtime candidates  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-HOSTED.4, T-HOSTED.16]  acc: [Non-author reviews exact base/head across both repositories, staged migration, first-start authority, credential custody, data protection and verification; accepted findings corrected and re-reviewed before merge]
+- [x] T-HOSTED.4 Verify exact source and infrastructure changes  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-HOSTED.2, T-HOSTED.3, T-HOSTED.14, T-HOSTED.15]  acc: [Relevant Pulumi mocks/buildspec checks and hosted unit/integration/race/security checks pass; credential-free remote build provenance and actual preview changes retained; no destructive or unrelated resource changes]
+- [x] T-HOSTED.5 Independently review final IaC and runtime candidates  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-HOSTED.4, T-HOSTED.16]  acc: [Non-author reviews exact base/head across both repositories, staged migration, first-start authority, credential custody, data protection and verification; accepted findings corrected and re-reviewed before merge]
 - [ ] T-HOSTED.6 Merge and verify landed deployment inputs  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-HOSTED.5, T-HOSTED.17]  acc: [Guarded rebase preserves repository policies, exact approved trees and immutable source provenance; fresh landed checks verify affected behavior and plan conformance]
 - [ ] T-HOSTED.7 Stage canonical certificate and reconcile validation DNS  Owner: deployment-owner  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-HOSTED.6]  acc: [Merged preview matches exact existing-stack apply; new ACM certificate and Cloudflare validation records are owned, idempotent and issued while old serving configuration remains available]
 - [ ] T-HOSTED.8 Qualify enrollment and durable secret configuration  Owner: coordinator-with-owner  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-HOSTED.1]  acc: [Existing or explicitly provisioned GitHubApp client reference, canonical callback, exact founder numeric identity/workspace, persistent signing/flow/CSRF/session custody and maintenance target recorded; no unrelated secrets borrowed or secret values published]
@@ -2037,9 +2037,9 @@ identity configuration blocks only its dependent activation, not reviewable IaC.
 
 - [x] T-HOSTED.14 Implement an auditable one-shot database migrator  Owner: registry-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-HOSTED.1]  acc: [Default status reads schema metadata only; explicit apply holds a PostgreSQL advisory lock and records exact SQL hashes transactionally; pre-existing untracked schema refuses automatic replay; adoption requires explicit reviewed prefix plus manifest/schema fingerprints and recovery evidence; no down migration or fabricated identity]
 
-- [ ] T-HOSTED.15 Correct database privilege separation before activation  Owner: registry-and-infrastructure-owners  Est: TBD  kind: agent  stage: fix  blocked-by: [T-HOSTED.14]  acc: [Current app receives only a separate non-owner runtime database URL; isolated migration task retains owner authority; explicit role provisioning refuses unsafe attributes or ownership and grants only required runtime objects while excluding the migration ledger]
-- [ ] T-HOSTED.16 Verify the accepted database review correction  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-HOSTED.15]  acc: [Pulumi mocks prove current application and execution IAM exclude owner secret; PostgreSQL integration proves runtime role attributes, non-ownership, tenant isolation and denied schema or ledger mutation; exact checks and limitations retained]
-- [ ] T-HOSTED.17 Independently re-review database correction and deployment authority  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-HOSTED.16]  acc: [Non-author reviews exact correction and checks; production activation additionally requires live role, ownership and RLS evidence before the application is given runtime credentials]
+- [x] T-HOSTED.15 Correct database privilege separation before activation  Owner: registry-and-infrastructure-owners  Est: TBD  kind: agent  stage: fix  blocked-by: [T-HOSTED.14]  acc: [Current app receives only a separate non-owner runtime database URL; isolated migration task retains owner authority; explicit role provisioning refuses unsafe attributes or ownership and grants only required runtime objects while excluding the migration ledger]
+- [x] T-HOSTED.16 Verify the accepted database review correction  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-HOSTED.15]  acc: [Pulumi mocks prove current application and execution IAM exclude owner secret; PostgreSQL integration proves runtime role attributes, non-ownership, tenant isolation and denied schema or ledger mutation; exact checks and limitations retained]
+- [x] T-HOSTED.17 Independently re-review database correction and deployment authority  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-HOSTED.16]  acc: [Non-author reviews exact correction and checks; production activation additionally requires live role, ownership and RLS evidence before the application is given runtime credentials]
 
 #### Database correction and retained evidence
 
@@ -2068,3 +2068,18 @@ Hosted source qualification: the bounded Linux run of the explicit internal,
 command, wiring, retrieval and runtime integration suites passed with the race
 detector, followed by vet and build. Named external-client acceptance remains
 unqualified. Database privilege correction requires its own changed-source checks.
+
+Database correction qualification: exact corrected runtime source passed
+PostgreSQL integration with race detection, including actual login-flow storage
+under the restricted role, then hosted vet and build. Foundation mocks passed
+with race detection, vet and cross-compilation. Its real staged preview contains
+six creates, one build-project update and fifty unchanged resources, with no
+replacement or deletion. Review caught missing login-flow expiry pruning access;
+the correction and direct-store regression are retained. Production role and
+authenticated acceptance are still pending.
+
+Independent source review approved the corrected runtime candidate and staged
+Foundation candidate after the accepted database findings were fixed. Checks
+passed for the corrected source. Source approval permits guarded merge; it does
+not establish live database privileges, successful enrollment or production
+acceptance. Foundation PR 280 is merged with an identical Pulumi source tree.
