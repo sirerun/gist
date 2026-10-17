@@ -1,0 +1,1 @@
+{"dtype": "bfloat16", "dimension": 256, "load_seconds": 1.2592024150071666, "cold_inference_seconds": 0.18401166005060077, "warm_inference_seconds": [0.03557469602674246, 0.0312152779661119, 0.026750422082841396, 0.02615248702932149, 0.026608053012751043], "peak_rss_bytes": 1595772928, "targets": {"rss_4gib_pass": true, "load_30s_pass": true}}

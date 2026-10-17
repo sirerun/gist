@@ -1,0 +1,68 @@
+{
+  "reports_reproduced": 12,
+  "schema": "gist.inbox-development.verification/v1",
+  "selected_config_source_timings_exclude_inference": {
+    "E0:source_cold": {
+      "attempts": 30,
+      "maximum_seconds": 0.001429037,
+      "median_seconds": 0.000303368,
+      "p95_nearest_rank_seconds": 0.001153086
+    },
+    "E0:source_warm": {
+      "attempts": 30,
+      "maximum_seconds": 0.00097219,
+      "median_seconds": 0.000510407,
+      "p95_nearest_rank_seconds": 0.000793519
+    },
+    "H0:source_cold": {
+      "attempts": 30,
+      "maximum_seconds": 0.000665823,
+      "median_seconds": 0.0002533755,
+      "p95_nearest_rank_seconds": 0.000561439
+    },
+    "H0:source_warm": {
+      "attempts": 30,
+      "maximum_seconds": 0.001067183,
+      "median_seconds": 0.000499055,
+      "p95_nearest_rank_seconds": 0.000917358
+    },
+    "H1:source_cold": {
+      "attempts": 30,
+      "maximum_seconds": 0.000819567,
+      "median_seconds": 0.00026164,
+      "p95_nearest_rank_seconds": 0.000586815
+    },
+    "H1:source_warm": {
+      "attempts": 30,
+      "maximum_seconds": 0.000679983,
+      "median_seconds": 0.000367831,
+      "p95_nearest_rank_seconds": 0.000627599
+    },
+    "L0:source_cold": {
+      "attempts": 30,
+      "maximum_seconds": 0.000856446,
+      "median_seconds": 0.00023463150000000002,
+      "p95_nearest_rank_seconds": 0.000536399
+    },
+    "L0:source_warm": {
+      "attempts": 30,
+      "maximum_seconds": 0.001202734,
+      "median_seconds": 0.0002890875,
+      "p95_nearest_rank_seconds": 0.000757231
+    },
+    "L1:source_cold": {
+      "attempts": 30,
+      "maximum_seconds": 0.000560703,
+      "median_seconds": 0.00022604800000000001,
+      "p95_nearest_rank_seconds": 0.000538064
+    },
+    "L1:source_warm": {
+      "attempts": 30,
+      "maximum_seconds": 0.001108366,
+      "median_seconds": 0.00032371950000000004,
+      "p95_nearest_rank_seconds": 0.000721711
+    }
+  },
+  "selection_reproduced": true,
+  "verified_attempts": 2520
+}

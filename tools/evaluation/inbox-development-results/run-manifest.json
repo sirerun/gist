@@ -1,0 +1,105 @@
+{
+  "artifacts": {
+    "256-k16-source_cold.jsonl.gz": {
+      "sha256": "5e9ecaf505e9150391d5f9991d5b0ca211adb04972970eac81e53fe7242b175e",
+      "uncompressed_bytes": 305827,
+      "uncompressed_sha256": "678d5a44985949c2474af80f37356e4ede4979d0bd7220452cb4363568015162"
+    },
+    "256-k16-source_warm.jsonl.gz": {
+      "sha256": "0f0acb728da696adbc3222f457ae434204f8b5c5c5ca5576bcec6182f25d2add",
+      "uncompressed_bytes": 305834,
+      "uncompressed_sha256": "2c273241f8e0d87e2d1324e539545eabff91373293ab60eb4e35082269d22c04"
+    },
+    "256-k4-source_cold.jsonl.gz": {
+      "sha256": "a88ce34465082dc8f822be8da47bf09471b8c71d9303a6c15b893f08ef240dbb",
+      "uncompressed_bytes": 305622,
+      "uncompressed_sha256": "0c7fe3447b16194822c69bff67b85492d78a557caa45e7c22db16c95bd4dc99f"
+    },
+    "256-k4-source_warm.jsonl.gz": {
+      "sha256": "7f839855ab8079ca243746260370e197b143033e796bea79f97882a6ac1cf13e",
+      "uncompressed_bytes": 305623,
+      "uncompressed_sha256": "da83954690f018b400520359dc14e60baf16e0593f2db1174c459cc3fe37c2b5"
+    },
+    "256-k8-source_cold.jsonl.gz": {
+      "sha256": "6e48c251edae21919f97621493e211fc94ab94a62b0c146565a048e86a957913",
+      "uncompressed_bytes": 305616,
+      "uncompressed_sha256": "67f6d1cbaeb0b748af858fc043ce4671836febb6d7d7d7fc4e28e11807ff4053"
+    },
+    "256-k8-source_warm.jsonl.gz": {
+      "sha256": "2239a57861c1ab1537caf5a6e3e0dcef8a5b02ba25c624076cca277318330b51",
+      "uncompressed_bytes": 305622,
+      "uncompressed_sha256": "248ef3b19eb23cd842703c592ad2685ae14344367eac6ef260834653d1dfa097"
+    },
+    "768-k16-source_cold.jsonl.gz": {
+      "sha256": "e5ca056cd472f06b5901fc03d261888f025ed566c5e10a346d1add4b0e8afccd",
+      "uncompressed_bytes": 305824,
+      "uncompressed_sha256": "23da15cffb7a4906ba84fda01d901446e4890345ebf06f7ceee025a9e6e01065"
+    },
+    "768-k16-source_warm.jsonl.gz": {
+      "sha256": "941a2134b90f7688fed1e0ae70649cda100cd1bf817515d393ab370df66f877f",
+      "uncompressed_bytes": 305830,
+      "uncompressed_sha256": "6284a6f1f722f774c6944267a17f4c2b717da0472ca6535ae32fc85c7b1db84f"
+    },
+    "768-k4-source_cold.jsonl.gz": {
+      "sha256": "526a1b0a899f7da900e071fee7b6a4a142eb03cdd6a3802d09fb7a798ad0a6c2",
+      "uncompressed_bytes": 305628,
+      "uncompressed_sha256": "06a991b2a4cae7cb5eb20764d95405295d2103732c130db0c04fd924a6b53c27"
+    },
+    "768-k4-source_warm.jsonl.gz": {
+      "sha256": "7698b4ba3916c3680d2dc6cffaa2e7f4c95cc221a3d69e62b6483af2ff582c98",
+      "uncompressed_bytes": 305622,
+      "uncompressed_sha256": "5ce157e1f44219866fc5e48edc0be49f7d3691868c842df2592959b9f386ecd6"
+    },
+    "768-k8-source_cold.jsonl.gz": {
+      "sha256": "99885fbc12ea1e7a06415fd8b1f8a3d1c778eb6d15a65a264766cf6a95479924",
+      "uncompressed_bytes": 305633,
+      "uncompressed_sha256": "f10e17532ce720d368599d30fa2addf6da4cda69f71e78aa6acbbac957bca8fa"
+    },
+    "768-k8-source_warm.jsonl.gz": {
+      "sha256": "8690578978e32c7e5db54abbc03032e788437c06c8274e17e4ad1d0dcdb49fd5",
+      "uncompressed_bytes": 305630,
+      "uncompressed_sha256": "4b725d708078c85a3a02447b21c97b8899715841ceb772dd62f10dda87612485"
+    },
+    "embedding-inputs.jsonl.gz": {
+      "sha256": "56d419b27adbc55f8da2e51a796a29fcf3560d7c7dbe5405f35351882f965633",
+      "uncompressed_bytes": 3530,
+      "uncompressed_sha256": "938edbb56771620e37593063018a79f8b65840601e5378fa801219931f043ed1"
+    },
+    "vectors-256.json.gz": {
+      "sha256": "45a45706f17664e784156e3de6c58a6618d1cf93f6e6f99a2b536109bb4e0df4",
+      "uncompressed_bytes": 201228,
+      "uncompressed_sha256": "a6f419681ac224ccad47a3981893e619e9392925e755ec77789030187f230143"
+    },
+    "vectors-768.json.gz": {
+      "sha256": "5e27d3c4ae744e7d38e8d133e7997aadcce8499a9aca446d7f1ffa4dbb480f40",
+      "uncompressed_bytes": 600810,
+      "uncompressed_sha256": "38c47119c4935148f92362511a5253a8a906e943eddba1cd34f3c98e050d997e"
+    }
+  },
+  "construction_families": 1,
+  "elapsed_seconds": 16.22940035199281,
+  "frozen_artifacts": {
+    "catalog.json": "dd769302f83ac062af19bb465baf48b2f6ac9a3146da7d302e40f5c51e7db67a",
+    "development.inputs.jsonl": "eb05b86e2498835b1607704abd75ea0f021a8bb0c520ce1fea63067bd116011b",
+    "development.labels.jsonl": "b8dce1bf1c8675cbd8c1714b6fde17bc037bf930f2759adcb0b07b56f9f56619",
+    "task-policy.json": "79d93387f61b9532e92296efe4792b08b9ce5fbc2a6fc9fc68dcd3c3b0c85217"
+  },
+  "generalization_or_adoption_claim": false,
+  "heldout_accessed": false,
+  "model_downloads": 0,
+  "paid_model_calls": 0,
+  "policy_version": "sha256:79d93387f61b9532e92296efe4792b08b9ce5fbc2a6fc9fc68dcd3c3b0c85217",
+  "provider_calls": 0,
+  "recipe_version": "inbox-v1",
+  "runtime": {
+    "numpy": "2.4.2",
+    "python": "3.12.3",
+    "sentence-transformers": "6.1.0",
+    "tokenizers": "0.23.3",
+    "torch": "2.12.0.dev20260326+cu128",
+    "transformers": "5.20.1"
+  },
+  "schema": "gist.inbox-development.run/v1",
+  "source": "3676aa17e05cf7c813a2000068bc413e99738eb4",
+  "source_process_label_limit": "separate CLI process labels; not inference-cache state"
+}
