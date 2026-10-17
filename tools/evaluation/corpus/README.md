@@ -8,10 +8,13 @@ scores before `label_status` changes.
 There are 60 development cases and 60 separately sealed held-out cases. Each
 split has ten cases in each disjoint primary stratum: straightforward,
 paraphrase/multilingual, multiple capabilities/prerequisites, ambiguous/no-match,
-missing/stale/revoked, unauthorized/adversarial. Every case has a distinct named
-workflow family, chosen before intent wording; no family ID crosses splits.
-There are no sibling paraphrases across splits. Shared capability infrastructure
-(such as the inbox reader) does not mean shared task output. Manual intents vary
+missing/stale/revoked, unauthorized/adversarial. Each case retains a distinct workflow identity (`workflow_family`), chosen before
+wording. `family` now clusters correlated construction templates conservatively:
+44 development groups and35 held-out groups, not60 independent families per
+split. Unique IDs never establish independence. A v2 preregistration repair
+replaced32 held-out prompts before any scores, and independent construction-split
+review is pending. Shared capability infrastructure does not by itself mean
+shared task output. Manual intents vary
 by domain, requested evidence, source composition, language and abstention cause.
 
 Only one case per split uses the maintained real inbox skill. All other cases
@@ -27,7 +30,7 @@ private account, provider credential or actual customer record is included.
 
 `development.inputs.jsonl` contains one input per line:
 
-- `id`, `split`, `family`, `stratum`, `intent` identify the independently authored
+- `id`, `split`, `family`, `workflow_family`, `stratum`, `intent` identify the independently authored
   request and preregistered grouping.
 - `fixture.workflow` chooses the maintained inbox fixture or a named synthetic
   workflow. `fixture.status` is supplied environment state, not a prediction:
@@ -53,17 +56,30 @@ private account, provider credential or actual customer record is included.
   unavailable or unauthorized.
 - `eligible_tool_alternatives`: complete currently eligible tool closures, empty
   when the environment cannot safely offer a ready bundle.
-- `dependencies`: exact required fixture dependency pins.
+- `dependencies`: exact requested/candidate fixture dependency pins. Required
+  capabilities and dependencies describe the request or candidate closure, not
+  permission or executable eligibility. Only currently eligible complete tool
+  alternatives can be exposed, and these are empty for every nonready case.
 - `expected_status`: `ready`, `requires_connection`, `denied`, `unsupported`,
   `no_match`, or `requires_selection`.
 - `prohibited_actions`, `prohibited_disclosures`, and `output_rubric`: independent
   safety and observable outcome requirements. A safety prohibition still applies
   when a task abstains.
 
+Optional fixture transitions describe synthetic environment changes during
+preparation. A runner must enact a transition at its declared phase and observe
+real checks, or report that scenario NOT_RUN. It must not use labels or scenario
+status as the result oracle. Unsupported probe workflows remain unsupported;
+fixtures do not turn synthetic capabilities into product support.
+
 `manifest.json` records counts and exact SHA-256 file hashes. It includes only
 an opaque held-out artifact ID and hashes/counts, never held-out intents, labels,
-family names or storage locations. `author_initial_unreconciled` must not be
-interpreted as two-annotator qualification.
+family names or storage locations. `v2_blind_reconciliation_pending` must not be interpreted as two-annotator
+qualification. `manifest.v1.json` and retained source history preserve the
+superseded initial corpus. Both original label sets remain intact; reconciled
+artifacts are separate files. V1 reconciliation clarified requested-versus-
+executable capability metadata and normalized an ambiguous rubric prefix so
+malicious requested actions are never an instruction to satisfy them.
 
 ## Blind seal and reconciliation
 
