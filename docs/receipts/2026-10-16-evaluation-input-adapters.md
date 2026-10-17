@@ -118,7 +118,7 @@ Actual final aggregate passed on the qualified Linux host:
 
 - Full-root Go tests, vet, build and CLI build with GOMAXPROCS=4, `-p 4`.
 - Affected CLI and fixture race checks; changed-package golangci2.14: zero issues.
--16 Python adapter/report regressions, including rejection before label access.
+- 16 Python adapter/report regressions, including rejection before label access.
 - gofmt, tidy and exact unchanged go.mod/go.sum comparison; diff check.
 - Real subprocess CLI tests exercise admitted external-policy preparation,
   default-policy denial, each k choice, policy tamper/schema/size/symlink/scope
@@ -143,3 +143,31 @@ Exact final-candidate approval, guarded merge and landed checks remain open.
 This source delivery removes driver limitations; .9 still needs independent
 representative inventory/policy/cohort qualification and development selection.
 No owner adoption decision, default enablement or release is inferred.
+
+
+## Independent approval, merge and landed checks
+
+Non-author full-candidate review approved
+f2ad4d4b733e6258317a0c4060a61fd5060ed140 against
+7ece68b47870b89bb648ea24efdcfc146b377d2c. EVAL-R1 and EVAL-R2 resolved;
+no blocker remained. PR74 (https://github.com/sirerun/gist/pull/74) rebase merged
+8ef1969ae68e34c2366d5ec8f13f55da94020d13. Immediate base/head matched review;
+repository required no statuses and zero approvals, with no unresolved review
+threads. GitHub job117294113536 could not start because the account is locked for
+billing. Authorized qualified-host fallback was used without retry, policy change
+or CI-green claim.
+
+Fresh fetched main reaches the merged commit and exactly matches the approved
+full tree. Landed tracked archive SHA256
+3fb649920b61f54bd08e66d90643d00ed814cad74eea0de3ece5cc76b3bdd9c0
+matched on both hosts. Actual landed Go preparation/fixture/CLI tests,16 Python
+regressions, CLI build and k16 dry-run passed. The dry-run retains explicit
+default policy identity,300 source attempts and120 unavailable provider attempts
+for60 development cases, zero paid/provider calls and unknown tokens/dollars.
+No inference or held-out run was performed.
+
+T-PREP.21-.29 source lifecycle is complete. The caller-policy adapter and k grid
+are executable prerequisites; representative independently reviewed data and
+caller policy remain necessary before .9 evaluation. Source tests do not create
+real caller authority, reconcile Zati's two-role integration, choose a primary
+configuration, prove comparison quality or authorize adoption/release.
