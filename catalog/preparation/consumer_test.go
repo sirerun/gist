@@ -573,7 +573,7 @@ func TestTaskAdmissionScopeAndRevocationAreChecked(t *testing.T) {
 					scope = "unbound"
 				}
 				now := time.Now().UTC()
-				return preparation.TaskAdmissionDecision{ScopeDigest: scope, Admitted: !(which == "revoked after IO" && calls > 1), Generation: "task-owner-v1", CheckedAt: now, ValidUntil: now.Add(time.Minute)}, nil
+				return preparation.TaskAdmissionDecision{ScopeDigest: scope, Admitted: which != "revoked after IO" || calls <= 1, Generation: "task-owner-v1", CheckedAt: now, ValidUntil: now.Add(time.Minute)}, nil
 			})
 			out, e := s.Prepare(context.Background(), r)
 			if e == nil || out.Selected != nil {

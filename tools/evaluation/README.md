@@ -175,3 +175,10 @@ only two source smoke requests; corpus labels and desired workflow IDs do not
 create that admission. Other intent coverage remains nonready. Held-out report
 validation rechecks every record's source/input/catalog SHA and version, recipe,
 semantic configuration and semantic model/runtime identity against admission.
+
+The generic SDK accepts a real caller TaskAdmitter, but this CLI intentionally
+uses only its two-literal controlled source policy. T-PREP.9 must qualify an
+independent caller task-coverage policy and substitute that policy through the
+public SDK in its evaluation driver, in addition to admitting a compatible frozen
+catalog/cohort. The existing60 development cases are not all caller-admitted
+workflows; running this source CLI does not qualify that future policy or pilot.
