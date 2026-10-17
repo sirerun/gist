@@ -148,3 +148,14 @@ operation and left the turn proposal-pending. This is a new continuation blocker
 no model service or prompt was started. The failure is retained for diagnosis
 and a scoped controller correction with independent review. The preceding
 non-race joined pass does not override this failed acceptance.
+
+
+INBOX-R6 diagnosis confirms a production scheduling window: an effect can be
+pending before the controller registers its proposal index, and the known-turn
+fallback journals a guessed model route. A scoped typed private execution-owner
+lookup is admitted to classify exact persisted operations, with installation
+fencing and no public wire/schema change. Independent review of the first repair
+found INBOX-R6a: an actually failed misroute is already journaled refused, so
+normal open-entry delivery never reaches reclassification. The corrected repair
+must recover only a proven different valid owner, preserve the original fault
+and never repeat the physical effect. Launch remains held pending this fix.
