@@ -1922,6 +1922,13 @@ run had occurred. Correct the fixture to the intended second-account selection,
 regenerate immutable inventory, preserve independent labels and review the exact
 freeze before measuring. Expected readiness and thresholds are unchanged.
 
-- [ ] T-COMPOSE.39 Correct evaluation fixture and freeze findings  Owner: evaluation-author  Est: TBD  kind: agent  stage: fix  blocked-by: [T-COMPOSE.14, T-COMPOSE.32]  acc: [Accepted pre-score fixture and freeze findings corrected against published contracts; C16 uses list/read connection selections; original attempts and unchanged scenarios/thresholds retained]
+- [x] T-COMPOSE.39 Correct evaluation fixture and freeze findings  Owner: evaluation-author  Est: TBD  kind: agent  stage: fix  blocked-by: [T-COMPOSE.14, T-COMPOSE.32]  acc: [Accepted pre-score fixture and freeze findings corrected against published contracts; C16 uses list/read connection selections; original attempts and unchanged scenarios/thresholds retained]
 - [ ] T-COMPOSE.40 Verify corrected evaluation inventory and harness  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.39]  acc: [Exact source unit checks and deterministic inventory regeneration pass; independent labels reconcile before scores and no implementation-produced outcome is used as gold]
 - [ ] T-COMPOSE.41 Independently review corrected evaluation freeze  Owner: independent-reviewer  Est: TBD  kind: agent  stage: rereview  blocked-by: [T-COMPOSE.40]  acc: [Non-author approves exact runner/config/inventory/labels/report manifest before scored execution, with accepted findings resolved and no outcome or threshold tuning]
+
+Pre-score source checks at817d084 passed full root integration/race, vet, builds,
+contracts, registry tests, tidy, report tests and inventory regeneration. Lint
+found one introduced unchecked output.Close alongside five inherited findings.
+Independent freeze review at5941596 also found early failed scale attempts could
+crash the report. Both are corrected under .39; .40/.41 remain pending refreshed
+checks and exact-freeze approval. No scored attempt, label or threshold changed.
