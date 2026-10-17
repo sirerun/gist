@@ -70,7 +70,7 @@ func decodePolicy(raw []byte, expected string) (*taskPolicy, error) {
 	if len(raw) > maxPolicyBytes || fixture.Hash(raw).Value != expected {
 		return nil, errors.New("task policy digest/size mismatch")
 	}
-	if err := rejectDuplicateFields(json.NewDecoder(bytes.NewReader(raw))); err != nil {
+	if err := rejectDuplicateFields(json.NewDecoder(bytes.NewReader(raw)), taskPolicyShape()); err != nil {
 		return nil, err
 	}
 	d := json.NewDecoder(bytes.NewReader(raw))
@@ -129,19 +129,43 @@ func policyTemplate() (taskPolicy, error) {
 	return taskPolicy{CatalogSHA256: fixture.Hash(raw).Value, Schema: policySchema, Kind: "evaluation_fixture_not_live_authority", Entries: []policyEntry{{IntentSHA256: "REPLACE_WITH_INDEPENDENTLY_REVIEWED_EXACT_INTENT_SHA256", Principal: fixture.Principal, RuntimeID: fixture.Request("").RuntimeID, Skill: ports.ArtifactPin{Ref: r.Ref, Digest: r.Digest, ManifestDigest: r.ManifestDigest}, RequiredCapabilities: []ports.ArtifactRef{fixture.Ref(ports.KindCapability, inboxbriefing.CapabilityID)}, RecipeVersion: preparation.RecipeVersion}}}, nil
 }
 
-// Encoding/json otherwise silently accepts duplicate object keys. A policy
-// snapshot must have only one interpretation, including nested caller fields.
-func rejectDuplicateFields(d *json.Decoder) error {
+// Strict shapes prevent encoding/json's case-insensitive aliases at every path.
+type policyShape struct {
+	fields  map[string]*policyShape
+	element *policyShape
+}
+
+func taskPolicyShape() *policyShape {
+	scalar := &policyShape{}
+	ref := &policyShape{fields: map[string]*policyShape{"WorkspaceID": scalar, "Kind": scalar, "ID": scalar, "Version": scalar}}
+	digest := &policyShape{fields: map[string]*policyShape{"Algorithm": scalar, "Value": scalar}}
+	principal := &policyShape{fields: map[string]*policyShape{"Issuer": scalar, "Subject": scalar, "Audience": scalar, "WorkspaceID": scalar, "Scopes": {element: scalar}, "PolicyGeneration": scalar, "SubjectType": scalar}}
+	pin := &policyShape{fields: map[string]*policyShape{"Ref": ref, "Digest": digest, "ManifestDigest": digest}}
+	entry := &policyShape{fields: map[string]*policyShape{"intent_sha256": scalar, "principal": principal, "runtime_id": scalar, "skill": pin, "required_capabilities": {element: ref}, "recipe_version": scalar}}
+	return &policyShape{fields: map[string]*policyShape{"schema": scalar, "kind": scalar, "catalog_sha256": scalar, "entries": {element: entry}}}
+}
+func rejectDuplicateFields(d *json.Decoder, shape *policyShape) error {
 	token, err := d.Token()
 	if err != nil {
 		return err
 	}
-	delim, ok := token.(json.Delim)
-	if !ok {
+	delim, composite := token.(json.Delim)
+	if !composite {
+		// Null optional Scopes is the published nil slice spelling; typed decoding
+		// and exact caller comparison reject null required objects/fields afterward.
+		if token == nil {
+			return nil
+		}
+		if shape.fields != nil || shape.element != nil {
+			return errors.New("invalid policy JSON shape")
+		}
 		return nil
 	}
 	switch delim {
 	case '{':
+		if shape.fields == nil {
+			return errors.New("unexpected policy object")
+		}
 		seen := map[string]bool{}
 		for d.More() {
 			key, err := d.Token()
@@ -149,17 +173,21 @@ func rejectDuplicateFields(d *json.Decoder) error {
 				return err
 			}
 			name, ok := key.(string)
-			if !ok || !canonicalPolicyField(name) || seen[name] {
-				return errors.New("duplicate/invalid policy JSON field")
+			child, exists := shape.fields[name]
+			if !ok || !exists || seen[name] {
+				return errors.New("noncanonical/duplicate policy JSON field")
 			}
 			seen[name] = true
-			if err := rejectDuplicateFields(d); err != nil {
+			if err := rejectDuplicateFields(d, child); err != nil {
 				return err
 			}
 		}
 	case '[':
+		if shape.element == nil {
+			return errors.New("unexpected policy array")
+		}
 		for d.More() {
-			if err := rejectDuplicateFields(d); err != nil {
+			if err := rejectDuplicateFields(d, shape.element); err != nil {
 				return err
 			}
 		}
@@ -168,18 +196,4 @@ func rejectDuplicateFields(d *json.Decoder) error {
 	}
 	_, err = d.Token()
 	return err
-}
-
-// Ports use their published Go JSON names (no json tags). Admit only these exact
-// spellings plus this manifest's explicitly tagged keys. The typed decoder still
-// enforces which of these fields is valid at each nesting level.
-func canonicalPolicyField(name string) bool {
-	switch name {
-	case "schema", "kind", "catalog_sha256", "entries", "intent_sha256", "principal", "runtime_id", "skill", "required_capabilities", "recipe_version",
-		"Issuer", "Subject", "Audience", "WorkspaceID", "Scopes", "PolicyGeneration", "SubjectType",
-		"Ref", "Digest", "ManifestDigest", "Algorithm", "Value", "Kind", "ID", "Version":
-		return true
-	default:
-		return false
-	}
 }

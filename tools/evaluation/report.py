@@ -132,7 +132,25 @@ def grade(rows, labels):
             for key, value in sorted(groups.items())]
 
 
+def semantic_model_identity(rows):
+    models = set()
+    for row in rows:
+        if row.get("arm") not in ("E0", "H0", "H1"):
+            continue
+        model = row.get("model_version")
+        if not isinstance(model, str) or not model.strip():
+            if not (row.get("status") == "NOT_RUN" and row.get("comparison_status") == "NOT_RUN"
+                    and (row.get("error") or row.get("comparison_reason"))):
+                raise ValueError("executed semantic attempt requires model/runtime identity")
+        else:
+            models.add(model)
+    if len(models) > 1:
+        raise ValueError("mixed semantic model/runtime identities")
+    return next(iter(models), None)
+
+
 def validate_frozen_rows(rows, admission):
+    semantic_model_identity(rows)
     expected = {"source": admission["candidate_source"], "inputs_sha256": admission["inputs_sha256"],
                 "catalog_sha256": admission["catalog_sha256"], "catalog_version": admission["catalog_version"],
                 "recipe_version": admission["recipe_version"], "policy_version": admission["policy_version"], "top_k": admission["top_k"],
@@ -167,11 +185,9 @@ def main():
     if len(identities) != 1 or any(not row.get("policy_version") or row.get("top_k") not in (4, 8, 16)
                                    or row.get("semantic_floor") != 0.30 or row.get("rrf_constant") != 60 for row in rows):
         raise ValueError("mixed or unsupported source/policy/configuration identities")
-    semantic_models = {row.get("model_version") for row in rows
-                       if row.get("arm") in ("E0", "H0", "H1") and row.get("model_version")}
-    if len(semantic_models) > 1:
-        raise ValueError("mixed semantic model/runtime identities")
+    selected_model = semantic_model_identity(rows)
     result = aggregate(rows)
+    result["selected_semantic_model_version"] = selected_model
     if any(row.get("phase") != args.phase for row in rows):
         raise ValueError("attempt phase differs from report phase")
     if admission:

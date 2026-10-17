@@ -125,3 +125,43 @@ class ReportBeforeLabelAccessTests(unittest.TestCase):
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn("mixed or unsupported", result.stderr)
                 self.assertNotIn("DO_NOT_OPEN", result.stderr)
+
+class ExecutedSemanticIdentityTests(unittest.TestCase):
+    def test_empty_identity_only_allowed_for_explicit_unavailable_attempt(self):
+        from report import semantic_model_identity
+        for arm in ("E0", "H0", "H1"):
+            for model in (None, "", "  "):
+                row = {"arm": arm, "status": "ready", "model_version": model}
+                with self.subTest(arm=arm, model=model), self.assertRaises(ValueError):
+                    semantic_model_identity([row])
+                row["status"] = "NOT_RUN"
+                with self.assertRaises(ValueError):
+                    semantic_model_identity([row])
+                row.update(comparison_status="NOT_RUN", error="pinned real local vectors unavailable")
+                self.assertIsNone(semantic_model_identity([row]))
+        self.assertEqual(semantic_model_identity([{"arm": "H1", "status": "ready", "model_version": "pinned-model"}]), "pinned-model")
+        with self.assertRaises(ValueError):
+            semantic_model_identity([{"arm": "E0", "status": "ready", "model_version": "first"},
+                                     {"arm": "H1", "status": "ready", "model_version": "second"}])
+
+    def test_missing_executed_model_refused_before_labels(self):
+        import subprocess
+        import sys
+        import tempfile
+        import json
+        from pathlib import Path
+        for model in (None, "", " "):
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                row = {"id": "a", "arm": "H0", "repeat": 1, "phase": "development", "status": "ready",
+                       "source": "s", "inputs_sha256": "i", "catalog_sha256": "c", "model_version": model,
+                       "catalog_version": "v", "recipe_version": "r", "policy_version": "p",
+                       "top_k": 4, "semantic_floor": .30, "rrf_constant": 60}
+                path = root / "attempts.jsonl"
+                path.write_text(json.dumps(row) + "\n")
+                result = subprocess.run([sys.executable, str(Path(__file__).with_name("report.py")),
+                                         "--attempts", str(path), "--labels", str(root / "DO_NOT_OPEN")],
+                                        capture_output=True, text=True, check=False)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("requires model/runtime identity", result.stderr)
+                self.assertNotIn("DO_NOT_OPEN", result.stderr)
