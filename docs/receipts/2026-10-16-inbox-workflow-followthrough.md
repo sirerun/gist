@@ -271,3 +271,22 @@ findings are fixed and re-reviewed; portable source and runtime receipts match
 reviewed bytes. No remaining finding or active review blocks these heads.
 T-PREP.54–.56 are complete. Guarded merge and landed verification remain open;
 actual model evaluation and original adoption gates remain unqualified.
+
+
+## Guarded merges and initial landed evidence
+
+Gist PR80 merged by guarded rebase at2026-10-17T06:28:43Z to
+d167a835b5bb68d2a1a94437c757fc65fe8dbc7b; Zati PR45 merged at06:28:58Z
+to1a53077d6239e04c68a13d20406fb0f10de55ec5. Immediately preceding merge,
+both heads/bases matched reviewed revisions, no blocking threads or pending
+reviews existed, and unchanged policies imposed no required status checks or
+human approvals. Gist permits rebase through its PR rule; Zati main is reported
+unprotected (private free-plan rules API returns403). No admin/bypass or policy
+change was used. Hosted check failures remain billing-unavailable, not CI-green.
+
+Fresh Gist main reaches the landed commit and its complete tree equals reviewed
+6dbd4ee. In an isolated landed checkout, all five diagnostic tests passed and a
+fresh CLI output matched diagnosis.json byte-for-byte. Portable producer landed
+receipt records provenance and limits. T-PREP.57 is complete; Zati's bounded
+fresh landed workflow check remains in progress. The dirty original Gist checkout
+was preserved unchanged.

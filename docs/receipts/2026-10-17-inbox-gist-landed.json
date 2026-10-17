@@ -1,0 +1,17 @@
+{
+  "schema": "gist.inbox_followthrough_landed/v1",
+  "pr": "https://github.com/sirerun/gist/pull/80",
+  "method": "rebase",
+  "reviewed_head": "6dbd4eefffead9f087d77488e2965508a240df30",
+  "reviewed_base": "23ba27a7fdcd829f3407c3f3cc328a0737fa9afb",
+  "landed": "d167a835b5bb68d2a1a94437c757fc65fe8dbc7b",
+  "reachable_from_fresh_main": true,
+  "reviewed_tree_equal": true,
+  "diagnostic_tests_passed": 5,
+  "fresh_cli_byte_equal": true,
+  "diagnosis_sha256": "9474e9e2ef4752c0e91262885e7ecae4f834fd9b9d8f0b53773b5e615e466f1b",
+  "hosted_ci": "billing_unavailable; no enforced required checks; authorized local fallback",
+  "model_comparison": "NOT_RUN",
+  "defaults_changed": false,
+  "deployment": false
+}
