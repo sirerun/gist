@@ -19,7 +19,10 @@ policy before work and before exposure, and reauthorize offered records. Refusal
 policy check. A
 changed policy or generation produces no candidates. The caller policy gate
 must reject revoked/stale policy snapshots, including connection admissions;
-it is mandatory and supplies no default allow implementation. Composition still
+it is mandatory and supplies no default allow implementation. The caller must
+advance policy generation for connection/admission changes as well as catalog
+grants and reject the old scope. New authority scope requires a new scoped
+index; content updates never renew authority. Composition still
 retrieves exact artifacts and performs its own final authority checks.
 
 Search bounds: 1 KiB query, 32 normalized terms, 4096 examined postings/entries,
@@ -34,7 +37,8 @@ index structure; full rebuild and rollback publish new monotonic generations.
 Top-level entry/posting maps are copied in O(N) during an update; only changed
 entries are reanalyzed and affected posting lists rebuilt. This is not an
 affected-only total-cost claim. Rollback does not restore old policy authority.
-Retain only the current and immediately previous snapshots. Queries detect
+The index retains current and immediately previous snapshots; in-flight readers
+may temporarily retain older snapshots, included in peak memory accounting. Queries detect
 concurrent publication before exposure. No result cache is introduced.
 
 Deterministic synthetic sizes: 10,000 and 100,000 total records, 40% tools,
