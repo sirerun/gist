@@ -1745,7 +1745,7 @@ and target-host capacity before scoring, never invented here or tuned afterward.
 - [x] T-COMPOSE.14 Verify landed Zati migration  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.13]  acc: [Fresh consumer main verifies reviewed source, exact producer dependency and joined legacy/new behavior; installation and provider qualification remain distinct]
 - [x] T-COMPOSE.15 Freeze indexed discovery workload and scale thresholds  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-COMPOSE.7]  acc: [Synthetic 10k/100k mixtures, skew, candidate and fan-out budgets, target host, baseline, latency/RSS/update thresholds, independent labels and no-leak/false-ready invariants fixed before runs; resource limits and exact commands recorded without paid calls or held-out access]
 - [x] T-COMPOSE.16 Implement bounded indexing and generation-aware retrieval  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.15]  acc: [Capability lookup and authorized shortlist indexes avoid per-request full schema/vector materialization; updates/rebuild/rollback, cache isolation/invalidation, cancellation and incomplete-budget outcomes preserve current policy and exact readiness; optional semantic route does not become default]
-- [ ] T-COMPOSE.17 Qualify new composition inventory and evaluation cohort  Owner: evaluation-author  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.14, T-COMPOSE.15, T-COMPOSE.32, T-COMPOSE.41]  acc: [Independent fixed inventory and caller-policy manifest use new immutable skills and actual two-tool contracts; non-author labels reconcile before scores; primary configuration and split frozen; old composite pilot remains unchanged and original held-out access ungranted]
+- [x] T-COMPOSE.17 Qualify new composition inventory and evaluation cohort  Owner: evaluation-author  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.14, T-COMPOSE.15, T-COMPOSE.32, T-COMPOSE.41]  acc: [Independent fixed inventory and caller-policy manifest use new immutable skills and actual two-tool contracts; non-author labels reconcile before scores; primary configuration and split frozen; old composite pilot remains unchanged and original held-out access ungranted]
 - [ ] T-COMPOSE.18 Verify scale and composition evaluation evidence  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.16, T-COMPOSE.17, T-COMPOSE.32]  acc: [Declared synthetic 10k/100k runs report all attempts, latency percentiles, RSS/index/update cost, recall/coverage, false readiness, exposure, token availability and cold/warm phases; thresholds and failure dispositions retained; full safety and compatibility checks pass without post-score retuning]
 - [ ] T-COMPOSE.19 Independently review index and evaluation candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.18]  acc: [Independent non-author reviews .15-.18 exact base/head, label independence, reproducibility, all failures and limited claims; blockers resolved before merge]
 - [ ] T-COMPOSE.20 Merge reviewed scale and evaluation candidate  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.19]  acc: [Exact approved source and artifacts rebase through unchanged GitHub policy with landed SHA and check provenance]
@@ -1923,8 +1923,8 @@ regenerate immutable inventory, preserve independent labels and review the exact
 freeze before measuring. Expected readiness and thresholds are unchanged.
 
 - [x] T-COMPOSE.39 Correct evaluation fixture and freeze findings  Owner: evaluation-author  Est: TBD  kind: agent  stage: fix  blocked-by: [T-COMPOSE.14, T-COMPOSE.32]  acc: [Accepted pre-score fixture and freeze findings corrected against published contracts; C16 uses list/read connection selections; original attempts and unchanged scenarios/thresholds retained]
-- [ ] T-COMPOSE.40 Verify corrected evaluation inventory and harness  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.39]  acc: [Exact source unit checks and deterministic inventory regeneration pass; independent labels reconcile before scores and no implementation-produced outcome is used as gold]
-- [ ] T-COMPOSE.41 Independently review corrected evaluation freeze  Owner: independent-reviewer  Est: TBD  kind: agent  stage: rereview  blocked-by: [T-COMPOSE.40]  acc: [Non-author approves exact runner/config/inventory/labels/report manifest before scored execution, with accepted findings resolved and no outcome or threshold tuning]
+- [x] T-COMPOSE.40 Verify corrected evaluation inventory and harness  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.39]  acc: [Exact source unit checks and deterministic inventory regeneration pass; independent labels reconcile before scores and no implementation-produced outcome is used as gold]
+- [x] T-COMPOSE.41 Independently review corrected evaluation freeze  Owner: independent-reviewer  Est: TBD  kind: agent  stage: rereview  blocked-by: [T-COMPOSE.40]  acc: [Non-author approves exact runner/config/inventory/labels/report manifest before scored execution, with accepted findings resolved and no outcome or threshold tuning]
 
 Pre-score source checks at817d084 passed full root integration/race, vet, builds,
 contracts, registry tests, tidy, report tests and inventory regeneration. Lint
@@ -1932,3 +1932,13 @@ found one introduced unchecked output.Close alongside five inherited findings.
 Independent freeze review at5941596 also found early failed scale attempts could
 crash the report. Both are corrected under .39; .40/.41 remain pending refreshed
 checks and exact-freeze approval. No scored attempt, label or threshold changed.
+
+Evaluation freeze approved by independent composition_doc_audit at
+afceb5b770528e56cf8f5fc07c83b7c6d27f8d3a against ab6b6c6. Corrected runner
+race, six report tests and deterministic inventory comparison pass; full lint
+matches exactly five inherited findings, zero introduced. Earlier full root
+integration/race/vet/build/contracts/registry/tidy evidence at817d084 remains
+valid for unchanged source. Freeze manifest SHA256
+a285988ebedc0a2edd681bd81b8e4c7d0f8c1f9e6b2377a502376bc0e3d7390e
+binds 78 files. Both label authors agree 19 outcomes and exact selected IDs.
+.17 and .39-.41 close before .18 scoring; measurements remain unobserved here.
