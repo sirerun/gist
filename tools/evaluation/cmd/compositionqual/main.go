@@ -3,10 +3,12 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
+	"time"
 )
 
 type configuration struct {
@@ -97,10 +99,27 @@ func run() error {
 		if *freeze == "" || *source == "" {
 			return fmt.Errorf("measured runs require reviewed freeze manifest and exact source identity")
 		}
-		// Execution is implemented separately after the inventory checkpoint.
-		_ = records
-		_ = partitions
-		return fmt.Errorf("measurement runner not yet implemented")
+		if e = verifyFreeze(*freeze, *configPath, *inputsPath); e != nil {
+			return e
+		}
+		if e = validateHost(c); e != nil {
+			return e
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.Execution.Deadline)*time.Second)
+		defer cancel()
+		output := os.Stdout
+		if *out != "-" {
+			output, e = os.OpenFile(*out, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0644)
+			if e != nil {
+				return e
+			}
+			defer output.Close()
+		}
+		enc := json.NewEncoder(output)
+		if *mode == "cohort" {
+			return runCohort(ctx, c, inputs, *source, enc.Encode)
+		}
+		return enc.Encode(runScale(ctx, c, *records, *partitions, *source))
 	default:
 		return fmt.Errorf("unknown mode %q", *mode)
 	}

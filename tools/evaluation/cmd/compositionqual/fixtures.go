@@ -300,7 +300,7 @@ func makeFixture(config configuration, input scenario) (*fixture, error) {
 			selected := items[len(items)-1]
 			f.request.Selections[key] = selected.Binding
 			if input.Scenario == "selected_second_account" {
-				f.request.ConnectionSelections["mailbox"] = selected.Connection
+				f.request.ConnectionSelections[key] = selected.Connection
 			}
 		}
 	case "unsupported_consumer":
@@ -334,6 +334,7 @@ func (f *fixture) service(ctx context.Context) (c.Service, error) {
 }
 
 type caseInventory struct {
+	Controls     map[string]any           `json:"runtime_controls"`
 	Input        scenario                 `json:"input"`
 	Request      c.Request                `json:"request"`
 	Artifacts    []artifact               `json:"artifacts"`
@@ -351,6 +352,13 @@ func inventory(config configuration, configBytes, inputBytes []byte, inputs []sc
 			return nil, e
 		}
 		item := caseInventory{Input: input, Request: f.request, Candidates: f.candidates, IndexEntries: f.entries, Denied: []ports.ArtifactRef{}, Conformance: f.conformance}
+		item.Controls = map[string]any{"fixed_clock_utc": config.Composition.FixedClock, "authority_max_age_seconds": config.Composition.MaxAge, "authority_valid_for_seconds": config.Composition.ValidFor, "initial_task_query": "is:unread", "task_policy": "query must equal is:unread", "cancel_before_prepare": input.Scenario == "cancelled_request", "revoke_authority_after_check": 0, "checked_at_seconds_before_now": 0, "visibility_policy": "exclude denied refs before scoped index build; deny exact retrieval"}
+		if input.Scenario == "revoked_final_authority" {
+			item.Controls["revoke_authority_after_check"] = 1
+		}
+		if input.Scenario == "stale_authority" {
+			item.Controls["checked_at_seconds_before_now"] = config.Composition.StaleAge
+		}
 		for ref, record := range f.store.records {
 			pin := ports.ArtifactPin{Ref: ref, Digest: record.Digest, ManifestDigest: record.ManifestDigest}
 			item.Artifacts = append(item.Artifacts, artifact{Pin: pin, Record: record, Bytes: f.store.data[ref]})
