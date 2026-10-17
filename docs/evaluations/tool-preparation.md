@@ -38,14 +38,18 @@ phase times and actual provider usage where available; absent usage is unknown,
 not zero or a byte-derived token count. Scripted provider responses are labeled
 fixtures and cannot establish real-model quality, token savings or charges.
 
-An actual local-model development run needs its exact frozen route/model,
-settings, synthetic cases/rubric, balanced arm order, call/time/cost bounds and
-cleanup contract before prompts. No paid model, mailbox/Composio calls or new
-downloads are admitted. The owner explicitly approved a bounded start of cached pinned Qwen,
-with no downloads/paid calls, at most60 requests and one-hour service lifetime,
-followed by stopping only that owned service. Asset/capacity/manifest/driver
-qualification still precedes any launch or prompts. Preserve unavailable/failed attempts and report the narrow development
-scope. Original held-out data, decision targets and adoption gates remain intact.
+The previously authorized cached-Qwen attempt is closed: both startups failed
+conservative cache preflight before model requests; all 12 workflow attempts are
+NOT_RUN. The one-hour authorization expired and is not reusable. See the
+[retained outcome](../receipts/2026-10-17-inbox-model-outcome.json). Another actual
+model run needs fresh explicit route/resource/call/time authority and a frozen
+manifest. No paid model, mailbox/Composio calls or downloads follow from this plan.
+
+[ADR021](../adr/021-capability-composition-and-bounded-discovery.md) introduces
+planned atomic capability composition and a separately frozen scale study.
+Its new skill versions require an independently reviewed inventory, caller
+policy and cohort; old composite-tool data cannot be relabeled as new product
+conformance. The original held-out pilot and adoption criteria stay intact.
 
 ## Dataset and preregistration
 

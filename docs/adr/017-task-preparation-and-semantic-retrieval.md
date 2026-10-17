@@ -1,5 +1,10 @@
 # ADR017 — Task preparation with optional semantic retrieval
 
+Composition evolution: [ADR021](021-capability-composition-and-bounded-discovery.md)
+defines the planned reusable capability/recipe and indexed-discovery path. This
+ADR's frozen pilot and initial inbox recipe remain historical source contracts;
+they do not establish generic multi-tool coverage or 100k-scale performance.
+
 Date: 2026-10-16
 Status: Accepted evaluation direction; model adoption and performance claims pending evidence.
 Supersedes: RFC-002's unspecified retrieval-evaluation approach, not its frozen wire contract.
