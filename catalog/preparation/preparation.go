@@ -150,6 +150,11 @@ func (s Service) Prepare(ctx context.Context, req Request) (Result, error) {
 	if err := ctx.Err(); err != nil {
 		return Result{}, err
 	}
+	if unsupportedIntent(req.Intent) {
+		out.Status = "unsupported"
+		out.Findings = []string{"intent outside maintained read-only recipe; no embedding disclosure"}
+		return out, nil
+	}
 	page, err := s.Catalog.Search(ctx, ports.SearchQuery{Principal: req.Principal, Kinds: []ports.ArtifactKind{ports.KindSkill}, Limit: 100, MaxBytes: 65536})
 	if err != nil {
 		return Result{}, err
