@@ -157,3 +157,20 @@ dependencies, account mismatch, alternatives, incomplete index budgets,
 unsupported consumers, exact package/contract/schema drift, revocation,
 freshness/task authority, cancellation, context limits and unchanged legacy
 fixtures. No live provider or model evidence follows from these checks.
+
+## Implementation clarification — 2026-10-17
+
+After the reviewed initial freeze, the additive request gained explicit
+`ConnectionSelections` keyed by requirement. A binding pin alone cannot select
+between two caller connections using the same binding. Required group members
+establish affinity; optional members incompatible with that connection disable
+their optional branch. Missing required candidates report `requires_connection`,
+whereas incompatible present required candidates report `connection_mismatch`.
+Non-ready diagnostics retain requirement keys/statuses but never offered schemas.
+
+The authority sequence is precise: current authorized retrieval builds the
+baseline closure; the first scoped caller task/readiness decision covers that
+closure; full authorized retrieval/resolution runs again; the second scoped
+caller decision and unchanged-generation/expiry checks precede any returned
+bundle. This detects observed changes; it is not an atomic authority lease.
+Custom retrieval port output is also bounded before package validation.

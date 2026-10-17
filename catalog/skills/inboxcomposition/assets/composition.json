@@ -1,0 +1,82 @@
+{
+  "schema_version": "gist.composition/v1",
+  "skill_id": "zati/inbox-briefing",
+  "skill_version": "2.0.0",
+  "requirements": [
+    {
+      "key": "list",
+      "capability_id": "mail/messages/list",
+      "contract_version": "1.0.0",
+      "contract_digest": "d728246217fe896a4914c49d1e7d94cc7fa4d36ab85ef2ae6e8c3ff2ca7142c2",
+      "optional": false
+    },
+    {
+      "key": "read",
+      "capability_id": "mail/message/read",
+      "contract_version": "1.0.0",
+      "contract_digest": "0272e9bd325057b42672102ab2390a16840eb465c5b552207d0d2991ec6dd796",
+      "optional": false
+    }
+  ],
+  "connection_groups": [
+    {
+      "id": "mailbox",
+      "requirements": [
+        "list",
+        "read"
+      ]
+    }
+  ],
+  "task_schema": {
+    "type": "object",
+    "required": [
+      "query"
+    ],
+    "properties": {
+      "query": {
+        "type": "string",
+        "maxLength": 1024
+      }
+    },
+    "additionalProperties": false
+  },
+  "steps": [
+    {
+      "id": "list_unread",
+      "requirement": "list",
+      "after": [],
+      "inputs": {
+        "query": {
+          "step": "",
+          "pointer": "/query"
+        }
+      }
+    },
+    {
+      "id": "read_selected",
+      "requirement": "read",
+      "after": [
+        "list_unread"
+      ],
+      "inputs": {
+        "message_id": {
+          "step": "$item",
+          "pointer": ""
+        }
+      },
+      "foreach": {
+        "step": "list_unread",
+        "pointer": "/message_ids",
+        "max": 20
+      }
+    }
+  ],
+  "limits": {
+    "max_steps": 2,
+    "max_iterations": 20,
+    "max_calls": 21,
+    "max_input_bytes": 65536,
+    "max_output_bytes": 2097152,
+    "max_guide_bytes": 4096
+  }
+}
