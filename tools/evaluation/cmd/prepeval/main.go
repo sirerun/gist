@@ -181,6 +181,9 @@ func run() error {
 		}
 		actualCatalogSHA = *catalogSHA
 	}
+	if policy != nil && policy.CatalogSHA256 != actualCatalogSHA {
+		return errors.New("task policy catalog SHA mismatch")
+	}
 	catalogVersion := "sha256:" + actualCatalogSHA
 	if *exportCatalog {
 		if *catalogFile != "" {

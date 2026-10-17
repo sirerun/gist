@@ -202,6 +202,8 @@ prepeval --source SOURCE_SHA --inputs development.inputs.jsonl \
   --top-k 8 --vectors development-vectors.json > attempts-k8.jsonl
 ```
 
+The policy also requires `catalog_sha256` for the independently reviewed exact
+shared inventory; it must match the actual loaded catalog before input access.
 Policy schema is `gist.evaluation.task-policy/v1`, kind
 `evaluation_fixture_not_live_authority`. Entries bind `intent_sha256`, complete
 `principal` (including scopes/generation), `runtime_id`, exact `skill` archive and
