@@ -1,0 +1,40 @@
+{
+  "schema": "gist.inbox-development.cohort/v1",
+  "cohort_id": "closed-menu-inbox-development-20261016",
+  "kind": "positive_closed_menu_source_conformance_only",
+  "label_status": "independent_blind_freezes_complete_reconciliation_pending",
+  "case_count": 30,
+  "construction_family_count": 1,
+  "family": "maintained-inbox-briefing-closed-menu-v1",
+  "split": "development_only_no_heldout",
+  "artifacts": {
+    "catalog.json": {
+      "sha256": "dd769302f83ac062af19bb465baf48b2f6ac9a3146da7d302e40f5c51e7db67a"
+    },
+    "task-policy.template.json": {
+      "sha256": "15c70ed9e4049e1613bf7a5ab102c9b12f2e933c2f74356189e0a0e6f87aa375"
+    },
+    "caller-menu.json": {
+      "sha256": "3a19b2cfe035974e98a38725e3fb2687f72a9fff112256c20f81e860dbf21985"
+    },
+    "task-policy.json": {
+      "sha256": "79d93387f61b9532e92296efe4792b08b9ce5fbc2a6fc9fc68dcd3c3b0c85217"
+    },
+    "development.inputs.jsonl": {
+      "sha256": "eb05b86e2498835b1607704abd75ea0f021a8bb0c520ce1fea63067bd116011b"
+    }
+  },
+  "canonical_labels_file": "development.labels.jsonl",
+  "freeze_commits": {
+    "catalog_template": "1922fc565face4f3d3ec64774c43a4069fa81ee6",
+    "menu_policy": "d3917eff46d63a96617d8b9373ebbf9b802fa393",
+    "inputs": "12303b5889f6cafb86cc1b79cb095f61d09087a1"
+  },
+  "limits": [
+    "No old pilot corpus or held-out inputs/labels read.",
+    "No model scores or preparation/provider calls during data authoring.",
+    "One correlated construction family, no negative or heldout coverage.",
+    "Actual composite-tool fixture differs from Zati two-role consumer.",
+    "No task-performance, generalization, live Gmail or adoption claim."
+  ]
+}
