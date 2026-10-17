@@ -47,7 +47,7 @@ var runtimeRoleName = regexp.MustCompile(`^[a-z_][a-z0-9_]{0,62}$`)
 
 func runtimeConfig(owner *pgx.ConnConfig, raw string) (*pgx.ConnConfig, error) {
 	cfg, err := pgx.ParseConfig(raw)
-	if err != nil || raw == "" || cfg.Host != owner.Host || cfg.Port != owner.Port || cfg.Database != owner.Database || cfg.User == owner.User || !runtimeRoleName.MatchString(cfg.User) || len(cfg.Password) < 32 {
+	if err != nil || raw == "" || cfg.Host != owner.Host || cfg.Port != owner.Port || cfg.Database != owner.Database || (cfg.User == owner.User || (owner.Password != "" && cfg.Password == owner.Password)) || !runtimeRoleName.MatchString(cfg.User) || len(cfg.Password) < 32 {
 		return nil, errors.New("runtime URL must identify the same host, port and database with a distinct role and strong password")
 	}
 	for _, b := range []byte(cfg.Password) {
