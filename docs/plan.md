@@ -1990,9 +1990,11 @@ The owner has supplied deployment authority, AWSCLI and CloudflareMCP are
 authenticated, and the existing member-account deployment role is assumable.
 Existing service is healthy on the old registry origin with an older image.
 The canonical hostname has no DNS record. New source requires durable signing
-and enrollment configuration absent from the old task. GitHubApp credentials
-are an unresolved external input, not permission to invent identity or disable
-authentication. No credential values enter source, logs or public receipts.
+and enrollment configuration absent from the old task. The owner supplied a company-wide Sire Run GitHubApp credential binding; its
+private key verified ownership and permission-free identity metadata through
+GitHub. Secret values remain outside source. Initial private Gist workspace
+and the authenticated founder account are explicit deployment configuration;
+no identity is seeded before actual GitHub verification. No credential values enter source, logs or public receipts.
 
 The existing Pulumi stack in sirerun/foundation owns AWS resources. Cloudflare
 records follow its certificate/ALB outputs with an idempotent reconciliation
@@ -2012,7 +2014,7 @@ is supplied; do not infer fixture-only conformance is production qualification.
 - [x] T-HOSTED.1 Reconcile hosting authority and current infrastructure  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  acc: [Current source, dirty worktrees, stack outputs, AWS role, existing ECS revision, DNS, secret names and protected data identified without secret disclosure; narrow owner-authorized scope recorded]
 - [ ] T-HOSTED.2 Implement staged canonical origin and runtime IaC  Owner: infrastructure-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-HOSTED.1]  acc: [Foundation owns staged certificate/TLS, exact image, strict origin/audience, Secrets Manager references, least-privilege roles, correct parent-module container build, migration task and rollback without data replacement]
 - [ ] T-HOSTED.3 Correct required hosted startup bootstrap  Owner: registry-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-HOSTED.1]  acc: [Explicit first-enrollment mode solves cold-start only through real verified founder enrollment; all catalog and grants fail closed until current maintainer readiness; default startup and revocation behavior retain meaningful regressions]
-- [ ] T-HOSTED.4 Verify exact source and infrastructure changes  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-HOSTED.2, T-HOSTED.3]  acc: [Relevant Pulumi mocks/buildspec checks and hosted unit/integration/race/security checks pass; credential-free remote build provenance and actual preview changes retained; no destructive or unrelated resource changes]
+- [ ] T-HOSTED.4 Verify exact source and infrastructure changes  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-HOSTED.2, T-HOSTED.3, T-HOSTED.14]  acc: [Relevant Pulumi mocks/buildspec checks and hosted unit/integration/race/security checks pass; credential-free remote build provenance and actual preview changes retained; no destructive or unrelated resource changes]
 - [ ] T-HOSTED.5 Independently review final IaC and runtime candidates  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-HOSTED.4]  acc: [Non-author reviews exact base/head across both repositories, staged migration, first-start authority, credential custody, data protection and verification; accepted findings corrected and re-reviewed before merge]
 - [ ] T-HOSTED.6 Merge and verify landed deployment inputs  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-HOSTED.5]  acc: [Guarded rebase preserves repository policies, exact approved trees and immutable source provenance; fresh landed checks verify affected behavior and plan conformance]
 - [ ] T-HOSTED.7 Stage canonical certificate and reconcile validation DNS  Owner: deployment-owner  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-HOSTED.6]  acc: [Merged preview matches exact existing-stack apply; new ACM certificate and Cloudflare validation records are owned, idempotent and issued while old serving configuration remains available]
@@ -2030,3 +2032,22 @@ and one registry implementer with disjoint isolated worktrees; coordinator owns
 cloud changes/plan and non-author review is a separate gate. No agent changes
 AWS or DNS concurrently. Requested outcome is deployed service; missing real
 identity configuration blocks only its dependent activation, not reviewable IaC.
+
+#### Hosted migration and identity qualification
+
+- [ ] T-HOSTED.14 Implement an auditable one-shot database migrator  Owner: registry-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-HOSTED.1]  acc: [Default status reads schema metadata only; explicit apply holds a PostgreSQL advisory lock and records exact SQL hashes transactionally; pre-existing untracked schema refuses automatic replay; adoption requires explicit reviewed prefix plus manifest/schema fingerprints and recovery evidence; no down migration or fabricated identity]
+
+The owner considered GitHub-backed public distribution and requested design
+audit before dropping sign-in. Audit confirms authenticated publication, private
+workspaces, OAuth/workload grants, principal-bound resolutions and revocation
+are implemented functionality worth preserving. Company-wide GitHubApp setup
+now supplies the identity prerequisite. Keep those controls; a public catalog
+projection can be added independently after explicit visibility, trust and
+freshness contracts. No static-only replacement or removal of auth is shipped.
+
+Candidate checks retain actual failures: initial Foundation offline dependency
+cache missed pinned SDK modules; a bounded retry downloaded checksum-verified
+program dependencies and passed mocks/race/vet plus cross-compilation. Initial
+full hosted integration/race passed internal/cmd suites but named-client
+acceptance failed because no real pinned client build was configured. That
+external acceptance remains unqualified; do not invent client evidence.
