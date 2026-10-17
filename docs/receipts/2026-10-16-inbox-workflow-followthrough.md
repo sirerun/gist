@@ -290,3 +290,20 @@ fresh CLI output matched diagnosis.json byte-for-byte. Portable producer landed
 receipt records provenance and limits. T-PREP.57 is complete; Zati's bounded
 fresh landed workflow check remains in progress. The dirty original Gist checkout
 was preserved unchanged.
+
+
+Fresh Zati main reaches exact landed1a53077d6239e04c68a13d20406fb0f10de55ec5;
+its tree002905068e38b9fa4d434d2d17986542d2a17230 equals reviewed607d914e.
+A fresh tracked archive was transferred with SHA verification. The separate
+bounded landed check passed in26.602seconds: critical controller/execution
+regressions, actual controlled workflow/bridge and specification rendering.
+Portable consumer landed receipt records the exact provenance and commands.
+No broad suite, race suite or model run was repeated for unchanged source.
+
+The original Zati main fast-forwarded safely to that landed revision, retaining
+only its pre-existing untracked .codex files. The authored dirty Gist checkout
+remains untouched. T-PREP.58 is complete. This followthrough batch is source-
+and landed-complete; its attempted model comparison is NOT_RUN, and the original
+held-out, adoption, defaults, provider, installation, release and production
+gates are unchanged. Both owned runtime attempts are cleaned up; no service or
+unattended watcher from this experiment remains running.
