@@ -1,0 +1,13 @@
+{
+  "schema": "gist.inbox-development.menu-freeze/v1",
+  "catalog_freeze_commit": "1922fc565face4f3d3ec64774c43a4069fa81ee6",
+  "caller_menu_sha256": "3a19b2cfe035974e98a38725e3fb2687f72a9fff112256c20f81e860dbf21985",
+  "task_policy_sha256": "79d93387f61b9532e92296efe4792b08b9ce5fbc2a6fc9fc68dcd3c3b0c85217",
+  "catalog_sha256": "dd769302f83ac062af19bb465baf48b2f6ac9a3146da7d302e40f5c51e7db67a",
+  "task_policy_template_sha256": "15c70ed9e4049e1613bf7a5ab102c9b12f2e933c2f74356189e0a0e6f87aa375",
+  "case_count": 30,
+  "construction_family_count": 1,
+  "admission": "Exact SHA256 of independently authored caller-menu text; all non-intent fields copied unchanged from the previously frozen actual policy template. No labels/status-derived policy or catalog synthesis.",
+  "gold_state": "No cases or gold labels authored before this menu/policy freeze.",
+  "scope": "Development-only positive closed-menu source conformance. No heldout, negative coverage, task-performance, generalization, Zati compatibility, live Gmail or adoption claim."
+}
