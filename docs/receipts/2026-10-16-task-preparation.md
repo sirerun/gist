@@ -307,3 +307,36 @@ assertions, deferred retrieval Close, integrity QF1001 and unused discovery
 cacheKey. Changed packages introduce none. Frozen checker and12 registry Python
 checks passed. T-PREP.2-.5 are source/check/review-findings complete; exact final
 document approval, guarded merge and landed acceptance remain open.
+
+
+## Reviewed merge and landed verification
+
+Independent complete-candidate approval covered
+1e326291a4ade5c36e6733245efe6e688c0a2353 against
+76d9c5ff997b7124508c8e38192cd41907ae8386. All R1-R9 corrections were accepted
+and no blocking finding remained. PR71
+(https://github.com/sirerun/gist/pull/71) rebase merged at
+e12b8a23a8479737fbc58ab5cf790e2ff130359e on2026-10-17UTC. Immediate
+pre-merge base/head matched reviewed identities; policy required zero approvals
+and no status checks, with no unresolved review threads.
+
+Hosted Actions run38995495129 could not start: account locked due to billing.
+The authorized qualified-host fallback was used; no CI-green claim, protection
+change, paid runner or retry was made. Five unrelated baseline lint findings
+remain separate from passing changed-source lint.
+
+Fresh fetched main reaches the merged commit and its full tree exactly equals
+the approved head. Tracked landed archive SHA256
+c79d50bbf0375bcd7672ff018c0c6e5951f00d9d6e60f7d483c31c0bd4172c40
+matched on both hosts. Actual landed checks passed on the qualified Linux host:
+public preparation, fixture loader and CLI Go tests;12 Python adapter/report
+regressions; CLI build;60-case dry-run reporting300 source attempts plus120
+unavailable provider attempts, zero paid/provider calls and unknown token/dollar
+estimates. No fresh model download/inference or held-out access was needed.
+
+T-PREP.0-.8 are source-lifecycle complete. .9 remains pending compatible
+independently reviewed inventory and caller task-admission policy, with richer
+inbox coverage required before positive adoption. Provider/whole-task comparison,
+default adoption, actual Zati preparation integration and release retain their
+existing gates. Native source build passed; visible and live Gmail acceptance
+remain unverified. No installation, provider action or deployment is claimed.
