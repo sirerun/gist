@@ -160,7 +160,7 @@ func (e *Embedder) Embed(ctx context.Context, q preparation.EmbeddingRequest) (p
 	result := preparation.EmbeddingResult{ModelVersion: e.version, Vectors: make([][]float64, len(texts))}
 	seen := make([]bool, len(texts))
 	for _, item := range response.Data {
-		if item.Index == nil || *item.Index < 0 || *item.Index >= len(texts) || seen[*item.Index] || item.Object != "embedding" || len(item.Embedding) != 768 {
+		if item.Index == nil || *item.Index < 0 || int(*item.Index) >= len(texts) || seen[*item.Index] || item.Object != "embedding" || len(item.Embedding) != 768 {
 			return empty, errors.New("llamacpp: invalid indexed vector response")
 		}
 		seen[*item.Index] = true
