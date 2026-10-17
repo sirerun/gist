@@ -199,12 +199,18 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 	// before accepting traffic. This never enumerates or invents tenant authority.
 	maintenanceCtx, stopMaintenance := context.WithTimeout(ctx, cfg.RequestTimeout)
 	maintenanceErr := a.purgeEventTargets(maintenanceCtx, catalog)
+	if maintenanceErr != nil && cfg.FirstEnrollment {
+		if eligible, err := a.firstEnrollmentEligible(maintenanceCtx); err == nil && eligible {
+			a.maintenanceErr = maintenanceErr
+			maintenanceErr = nil
+		}
+	}
 	stopMaintenance()
 	if maintenanceErr != nil {
 		pool.Close()
 		return nil, maintenanceErr
 	}
-	handler := requestContext{lifetime: a.requests, rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, enrollment: enrollmentRoutes, ready: func(ctx context.Context) error {
+	handler := requestContext{lifetime: a.requests, admission: a.bootstrapAdmission, rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, enrollment: enrollmentRoutes, ready: func(ctx context.Context) error {
 		if err := a.maintenanceReady(); err != nil {
 			return err
 		}
@@ -368,6 +374,7 @@ type requestContext struct {
 	rest, mcp, oauth http.Handler
 	enrollment       http.Handler
 	ready            func(context.Context) error
+	admission        func() error
 }
 
 func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -392,6 +399,18 @@ func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		var b [12]byte
 		if _, err := rand.Read(b[:]); err == nil {
 			r.Header.Set("X-Request-ID", fmt.Sprintf("req_%x", b))
+		}
+	}
+	// Enrollment cannot require a pre-existing maintainer. All other APIs,
+	// including OAuth issuance, remain unavailable until normal maintenance
+	// has verified the enrolled identity against current durable policy.
+	if h.admission != nil && r.URL.Path != "/healthz" && r.URL.Path != "/readyz" && r.URL.Path != enrollment.StartPath && r.URL.Path != enrollment.CallbackPath {
+		if err := h.admission(); err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Retry-After", "60")
+			w.WriteHeader(http.StatusServiceUnavailable)
+			_, _ = io.WriteString(w, `{"code":"service_unavailable","message":"Service unavailable","retryable":true}`)
+			return
 		}
 	}
 	if h.oauth != nil && oauth.Handles(r.URL.Path) {

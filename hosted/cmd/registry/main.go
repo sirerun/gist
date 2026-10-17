@@ -33,6 +33,7 @@ func main() {
 		SigningKeyConfig:        []byte(os.Getenv("GIST_SIGNING_KEY_CONFIG")),
 		EventMaintenanceTargets: maintenance,
 		GitHubEnrollment:        enrollmentConfig,
+		FirstEnrollment:         os.Getenv("GIST_FIRST_ENROLLMENT") == "true",
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()

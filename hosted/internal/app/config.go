@@ -40,6 +40,9 @@ type Config struct {
 	// GitHubEnrollment enables permissionless operator sign-in and invite-only
 	// workspace membership. GitHub access tokens are never persisted.
 	GitHubEnrollment *enrollment.Config
+	// FirstEnrollment permits only GitHub founder enrollment on a new workspace
+	// while current maintenance authority is unavailable. It never grants authority.
+	FirstEnrollment bool
 	// GitHubEnrollmentHTTPClient optionally supplies the enrollment outbound
 	// client; nil uses the enrollment package's bounded default client.
 	GitHubEnrollmentHTTPClient *http.Client
@@ -123,6 +126,20 @@ func (c Config) Validate() error {
 			return errors.New("app: event maintenance targets require unique workspaces and subjects")
 		}
 		seen[target.WorkspaceID] = true
+	}
+	if c.FirstEnrollment {
+		if scopes := c.GitHubEnrollment.BootstrapScopes; len(scopes) > 0 {
+			publish := false
+			for _, scope := range scopes {
+				publish = publish || scope == "catalog:publish"
+			}
+			if !publish {
+				return errors.New("app: first enrollment requires founder publish scope for maintenance")
+			}
+		}
+		if len(c.EventMaintenanceTargets) != 1 || c.EventMaintenanceTargets[0].WorkspaceID != c.GitHubEnrollment.WorkspaceID || c.EventMaintenanceTargets[0].Subject != c.GitHubEnrollment.FounderAccount || c.PublicationV2 != nil {
+			return errors.New("app: first enrollment requires the exact founder maintenance target and v1-only publication")
+		}
 	}
 	if c.PublicationV2 != nil {
 		v := c.PublicationV2
