@@ -15,8 +15,8 @@
   "qualification_kind": "synthetic local smoke, not held-out benchmark or native acceptance",
   "runs": [
     {
-      "adapter_sha256": "1ea286e3a483c26475bcab287faa83a2e400b74874a11aee4eec33851f9c9659",
-      "cold_inference_seconds": 0.1880135330138728,
+      "adapter_sha256": "af73625d32651b988989b4c775d5fe3954fdaa677fe53593834136e1e8bb24bd",
+      "cold_inference_seconds": 0.17467754799872637,
       "device": "cpu",
       "dimension": 256,
       "dtype": "bfloat16",
@@ -40,11 +40,11 @@
         "sentence_pooling": "b6e96e0eac50ebc33d6310ef3b8d35b7cd2b7e0e521809552bba34c05c13d43d",
         "transformers_model": "f0376b13fb5230b349ce269c4fb40906931744a84df57c1d208f46032941eda7"
       },
-      "load_seconds": 1.2236813299823552,
+      "load_seconds": 1.1292191939428449,
       "loaded_parameters": 271002624,
       "model": "google/embeddinggemma-2",
-      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:bfloat16:256d",
-      "peak_rss_bytes": 1516716032,
+      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:tokenizers=0.23.3:numpy=2.4.2:python=3.12.3:bfloat16:256d",
+      "peak_rss_bytes": 1507651584,
       "pooling": {
         "embedding_dimension": 768,
         "include_prompt": true,
@@ -58,8 +58,11 @@
       "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
       "runtime": {
         "huggingface-hub": "1.33.0",
+        "numpy": "2.4.2",
+        "python": "3.12.3",
         "safetensors": "0.8.0",
         "sentence-transformers": "6.1.0",
+        "tokenizers": "0.23.3",
         "torch": "2.12.0.dev20260326+cu128",
         "transformers": "5.20.1"
       },
@@ -77,16 +80,16 @@
         "provider_calls": 0
       },
       "warm_inference_seconds": [
-        0.03763542708475143,
-        0.03297374804969877,
-        0.02556569396983832,
-        0.02475702005904168,
-        0.02503718005027622
+        0.034593163058161736,
+        0.03203070804011077,
+        0.02446135599166155,
+        0.02605438604950905,
+        0.026745863957330585
       ]
     },
     {
-      "adapter_sha256": "1ea286e3a483c26475bcab287faa83a2e400b74874a11aee4eec33851f9c9659",
-      "cold_inference_seconds": 0.17732737201731652,
+      "adapter_sha256": "af73625d32651b988989b4c775d5fe3954fdaa677fe53593834136e1e8bb24bd",
+      "cold_inference_seconds": 0.1656490140594542,
       "device": "cpu",
       "dimension": 768,
       "dtype": "bfloat16",
@@ -110,11 +113,11 @@
         "sentence_pooling": "b6e96e0eac50ebc33d6310ef3b8d35b7cd2b7e0e521809552bba34c05c13d43d",
         "transformers_model": "f0376b13fb5230b349ce269c4fb40906931744a84df57c1d208f46032941eda7"
       },
-      "load_seconds": 1.2689419960370287,
+      "load_seconds": 1.2091504690470174,
       "loaded_parameters": 271002624,
       "model": "google/embeddinggemma-2",
-      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:bfloat16:768d",
-      "peak_rss_bytes": 1506844672,
+      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:tokenizers=0.23.3:numpy=2.4.2:python=3.12.3:bfloat16:768d",
+      "peak_rss_bytes": 1507741696,
       "pooling": {
         "embedding_dimension": 768,
         "include_prompt": true,
@@ -128,8 +131,11 @@
       "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
       "runtime": {
         "huggingface-hub": "1.33.0",
+        "numpy": "2.4.2",
+        "python": "3.12.3",
         "safetensors": "0.8.0",
         "sentence-transformers": "6.1.0",
+        "tokenizers": "0.23.3",
         "torch": "2.12.0.dev20260326+cu128",
         "transformers": "5.20.1"
       },
@@ -147,16 +153,16 @@
         "provider_calls": 0
       },
       "warm_inference_seconds": [
-        0.03649790305644274,
-        0.030731117934919894,
-        0.037677603075280786,
-        0.02698000194504857,
-        0.028349879081360996
+        0.0256434369366616,
+        0.023715547053143382,
+        0.02381904993671924,
+        0.03758395300246775,
+        0.02377810701727867
       ]
     },
     {
-      "adapter_sha256": "1ea286e3a483c26475bcab287faa83a2e400b74874a11aee4eec33851f9c9659",
-      "cold_inference_seconds": 0.22424189595039934,
+      "adapter_sha256": "af73625d32651b988989b4c775d5fe3954fdaa677fe53593834136e1e8bb24bd",
+      "cold_inference_seconds": 0.22140969207976013,
       "device": "cpu",
       "dimension": 256,
       "dtype": "float32",
@@ -180,11 +186,11 @@
         "sentence_pooling": "b6e96e0eac50ebc33d6310ef3b8d35b7cd2b7e0e521809552bba34c05c13d43d",
         "transformers_model": "f0376b13fb5230b349ce269c4fb40906931744a84df57c1d208f46032941eda7"
       },
-      "load_seconds": 1.2765666419873014,
+      "load_seconds": 1.2580726370215416,
       "loaded_parameters": 271002624,
       "model": "google/embeddinggemma-2",
-      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:float32:256d",
-      "peak_rss_bytes": 2943430656,
+      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:tokenizers=0.23.3:numpy=2.4.2:python=3.12.3:float32:256d",
+      "peak_rss_bytes": 2938908672,
       "pooling": {
         "embedding_dimension": 768,
         "include_prompt": true,
@@ -198,8 +204,11 @@
       "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
       "runtime": {
         "huggingface-hub": "1.33.0",
+        "numpy": "2.4.2",
+        "python": "3.12.3",
         "safetensors": "0.8.0",
         "sentence-transformers": "6.1.0",
+        "tokenizers": "0.23.3",
         "torch": "2.12.0.dev20260326+cu128",
         "transformers": "5.20.1"
       },
@@ -217,16 +226,16 @@
         "provider_calls": 0
       },
       "warm_inference_seconds": [
-        0.03802627697587013,
-        0.035776047967374325,
-        0.03585331002250314,
-        0.03578636806923896,
-        0.036299958010204136
+        0.04627238598186523,
+        0.044594682985916734,
+        0.04251690802630037,
+        0.0346427260665223,
+        0.034780692076310515
       ]
     },
     {
-      "adapter_sha256": "1ea286e3a483c26475bcab287faa83a2e400b74874a11aee4eec33851f9c9659",
-      "cold_inference_seconds": 0.17888420796953142,
+      "adapter_sha256": "af73625d32651b988989b4c775d5fe3954fdaa677fe53593834136e1e8bb24bd",
+      "cold_inference_seconds": 0.20817100699059665,
       "device": "cpu",
       "dimension": 768,
       "dtype": "float32",
@@ -250,11 +259,11 @@
         "sentence_pooling": "b6e96e0eac50ebc33d6310ef3b8d35b7cd2b7e0e521809552bba34c05c13d43d",
         "transformers_model": "f0376b13fb5230b349ce269c4fb40906931744a84df57c1d208f46032941eda7"
       },
-      "load_seconds": 1.253354322980158,
+      "load_seconds": 1.1654180269688368,
       "loaded_parameters": 271002624,
       "model": "google/embeddinggemma-2",
-      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:float32:768d",
-      "peak_rss_bytes": 2943098880,
+      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:tokenizers=0.23.3:numpy=2.4.2:python=3.12.3:float32:768d",
+      "peak_rss_bytes": 2943225856,
       "pooling": {
         "embedding_dimension": 768,
         "include_prompt": true,
@@ -268,8 +277,11 @@
       "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
       "runtime": {
         "huggingface-hub": "1.33.0",
+        "numpy": "2.4.2",
+        "python": "3.12.3",
         "safetensors": "0.8.0",
         "sentence-transformers": "6.1.0",
+        "tokenizers": "0.23.3",
         "torch": "2.12.0.dev20260326+cu128",
         "transformers": "5.20.1"
       },
@@ -287,11 +299,11 @@
         "provider_calls": 0
       },
       "warm_inference_seconds": [
-        0.035793430055491626,
-        0.034620763966813684,
-        0.03483624791260809,
-        0.034534828970208764,
-        0.03466007602401078
+        0.05960930697619915,
+        0.03602739796042442,
+        0.03642065601889044,
+        0.03665749996434897,
+        0.036333409952931106
       ]
     }
   ],
