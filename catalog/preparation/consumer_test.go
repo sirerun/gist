@@ -3,9 +3,11 @@ package preparation_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/sirerun/gist/catalog/ports"
 	"github.com/sirerun/gist/catalog/preparation"
@@ -234,5 +236,122 @@ func TestUnknownIntentAndCancellation(t *testing.T) {
 	_, e = s.Prepare(ctx, r)
 	if !errors.Is(e, context.Canceled) {
 		t.Fatalf("ignored cancellation: %v", e)
+	}
+}
+
+type currentConnection struct {
+	calls          int
+	ready          bool
+	revokeOnSecond bool
+	wrongScope     bool
+	now            ports.Clock
+}
+
+func (c *currentConnection) CheckCurrentReadiness(_ context.Context, r preparation.ReadinessRequest) (preparation.ReadinessDecision, error) {
+	c.calls++
+	scope := r.Scope
+	if c.wrongScope {
+		scope.RuntimeID = "foreign-runtime"
+	}
+	ready := c.ready
+	if c.revokeOnSecond && c.calls > 1 {
+		ready = false
+	}
+	now := c.now.Now()
+	return preparation.ReadinessDecision{Scope: scope, Ready: ready, Generation: "actual-fixture-connection-state-v1", CheckedAt: now, ValidUntil: now.Add(time.Minute)}, nil
+}
+func credentialed(t *testing.T) (*fixture.Catalog, preparation.Service, preparation.Request) {
+	t.Helper()
+	c, s, r := ready(t)
+	ref := fixture.Ref(ports.KindTool, "synthetic/mail-read")
+	record := c.Records[ref]
+	var metadata map[string]any
+	if e := json.Unmarshal(record.Metadata, &metadata); e != nil {
+		t.Fatal(e)
+	}
+	metadata["credentials"] = map[string]any{"type": "oauth", "scopes": []string{"synthetic.mail.readonly"}}
+	raw, e := json.Marshal(metadata)
+	if e != nil {
+		t.Fatal(e)
+	}
+	record.Metadata = raw
+	record.Digest = fixture.Hash(raw)
+	record.ManifestDigest = record.Digest
+	c.Records[ref] = record
+	c.Bytes[ref] = raw
+	return c, s, r
+}
+func TestCredentialedReadinessRequiresFreshScopedCallerPort(t *testing.T) {
+	_, s, r := credentialed(t)
+	out, e := s.Prepare(context.Background(), r)
+	if e != nil || out.Status != "requires_connection" || out.Selected != nil {
+		t.Fatalf("invented connection: %+v %v", out, e)
+	}
+	for _, which := range []string{"false", "true", "revoked after IO", "wrong scope"} {
+		t.Run(which, func(t *testing.T) {
+			_, s, r := credentialed(t)
+			port := &currentConnection{ready: which != "false", revokeOnSecond: which == "revoked after IO", wrongScope: which == "wrong scope", now: ports.SystemClock{}}
+			s.CurrentReadiness = port
+			s.Clock = port.now
+			s.MaxReadinessAge = time.Minute
+			out, e := s.Prepare(context.Background(), r)
+			if which == "true" {
+				if e != nil || out.Status != "ready" || port.calls != 2 {
+					t.Fatalf("current admitted connection failed: %+v %v", out, e)
+				}
+				if out.Selected.Resolution.Findings[0].Provenance != "client_asserted" {
+					t.Fatal("upgraded caller assertion provenance")
+				}
+			} else if out.Status == "ready" || out.Selected != nil {
+				t.Fatalf("unavailable connection became ready: %+v %v", out, e)
+			}
+		})
+	}
+}
+
+type staleSearch struct {
+	*fixture.Catalog
+	stale ports.CatalogRecord
+}
+
+func (c staleSearch) Search(ctx context.Context, q ports.SearchQuery) (ports.SearchPage, error) {
+	page, e := c.Catalog.Search(ctx, q)
+	for i, r := range page.Records {
+		if r.Ref == c.stale.Ref {
+			page.Records[i] = c.stale
+		}
+	}
+	return page, e
+}
+func TestStaleDerivedIndexCannotExposeRevokedOrUnpinnedMetadataToEmbedding(t *testing.T) {
+	for _, which := range []string{"revoked", "changed summary same pins"} {
+		t.Run(which, func(t *testing.T) {
+			c, s, r := ready(t)
+			// Restrict nominations to one skill so distractor-only embeddings cannot
+			// obscure whether the stale protected record reached the callback.
+			for ref := range c.Records {
+				if ref.Kind == ports.KindSkill && ref.ID != inboxbriefing.SkillID {
+					delete(c.Records, ref)
+				}
+			}
+			ref := fixture.Ref(ports.KindSkill, inboxbriefing.SkillID)
+			old := c.Records[ref]
+			current := old
+			if which == "revoked" {
+				current.State = "revoked"
+			} else {
+				current.Metadata = []byte(`{"logical_name":"changed authoritative metadata"}`)
+			}
+			c.Records[ref] = current
+			s.Catalog = staleSearch{c, old}
+			embed := &embedding{model: "unit-only-v1"}
+			s.Embedder = embed
+			s.ModelVersion = embed.model
+			r.Mode = preparation.Semantic
+			out, _ := s.Prepare(context.Background(), r)
+			if embed.calls != 0 || len(out.Candidates) != 0 || out.Selected != nil {
+				t.Fatal("stale/unauthenticated description reached embedding or exposure")
+			}
+		})
 	}
 }

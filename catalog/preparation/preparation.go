@@ -3,6 +3,7 @@
 package preparation
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -65,13 +66,43 @@ type Embedder interface {
 type Resolver interface {
 	Resolve(context.Context, resolution.Request) (resolution.Result, error)
 }
+
+// ReadinessScope binds a caller's current connection assertion to the exact
+// principal/policy, runtime, selected skill and immutable resolved closure.
+type ReadinessScope struct {
+	PrincipalDigest string
+	RuntimeID       string
+	Skill           ports.ArtifactRef
+	ClosureDigest   string
+}
+type ReadinessRequest struct {
+	Principal  ports.Principal
+	RuntimeID  string
+	Skill      ports.ArtifactRef
+	Resolution resolution.Result
+	Scope      ReadinessScope
+}
+type ReadinessDecision struct {
+	Scope      ReadinessScope
+	Ready      bool
+	Generation string
+	CheckedAt  time.Time
+	ValidUntil time.Time
+}
+type CurrentReadiness interface {
+	CheckCurrentReadiness(context.Context, ReadinessRequest) (ReadinessDecision, error)
+}
+
 type Service struct {
-	Catalog      ports.CatalogStore
-	Authorizer   ports.Authorizer
-	Retriever    packages.Retriever
-	Resolver     Resolver
-	Embedder     Embedder
-	ModelVersion string
+	Catalog          ports.CatalogStore
+	Authorizer       ports.Authorizer
+	Retriever        packages.Retriever
+	Resolver         Resolver
+	Embedder         Embedder
+	ModelVersion     string
+	CurrentReadiness CurrentReadiness
+	Clock            ports.Clock
+	MaxReadinessAge  time.Duration
 }
 type Candidate struct {
 	Ref   ports.ArtifactRef
@@ -141,7 +172,26 @@ func (s Service) Prepare(ctx context.Context, req Request) (Result, error) {
 		if !decision.Allowed {
 			continue
 		}
-		records[record.Ref] = record
+		current, e := s.Catalog.Get(ctx, record.Ref)
+		if e != nil {
+			return Result{}, e
+		}
+		if current.Ref != record.Ref {
+			return Result{}, errors.New("preparation: current candidate identity mismatch")
+		}
+		if current.State != "published" && current.State != "deprecated" {
+			continue
+		}
+		if current.Digest != record.Digest || current.ManifestDigest != record.ManifestDigest {
+			continue
+		}
+		if !matches(current.Metadata, current.ManifestDigest) {
+			return Result{}, errors.New("preparation: current skill metadata is not immutable manifest bytes")
+		}
+		if e = s.authorized(ctx, req.Principal, current.Ref); e != nil {
+			return Result{}, e
+		}
+		records[current.Ref] = current
 	}
 	if len(records) == 0 {
 		return out, nil
@@ -214,7 +264,7 @@ func (s Service) Prepare(ctx context.Context, req Request) (Result, error) {
 		return out, nil
 	}
 	record := records[chosen]
-	resolved, err := s.Resolver.Resolve(ctx, resolution.Request{Principal: req.Principal, Skill: chosen, RuntimeID: req.RuntimeID, OwnedConnections: true, MaxBytes: req.MaxBytes, Lease: time.Minute})
+	resolved, connectionGeneration, err := s.resolveCurrent(ctx, req, chosen)
 	if err != nil {
 		return Result{}, err
 	}
@@ -232,6 +282,23 @@ func (s Service) Prepare(ctx context.Context, req Request) (Result, error) {
 	pkg, err := s.Retriever.RetrieveSkill(ctx, req.Principal, pin, packages.Limits{MaxPackageBytes: 65536, MaxFileBytes: 65536, MaxFiles: 64})
 	if err != nil {
 		return Result{}, err
+	}
+	if !matches(record.Metadata, record.ManifestDigest) {
+		return Result{}, errors.New("preparation: resolver skill metadata differs from verified manifest")
+	}
+	var requirements struct {
+		Runtime struct {
+			LocalExecution bool     `json:"local_execution"`
+			Filesystem     []string `json:"filesystem"`
+		} `json:"runtime_requirements"`
+	}
+	if err := json.Unmarshal(pkg.ManifestBytes, &requirements); err != nil {
+		return Result{}, err
+	}
+	if requirements.Runtime.LocalExecution || len(requirements.Runtime.Filesystem) > 0 {
+		out.Status = "unsupported"
+		out.Findings = append(out.Findings, "recipe does not admit local execution or filesystem requirements")
+		return out, nil
 	}
 	contracts := []Contract{}
 	manifests := map[ports.ArtifactRef]ports.Digest{}
@@ -289,11 +356,11 @@ func (s Service) Prepare(ctx context.Context, req Request) (Result, error) {
 			return Result{}, e
 		}
 	}
-	refreshed, err := s.Resolver.Resolve(ctx, resolution.Request{Principal: req.Principal, Skill: chosen, RuntimeID: req.RuntimeID, OwnedConnections: true, MaxBytes: req.MaxBytes, Lease: time.Minute})
+	refreshed, finalConnectionGeneration, err := s.resolveCurrent(ctx, req, chosen)
 	if err != nil {
 		return Result{}, err
 	}
-	if !sameResolution(resolved, refreshed) {
+	if connectionGeneration != finalConnectionGeneration || !sameResolution(resolved, refreshed) {
 		return Result{}, errors.New("preparation: current bindings or connection changed")
 	}
 	out.Status = "ready"
@@ -327,7 +394,7 @@ func (s Service) recheck(ctx context.Context, p ports.Principal, old ports.Catal
 	if e != nil {
 		return e
 	}
-	if now.Ref != old.Ref || now.Digest != old.Digest || now.ManifestDigest != old.ManifestDigest || now.PackageDigest != old.PackageDigest || (now.State != "published" && now.State != "deprecated") {
+	if now.Ref != old.Ref || now.Digest != old.Digest || now.ManifestDigest != old.ManifestDigest || now.PackageDigest != old.PackageDigest || !bytes.Equal(now.Metadata, old.Metadata) || (now.State != "published" && now.State != "deprecated") {
 		return errors.New("preparation: candidate changed during preparation")
 	}
 	return s.authorized(ctx, p, old.Ref)
@@ -355,9 +422,19 @@ func (s Service) semantic(ctx context.Context, req Request, records map[ports.Ar
 			return nil, errors.New("catalog description exceeds embedding input budget")
 		}
 	}
+	for _, ref := range refs {
+		if err := s.recheck(ctx, req.Principal, records[ref]); err != nil {
+			return nil, err
+		}
+	}
 	docs, e := s.Embedder.Embed(ctx, EmbeddingRequest{req.Principal, s.ModelVersion, "document", texts})
 	if e != nil {
 		return nil, e
+	}
+	for _, ref := range refs {
+		if err := s.recheck(ctx, req.Principal, records[ref]); err != nil {
+			return nil, err
+		}
 	}
 	query, e := s.Embedder.Embed(ctx, EmbeddingRequest{req.Principal, s.ModelVersion, "query", []string{req.Intent}})
 	if e != nil {
@@ -434,4 +511,57 @@ func unsupportedIntent(intent string) bool {
 		}
 	}
 	return false
+}
+
+// resolveCurrent never invents caller-owned connections. The legacy resolver's
+// boolean is true only after an explicitly scoped, fresh caller-owned decision.
+func (s Service) resolveCurrent(ctx context.Context, req Request, skill ports.ArtifactRef) (resolution.Result, string, error) {
+	input := resolution.Request{Principal: req.Principal, Skill: skill, RuntimeID: req.RuntimeID, OwnedConnections: false, MaxBytes: req.MaxBytes, Lease: time.Minute}
+	baseline, err := s.Resolver.Resolve(ctx, input)
+	if err != nil {
+		return resolution.Result{}, "", err
+	}
+	if s.CurrentReadiness == nil {
+		return baseline, "", nil
+	}
+	if s.Clock == nil || s.MaxReadinessAge <= 0 {
+		return resolution.Result{}, "", errors.New("preparation: current readiness requires explicit clock/freshness")
+	}
+	scope := readinessScope(req, skill, baseline)
+	decision, err := s.CurrentReadiness.CheckCurrentReadiness(ctx, ReadinessRequest{Principal: req.Principal, RuntimeID: req.RuntimeID, Skill: skill, Resolution: baseline, Scope: scope})
+	if err != nil {
+		return resolution.Result{}, "", err
+	}
+	now := s.Clock.Now()
+	if decision.Scope != scope || decision.Generation == "" || decision.CheckedAt.IsZero() || decision.CheckedAt.After(now) || now.Sub(decision.CheckedAt) > s.MaxReadinessAge || !decision.ValidUntil.After(now) {
+		return resolution.Result{}, "", errors.New("preparation: stale or mismatched current readiness")
+	}
+	if !decision.Ready {
+		baseline.Status = resolution.StatusIncomplete
+		return baseline, decision.Generation, nil
+	}
+	input.OwnedConnections = true
+	resolved, err := s.Resolver.Resolve(ctx, input)
+	if err != nil {
+		return resolution.Result{}, "", err
+	}
+	if readinessScope(req, skill, resolved) != scope {
+		return resolution.Result{}, "", errors.New("preparation: closure changed during readiness check")
+	}
+	return resolved, decision.Generation, nil
+}
+func readinessScope(req Request, skill ports.ArtifactRef, result resolution.Result) ReadinessScope {
+	principal := req.Principal
+	principal.Scopes = append([]string(nil), principal.Scopes...)
+	sort.Strings(principal.Scopes)
+	encoded, _ := json.Marshal(principal)
+	principalSum := sha256.Sum256(encoded)
+	pins := []resolution.ArtifactPin{result.Skill}
+	for _, finding := range result.Findings {
+		pins = append(pins, finding.Closure...)
+	}
+	sort.Slice(pins, func(i, j int) bool { return pins[i].Kind+":"+pins[i].Reference < pins[j].Kind+":"+pins[j].Reference })
+	encoded, _ = json.Marshal(pins)
+	closureSum := sha256.Sum256(encoded)
+	return ReadinessScope{PrincipalDigest: hex.EncodeToString(principalSum[:]), RuntimeID: req.RuntimeID, Skill: skill, ClosureDigest: hex.EncodeToString(closureSum[:])}
 }
