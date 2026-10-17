@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"math/big"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -14,7 +15,7 @@ import (
 
 // checkJSON detects duplicate keys before decoding would overwrite them.
 func checkJSON(b []byte, ceiling int) error {
-	if len(b) == 0 || len(b) > ceiling {
+	if len(b) == 0 || len(b) > ceiling || !utf8.Valid(b) {
 		return errors.New("composition: JSON byte limit")
 	}
 	d := json.NewDecoder(bytes.NewReader(b))
@@ -299,9 +300,24 @@ func value(s Schema, v any) error {
 		if !ok {
 			return fail()
 		}
-		f, e := strconv.ParseFloat(string(x), 64)
-		if e != nil || math.IsInf(f, 0) || math.IsNaN(f) || (s.Type == "integer" && math.Trunc(f) != f) {
+		if len(x) > 128 {
 			return fail()
+		}
+		f, e := strconv.ParseFloat(string(x), 64)
+		if e != nil || math.IsInf(f, 0) || math.IsNaN(f) {
+			return fail()
+		}
+		if s.Type == "integer" {
+			if pos := strings.IndexAny(string(x), "eE"); pos >= 0 {
+				exponent, e := strconv.Atoi(string(x)[pos+1:])
+				if e != nil || exponent > 1024 || exponent < -1024 {
+					return fail()
+				}
+			}
+			exact, ok := new(big.Rat).SetString(string(x))
+			if !ok || !exact.IsInt() {
+				return fail()
+			}
 		}
 	default:
 		return fail()

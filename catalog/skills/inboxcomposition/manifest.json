@@ -1,12 +1,11 @@
 {
   "id": "zati/inbox-briefing",
   "version": "2.0.0",
-  "logical_name": "Read-only inbox briefing",
   "summary": "Bounded atomic list/read briefing on one mailbox.",
   "trust": "operator_asserted",
   "publication": {
     "status": "approved",
-    "provenance": "maintained-source; caller must explicitly admit this package"
+    "provenance": "publisher_asserted"
   },
   "required_capabilities": [
     {
@@ -24,7 +23,7 @@
   },
   "package_digest": {
     "algorithm": "sha256",
-    "value": "455397520c1a8f3aab836836223db05de0b83681f9a5be498bdbcdccc0cd6ed0"
+    "value": "4e2af8b9666bdcebd6d25b0098886860c433d4a86c84484f9373d5a3ad5225bf"
   },
   "inventory": [
     {
@@ -36,26 +35,32 @@
     {
       "path": "assets/composition.json",
       "size": 1678,
-      "sha256": "6fcc15a8fd0d1a2b30b7d925c1c55eebfc6b8d11d8ec522636716384ef8ebed8",
+      "sha256": "c16531454a4d07f1c58c0ebef42b5bafa9ef92d83f68b900fe96a118c962d35f",
       "media_type": "application/json"
     },
     {
       "path": "assets/conformance.json",
-      "size": 968,
-      "sha256": "e72a6c35682fc5b26241d9d48ed0e12fa3d4bfe8f71ca09e7ac628ecc0c1edb9",
+      "size": 1366,
+      "sha256": "4b0e76e228f80ac09ecb29902eeb31a73369af1ce30e3bb028993bc082f98e2b",
       "media_type": "application/json"
     },
     {
       "path": "assets/list-contract.json",
-      "size": 1379,
-      "sha256": "d728246217fe896a4914c49d1e7d94cc7fa4d36ab85ef2ae6e8c3ff2ca7142c2",
+      "size": 1249,
+      "sha256": "13b48dce7ef4e1948d82e63fc6b8f563236ebd62c68a19aff5e4850edf6f516e",
       "media_type": "application/json"
     },
     {
       "path": "assets/read-contract.json",
-      "size": 1412,
-      "sha256": "0272e9bd325057b42672102ab2390a16840eb465c5b552207d0d2991ec6dd796",
+      "size": 1282,
+      "sha256": "f558e87ba5af1f3b3b07183c56e28f29dfefeb783759809898e99549dca30de7",
       "media_type": "application/json"
     }
+  ],
+  "name": "Read-only inbox briefing",
+  "manifest_version": "1",
+  "entrypoint": "SKILL.md",
+  "effects": [
+    "mail.read"
   ]
 }

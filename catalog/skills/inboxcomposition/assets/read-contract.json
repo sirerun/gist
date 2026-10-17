@@ -54,18 +54,20 @@
   "required_scopes": [
     "mail:read"
   ],
-  "error_semantics": {
-    "not_found": "Report missing message as partial; never invent contents.",
-    "denied": "Stop this operation; do not retry without new caller authority.",
-    "unavailable": "Report provider failure; caller owns retry policy."
+  "cost": {
+    "currency": "USD",
+    "unit": "request",
+    "upper_bound": null
   },
-  "forbidden_effects": [
-    "mark_read",
-    "send",
-    "draft",
-    "label",
-    "delete",
-    "attachments",
-    "linked_content"
-  ]
+  "timeout_ms": 30000,
+  "retry": {
+    "supported": false,
+    "max_attempts": 0
+  },
+  "idempotency": {
+    "supported": true
+  },
+  "async_status": {
+    "supported": false
+  }
 }
