@@ -138,3 +138,13 @@ current checks and executable integrity. No model prompt has yet been sent.
 
 A fresh coordinator run of the five Gist diagnostic regressions passed. The
 four ambiguity cases remain unchanged, and no ranking default was modified.
+
+## Retained race failure blocks model launch
+
+The retained source8e8ac983 race run passed focused controller and execution
+checks but failed the joined integration after279.3seconds: a partial-inbox tool
+callback was routed to a model-step owner, which reported no dispatch for that
+operation and left the turn proposal-pending. This is a new continuation blocker;
+no model service or prompt was started. The failure is retained for diagnosis
+and a scoped controller correction with independent review. The preceding
+non-race joined pass does not override this failed acceptance.
