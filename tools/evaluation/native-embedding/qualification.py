@@ -2,7 +2,7 @@
 """Pinned CPU qualification; run under24GiB/no-swap/4CPU/2700s cgroup.
 No downloads/providers. Hard preregistered parity thresholds; failure stops.
 """
-import argparse,gzip,hashlib,json,math,os,secrets,signal,socket,subprocess,tempfile,time,urllib.request,urllib.error
+import argparse,gzip,hashlib,json,math,os,re,secrets,signal,socket,subprocess,tempfile,time,urllib.request,urllib.error
 from pathlib import Path
 HERE=Path(__file__).resolve().parent
 ROOT=HERE.parents[2]
@@ -42,6 +42,16 @@ def main():
    req=urllib.request.Request(origin+path,data=json.dumps(body).encode() if body is not None else None,headers=headers)
    with opener.open(req,timeout=30) as response:return json.load(response)
   try:
+   # Observe the trusted child's exact bind-success record before the first
+   # bearer HTTP request; response aliases cannot prove process ownership.
+   bound=False
+   expected=re.compile(r'^(?:[0-9.]+ )?I srv  llama_server: listening on http://127\.0\.0\.1:'+str(port)+r'$')
+   for _ in range(200):
+    if server.poll() is not None:raise RuntimeError('native child exited before owned bind proof')
+    if any(expected.fullmatch(line) for line in rawserver.read_text(errors='replace').splitlines()):bound=True;break
+    time.sleep(.1)
+   if not bound:raise RuntimeError('owned bind proof deadline; no HTTP authentication sent')
+   emit(out/'owned-bind.json',{'exact_child_bind_line_observed_before_http':True,'reuse_port_enabled':False,'private_capture':True})
    for _ in range(100):
     if server.poll() is not None:raise RuntimeError('native server exited before readiness')
     try:models=http('/v1/models');break
