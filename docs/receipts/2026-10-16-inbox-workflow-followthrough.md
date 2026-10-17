@@ -76,3 +76,45 @@ work continues independently. Actual reasoning comparison is not yet run.
 Consumer end-to-end implementation, actual usage/whole-attempt records, full
 candidate verification/review, guarded merges and landed acceptance remain open.
 The original adoption and held-out gates remain open independently.
+
+## Subsequent cached-model authority and launch review
+
+The owner subsequently approved starting cached pinned Qwen for this synthetic
+comparison, no downloads or paid calls, at most60 requests and one-hour total
+service lifetime, then stopping only that service. Plan75532a8 records this
+authority and the new4CPU/80Gi trial profile, preserving documented target-only
+model settings except pod-local loopback. Coordinator-admitted88GiB initial
+MemAvailable and8GiB runtime stop floors are conservative guards, not a proven
+sufficiency or an explicit owner-selected memory policy. No published ports,
+restart Never and both local/external deadlines are required. Missing cached
+assets stops; no automatic retuning, tenant interruption or paid fallback.
+
+External launch review found and corrected LAUNCH-R1 (surviving process-group
+cleanup), LAUNCH-R2 (post-cache-hash memory/swap recheck) and LAUNCH-R3 (exact
+verified template path). Four adversarial regressions passed. Independent review
+conditionally approved bundle SHA256SUMS
+7bafbd31f750e0ad81d2b7b68ec58e4e7a8f1dc238c046dcdfc760d6970f1f47, verifying
+all15 listed hashes. This approves mechanics only: benchmark artifact/cap, private
+staging, fresh capacity/cache observations, complete preloader byte verification,
+started external watchdog and coordinator launch-go remain required. No model
+workload or prompt has yet been submitted. A practical fresh known-cache check
+is not engine-enforced atomic pull-never; actual no-download evidence is required.
+
+## Joined-path production defects
+
+The joined fixture reached a successful physical list call through Effects and
+TLS MCP, then exposed two independently confirmed existing integration defects.
+INBOX-R1: execution reuses the whole turn ID as the Effect source for every
+external proposal; a distinct second action conflicts with the first immutable
+action digest. INBOX-R2: ordinary MCP success publishes request-audit and result
+artifacts, while controller result selection requires exactly one flat artifact;
+no result reaches the next model context. These are not ranking failures or a
+reason to inject results manually in the fixture.
+
+Plan341b074 admits scoped execution/effects/controller repairs and focused tests,
+plus authored spec maintenance/rendering under the same serialized integration
+owner. Stable per-proposal replay, distinct-step actions, callback-turn worker
+authority and unique trusted tool_result selection must survive. Full real
+list→read→stored-reply acceptance and independent corrected review remain open.
+Wazi local conformance passed442 tasks, source digest
+f1b85e33d7016046ee6c24068f8033e91b8b33e249c308b2458091f9e9fa94d3.
