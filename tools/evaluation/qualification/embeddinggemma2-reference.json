@@ -10,13 +10,14 @@
   ],
   "heldout_accessed": false,
   "host_class": "Linux ARM64 NVIDIA GB10 unified-memory; CPU-only reference",
+  "integrity_policy": "Committed official pinned 13-file SHA256 manifest verified before any loader and again before output; canonical file-set root in model version; extra/missing/symlink/tamper rejected",
   "paid_model_calls": 0,
   "provider_calls": 0,
   "qualification_kind": "synthetic local smoke, not held-out benchmark or native acceptance",
   "runs": [
     {
-      "adapter_sha256": "af73625d32651b988989b4c775d5fe3954fdaa677fe53593834136e1e8bb24bd",
-      "cold_inference_seconds": 0.17467754799872637,
+      "adapter_sha256": "35b118e9b23d726528a3dc248b0aaaf3e7178d077140956aacbeeaaad83a7e94",
+      "cold_inference_seconds": 0.174670165986754,
       "device": "cpu",
       "dimension": 256,
       "dtype": "bfloat16",
@@ -40,11 +41,11 @@
         "sentence_pooling": "b6e96e0eac50ebc33d6310ef3b8d35b7cd2b7e0e521809552bba34c05c13d43d",
         "transformers_model": "f0376b13fb5230b349ce269c4fb40906931744a84df57c1d208f46032941eda7"
       },
-      "load_seconds": 1.1292191939428449,
+      "load_seconds": 1.177332762046717,
       "loaded_parameters": 271002624,
       "model": "google/embeddinggemma-2",
-      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:tokenizers=0.23.3:numpy=2.4.2:python=3.12.3:bfloat16:256d",
-      "peak_rss_bytes": 1507651584,
+      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:files=e3faeaceb35dcd6de5edb05a700a55e827ecb35c503faf9d75e272cfe195703d:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:tokenizers=0.23.3:numpy=2.4.2:python=3.12.3:bfloat16:256d",
+      "peak_rss_bytes": 1506910208,
       "pooling": {
         "embedding_dimension": 768,
         "include_prompt": true,
@@ -73,6 +74,7 @@
       },
       "text_only": true,
       "threads": 4,
+      "trusted_file_set_sha256": "e3faeaceb35dcd6de5edb05a700a55e827ecb35c503faf9d75e272cfe195703d",
       "usage": {
         "dollars": null,
         "model_tokens": null,
@@ -80,16 +82,16 @@
         "provider_calls": 0
       },
       "warm_inference_seconds": [
-        0.034593163058161736,
-        0.03203070804011077,
-        0.02446135599166155,
-        0.02605438604950905,
-        0.026745863957330585
+        0.03519231895916164,
+        0.0333976149559021,
+        0.024578078999184072,
+        0.028770042001269758,
+        0.025324873044155538
       ]
     },
     {
-      "adapter_sha256": "af73625d32651b988989b4c775d5fe3954fdaa677fe53593834136e1e8bb24bd",
-      "cold_inference_seconds": 0.1656490140594542,
+      "adapter_sha256": "35b118e9b23d726528a3dc248b0aaaf3e7178d077140956aacbeeaaad83a7e94",
+      "cold_inference_seconds": 0.17600951704662293,
       "device": "cpu",
       "dimension": 768,
       "dtype": "bfloat16",
@@ -113,11 +115,11 @@
         "sentence_pooling": "b6e96e0eac50ebc33d6310ef3b8d35b7cd2b7e0e521809552bba34c05c13d43d",
         "transformers_model": "f0376b13fb5230b349ce269c4fb40906931744a84df57c1d208f46032941eda7"
       },
-      "load_seconds": 1.2091504690470174,
+      "load_seconds": 1.1793760500149801,
       "loaded_parameters": 271002624,
       "model": "google/embeddinggemma-2",
-      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:tokenizers=0.23.3:numpy=2.4.2:python=3.12.3:bfloat16:768d",
-      "peak_rss_bytes": 1507741696,
+      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:files=e3faeaceb35dcd6de5edb05a700a55e827ecb35c503faf9d75e272cfe195703d:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:tokenizers=0.23.3:numpy=2.4.2:python=3.12.3:bfloat16:768d",
+      "peak_rss_bytes": 1506922496,
       "pooling": {
         "embedding_dimension": 768,
         "include_prompt": true,
@@ -146,6 +148,7 @@
       },
       "text_only": true,
       "threads": 4,
+      "trusted_file_set_sha256": "e3faeaceb35dcd6de5edb05a700a55e827ecb35c503faf9d75e272cfe195703d",
       "usage": {
         "dollars": null,
         "model_tokens": null,
@@ -153,16 +156,16 @@
         "provider_calls": 0
       },
       "warm_inference_seconds": [
-        0.0256434369366616,
-        0.023715547053143382,
-        0.02381904993671924,
-        0.03758395300246775,
-        0.02377810701727867
+        0.03491171705536544,
+        0.029748036060482264,
+        0.024471539072692394,
+        0.025711848051287234,
+        0.02664974390063435
       ]
     },
     {
-      "adapter_sha256": "af73625d32651b988989b4c775d5fe3954fdaa677fe53593834136e1e8bb24bd",
-      "cold_inference_seconds": 0.22140969207976013,
+      "adapter_sha256": "35b118e9b23d726528a3dc248b0aaaf3e7178d077140956aacbeeaaad83a7e94",
+      "cold_inference_seconds": 0.2211893879575655,
       "device": "cpu",
       "dimension": 256,
       "dtype": "float32",
@@ -186,11 +189,11 @@
         "sentence_pooling": "b6e96e0eac50ebc33d6310ef3b8d35b7cd2b7e0e521809552bba34c05c13d43d",
         "transformers_model": "f0376b13fb5230b349ce269c4fb40906931744a84df57c1d208f46032941eda7"
       },
-      "load_seconds": 1.2580726370215416,
+      "load_seconds": 1.202524457941763,
       "loaded_parameters": 271002624,
       "model": "google/embeddinggemma-2",
-      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:tokenizers=0.23.3:numpy=2.4.2:python=3.12.3:float32:256d",
-      "peak_rss_bytes": 2938908672,
+      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:files=e3faeaceb35dcd6de5edb05a700a55e827ecb35c503faf9d75e272cfe195703d:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:tokenizers=0.23.3:numpy=2.4.2:python=3.12.3:float32:256d",
+      "peak_rss_bytes": 2936160256,
       "pooling": {
         "embedding_dimension": 768,
         "include_prompt": true,
@@ -219,6 +222,7 @@
       },
       "text_only": true,
       "threads": 4,
+      "trusted_file_set_sha256": "e3faeaceb35dcd6de5edb05a700a55e827ecb35c503faf9d75e272cfe195703d",
       "usage": {
         "dollars": null,
         "model_tokens": null,
@@ -226,16 +230,16 @@
         "provider_calls": 0
       },
       "warm_inference_seconds": [
-        0.04627238598186523,
-        0.044594682985916734,
-        0.04251690802630037,
-        0.0346427260665223,
-        0.034780692076310515
+        0.04532236501108855,
+        0.034962904057465494,
+        0.03565536194946617,
+        0.03506671206559986,
+        0.03501727094408125
       ]
     },
     {
-      "adapter_sha256": "af73625d32651b988989b4c775d5fe3954fdaa677fe53593834136e1e8bb24bd",
-      "cold_inference_seconds": 0.20817100699059665,
+      "adapter_sha256": "35b118e9b23d726528a3dc248b0aaaf3e7178d077140956aacbeeaaad83a7e94",
+      "cold_inference_seconds": 0.23737349302973598,
       "device": "cpu",
       "dimension": 768,
       "dtype": "float32",
@@ -259,11 +263,11 @@
         "sentence_pooling": "b6e96e0eac50ebc33d6310ef3b8d35b7cd2b7e0e521809552bba34c05c13d43d",
         "transformers_model": "f0376b13fb5230b349ce269c4fb40906931744a84df57c1d208f46032941eda7"
       },
-      "load_seconds": 1.1654180269688368,
+      "load_seconds": 1.2152863750234246,
       "loaded_parameters": 271002624,
       "model": "google/embeddinggemma-2",
-      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:tokenizers=0.23.3:numpy=2.4.2:python=3.12.3:float32:768d",
-      "peak_rss_bytes": 2943225856,
+      "model_version": "google/embeddinggemma-2@914f7f89142e33e77833254d9c9b90c3cef7303b:files=e3faeaceb35dcd6de5edb05a700a55e827ecb35c503faf9d75e272cfe195703d:transformers=5.20.1:sentence-transformers=6.1.0:torch=2.12.0.dev20260326+cu128:tokenizers=0.23.3:numpy=2.4.2:python=3.12.3:float32:768d",
+      "peak_rss_bytes": 2935623680,
       "pooling": {
         "embedding_dimension": 768,
         "include_prompt": true,
@@ -292,6 +296,7 @@
       },
       "text_only": true,
       "threads": 4,
+      "trusted_file_set_sha256": "e3faeaceb35dcd6de5edb05a700a55e827ecb35c503faf9d75e272cfe195703d",
       "usage": {
         "dollars": null,
         "model_tokens": null,
@@ -299,11 +304,11 @@
         "provider_calls": 0
       },
       "warm_inference_seconds": [
-        0.05960930697619915,
-        0.03602739796042442,
-        0.03642065601889044,
-        0.03665749996434897,
-        0.036333409952931106
+        0.09125877998303622,
+        0.036286671995185316,
+        0.03583595703821629,
+        0.034832381061278284,
+        0.035875636036507785
       ]
     }
   ],

@@ -21,6 +21,44 @@ REVISION = "914f7f89142e33e77833254d9c9b90c3cef7303b"
 PREFIXES = {"query": "task: search result | query: ", "document": "title: none | text: "}
 
 
+def verify_model_files(model_dir, trusted_manifest=None):
+    """Authenticate exact local model inputs before any loader sees them.
+
+    The default manifest is committed source authority derived from the qualified
+    immutable official download. A directory's own revision/metadata is not trust.
+    Callers must keep the selected directory free of concurrent writers during
+    loading; this is a byte verification boundary, not filesystem isolation.
+    """
+    if trusted_manifest is None:
+        trusted_manifest = json.loads(Path(__file__).with_name("model-files.sha256.json").read_text())
+    if trusted_manifest.get("model") != MODEL or trusted_manifest.get("revision") != REVISION:
+        raise ValueError("trusted model manifest identity mismatch")
+    expected = trusted_manifest.get("files", {})
+    if not expected or "model.safetensors" not in expected or "config.json" not in expected or "tokenizer.json" not in expected:
+        raise ValueError("trusted model manifest lacks mandatory inputs")
+    model_dir = Path(model_dir)
+    actual = {}
+    for path in sorted(model_dir.glob("**/*")):
+        relative = path.relative_to(model_dir)
+        if ".cache" in relative.parts:
+            continue
+        if path.is_symlink():
+            raise ValueError("model input symlink is not allowed")
+        if path.is_file():
+            actual[relative.as_posix()] = path
+    if set(actual) != set(expected):
+        raise ValueError("local model file set differs from trusted immutable manifest")
+    for name, path in actual.items():
+        digest = hashlib.sha256()
+        with path.open("rb") as stream:
+            for block in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(block)
+        if digest.hexdigest() != expected[name]:
+            raise ValueError("local model bytes differ from trusted immutable manifest: " + name)
+    root = hashlib.sha256(json.dumps(expected, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    return root, dict(expected)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model-dir", required=True)
@@ -39,6 +77,7 @@ def main():
                           max_workers=4)
     if not (model_dir / "model.safetensors").is_file():
         raise SystemExit("NOT_RUN: pinned local model unavailable; explicit --download required")
+    file_set_digest, verified_hashes = verify_model_files(model_dir)
     # Disable all incidental Hub/network access after the explicit fetch.
     os.environ["HF_HUB_OFFLINE"] = "1"
     os.environ["TRANSFORMERS_OFFLINE"] = "1"
@@ -67,7 +106,7 @@ def main():
     pooler = Pooling(**pooling_config)
     normalizer = Normalize()
     load_seconds = time.monotonic() - started
-    version = f"{MODEL}@{REVISION}:transformers={versions['transformers']}:sentence-transformers={versions['sentence-transformers']}:torch={versions['torch']}:tokenizers={versions['tokenizers']}:numpy={versions['numpy']}:python={versions['python']}:{args.dtype}:{args.dimension}d"
+    version = f"{MODEL}@{REVISION}:files={file_set_digest}:transformers={versions['transformers']}:sentence-transformers={versions['sentence-transformers']}:torch={versions['torch']}:tokenizers={versions['tokenizers']}:numpy={versions['numpy']}:python={versions['python']}:{args.dtype}:{args.dimension}d"
 
     def embed(purpose, texts):
         if purpose not in PREFIXES or not isinstance(texts, list) or any(not isinstance(t, str) or len(t) > 8192 for t in texts):
@@ -110,14 +149,10 @@ def main():
     rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
     if rss > 24 * 1024**3:
         raise SystemExit("qualification resource envelope exceeded")
-    hashes = {}
-    for path in sorted(model_dir.glob("**/*")):
-        if path.is_file() and ".cache" not in path.parts:
-            digest = hashlib.sha256()
-            with path.open("rb") as stream:
-                for block in iter(lambda: stream.read(1024 * 1024), b""):
-                    digest.update(block)
-            hashes[str(path.relative_to(model_dir))] = digest.hexdigest()
+    # Refuse observed file changes before releasing any numeric output.
+    final_digest, hashes = verify_model_files(model_dir)
+    if final_digest != file_set_digest or hashes != verified_hashes:
+        raise ValueError("model changed during qualification")
     output = {"model_version": version, "entries": entries}
     Path(args.output).write_text(json.dumps(output, sort_keys=True, allow_nan=False) + "\n")
     import inspect
@@ -131,6 +166,7 @@ def main():
                  "pooling": pooling_config, "implementation_sha256": implementation_hashes,
                  "projection": "official model forward projects per-token512to768 before maintained masked-mean pooling; prompts included; maintained normalization then truncate and renormalize",
                  "adapter_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                 "trusted_file_set_sha256": file_set_digest,
                  "prefixes": PREFIXES, "load_seconds": load_seconds, "cold_inference_seconds": cold_seconds,
                  "warm_inference_seconds": warm_seconds, "peak_rss_bytes": rss, "file_sha256": hashes,
                  "model_version": version, "synthetic_smoke_only": True,
