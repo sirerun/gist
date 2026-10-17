@@ -148,3 +148,116 @@ later source corrections received focused affected checks.
 
 The uncapped Zati lint baseline comparison, Mac probe evidence, final independent
 approval and producer-first landing remain pending at this checkpoint.
+
+## Producer review and landing
+
+Independent review approved Gist f12188c8ec66977edc0a528b481b5bb18e008ec0
+against base 44c667a5b32eb9abaf2e7956bb4ec62ca1a59f66. The reviewer independently
+verified 79 retained hashes, all 39 token comparisons, 78 vector comparisons and
+840 closure records, and checked that the qualified b29492d source is unchanged
+in the final candidate. All three accepted findings were resolved. Zati's
+cleanup correction and mechanical generated-contract changes were also reviewed;
+final consumer approval still awaits its immutable producer pin and final head.
+
+[Gist PR #78](https://github.com/sirerun/gist/pull/78) was guarded-rebase merged
+with exact head f12188c8ec66977edc0a528b481b5bb18e008ec0 against the unchanged
+base above, landing cfd902ebc9cff3ce9c763cb95207e314db7f50b9. Fresh origin/main
+matched this tip and was tree-identical to the approved candidate. There were
+no review threads or enforced required checks; policy required a PR and rebase.
+Hosted CI did not start: run 39003421622 / check 117310908824 reported the
+account locked for billing. The existing authorized local/qualified-host
+fallback was used without policy changes; this is not CI-green evidence.
+
+Consumer dependency refresh, landed affected checks and final closeout remain
+open at this checkpoint.
+
+Producer landed acceptance subsequently passed against cfd902e: tracked source
+archive SHA256 7d7c0d302e72035e26a5e6932103f4f4a690fc3d96e548cc6f29e044e3c74bbb
+matched after transfer; affected Go tests, vet and build passed. Retained parity
+artifacts reverified without rerunning reference inference. Fresh actual Go
+adapter probes returned finite unit vectors at both dimensions, with owned bind
+proof before any HTTP and the child cleanly reaped. The service enforced four
+CPUs, 24 GiB, no swap and a 1200-second deadline. The two single-query requests
+took 0.384 and 0.365 seconds; these observations are not a comparative benchmark.
+[Portable landed evidence](2026-10-16-native-go-producer-landed.json) SHA256:
+455a56623518ec6f0d23a2a4e490345e23a75bd29b9b864c7a1a104dba226d2b.
+
+## Separate Mac evidence and limit
+
+The first Mac invocation failed to enforce its printed load gate and briefly
+started CMake above the allowed load. Its exact owned process group was stopped
+after 15.358 seconds; no success was claimed. After correcting the automatic
+pre-spawn guard, one admitted retry passed the native CPU build in 61.604
+seconds and the ordinary pinned Go CLI build in 9.417 seconds. Sampled aggregate
+owned RSS was reported as 1.21 GB peak and conservative available memory
+was reported as at least 2.94 GB during those successful stages.
+
+The fresh gate before the first actual Mac embedding probe reported load 21.54,
+above the maximum ten. Neither dimension's probe started. The exact owned build
+lease was released, with no polling/retry loop. Mac evidence therefore establishes
+source builds only; execution, vectors and tokenizer parity remain unqualified.
+The independently qualified Linux path is unaffected. Zati's consumer evidence
+retains the failed attempt and final platform distinctions.
+
+## Ordinary consumer dependency checks
+
+Zati 8fbbf906 pins actual landed Gist cfd902e as
+`v1.2.1-0.20261017044208-cfd902ebc9cf`, with matching module checksums and
+dependency lock. With GOWORK off and no replacement, the pinned Go 1.26.2 run
+passed the complete command suite (121.658 seconds), focused race tests (1.400
+seconds), vet, CLI build, module verification, empty tidy diff and all 50
+generated specification checks. The dependency gate agrees with the lock.
+The independent reviewer had already found the immutable pin/lock delta clean;
+final evidence and exact consumer approval remain open at this checkpoint.
+
+Fresh ordinary-pin Linux CLI probes also passed for both dimensions, with clean
+session/child removal, four CPUs, 24 GiB and explicit zero-swap policy. The pair
+took 7.630 seconds. Extra execution/skills dependency checks passed. A broader
+integration selection exposed `TestLandedPublicDescriptorsMatchFrozenCatalog`
+reporting 227 descriptors against its frozen count of 220. The exact aa379b6
+baseline with its original older Gist dependency and GOWORK off reproduced the
+same failure. It is retained as an existing failure, not changed or described
+as passing. Narrow actual Gist integration checks are recorded separately in
+the final consumer evidence.
+
+## Consumer review and landing
+
+Exact `TestGist` integration checks passed in 24.961 seconds. Independent final
+review approved Zati 2a7fbebc8d8e77e29faf4a6bf858aa81bc20b0ab against
+aa379b6dbc3da65f5a8ae896a1984524a8497e11, including the final normal-module
+evidence, pin, generated contracts and platform/baseline distinctions.
+[Zati PR #43](https://github.com/zati-run/zati/pull/43) was guarded-rebase merged
+with that exact head and unchanged base, landing
+fab1de071cffcc835a3371e3158da031d158c3cd. Fresh origin/main matched that tip and
+was tree-identical to the reviewed candidate. The branch was unprotected and
+there were no review threads. Hosted CI check 117312666314 did not start because
+of account billing/payment limits. The authorized local fallback was used;
+there is no hosted CI-green claim.
+
+Producer and consumer source are now merged. Consumer landed acceptance remains
+open until the bounded fresh-source probe and affected checks complete.
+
+## Final landed acceptance
+
+Consumer fab1de071cffcc835a3371e3158da031d158c3cd passed fresh tracked-source
+acceptance with GOWORK off and its ordinary immutable producer pin. Archive
+SHA256 16b65135f575113ad21ec8b94851c5592bd529cf619e21307fa0a1ce9d3bd499 matched
+after transfer. Focused lifecycle tests, vet, build, lock/spec checks and actual
+256/768 probes all passed. The four-CPU, 24 GiB, no-swap service completed in
+15.771 seconds with zero remaining owned children or session files. No broad
+suite or reference inference was repeated because the landed tree matched the
+approved tree. [Portable consumer evidence](2026-10-16-native-go-consumer-landed.json)
+SHA256: 2c649be30a9abfb785172fcd41f2d169ababcfeb2f355089c9e48959f4047fde.
+
+T-PREP.39–48 are complete for this optional native Go source trial. Both source
+PRs are merged and their landed runtime paths verified on Linux. Mac source
+builds passed but actual Mac embedding execution/parity remains unqualified.
+No install, release, deployment, mailbox action, default strategy change or
+semantic adoption occurred. Existing T-PREP.13/.14 adoption gates remain open;
+the earlier one-family coverage shortfall has not been repaired by numerical
+parity. Existing lint/descriptor-count failures and hosted billing failures are
+retained with their baseline distinctions.
+
+Final Wazi local conformance passed all 432 tasks; plan source digest
+53e4f76d213233283074b7bc6f7a163cb56c377477b338494d05959f51c92970.
+This is local schema/semantic validation, not authenticated remote authority.

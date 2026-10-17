@@ -1,0 +1,95 @@
+{
+  "schema": "zati.native_embedding_landed_acceptance/v1",
+  "qualified_scope": "Linux ARM64 optional synthetic local embedding probe only",
+  "observed_at": "2026-10-17T04:51:19.614496+00:00",
+  "consumer_commit": "fab1de071cffcc835a3371e3158da031d158c3cd",
+  "consumer_tree": "586ce1da3052d020c97431ac4a37942819ec50c5",
+  "approved_candidate": "2a7fbebc8d8e77e29faf4a6bf858aa81bc20b0ab",
+  "approved_tree_identical": true,
+  "tracked_archive_sha256": "16b65135f575113ad21ec8b94851c5592bd529cf619e21307fa0a1ce9d3bd499",
+  "local_remote_archive_hash_equal": true,
+  "producer_commit": "cfd902ebc9cff3ce9c763cb95207e314db7f50b9",
+  "gist_module_version": "v1.2.1-0.20261017044208-cfd902ebc9cf",
+  "go_toolchain": "go1.26.2",
+  "gowork": "off",
+  "workspace_or_replace_committed": false,
+  "checks": [
+    {
+      "name": "embedding-tests",
+      "exit": 0,
+      "elapsed_seconds": 5.073,
+      "output_sha256": "fdce8a6cfa1ad3e59f33487b7fda3c936f7f24083352da3100a17aa4b5a33e3b"
+    },
+    {
+      "name": "vet",
+      "exit": 0,
+      "elapsed_seconds": 0.741,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "build",
+      "exit": 0,
+      "elapsed_seconds": 1.222,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "dependency-lock",
+      "exit": 0,
+      "elapsed_seconds": 0.315,
+      "output_sha256": "2d5724c3e1cde83f83af7893c7ef1cb4ddc2c6ae4ce79addd4ddbbadade0e391"
+    },
+    {
+      "name": "specification",
+      "exit": 0,
+      "elapsed_seconds": 0.974,
+      "output_sha256": "d96dada7f2fd9a9a8c856cbb1f39f8d1cfde924d9779c73e73d11bb306fa0fc5"
+    },
+    {
+      "name": "native-256",
+      "exit": 0,
+      "elapsed_seconds": 3.63,
+      "output_sha256": "5451b34ef6763ec6017a831f39ea5c089f865845eb092e790ca53e4d02c8a226"
+    },
+    {
+      "name": "native-768",
+      "exit": 0,
+      "elapsed_seconds": 3.737,
+      "output_sha256": "bae7b22f78f33b6c1f3d16c43de0d7cd604759ba713f79a19b925d2598bdfd17"
+    }
+  ],
+  "native_probes": [
+    {
+      "status": "synthetic_probe_completed",
+      "model_version": "llamacpp-embeddinggemma2:sha256:d8f7cba7cd9e39c606a646048aac3bdb97034f2fea40c8c6f3d577842210a4c6",
+      "dimension": 256,
+      "binary_sha256": "436cc65b98927488311f1682658ec8b14f4e833107a37f5ce546225e9a3f9fcc",
+      "model_sha256": "68bae29d62fb8c7d23e98d21fd4662753ddd636e6b62b8a70dfe059a9844f216"
+    },
+    {
+      "status": "synthetic_probe_completed",
+      "model_version": "llamacpp-embeddinggemma2:sha256:8661486cb9e4730e790a15a547c9923a1cd73979f67f752fb9f5d9cfffda5278",
+      "dimension": 768,
+      "binary_sha256": "436cc65b98927488311f1682658ec8b14f4e833107a37f5ce546225e9a3f9fcc",
+      "model_sha256": "68bae29d62fb8c7d23e98d21fd4662753ddd636e6b62b8a70dfe059a9844f216"
+    }
+  ],
+  "cleanup": {
+    "private_session_entries": 0,
+    "owned_runtime_children": 0
+  },
+  "bounds": {
+    "cpu_quota_percent": 400,
+    "gomaxprocs": 4,
+    "go_package_parallelism": 4,
+    "memory_max_bytes": 25769803776,
+    "memory_swap_max_bytes": 0,
+    "unit_runtime_max_seconds": 1200,
+    "native_wrapper_seconds": 180
+  },
+  "limitations": [
+    "Source/Linux synthetic acceptance only; no hosted CI execution claim.",
+    "No mailbox/provider calls, semantic-preparation adoption, installation, or release qualification.",
+    "No macOS runtime or full token/vector parity claim.",
+    "Full suite/race/lint/grid were not repeated because the landed tree exactly matches the reviewed candidate."
+  ]
+}
