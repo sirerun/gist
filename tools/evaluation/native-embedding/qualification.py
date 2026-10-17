@@ -31,7 +31,7 @@ def main():
   work=Path(temp);key=secrets.token_hex(32);keyfile=work/'key';keyfile.write_text(key);keyfile.chmod(0o600)
   server_socket=socket.socket();server_socket.bind(('127.0.0.1',0));port=server_socket.getsockname()[1];server_socket.close()
   origin=f'http://127.0.0.1:{port}';alias='gist-native-embeddinggemma2-qualified'
-  nativecmd=[a.binary,'--model',a.model,'--embedding','--pooling','mean','--embd-normalize','2','--ctx-size','8192','--batch-size','8192','--ubatch-size','8192','--parallel','1','--threads','4','--threads-batch','4','--n-gpu-layers','0','--no-warmup','--host','127.0.0.1','--port',str(port),'--alias',alias,'--api-key-file',str(keyfile)]
+  nativecmd=[a.binary,'--model',a.model,'--embedding','--pooling','mean','--embd-normalize','2','--ctx-size','8192','--batch-size','8192','--ubatch-size','8192','--parallel','1','--threads','4','--threads-batch','4','--n-gpu-layers','0','--no-warmup','--no-log-prefix','--no-log-timestamps','--log-colors','off','--host','127.0.0.1','--port',str(port),'--alias',alias,'--api-key-file',str(keyfile)]
   rawserver=work/'server.raw.log';log=rawserver.open('wb');server=subprocess.Popen(nativecmd,stdout=log,stderr=log,env=env,start_new_session=True)
   class NoRedirect(urllib.request.HTTPRedirectHandler):
    def redirect_request(self,*args,**kwargs):return None
@@ -45,7 +45,7 @@ def main():
    # Observe the trusted child's exact bind-success record before the first
    # bearer HTTP request; response aliases cannot prove process ownership.
    bound=False
-   expected=re.compile(r'^(?:[0-9.]+ )?I srv  llama_server: listening on http://127\.0\.0\.1:'+str(port)+r'$')
+   expected=re.compile(r'^srv  llama_server: listening on http://127\.0\.0\.1:'+str(port)+r'$')
    for _ in range(200):
     if server.poll() is not None:raise RuntimeError('native child exited before owned bind proof')
     if any(expected.fullmatch(line) for line in rawserver.read_text(errors='replace').splitlines()):bound=True;break
