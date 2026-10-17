@@ -579,6 +579,10 @@ func (s Service) resolveCurrent(ctx context.Context, req Request, skill ports.Ar
 	if err != nil {
 		return resolution.Result{}, "", err
 	}
+	finalNow := s.Clock.Now()
+	if decision.CheckedAt.After(finalNow) || finalNow.Sub(decision.CheckedAt) > s.MaxReadinessAge || !decision.ValidUntil.After(finalNow) {
+		return resolution.Result{}, "", errors.New("preparation: readiness expired during resolution")
+	}
 	if readinessScope(req, skill, resolved) != scope {
 		return resolution.Result{}, "", errors.New("preparation: closure changed during readiness check")
 	}
