@@ -231,11 +231,16 @@ func (s Service) Prepare(ctx context.Context, req Request) (Result, error) {
 		}
 	}
 	if mode == Hybrid {
-		for i := range ranked {
-			ranked[i].Score = 1 / float64(60+i+1)
-			if rank, ok := lexRanks[ranked[i].Ref]; ok {
-				ranked[i].Score += 1 / float64(60+rank)
-			}
+		union := map[ports.ArtifactRef]float64{}
+		for i, candidate := range ranked {
+			union[candidate.Ref] += 1 / float64(60+i+1)
+		}
+		for ref, rank := range lexRanks {
+			union[ref] += 1 / float64(60+rank)
+		}
+		ranked = ranked[:0]
+		for ref, score := range union {
+			ranked = append(ranked, Candidate{ref, score})
 		}
 	}
 	sortCandidates(ranked)
@@ -325,8 +330,23 @@ func (s Service) Prepare(ctx context.Context, req Request) (Result, error) {
 			}
 			want := ports.Digest{Algorithm: item.Digest.Algorithm, Value: item.Digest.Value}
 			manifest := ports.Digest{Algorithm: item.ManifestDigest.Algorithm, Value: item.ManifestDigest.Value}
-			if env.Record.Digest != want || env.Record.ManifestDigest != manifest || !matches(env.Bytes, want) {
+			if env.Record.Digest != want || logicalManifestDigest(env.Record) != manifest || !matches(env.Bytes, want) {
 				return Result{}, errors.New("preparation: contract bytes differ from pinned resolution")
+			}
+			if ref.Kind == ports.KindTool {
+				var schema struct {
+					Input  json.RawMessage `json:"input_schema"`
+					Output json.RawMessage `json:"output_schema"`
+				}
+				if err := json.Unmarshal(env.Bytes, &schema); err != nil {
+					return Result{}, err
+				}
+				for _, raw := range []json.RawMessage{schema.Input, schema.Output} {
+					var object map[string]any
+					if err := json.Unmarshal(raw, &object); err != nil || object == nil {
+						return Result{}, errors.New("preparation: complete input/output tool schemas required")
+					}
+				}
 			}
 			contracts = append(contracts, Contract{ref, want, append([]byte(nil), env.Bytes...)})
 			manifests[ref] = manifest
@@ -349,7 +369,7 @@ func (s Service) Prepare(ctx context.Context, req Request) (Result, error) {
 		if e != nil {
 			return Result{}, e
 		}
-		if current.Ref != contract.Ref || current.ManifestDigest != manifests[contract.Ref] || current.Digest != contract.Digest || (current.State != "published" && current.State != "deprecated") {
+		if current.Ref != contract.Ref || logicalManifestDigest(current) != manifests[contract.Ref] || current.Digest != contract.Digest || (current.State != "published" && current.State != "deprecated") {
 			return Result{}, errors.New("preparation: closure changed during assembly")
 		}
 		if e = s.authorized(ctx, req.Principal, contract.Ref); e != nil {
@@ -564,4 +584,20 @@ func readinessScope(req Request, skill ports.ArtifactRef, result resolution.Resu
 	encoded, _ = json.Marshal(pins)
 	closureSum := sha256.Sum256(encoded)
 	return ReadinessScope{PrincipalDigest: hex.EncodeToString(principalSum[:]), RuntimeID: req.RuntimeID, Skill: skill, ClosureDigest: hex.EncodeToString(closureSum[:])}
+}
+
+// Keep the resolver's existing non-skill v2 compatibility alias: exact typed
+// document bytes are identified by DocumentDigest, not an invented manifest.
+func logicalManifestDigest(record ports.CatalogRecord) ports.Digest {
+	valid := func(d ports.Digest) bool {
+		decoded, e := hex.DecodeString(d.Value)
+		return e == nil && d.Algorithm == "sha256" && len(decoded) == sha256.Size && hex.EncodeToString(decoded) == d.Value
+	}
+	if valid(record.ManifestDigest) {
+		return record.ManifestDigest
+	}
+	if record.Ref.Kind != ports.KindSkill && valid(record.DocumentDigest) && matches(record.Metadata, record.DocumentDigest) {
+		return record.DocumentDigest
+	}
+	return ports.Digest{}
 }

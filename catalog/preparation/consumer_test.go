@@ -133,6 +133,7 @@ type embedding struct {
 	calls   int
 	seen    []string
 	invalid bool
+	omit    bool
 }
 
 func (e *embedding) Embed(_ context.Context, r preparation.EmbeddingRequest) (preparation.EmbeddingResult, error) {
@@ -141,7 +142,7 @@ func (e *embedding) Embed(_ context.Context, r preparation.EmbeddingRequest) (pr
 	result := preparation.EmbeddingResult{ModelVersion: e.model}
 	for _, text := range r.Texts {
 		vector := make([]float64, 256)
-		if r.Purpose == "query" || strings.Contains(text, "Read-only inbox briefing") {
+		if r.Purpose == "query" || (strings.Contains(text, "Read-only inbox briefing") && !e.omit) {
 			vector[0] = 1
 		} else {
 			vector[1] = 1
@@ -351,6 +352,63 @@ func TestStaleDerivedIndexCannotExposeRevokedOrUnpinnedMetadataToEmbedding(t *te
 			out, _ := s.Prepare(context.Background(), r)
 			if embed.calls != 0 || len(out.Candidates) != 0 || out.Selected != nil {
 				t.Fatal("stale/unauthenticated description reached embedding or exposure")
+			}
+		})
+	}
+}
+
+func TestHybridUsesUnionAndRetainsLexicalHitsOmittedBySemanticThreshold(t *testing.T) {
+	_, s, r := ready(t)
+	embed := &embedding{model: "controlled-unit-v1", omit: true}
+	s.Embedder = embed
+	s.ModelVersion = embed.model
+	r.Mode = preparation.Semantic
+	out, e := s.Prepare(context.Background(), r)
+	if e != nil || out.Status != "no_match" {
+		t.Fatalf("unit semantic arm unexpectedly matched: %+v %v", out, e)
+	}
+	r.Mode = preparation.Hybrid
+	out, e = s.Prepare(context.Background(), r)
+	if e != nil || out.Status != "ready" || out.Selected == nil {
+		t.Fatalf("hybrid dropped exact lexical coverage: %+v %v", out, e)
+	}
+}
+
+func TestV2TypedDocumentAliasPreservesCompleteSchemas(t *testing.T) {
+	for _, which := range []string{"valid", "wrong alias", "tampered bytes", "revoked"} {
+		t.Run(which, func(t *testing.T) {
+			c, s, r := ready(t)
+			for ref, record := range c.Records {
+				if ref.Kind != ports.KindSkill {
+					record.DocumentDigest = fixture.Hash(record.Metadata)
+					record.ManifestDigest = ports.Digest{}
+					c.Records[ref] = record
+				}
+			}
+			tool := fixture.Ref(ports.KindTool, "synthetic/mail-read")
+			record := c.Records[tool]
+			switch which {
+			case "wrong alias":
+				record.DocumentDigest.Value = strings.Repeat("b", 64)
+				c.Records[tool] = record
+			case "tampered bytes":
+				c.Bytes[tool] = []byte("altered typed document")
+			case "revoked":
+				record.State = "revoked"
+				c.Records[tool] = record
+			}
+			out, e := s.Prepare(context.Background(), r)
+			if which == "valid" {
+				if e != nil || out.Status != "ready" || out.Selected == nil {
+					t.Fatalf("valid v2 aliases rejected: %+v %v", out, e)
+				}
+				for _, contract := range out.Selected.Contracts {
+					if contract.Ref == tool && !bytes.Equal(contract.Bytes, c.Bytes[tool]) {
+						t.Fatal("exact v2 tool schemas changed")
+					}
+				}
+			} else if out.Status == "ready" || out.Selected != nil {
+				t.Fatalf("invalid v2 alias/content accepted: %+v %v", out, e)
 			}
 		})
 	}

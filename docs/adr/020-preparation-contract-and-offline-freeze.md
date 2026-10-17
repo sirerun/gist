@@ -48,7 +48,7 @@ embedding cache: every call binds fresh scope/catalog/model/recipe/policy input.
 Changing any version invalidates external vector input or causes explicit refusal.
 
 Lexical ranking uses existing public discovery. Semantic ranking uses normalized
-cosine vectors; hybrid uses reciprocal-rank fusion with constant60. Primary k is4,
+cosine vectors with frozen minimum score0.30; hybrid uses reciprocal-rank fusion with constant60. Primary k is4,
 with development-only alternatives8/16. Deterministic guide `inbox-v1` is a
 maintained recipe only for the admitted inbox skill: complete instructions/assets,
 exact contracts, read-only prerequisites/list-before-read call order and refusal
@@ -106,8 +106,13 @@ upper harm uses "any repeat baseline-only". Use Clopper–Pearson one-sided boun
 alpha/4 per event for four bounds (union bound95% total). The lower effect is
 CP-lower(all candidate-only wins) minus CP-upper(any baseline-only losses);
 the upper effect is CP-upper(any candidate-only wins) minus CP-lower(all
-baseline-only losses). This bounds the mean paired success difference despite
-within-family repeat dependence; independent families are the sampling units.
+baseline-only losses). This bounds the **equally weighted construction-family mean** paired success
+difference (mean all case×repeat differences within each family, then equal
+weight across families), despite
+within-family case/repeat dependence; independent families are the sampling units.
+Unequal case counts do not make this a pooled per-attempt estimand. Pooled
+all-attempt success is descriptive and separately denominated; the2pp primary
+noninferiority margin remains unchanged on the family-balanced estimand.
 At zero observed discordance among60families the upper harm bound is
 `1-(0.0125)^(1/60)` (about7.04pp), so it cannot establish a2pp margin. Register
 additional independent families before evaluating them; never relax the margin.
