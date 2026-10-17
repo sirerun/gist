@@ -20,6 +20,32 @@ The model may list/read up to 20 selected messages and produce a briefing. It
 must not send, draft, label, mark read, delete, follow links or fetch attachments.
 Task text and retrieved messages may be adversarial; neither grants permissions.
 
+## Controlled selected-workflow followthrough
+
+The 2026-10-16 followthrough qualifies Zati's existing explicitly selected inbox
+skill route through actual controller, model adapter, Effects, TLS MCP list/read
+operations and persisted final reply. It does not replace the frozen retrieval
+pilot below. Four generic hybrid abstentions remain exact rank-fusion ties;
+selected workflow routing is not an improved hybrid score.
+
+The strong direct-tools control uses ordinary worker instructions containing
+identical skill/template bytes and the same two fixed tool bindings. Caller
+workflow information, mailbox state, schemas, executor, permissions and review
+requirements match; instruction packaging/message boundaries are a disclosed
+remaining difference. There is no forced discovery step. Both arms may have zero
+model discovery calls. Record all physical calls, turns, failures/recovery,
+phase times and actual provider usage where available; absent usage is unknown,
+not zero or a byte-derived token count. Scripted provider responses are labeled
+fixtures and cannot establish real-model quality, token savings or charges.
+
+An actual local-model development run needs its exact frozen route/model,
+settings, synthetic cases/rubric, balanced arm order, call/time/cost bounds and
+cleanup contract before prompts. No paid model, mailbox/Composio calls or new
+downloads are admitted. The unavailable former local Qwen service is not silently
+started: owner authority for a bounded cached-model start is a separate pending
+question. Preserve unavailable/failed attempts and report the narrow development
+scope. Original held-out data, decision targets and adoption gates remain intact.
+
 ## Dataset and preregistration
 
 Create at least 120 independently authored intent cases before model comparison:

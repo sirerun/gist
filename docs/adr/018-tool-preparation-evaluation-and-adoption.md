@@ -59,6 +59,25 @@ qualified revisions. Hosted expansion and RFC-003 remain outside this work.
 Operational evidence must cover invalidation, revocation, fallback, memory,
 latency and rollback; reverting retrieval must not alter authorization policy.
 
+## Controlled Zati followthrough — 2026-10-16
+
+The owner approved a controlled inbox followthrough after native numerical
+qualification. Zati's existing selected-skill path already pins the exact inbox
+instructions/template and separate list/read mappings before model dispatch.
+An exact RRF tie in open-ended search does not justify weakening abstention or
+adding an unused library API for that already-selected workflow. Preserve the
+original four abstentions and qualify the actual selected consumer path.
+
+For this development slice, compare catalog-imported instructions with ordinary
+worker instructions containing the identical skill/template bytes and the same
+two explicitly configured tools. Preserve caller workflow information, mailbox,
+executor, permissions, review requirements and grading. Report packaging/message
+boundary differences. Both paths may require zero model discovery calls; no
+improvement is presumed. Controlled provider fixtures qualify source behavior,
+not real-model token savings. Any actual local-model study is separately frozen,
+bounded and reported as development-only. No Composio attribution, held-out
+generalization, default adoption or live Gmail evidence follows from it.
+
 ## Sources
 
 Composio's documented search already returns tools, an execution plan and
