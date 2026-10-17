@@ -214,3 +214,24 @@ lint2.14.0 reports165 identical findings on both trees, zero introduced; this is
 not the CI-pinned2.11.3 and not an overall lint pass. Independent source/check
 review admitted one bounded synthetic model trial, with result review still open.
 T-PREP.51 source implementation is complete; measurement and delivery remain open.
+
+
+## First owned startup: retained preloader failure
+
+The single owned startup was submitted at2026-10-17T06:20:47Z with an external
+watchdog already running. The preloader failed before model loading because it
+required absent .gitattributes repository metadata. Model calls and executed
+comparison attempts were zero; all12 remained NOT_RUN. Exact-manifest cleanup
+finished at06:21:05Z: GET404, no owned containers, resource allocation restored.
+No download, paid call or automatic restart occurred. The portable startup-failure
+receipt records this independently from model outcomes.
+
+Source review identified a false prerequisite in the authored preloader: eight
+repository documents/metadata are ancillary, while fourteen conservative loader
+files remain mandatory. A correction is admitted only with full pinned hashes
+for the required closure, exact index/shard matching, no custom-code mapping,
+verified-only overlay and independent review. The first failure remains intact;
+any corrected start must retain the original07:20:47Z absolute deadline and the
+same model arguments, template, cases, binary and remaining60-request budget.
+Missing or mismatched required model assets still stops; no retry is authorized
+until that concrete correction passes review and fresh runtime gates.

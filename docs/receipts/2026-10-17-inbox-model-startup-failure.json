@@ -1,0 +1,26 @@
+{
+  "schema": "gist.cached_qwen_startup/v1",
+  "status": "failed_before_model_loader",
+  "started_at": "2026-10-17T06:20:47Z",
+  "cleanup_completed_at": "2026-10-17T06:21:05Z",
+  "original_not_after": "2026-10-17T07:20:47Z",
+  "source": "9ba393e833a239102fbadb2425e4bc22a9fe6ec9",
+  "binary_sha256": "13f878978e319a6a8c717e982c45dba542644c58180ae91a293bc9437f0c13c8",
+  "case_manifest_sha256": "575f36f9596f78c32e40074dbeec9d930112085e912ea0a9ee897f186b3fe28f",
+  "reason": "Preloader required absent .gitattributes repository metadata before checking required loader assets",
+  "model_loader_started": false,
+  "main_model_calls": 0,
+  "planned_attempts": 12,
+  "executed_attempts": 0,
+  "attempt_status": "NOT_RUN",
+  "full_model_integrity_verified": false,
+  "downloads": 0,
+  "paid_calls": 0,
+  "cleanup": {
+    "exact_manifest_matched": true,
+    "owned_pod_get_status": 404,
+    "owned_containers_remaining": 0,
+    "allocation_returned_to_baseline": true
+  },
+  "interpretation": "Retained preloader failure, not model or comparison outcome. Independent source review identified ancillary-file prerequisite as overstrict; any correction keeps original absolute deadline and verifies every required loader asset."
+}
