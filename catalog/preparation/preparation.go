@@ -293,6 +293,15 @@ func (s Service) Prepare(ctx context.Context, req Request) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
+	maintained, err := inboxbriefing.Files()
+	if err != nil {
+		return Result{}, err
+	}
+	if !matches(maintained["manifest.json"], ports.Digest{Algorithm: "sha256", Value: pkg.ManifestDigest}) {
+		out.Status = "unsupported"
+		out.Findings = append(out.Findings, "retrieved package is not the immutable source bound to inbox-v1 recipe")
+		return out, nil
+	}
 	if !matches(record.Metadata, record.ManifestDigest) {
 		return Result{}, errors.New("preparation: resolver skill metadata differs from verified manifest")
 	}
