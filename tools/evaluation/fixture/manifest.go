@@ -178,6 +178,29 @@ func Overlay(c *Catalog, scenario string) error {
 	case "ready", "no_match":
 		return nil
 	case "missing_connection":
+		credentialed := false
+		for ref, r := range c.Records {
+			if ref.Kind == ports.KindTool {
+				var tool struct {
+					Credentials struct {
+						Type string `json:"type"`
+					} `json:"credentials"`
+				}
+				if err := json.Unmarshal(r.Metadata, &tool); err != nil {
+					return err
+				}
+				if tool.Credentials.Type != "" && tool.Credentials.Type != "none" {
+					credentialed = true
+				}
+			}
+		}
+		if !credentialed {
+			return errors.New("NOT_RUN: no credentialed tool/current connection scenario in this frozen catalog")
+		}
+		// No readiness port is configured: the actual SDK resolves credentialed
+		// tools with OwnedConnections=false and reports non-readiness.
+		return nil
+	case "missing_binding":
 		for ref := range c.Records {
 			if ref.Kind == ports.KindBinding {
 				delete(c.Records, ref)
