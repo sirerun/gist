@@ -1728,7 +1728,7 @@ scale workloads are new data; original sealed held-out inputs stay closed.
 Numerical latency/RSS/index-size targets are frozen in .15 from measured baseline
 and target-host capacity before scoring, never invented here or tuned afterward.
 
-- [ ] T-COMPOSE.1 Freeze producer schemas, API and verification contract  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  acc: [ADR021 requirements become canonical composition and capability schemas with digest rules, statuses, limits, compatibility cases and exact verification commands; no provider calls or wire changes; requirements and design reviewed before coding]
+- [x] T-COMPOSE.1 Freeze producer schemas, API and verification contract  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  acc: [ADR021 requirements become canonical composition and capability schemas with digest rules, statuses, limits, compatibility cases and exact verification commands; no provider calls or wire changes; requirements and design reviewed before coding]
 - [ ] T-COMPOSE.2 Implement typed composition validation and exact resolution  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.1]  acc: [Strict bounded DAG and JSON Pointer validation, capability-indexed alternatives, connection-group intersection, per-capability and composition evidence, scoped freshness and complete-schema budgets implement UC-COMP-1 and UC-COMP-2 without Cartesian search or authority grants]
 - [ ] T-COMPOSE.3 Publish local immutable fixtures and migration contracts  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.1]  acc: [New list/read contracts and inbox package/recipe fixtures have pinned digests and conformance examples; old bytes remain unchanged; this is repository fixture publication only, not registry upload or a module release]
 - [ ] T-COMPOSE.4 Verify producer behavior and compatibility  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.2, T-COMPOSE.3]  acc: [Current required checks plus missing optional/required capability, duplicate roles/keys, cycles, type mismatch, bounded iteration, partial results, same-connection/account mismatch, ambiguity, schema drift, revocation, cancellation and insufficient context pass; unsupported consumers and legacy paths covered]
@@ -1753,3 +1753,24 @@ and target-host capacity before scoring, never invented here or tuned afterward.
 - [ ] T-COMPOSE.23 Release library and install approved consumer  Owner: release-owner  Est: TBD  kind: agent  stage: release  blocked-by: [T-COMPOSE.22]  acc: [Qualified release/installation binding publishes only approved artifacts, records signatures and dependency pins, verifies installed version and rollback; generic dispatch stays blocked until route and authority are qualified]
 - [ ] T-COMPOSE.24 Accept installed workflow within approved provider scope  Owner: owner-with-verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.23]  acc: [Actual installed UI and workflow evidence recorded; synthetic-only versus live provider scope explicit; live inbox requires separate read-only account/call/cost/expiry authority, otherwise remains unqualified]
 - [ ] T-COMPOSE.25 Record operational handoff and recovery ownership  Owner: maintainer  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.24]  acc: [Runbook covers index generations, cache invalidation, connection revocation, unsupported upgrades, rollback and incident ownership; installed evidence and unresolved provider limits recorded; no hosted rollout or semantic adoption implied]
+
+#### Composition producer ship preflight — 2026-10-17
+
+Owner invoked plan and ship with ceiling25. Actual first assignment is three
+implementation/verification members T-COMPOSE.2/.3/.4 under preflight .1 and
+review/merge/landed .5/.6/.7. One inherited current-session implementer owns the
+producer worktree; coordinator owns plan/claims and independent review. Concrete
+schema/API freeze precedes code and is recorded in docs/contracts/composition-v1.md.
+External dependency: landed ADR021 at d013516. Consumer and scale batches await
+producer landing. Source work may proceed while verification host is qualified;
+no heavy local build under observed Mac load above10. Existing qualified Linux
+source-check route is preferred; no model runtime or paid infrastructure starts.
+Actual model/effort inherit this session, without overrides; token/cost telemetry
+is unavailable. Split if contract incompatibility or check capacity prevents
+complete acceptance; never mark pending rows complete to fit a batch.
+
+T-COMPOSE.1 preimplementation freeze: independent composition_doc_audit approved
+contract SHA256380a85c246b7bba5cb83bd829823542b382886dec613f17f4d9f60c6329e20a4.
+Review corrected exact provider reference/pin semantics and added hard parsing,
+schema and candidate ceilings before coding. This is design approval only;
+source/check/review/landing rows remain pending.
