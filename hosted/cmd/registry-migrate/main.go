@@ -26,13 +26,15 @@ func main() {
 func run() error {
 	status := flag.Bool("status", false, "read-only schema status (default)")
 	apply := flag.Bool("apply", false, "apply pending embedded forward migrations")
+	definitions := flag.Bool("schema-definitions", false, "read-only explicit schema definition audit, without table row contents")
+	verify := flag.Bool("verify-runtime-role", false, "read-only verification using the actual runtime database role")
 	provision := flag.Bool("provision-runtime-role", false, "provision the reviewed restricted runtime role after migration apply")
 	adopt := flag.Int("adopt-through", 0, "record an operator-audited existing migration prefix; never runs its SQL")
 	manifest := flag.String("expected-manifest-sha256", "", "required migration manifest SHA256 for adoption")
 	schema := flag.String("expected-schema-sha256", "", "required current schema SHA256 for adoption")
 	timeout := flag.Duration("timeout", 5*time.Minute, "overall deadline, at most 15 minutes")
 	flag.Parse()
-	if flag.NArg() != 0 || (*status && (*apply || *adopt != 0 || *provision)) || (*apply && (*adopt != 0 || *provision)) || (*provision && *adopt != 0) || *adopt < 0 || (*adopt == 0 && (*manifest != "" || *schema != "")) || *timeout <= 0 || *timeout > 15*time.Minute {
+	if flag.NArg() != 0 || (*status && (*apply || *adopt != 0 || *provision || *verify || *definitions)) || (*apply && (*adopt != 0 || *provision)) || (*provision && *adopt != 0) || (*verify && (*provision || *apply || *adopt != 0)) || (*definitions && (*verify || *provision || *apply || *adopt != 0)) || *adopt < 0 || (*adopt == 0 && (*manifest != "" || *schema != "")) || *timeout <= 0 || *timeout > 15*time.Minute {
 		return fmt.Errorf("invalid migration flags; choose status, apply, or explicit audited adoption")
 	}
 	if os.Getenv("GIST_DATABASE_URL") == "" {
@@ -55,6 +57,26 @@ func run() error {
 		defer cancel()
 		_ = conn.Close(closeCtx)
 	}()
+	if *definitions {
+		report, err := runner.SchemaDefinitions(ctx, conn)
+		if err != nil {
+			return err
+		}
+		if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
+			return fmt.Errorf("cannot write schema audit")
+		}
+		return nil
+	}
+	if *verify {
+		report, err := runner.VerifyRuntimeRole(ctx, conn.Config(), os.Getenv("GIST_RUNTIME_DATABASE_URL"))
+		if err != nil {
+			return err
+		}
+		if err := json.NewEncoder(os.Stdout).Encode(report); err != nil {
+			return fmt.Errorf("cannot write runtime verification")
+		}
+		return nil
+	}
 	switch {
 	case *provision:
 		err = runner.ProvisionRuntimeRole(ctx, conn, os.Getenv("GIST_RUNTIME_DATABASE_URL"))

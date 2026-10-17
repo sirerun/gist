@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"github.com/jackc/pgx/v5"
 	"sort"
 )
 
@@ -41,27 +42,60 @@ UNION ALL
 SELECT json_build_array('schema',n.nspname,pg_get_userbyid(n.nspowner),n.nspacl)::text FROM pg_namespace n WHERE n.nspname='public'
 `
 
+// SchemaDefinitionsReport is explicit audit output containing only sorted DDL
+// metadata. It is never included in the default status or role attestation.
+type SchemaDefinitionsReport struct {
+	SchemaSHA256 string   `json:"schema_sha256"`
+	Definitions  []string `json:"definitions"`
+}
+
+func (r Runner) SchemaDefinitions(ctx context.Context, conn *pgx.Conn) (SchemaDefinitionsReport, error) {
+	tx, err := conn.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.RepeatableRead, AccessMode: pgx.ReadOnly})
+	if err != nil {
+		return SchemaDefinitionsReport{}, errors.New("cannot begin read-only schema audit")
+	}
+	defer rollback(tx)
+	definitions, err := schemaDefinitions(ctx, tx)
+	if err != nil {
+		return SchemaDefinitionsReport{}, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return SchemaDefinitionsReport{}, errors.New("cannot complete read-only schema audit")
+	}
+	return SchemaDefinitionsReport{SchemaSHA256: definitionsSHA256(definitions), Definitions: definitions}, nil
+}
+
 func schemaFingerprint(ctx context.Context, q queryer) (string, error) {
+	definitions, err := schemaDefinitions(ctx, q)
+	if err != nil {
+		return "", err
+	}
+	return definitionsSHA256(definitions), nil
+}
+func definitionsSHA256(definitions []string) string {
+	raw, _ := json.Marshal(definitions)
+	hash := sha256.Sum256(raw)
+	return hex.EncodeToString(hash[:])
+}
+func schemaDefinitions(ctx context.Context, q queryer) ([]string, error) {
 	rows, err := q.Query(ctx, fingerprintSQL)
 	if err != nil {
-		return "", errors.New("cannot fingerprint schema definitions")
+		return nil, errors.New("cannot inspect schema definitions")
 	}
-	var definitions []string
+	definitions := []string{}
 	for rows.Next() {
 		var definition string
 		if err := rows.Scan(&definition); err != nil {
 			rows.Close()
-			return "", errors.New("cannot fingerprint schema definitions")
+			return nil, errors.New("cannot inspect schema definitions")
 		}
 		definitions = append(definitions, definition)
 	}
 	err = rows.Err()
 	rows.Close()
 	if err != nil {
-		return "", errors.New("cannot fingerprint schema definitions")
+		return nil, errors.New("cannot inspect schema definitions")
 	}
 	sort.Strings(definitions)
-	raw, _ := json.Marshal(definitions)
-	hash := sha256.Sum256(raw)
-	return hex.EncodeToString(hash[:]), nil
+	return definitions, nil
 }
