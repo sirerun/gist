@@ -191,3 +191,30 @@ func TestInventoryKeepsOriginalPinsInDriftCase(t *testing.T) {
 		t.Fatal("fixture negotiation changed")
 	}
 }
+
+func TestCommittedInventoryMatchesConstructor(t *testing.T) {
+	cfg, configBytes, e := loadConfig("../../composition-cohort/primary-config.json")
+	if e != nil {
+		t.Fatal(e)
+	}
+	inputs, inputBytes, e := loadInputs("../../composition-cohort/inputs.jsonl")
+	if e != nil {
+		t.Fatal(e)
+	}
+	value, e := inventory(cfg, configBytes, inputBytes, inputs)
+	if e != nil {
+		t.Fatal(e)
+	}
+	generated, e := json.MarshalIndent(value, "", "  ")
+	if e != nil {
+		t.Fatal(e)
+	}
+	generated = append(generated, '\n')
+	saved, e := os.ReadFile("../../composition-cohort/inventory.json")
+	if e != nil {
+		t.Fatal(e)
+	}
+	if string(generated) != string(saved) {
+		t.Fatal("inventory differs from frozen input constructor; regenerate and relabel before scoring")
+	}
+}
