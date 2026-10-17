@@ -58,8 +58,10 @@ This is a design contract, not a claim that a parser is shipped. Strict parsing
 rejects unknown fields, duplicate JSON keys, cycles and unbounded constructs.
 The asset contains:
 
-- `schema_version`, and exact skill ID/version plus manifest digest (no circular
-  whole-package digest inside the package).
+- `schema_version` and exact skill ID/version. Neither manifest nor package
+  digest is embedded here: the manifest inventory hashes this asset, so either
+  back-reference would be circular. Verified retrieval/readiness binds the
+  manifest and composition digests externally.
 - `requirements`: unique local keys mapping to exact capability ID/version and
   canonical contract digest; required/optional status must match the manifest.
 - `connection_groups`: named lists of requirement keys whose selected bindings
