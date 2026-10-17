@@ -1,9 +1,9 @@
 {
   "schema": "gist.evaluation.corpus/v1",
   "corpus_id": "preparation-synthetic-pilot-20261016",
-  "label_status": "v3_blind_reconciliation_pending",
+  "label_status": "two_annotator_reconciled_pending_final_independent_check",
   "two_annotator_reconciliation_required": true,
-  "family_design": "family is a conservatively clustered construction class; workflow_family is a distinct task identity. Distinct row IDs are not independent families. V3 repair precedes any model/retrieval scores; independent template-isolation review is pending.",
+  "family_design": "family is a conservatively clustered construction class; workflow_family is a distinct task identity. Distinct row IDs are not independent families. V3 repair precedes any model/retrieval scores; independent template-isolation review accepted the repaired construction classes; final normalized artifact check is pending.",
   "splits": {
     "development": {
       "artifact_id": "gist-preparation-development-v3-20261016",
@@ -21,7 +21,9 @@
       "author1_labels_sha256": "56cc9f83231cda70acae792e18d509970eb2ee1569d872a614afefe001908941",
       "product_cases": 1,
       "labels_visible_to_implementer": true,
-      "workflow_family_count": 60
+      "workflow_family_count": 60,
+      "author2_labels_sha256": "14e070ceb86e9337f72fea9229446da75d09101aa532827c2b169ebd8abcde51",
+      "reconciled_labels_sha256": "4001b283b4d32af3926a4fc14ba070ff59823818e1ea139ccfa1dff68839f930"
     },
     "heldout": {
       "artifact_id": "gist-preparation-heldout-v3-20261016",
@@ -39,7 +41,9 @@
       "author1_labels_sha256": "53e20c13ab12983731afc55fb8ae386d98d2bdf47ddd52631c45052e8d368934",
       "product_cases": 1,
       "labels_visible_to_implementer": false,
-      "workflow_family_count": 60
+      "workflow_family_count": 60,
+      "author2_labels_sha256": "9d8b87f193760e927d627fc9e2f3012d2e769716787cd6e5be581984c450b6b8",
+      "reconciled_labels_sha256": "50656ef43e3ccee73dcb7d16cf5b152ca19c783c2b14c5d0fd9899a16088a05d"
     }
   },
   "limitations": [
@@ -56,5 +60,12 @@
       "finding": "CORPUS-R2",
       "reason": "Replacement intent variable was not serialized;32 original intents contradicted changed fixture metadata. V3 actual-intent diff count verified32."
     }
-  ]
+  ],
+  "fixture_profile": "preparation-synthetic-v3-deny-unsafe-closure",
+  "selection_policy": "deny: nonready fixtures have no complete currently authorized alternative closure; safe complete alternatives would be ready and must not be penalized.",
+  "reconciliation": {
+    "public_record": "reconciliation.json",
+    "sealed_record_artifact_id": "gist-preparation-heldout-reconciliation-v3",
+    "sealed_record_sha256": "51a072013f2a43e0192c058f896fd81b23d9573fc7716e31bfed519cc4135d11"
+  }
 }
