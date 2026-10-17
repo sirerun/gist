@@ -68,9 +68,10 @@
     "task": {
       "query": "is:unread"
     },
-    "adapter_version": "identity-structured/v1",
     "policy_generation": "policy-1",
-    "task_generation": "task-1"
+    "task_generation": "task-1",
+    "caller_adapter": "identity-structured/v1",
+    "binding_adapter_version": "1.0.0"
   },
   "execution": {
     "os": "linux",
