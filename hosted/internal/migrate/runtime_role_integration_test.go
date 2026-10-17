@@ -14,6 +14,8 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/sirerun/gist/hosted/internal/storage"
 	"github.com/sirerun/gist/hosted/migrations"
 )
 
@@ -79,6 +81,23 @@ func TestProvisionRuntimeRoleRestrictedRLSAndNoDDLOwnership(t *testing.T) {
 		t.Fatal("runtime authentication failed")
 	}
 	defer func() { _ = runtime.Close(context.Background()) }()
+	pool, err := pgxpool.New(ctx, raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pool.Close()
+	store, err := storage.NewPostgres(pool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	enrollmentStore, err := store.Enrollment("https://fixture.invalid")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// CreateFlow prunes expired records before inserting the new login nonce.
+	if err := enrollmentStore.CreateFlow(ctx, make([]byte, 32), time.Now().Add(5*time.Minute)); err != nil {
+		t.Fatal("actual login flow creation failed with provisioned runtime grants")
+	}
 	for _, statement := range []string{"CREATE TABLE public.forbidden(id integer)", "CREATE TEMP TABLE forbidden_temp(id integer)", "SELECT * FROM public.registry_schema_migrations", "ALTER TABLE public.workspaces ADD COLUMN forbidden integer", "INSERT INTO public.review_records DEFAULT VALUES", "DELETE FROM public.namespace_reservations"} {
 		if _, err := runtime.Exec(ctx, statement); err == nil {
 			t.Fatalf("runtime accepted forbidden operation %s", statement)
