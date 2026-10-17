@@ -1839,9 +1839,9 @@ verification/review/merge/landed obligations and make cohort/scoring wait for
 actual index landing. No workload results or acceptance thresholds are weakened.
 
 - [x] T-COMPOSE.29 Verify bounded index source  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.16]  acc: [Focused lexical/exact, isolation, current policy, incomplete budget, ownership and concurrent publication tests pass on exact source; aggregate checks retain explicit comparison for unchanged inherited failures with zero introduced lint findings; no 10k/100k evaluation result inferred]
-- [ ] T-COMPOSE.30 Independently review bounded index candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.29]  acc: [Non-author exact base/head review covers .15-.16 source and .29 evidence; concrete findings resolved without implying scale or consumer readiness]
-- [ ] T-COMPOSE.31 Merge reviewed bounded index source  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.30, T-COMPOSE.35]  acc: [Exact approved source merges via guarded rebase under unchanged checks and policy, with landed SHA recorded]
-- [ ] T-COMPOSE.32 Verify landed bounded index source  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.31]  acc: [Fresh main reaches reviewed tree and affected index/composition compatibility checks pass; .17-.21 qualification remains pending]
+- [x] T-COMPOSE.30 Independently review bounded index candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.29]  acc: [Non-author exact base/head review covers .15-.16 source and .29 evidence; concrete findings resolved without implying scale or consumer readiness]
+- [x] T-COMPOSE.31 Merge reviewed bounded index source  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.30, T-COMPOSE.35]  acc: [Exact approved source merges via guarded rebase under unchanged checks and policy, with landed SHA recorded]
+- [x] T-COMPOSE.32 Verify landed bounded index source  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.31]  acc: [Fresh main reaches reviewed tree and affected index/composition compatibility checks pass; .17-.21 qualification remains pending]
 
 Index candidate16699bd source implementation is complete; aggregate checks found
 a test fixture tagged its unrelated calendar document as mail, invalidating the
@@ -1852,7 +1852,7 @@ remain distinct from the new finding.
 
 - [x] T-COMPOSE.33 Correct index source verification findings  Owner: gist-index-implementer  Est: TBD  kind: agent  stage: fix  blocked-by: [T-COMPOSE.16]  acc: [Incorrect lexical fixture and introduced lint finding corrected without weakening rank/isolation/budget behavior; failure retained and exact corrected head recorded]
 - [x] T-COMPOSE.34 Verify corrected bounded index source  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.33]  acc: [Affected discovery race suite and lint delta pass; unchanged aggregate evidence remains source-bound, no scale result inferred]
-- [ ] T-COMPOSE.35 Independently re-review corrected index candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: rereview  blocked-by: [T-COMPOSE.34]  acc: [Non-author exact corrected head approval covers fixes and final plan/evidence, with no remaining blockers before merge]
+- [x] T-COMPOSE.35 Independently re-review corrected index candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: rereview  blocked-by: [T-COMPOSE.34]  acc: [Non-author exact corrected head approval covers fixes and final plan/evidence, with no remaining blockers before merge]
 
 Index correction e4697fe fixes the fixture without weakening ranking assertions
 and removes the introduced lint finding. Exact-source discovery race tests pass;
@@ -1860,3 +1860,11 @@ full lint still exits1 with exactly5 inherited findings and zero introduced.
 All unchanged passing aggregate checks remain tied to16699bd. Receipt:
 receipts/2026-10-17-composition-index.md. Independent corrected-source review found
 no blockers; final full documentation-head review and landing remain pending.
+
+Index source delivery: independent composition_doc_audit APPROVED final
+8e4c868 againstd0e97da; PR84 guarded rebase landedab6b6c6 with exact tree equality.
+Fresh landed discovery/composition/new inbox/legacy inbox race packages passed.
+Archive SHA256c943d75eccf793a00b29f8cdf8e54e4b2b5bf950b4f4ff424088e6169cdb8cf3.
+Hosted checks remain unavailable under billing lock; repository protections were
+unchanged. .15–.16 and .29–.35 are source delivery complete. No 10k/100k score,
+consumer acceptance, release or deployment follows from this checkpoint.
