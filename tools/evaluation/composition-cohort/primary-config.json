@@ -1,0 +1,93 @@
+{
+  "schema_version": "gist.composition-evaluation/v1",
+  "route": "lexical-scoped-index",
+  "warm_samples_per_query_class": 100,
+  "percentile_method": "nearest-rank: sorted[ceil(p*n)-1]",
+  "scale_runs": [
+    {
+      "logical_records": 10000,
+      "private_partitions": 10
+    },
+    {
+      "logical_records": 10000,
+      "private_partitions": 1
+    },
+    {
+      "logical_records": 100000,
+      "private_partitions": 10
+    },
+    {
+      "logical_records": 100000,
+      "private_partitions": 1
+    }
+  ],
+  "kind_percent": {
+    "tool": 40,
+    "skill": 30,
+    "capability": 10,
+    "binding": 20
+  },
+  "common_term_percent": 80,
+  "update_records": 100,
+  "query_classes": [
+    "exact_hit",
+    "exact_miss",
+    "unique_lexical_hit",
+    "common_lexical",
+    "lexical_no_match"
+  ],
+  "additional_checks": [
+    "revocation",
+    "denial",
+    "cancellation",
+    "exact_after_broad_exhaustion",
+    "inflight_generation_refusal",
+    "full_rebuild",
+    "rollback",
+    "binding_alternatives_1_4_64_65"
+  ],
+  "thresholds": {
+    "exact_narrow_p95_ms": 100,
+    "broad_p95_ms": 250,
+    "build_100k_seconds": 120,
+    "update_100_seconds": 5,
+    "peak_rss_bytes": 2147483648,
+    "false_ready": 0,
+    "unauthorized_exposures": 0,
+    "required_ready_recall": 1.0,
+    "required_outcome_coverage": 1.0
+  },
+  "composition": {
+    "inputs": "inputs.jsonl",
+    "cases": 19,
+    "fixed_clock_utc": "2026-10-17T00:00:00Z",
+    "authority_max_age_seconds": 60,
+    "authority_valid_for_seconds": 60,
+    "stale_checked_at_seconds_before_now": 61,
+    "default_max_response_bytes": 1048576,
+    "task": {
+      "query": "is:unread"
+    },
+    "adapter_version": "identity-structured/v1",
+    "policy_generation": "policy-1",
+    "task_generation": "task-1"
+  },
+  "execution": {
+    "os": "linux",
+    "architecture": "arm64",
+    "go": "go1.26.1",
+    "cpu_limit": 4,
+    "memory_limit_bytes": 25769803776,
+    "deadline_seconds_per_run": 1200,
+    "offline": true,
+    "model_calls": 0,
+    "provider_calls": 0
+  },
+  "snapshot_projection": "All exact public candidates plus scope/generation; enumerate every known reference separately outside measured queries; not internal postings serialization.",
+  "claim_limits": [
+    "one maintained composition family",
+    "synthetic development qualification",
+    "no token or Composio comparison",
+    "no live provider or model acceptance"
+  ]
+}
