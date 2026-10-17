@@ -28,11 +28,13 @@ type input struct {
 	Stratum string `json:"stratum"`
 	Intent  string `json:"intent"`
 	Fixture struct {
-		SkillID          string     `json:"skill_id"`
-		SkillVersion     string     `json:"skill_version"`
-		ToolAlternatives [][]string `json:"tool_alternatives"`
-		Dependencies     []string   `json:"dependencies"`
-		Status           string     `json:"status"`
+		SkillID          string          `json:"skill_id"`
+		SkillVersion     string          `json:"skill_version"`
+		ToolAlternatives [][]string      `json:"tool_alternatives"`
+		Dependencies     []string        `json:"dependencies"`
+		Status           string          `json:"status"`
+		Transition       json.RawMessage `json:"transition"`
+		Scenario         json.RawMessage `json:"scenario"`
 	} `json:"fixture"`
 }
 type vectorEntry struct {
@@ -67,6 +69,9 @@ func (v vectors) Embed(_ context.Context, request preparation.EmbeddingRequest) 
 }
 
 type attempt struct {
+	TopK             int            `json:"top_k"`
+	SemanticFloor    float64        `json:"semantic_floor"`
+	RRFConstant      int            `json:"rrf_constant"`
 	CatalogSHA256    string         `json:"catalog_sha256"`
 	ComparisonStatus string         `json:"comparison_status"`
 	ComparisonReason string         `json:"comparison_reason,omitempty"`
@@ -253,7 +258,20 @@ func run() error {
 	}
 	for _, item := range cases {
 		for _, arm := range []string{"L0", "L1", "E0", "H0", "H1", "C0", "C1"} {
-			row := attempt{AttemptIndex: *attemptIndex, RunKind: *runKind, Phase: *phase, InputsSHA256: inputHash, Schema: "gist.preparation.attempt/v1", ID: item.ID, Family: item.Family, Stratum: item.Stratum, Arm: arm, Repeat: 1, Source: *source, CatalogVersion: catalogVersion, CatalogSHA256: actualCatalogSHA, RecipeVersion: preparation.RecipeVersion, Kind: "controlled_source_smoke_not_retrieval_or_whole_task_benchmark", Usage: map[string]any{"provider_calls": 0, "paid_model_calls": 0, "main_model_tokens": nil, "cached_tokens": nil, "embedding_tokens": nil, "dollars": nil, "embedding_execution": "precomputed real pinned local vectors; separately qualified; lookup latency excludes inference"}}
+			row := attempt{TopK: 4, SemanticFloor: 0.30, RRFConstant: 60, AttemptIndex: *attemptIndex, RunKind: *runKind, Phase: *phase, InputsSHA256: inputHash, Schema: "gist.preparation.attempt/v1", ID: item.ID, Family: item.Family, Stratum: item.Stratum, Arm: arm, Repeat: 1, Source: *source, CatalogVersion: catalogVersion, CatalogSHA256: actualCatalogSHA, RecipeVersion: preparation.RecipeVersion, Kind: "controlled_source_smoke_not_retrieval_or_whole_task_benchmark", Usage: map[string]any{"provider_calls": 0, "paid_model_calls": 0, "main_model_tokens": nil, "cached_tokens": nil, "embedding_tokens": nil, "dollars": nil, "embedding_execution": "precomputed real pinned local vectors; separately qualified; lookup latency excludes inference"}}
+			if vec != nil && (arm == "E0" || arm == "H0" || arm == "H1") {
+				row.ModelVersion = vec.ModelVersion
+			}
+			if unsupportedMechanics(item) {
+				row.Status = "NOT_RUN"
+				row.ComparisonStatus = "NOT_RUN"
+				row.ComparisonReason = "unsupported transition/scenario mechanics"
+				row.Error = "NOT_RUN: midflight/scenario mechanics not implemented; no upfront-state substitution"
+				if err := enc.Encode(row); err != nil {
+					return err
+				}
+				continue
+			}
 			if arm == "C0" || arm == "C1" {
 				row.Status = "NOT_RUN"
 				row.ComparisonStatus = "NOT_RUN"
@@ -416,4 +434,13 @@ func readBounded(path string, max int64) ([]byte, error) {
 		return nil, errors.New("evaluation input exceeds byte budget")
 	}
 	return raw, nil
+}
+
+func unsupportedMechanics(item input) bool {
+	for _, raw := range []json.RawMessage{item.Fixture.Transition, item.Fixture.Scenario} {
+		if len(raw) > 0 && strings.TrimSpace(string(raw)) != "null" {
+			return true
+		}
+	}
+	return false
 }

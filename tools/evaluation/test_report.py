@@ -68,3 +68,22 @@ class ComparisonEnvironmentTests(unittest.TestCase):
         self.assertEqual(result["environment_catalog_mismatch"], 1)
         self.assertEqual(result["not_run"], 1)
         self.assertNotIn("evaluated", result)
+
+class FrozenAttemptIdentityTests(unittest.TestCase):
+    def test_each_frozen_identity_and_semantic_configuration_is_enforced(self):
+        from report import validate_frozen_rows
+        admission = {"candidate_source": "source", "inputs_sha256": "inputs", "catalog_sha256": "catalog",
+                     "catalog_version": "sha256:catalog", "recipe_version": "inbox-v1", "model_version": "model-v1",
+                     "top_k": 4, "semantic_floor": 0.30, "rrf_constant": 60}
+        row = {"source": "source", "inputs_sha256": "inputs", "catalog_sha256": "catalog",
+               "catalog_version": "sha256:catalog", "recipe_version": "inbox-v1", "model_version": "model-v1",
+               "top_k": 4, "semantic_floor": 0.30, "rrf_constant": 60, "arm": "H1"}
+        validate_frozen_rows([row], admission)
+        for field in row:
+            if field == "arm":
+                continue
+            with self.subTest(field=field):
+                changed = dict(row)
+                changed[field] = "wrong"
+                with self.assertRaises(ValueError):
+                    validate_frozen_rows([changed], admission)

@@ -83,6 +83,27 @@ an independently admitted package copying its logical ID/version cannot acquire
 that static recipe merely by naming itself the same. Repacked archives of the
 same verified manifest/inventory remain valid immutable byte instances.
 
+## Positive caller-owned task coverage admission
+
+Similarity nominates a skill; it never proves that skill covers this task. Before
+readiness the caller must supply `Service.TaskAdmitter` implementing
+`AdmitTask(context.Context,TaskAdmissionRequest)(TaskAdmissionDecision,error)`.
+The request contains exact intent, principal/scopes/policy, runtime, recipe
+version, selected immutable skill pin and required capability contracts plus a
+canonical ScopeDigest binding all these fields. The decision repeats that digest,
+positive Admitted, current policy Generation, authoritative CheckedAt and
+ValidUntil. Explicit Clock and positive MaxTaskAdmissionAge are required.
+Absent/false admission reports non-readiness; stale/mismatched admission fails
+closed. Repeat it after package/contract/readiness I/O and refuse a changed
+generation or revoked admission. No larger NL blacklist substitutes for this
+positive coverage boundary. Real callers use their admitted task/workflow owner;
+this package does not silently create an intent classifier or permission grant.
+
+The controlled source fixture admits only two independently authored explicit
+smoke requests. It does not infer task coverage from corpus labels, desired skill
+IDs or model scores. Other requests can rank candidates but remain nonready until
+a real caller positively admits their task-to-maintained-recipe contract.
+
 ## Frozen pilot protocol
 
 Minimum120 independently reconciled synthetic cases,60 development and60 held
