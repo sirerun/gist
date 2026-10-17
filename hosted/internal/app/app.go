@@ -408,8 +408,9 @@ func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err := h.admission(); err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.Header().Set("Retry-After", "60")
+			w.Header().Set("X-Request-ID", "req_bootstrap")
 			w.WriteHeader(http.StatusServiceUnavailable)
-			_, _ = io.WriteString(w, `{"code":"service_unavailable","message":"Service unavailable","retryable":true}`)
+			_ = json.NewEncoder(w).Encode(rest.Error{Code: "service_unavailable", Message: "Service unavailable", RequestID: "req_bootstrap", Retryable: true})
 			return
 		}
 	}
