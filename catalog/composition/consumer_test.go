@@ -201,7 +201,7 @@ func TestPrepareRefusesUnsafeStates(t *testing.T) {
 		{"mixed_generation", "connection_mismatch", func(f *fixture) { f.i.items["read"][0].Connection.Generation = "2" }},
 		{"incomplete", "incomplete_budget", func(f *fixture) { f.i.incomplete = true }},
 		{"fanout", "incomplete_budget", func(f *fixture) { f.i.items["read"] = make([]c.Candidate, 65) }},
-		{"context", "budget_exceeded", func(f *fixture) { f.req.MaxBytes = 10 }},
+		{"context", "error", func(f *fixture) { f.req.MaxBytes = 10 }},
 		{"calls", "budget_exceeded", func(f *fixture) { f.req.Limits.MaxCalls = 20 }},
 		{"denied", "denied", func(f *fixture) { f.a.mutate = func(d *c.Decision) { d.Ready = false } }},
 		{"expired", "stale", func(f *fixture) { f.a.mutate = func(d *c.Decision) { d.ValidUntil = f.k.now } }},
@@ -351,7 +351,7 @@ func TestRuntimePartialAccounting(t *testing.T) {
 }
 
 // Repackage a new synthetic test version, preserving all inventory checks.
-func repackage(t *testing.T, f *fixture, doc c.Document) {
+func repackage(t *testing.T, f *fixture, doc c.Document, local ...bool) {
 	t.Helper()
 	files, e := inboxcomposition.Files()
 	if e != nil {
@@ -361,6 +361,9 @@ func repackage(t *testing.T, f *fixture, doc c.Document) {
 	var manifest map[string]any
 	if e = json.Unmarshal(files["manifest.json"], &manifest); e != nil {
 		t.Fatal(e)
+	}
+	if len(local) > 0 && local[0] {
+		manifest["runtime_requirements"] = map[string]any{"local_execution": true, "filesystem": []string{"/tmp"}}
 	}
 	reqs := []map[string]any{}
 	for _, r := range doc.Requirements {
@@ -426,5 +429,68 @@ func TestOptionalBranchDoesNotPreventRequiredClosure(t *testing.T) {
 		if e != nil || r.Status != "ready" || len(r.Bundle.Tools) != 1 || len(r.Bundle.DisabledSteps) != 1 || r.Bundle.DisabledSteps[0] != "read_selected" {
 			t.Fatalf("%+v %v", r, e)
 		}
+	}
+}
+
+func TestExactIntegersAndNonReadyBudgets(t *testing.T) {
+	integer := c.Schema{Type: "integer"}
+	for _, value := range []string{"1.0000000000000001", "9007199254740992.5", "1e-999999", "1e999999"} {
+		if e := c.ValidateValue(integer, []byte(value), 128); e == nil {
+			t.Fatal("rounded or unbounded integer accepted", value)
+		}
+	}
+	for _, value := range []string{"1", "1.0", "1e2", "9007199254740993"} {
+		if e := c.ValidateValue(integer, []byte(value), 128); e != nil {
+			t.Fatal(value, e)
+		}
+	}
+	f := setup(t)
+	f.req.SupportedVersions = nil
+	f.req.MaxBytes = 10
+	r, e := f.service.Prepare(context.Background(), f.req)
+	if e == nil || r.Bundle != nil {
+		t.Fatal("nonready oversized status returned", r, e)
+	}
+	f = setup(t)
+	delete(f.i.items, "read")
+	f.req.MaxBytes = 250
+	r, e = f.service.Prepare(context.Background(), f.req)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if len(encoded(r)) > f.req.MaxBytes || r.Bundle != nil {
+		t.Fatal("unbounded failure diagnostics")
+	}
+}
+func TestVerifiedInstructionsRetainedAndBudgeted(t *testing.T) {
+	f := setup(t)
+	r, e := f.service.Prepare(context.Background(), f.req)
+	if e != nil {
+		t.Fatal(e)
+	}
+	files, _ := inboxcomposition.Files()
+	for path, b := range files {
+		if !bytes.Equal(r.Bundle.PackageFiles[path], b) {
+			t.Fatalf("verified asset absent or changed: %s", path)
+		}
+	}
+	if !bytes.Equal(r.Bundle.PackageFiles["SKILL.md"], files["SKILL.md"]) || !strings.Contains(r.Bundle.Guide, "Never mark read") {
+		t.Fatal("missing verified instructions")
+	}
+	f.doc.Limits.MaxGuideBytes = 350
+	f.req.Limits = f.doc.Limits
+	repackage(t, f, f.doc)
+	r, e = f.service.Prepare(context.Background(), f.req)
+	if e != nil || r.Status != "budget_exceeded" || r.Bundle != nil {
+		t.Fatal("instructions truncated", r, e)
+	}
+}
+
+func TestRuntimeRequirementsRefused(t *testing.T) {
+	f := setup(t)
+	repackage(t, f, f.doc, true)
+	r, e := f.service.Prepare(context.Background(), f.req)
+	if e == nil || r.Bundle != nil {
+		t.Fatal("unadmitted runtime accepted", r, e)
 	}
 }

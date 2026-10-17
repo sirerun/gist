@@ -7,14 +7,14 @@
       "key": "list",
       "capability_id": "mail/messages/list",
       "contract_version": "1.0.0",
-      "contract_digest": "d728246217fe896a4914c49d1e7d94cc7fa4d36ab85ef2ae6e8c3ff2ca7142c2",
+      "contract_digest": "13b48dce7ef4e1948d82e63fc6b8f563236ebd62c68a19aff5e4850edf6f516e",
       "optional": false
     },
     {
       "key": "read",
       "capability_id": "mail/message/read",
       "contract_version": "1.0.0",
-      "contract_digest": "0272e9bd325057b42672102ab2390a16840eb465c5b552207d0d2991ec6dd796",
+      "contract_digest": "f558e87ba5af1f3b3b07183c56e28f29dfefeb783759809898e99549dca30de7",
       "optional": false
     }
   ],

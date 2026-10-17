@@ -151,6 +151,7 @@ type Tool struct {
 	InputSchema, OutputSchema json.RawMessage
 }
 type Bundle struct {
+	PackageFiles      map[string][]byte
 	Document          Document
 	CompositionDigest string
 	Skill             ports.ArtifactPin

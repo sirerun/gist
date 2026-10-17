@@ -49,5 +49,19 @@
       },
       "valid": false
     }
+  ],
+  "error_semantics": {
+    "not_found": "Report missing message as partial; never invent contents.",
+    "denied": "Stop this operation; do not retry without new caller authority.",
+    "unavailable": "Report provider failure; caller owns retry policy."
+  },
+  "forbidden_effects": [
+    "mark_read",
+    "send",
+    "draft",
+    "label",
+    "delete",
+    "attachments",
+    "linked_content"
   ]
 }
