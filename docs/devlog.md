@@ -172,3 +172,11 @@ and primary configuration were committed before any scoring; independent labels
 will be reconciled against exact inventory before the final freeze review.
 This is a new synthetic development cohort with one maintained composition
 family. Old datasets and expired model envelopes remain unchanged.
+
+The independently reviewed afceb5b evaluation freeze then passed all 19
+composition outcomes and four separate 10k/100k scale runs. Results, source/archive
+pins and all attempts are retained in the composition qualification receipt.
+100k builds took0.62-0.70s; peak processRSS was~1GiB within the frozen2GiB target.
+Broad over-budget searches explicitly refused; no model/provider comparison or
+installed Zati latency is inferred. Final evaluation candidate delivery follows
+its independent review, merge and fresh landed reproduction gates.

@@ -1,0 +1,629 @@
+{
+  "claim_limits": [
+    "one maintained composition family",
+    "synthetic development qualification",
+    "no token or Composio comparison",
+    "no live provider or model acceptance"
+  ],
+  "cohort": {
+    "cases": [
+      {
+        "elapsed_ns": 1673643,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": true,
+        "id": "C01",
+        "observed_status": "ready",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 24389
+      },
+      {
+        "elapsed_ns": 492254,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": false,
+        "id": "C02",
+        "observed_status": "requires_connection",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 262
+      },
+      {
+        "elapsed_ns": 461102,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": false,
+        "id": "C03",
+        "observed_status": "requires_connection",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 262
+      },
+      {
+        "elapsed_ns": 503726,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": false,
+        "id": "C04",
+        "observed_status": "connection_mismatch",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 262
+      },
+      {
+        "elapsed_ns": 502622,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": false,
+        "id": "C05",
+        "observed_status": "connection_mismatch",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 262
+      },
+      {
+        "elapsed_ns": 1632811,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": false,
+        "id": "C06",
+        "observed_status": "requires_selection",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 259
+      },
+      {
+        "elapsed_ns": 3093495,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": true,
+        "id": "C07",
+        "observed_status": "ready",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 24389
+      },
+      {
+        "elapsed_ns": 441599,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": false,
+        "id": "C08",
+        "observed_status": "incomplete_budget",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 256
+      },
+      {
+        "elapsed_ns": 1584,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": false,
+        "id": "C09",
+        "observed_status": "unsupported_composition",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 161
+      },
+      {
+        "elapsed_ns": 1412876,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": false,
+        "id": "C10",
+        "observed_status": "denied",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 144
+      },
+      {
+        "elapsed_ns": 1235164,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": false,
+        "id": "C11",
+        "observed_status": "budget_exceeded",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 153
+      },
+      {
+        "elapsed_ns": 440190,
+        "error": "composition: candidate closure: composition: artifact drift",
+        "exact_selected": true,
+        "expected_ready": false,
+        "id": "C12",
+        "observed_status": "",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 138
+      },
+      {
+        "elapsed_ns": 512767,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": false,
+        "id": "C13",
+        "observed_status": "requires_connection",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 262
+      },
+      {
+        "elapsed_ns": 160,
+        "error": "context canceled",
+        "exact_selected": true,
+        "expected_ready": false,
+        "id": "C14",
+        "observed_status": "",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 138
+      },
+      {
+        "elapsed_ns": 21689923,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": true,
+        "id": "C15",
+        "observed_status": "ready",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 24389
+      },
+      {
+        "elapsed_ns": 1431932,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": true,
+        "id": "C16",
+        "observed_status": "ready",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 24389
+      },
+      {
+        "elapsed_ns": 1025917,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": false,
+        "id": "C17",
+        "observed_status": "stale",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 143
+      },
+      {
+        "elapsed_ns": 7520,
+        "error": "packages: artifact digest mismatch",
+        "exact_selected": true,
+        "expected_ready": false,
+        "id": "C18",
+        "observed_status": "",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 138
+      },
+      {
+        "elapsed_ns": 582782,
+        "error": "",
+        "exact_selected": true,
+        "expected_ready": false,
+        "id": "C19",
+        "observed_status": "denied",
+        "pass": true,
+        "private_exposure": false,
+        "response_bytes": 144
+      }
+    ],
+    "expected_cases": 19,
+    "false_ready": 0,
+    "missing": [],
+    "observed_cases": 19,
+    "outcome_coverage": 1.0,
+    "pass": true,
+    "private_exposures": 0,
+    "ready_hits": 4,
+    "ready_recall": 1.0,
+    "ready_total": 4
+  },
+  "model_calls": 0,
+  "pass": true,
+  "provider_calls": 0,
+  "scale": {
+    "missing": [],
+    "pass": true,
+    "runs": [
+      {
+        "build_seconds": 0.078328499,
+        "checks": {
+          "binding_alternatives_1_4_64_65": true,
+          "build_threshold": true,
+          "cancellation": true,
+          "common_lexical_cold_complete": true,
+          "common_lexical_correct_outcome": true,
+          "common_lexical_latency": true,
+          "common_lexical_sample_count": true,
+          "complete_safety_checks": true,
+          "denial": true,
+          "exact_after_broad_exhaustion": true,
+          "exact_hit_cold_complete": true,
+          "exact_hit_correct_outcome": true,
+          "exact_hit_latency": true,
+          "exact_hit_sample_count": true,
+          "exact_miss_cold_complete": true,
+          "exact_miss_correct_outcome": true,
+          "exact_miss_latency": true,
+          "exact_miss_sample_count": true,
+          "full_rebuild": true,
+          "inflight_generation_refusal": true,
+          "lexical_no_match_cold_complete": true,
+          "lexical_no_match_correct_outcome": true,
+          "lexical_no_match_latency": true,
+          "lexical_no_match_sample_count": true,
+          "projection_complete": true,
+          "projection_measured": true,
+          "revocation": true,
+          "rollback": true,
+          "rss_threshold": true,
+          "run_completed": true,
+          "unique_lexical_hit_cold_complete": true,
+          "unique_lexical_hit_correct_outcome": true,
+          "unique_lexical_hit_latency": true,
+          "unique_lexical_hit_sample_count": true,
+          "update_threshold": true
+        },
+        "error": "",
+        "logical_records": 10000,
+        "missing_query_classes": [],
+        "pass": true,
+        "peak_rss_bytes": 113967104,
+        "private_partitions": 1,
+        "queries": {
+          "common_lexical": {
+            "max_result_bytes": 61,
+            "p50_ms": 0.753342,
+            "p95_ms": 1.192413,
+            "samples": 100,
+            "statuses": [
+              "incomplete_budget"
+            ]
+          },
+          "exact_hit": {
+            "max_result_bytes": 339,
+            "p50_ms": 0.002032,
+            "p95_ms": 0.005024,
+            "samples": 100,
+            "statuses": [
+              "hit"
+            ]
+          },
+          "exact_miss": {
+            "max_result_bytes": 174,
+            "p50_ms": 0.001904,
+            "p95_ms": 0.004736,
+            "samples": 100,
+            "statuses": [
+              "miss"
+            ]
+          },
+          "lexical_no_match": {
+            "max_result_bytes": 52,
+            "p50_ms": 0.00392,
+            "p95_ms": 0.005072,
+            "samples": 100,
+            "statuses": [
+              "complete"
+            ]
+          },
+          "unique_lexical_hit": {
+            "max_result_bytes": 364,
+            "p50_ms": 0.004112,
+            "p95_ms": 0.008384,
+            "samples": 100,
+            "statuses": [
+              "complete"
+            ]
+          }
+        },
+        "rebuild_seconds": 0.076270201,
+        "rollback_seconds": 1.376e-06,
+        "snapshot_projection_bytes": 3146224,
+        "update_seconds": 0.013111627
+      },
+      {
+        "build_seconds": 0.078856032,
+        "checks": {
+          "binding_alternatives_1_4_64_65": true,
+          "build_threshold": true,
+          "cancellation": true,
+          "common_lexical_cold_complete": true,
+          "common_lexical_correct_outcome": true,
+          "common_lexical_latency": true,
+          "common_lexical_sample_count": true,
+          "complete_safety_checks": true,
+          "denial": true,
+          "exact_after_broad_exhaustion": true,
+          "exact_hit_cold_complete": true,
+          "exact_hit_correct_outcome": true,
+          "exact_hit_latency": true,
+          "exact_hit_sample_count": true,
+          "exact_miss_cold_complete": true,
+          "exact_miss_correct_outcome": true,
+          "exact_miss_latency": true,
+          "exact_miss_sample_count": true,
+          "full_rebuild": true,
+          "inflight_generation_refusal": true,
+          "lexical_no_match_cold_complete": true,
+          "lexical_no_match_correct_outcome": true,
+          "lexical_no_match_latency": true,
+          "lexical_no_match_sample_count": true,
+          "projection_complete": true,
+          "projection_measured": true,
+          "revocation": true,
+          "rollback": true,
+          "rss_threshold": true,
+          "run_completed": true,
+          "unique_lexical_hit_cold_complete": true,
+          "unique_lexical_hit_correct_outcome": true,
+          "unique_lexical_hit_latency": true,
+          "unique_lexical_hit_sample_count": true,
+          "update_threshold": true
+        },
+        "error": "",
+        "logical_records": 10000,
+        "missing_query_classes": [],
+        "pass": true,
+        "peak_rss_bytes": 108986368,
+        "private_partitions": 10,
+        "queries": {
+          "common_lexical": {
+            "max_result_bytes": 20467,
+            "p50_ms": 0.612702,
+            "p95_ms": 0.759598,
+            "samples": 100,
+            "statuses": [
+              "complete"
+            ]
+          },
+          "exact_hit": {
+            "max_result_bytes": 339,
+            "p50_ms": 0.004336,
+            "p95_ms": 0.00512,
+            "samples": 100,
+            "statuses": [
+              "hit"
+            ]
+          },
+          "exact_miss": {
+            "max_result_bytes": 174,
+            "p50_ms": 0.004048,
+            "p95_ms": 0.004752,
+            "samples": 100,
+            "statuses": [
+              "miss"
+            ]
+          },
+          "lexical_no_match": {
+            "max_result_bytes": 52,
+            "p50_ms": 0.002672,
+            "p95_ms": 0.003296,
+            "samples": 100,
+            "statuses": [
+              "complete"
+            ]
+          },
+          "unique_lexical_hit": {
+            "max_result_bytes": 364,
+            "p50_ms": 0.009008,
+            "p95_ms": 0.01096,
+            "samples": 100,
+            "statuses": [
+              "complete"
+            ]
+          }
+        },
+        "rebuild_seconds": 0.066118517,
+        "rollback_seconds": 3.1616e-05,
+        "snapshot_projection_bytes": 3148231,
+        "update_seconds": 0.006392861
+      },
+      {
+        "build_seconds": 0.704980831,
+        "checks": {
+          "binding_alternatives_1_4_64_65": true,
+          "build_threshold": true,
+          "cancellation": true,
+          "common_lexical_cold_complete": true,
+          "common_lexical_correct_outcome": true,
+          "common_lexical_latency": true,
+          "common_lexical_sample_count": true,
+          "complete_safety_checks": true,
+          "denial": true,
+          "exact_after_broad_exhaustion": true,
+          "exact_hit_cold_complete": true,
+          "exact_hit_correct_outcome": true,
+          "exact_hit_latency": true,
+          "exact_hit_sample_count": true,
+          "exact_miss_cold_complete": true,
+          "exact_miss_correct_outcome": true,
+          "exact_miss_latency": true,
+          "exact_miss_sample_count": true,
+          "full_rebuild": true,
+          "inflight_generation_refusal": true,
+          "lexical_no_match_cold_complete": true,
+          "lexical_no_match_correct_outcome": true,
+          "lexical_no_match_latency": true,
+          "lexical_no_match_sample_count": true,
+          "projection_complete": true,
+          "projection_measured": true,
+          "revocation": true,
+          "rollback": true,
+          "rss_threshold": true,
+          "run_completed": true,
+          "unique_lexical_hit_cold_complete": true,
+          "unique_lexical_hit_correct_outcome": true,
+          "unique_lexical_hit_latency": true,
+          "unique_lexical_hit_sample_count": true,
+          "update_threshold": true
+        },
+        "error": "",
+        "logical_records": 100000,
+        "missing_query_classes": [],
+        "pass": true,
+        "peak_rss_bytes": 1032601600,
+        "private_partitions": 1,
+        "queries": {
+          "common_lexical": {
+            "max_result_bytes": 61,
+            "p50_ms": 0.900942,
+            "p95_ms": 1.022893,
+            "samples": 100,
+            "statuses": [
+              "incomplete_budget"
+            ]
+          },
+          "exact_hit": {
+            "max_result_bytes": 339,
+            "p50_ms": 0.002352,
+            "p95_ms": 0.003024,
+            "samples": 100,
+            "statuses": [
+              "hit"
+            ]
+          },
+          "exact_miss": {
+            "max_result_bytes": 174,
+            "p50_ms": 0.00216,
+            "p95_ms": 0.003232,
+            "samples": 100,
+            "statuses": [
+              "miss"
+            ]
+          },
+          "lexical_no_match": {
+            "max_result_bytes": 52,
+            "p50_ms": 0.003008,
+            "p95_ms": 0.003824,
+            "samples": 100,
+            "statuses": [
+              "complete"
+            ]
+          },
+          "unique_lexical_hit": {
+            "max_result_bytes": 364,
+            "p50_ms": 0.004544,
+            "p95_ms": 0.005424,
+            "samples": 100,
+            "statuses": [
+              "complete"
+            ]
+          }
+        },
+        "rebuild_seconds": 0.692436058,
+        "rollback_seconds": 2.016e-06,
+        "snapshot_projection_bytes": 31460224,
+        "update_seconds": 0.159199623
+      },
+      {
+        "build_seconds": 0.622983824,
+        "checks": {
+          "binding_alternatives_1_4_64_65": true,
+          "build_threshold": true,
+          "cancellation": true,
+          "common_lexical_cold_complete": true,
+          "common_lexical_correct_outcome": true,
+          "common_lexical_latency": true,
+          "common_lexical_sample_count": true,
+          "complete_safety_checks": true,
+          "denial": true,
+          "exact_after_broad_exhaustion": true,
+          "exact_hit_cold_complete": true,
+          "exact_hit_correct_outcome": true,
+          "exact_hit_latency": true,
+          "exact_hit_sample_count": true,
+          "exact_miss_cold_complete": true,
+          "exact_miss_correct_outcome": true,
+          "exact_miss_latency": true,
+          "exact_miss_sample_count": true,
+          "full_rebuild": true,
+          "inflight_generation_refusal": true,
+          "lexical_no_match_cold_complete": true,
+          "lexical_no_match_correct_outcome": true,
+          "lexical_no_match_latency": true,
+          "lexical_no_match_sample_count": true,
+          "projection_complete": true,
+          "projection_measured": true,
+          "revocation": true,
+          "rollback": true,
+          "rss_threshold": true,
+          "run_completed": true,
+          "unique_lexical_hit_cold_complete": true,
+          "unique_lexical_hit_correct_outcome": true,
+          "unique_lexical_hit_latency": true,
+          "unique_lexical_hit_sample_count": true,
+          "update_threshold": true
+        },
+        "error": "",
+        "logical_records": 100000,
+        "missing_query_classes": [],
+        "pass": true,
+        "peak_rss_bytes": 1048948736,
+        "private_partitions": 10,
+        "queries": {
+          "common_lexical": {
+            "max_result_bytes": 61,
+            "p50_ms": 0.72179,
+            "p95_ms": 1.700059,
+            "samples": 100,
+            "statuses": [
+              "incomplete_budget"
+            ]
+          },
+          "exact_hit": {
+            "max_result_bytes": 339,
+            "p50_ms": 0.001792,
+            "p95_ms": 0.003616,
+            "samples": 100,
+            "statuses": [
+              "hit"
+            ]
+          },
+          "exact_miss": {
+            "max_result_bytes": 174,
+            "p50_ms": 0.001696,
+            "p95_ms": 0.003696,
+            "samples": 100,
+            "statuses": [
+              "miss"
+            ]
+          },
+          "lexical_no_match": {
+            "max_result_bytes": 52,
+            "p50_ms": 0.00328,
+            "p95_ms": 0.004384,
+            "samples": 100,
+            "statuses": [
+              "complete"
+            ]
+          },
+          "unique_lexical_hit": {
+            "max_result_bytes": 364,
+            "p50_ms": 0.003664,
+            "p95_ms": 0.007424,
+            "samples": 100,
+            "statuses": [
+              "complete"
+            ]
+          }
+        },
+        "rebuild_seconds": 0.605301334,
+        "rollback_seconds": 2.5792e-05,
+        "snapshot_projection_bytes": 31462231,
+        "update_seconds": 0.086403679
+      }
+    ]
+  },
+  "tokens": null
+}
