@@ -12,7 +12,11 @@ its qualified platform torch build. Install the exact packages in
 `requirements-embedding.txt`; never mutate shared packages. Set CPU/BLAS thread
 limits to4. The explicit first fetch is pinned to the immutable public model
 revision in `embedding_adapter.py`; no Hub account or token is required for its
-current public Apache2 access. File hashes and runtime versions are recorded.
+current public Apache2 access. Every local model/config/tokenizer/pooling file must match the committed
+`model-files.sha256.json` before any loader sees it and again before output.
+Missing, altered, symlinked or additional files fail closed. The canonical file-set
+root also binds vector/index identity. The operator must prevent concurrent
+writers to the selected model directory. File hashes and runtime versions are recorded.
 
 ```sh
 python3 -m venv --system-site-packages .runtime
