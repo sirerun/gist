@@ -2019,8 +2019,8 @@ is supplied; do not infer fixture-only conformance is production qualification.
 - [x] T-HOSTED.6 Merge and verify landed deployment inputs  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-HOSTED.5, T-HOSTED.17]  acc: [Guarded rebase preserves repository policies, exact approved trees and immutable source provenance; fresh landed checks verify affected behavior and plan conformance]
 - [x] T-HOSTED.7 Stage canonical certificate and reconcile validation DNS  Owner: deployment-owner  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-HOSTED.6]  acc: [Merged preview matches exact existing-stack apply; new ACM certificate and Cloudflare validation records are owned, idempotent and issued while old serving configuration remains available]
 - [x] T-HOSTED.8 Qualify enrollment and durable secret configuration  Owner: coordinator-with-owner  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-HOSTED.1]  acc: [Existing or explicitly provisioned GitHubApp client reference, canonical callback, exact founder numeric identity/workspace, persistent signing/flow/CSRF/session custody and maintenance target recorded; no unrelated secrets borrowed or secret values published]
-- [ ] T-HOSTED.9 Build and pin the reviewed registry image  Owner: deployment-owner  Est: TBD  kind: agent  stage: release  blocked-by: [T-HOSTED.6]  acc: [Existing CodeBuild/ECR produces ARM64 image from exact merged source and reviewed Containerfile, retains build/digest and failure receipts; no moving image tags]
-- [ ] T-HOSTED.10 Run owned versioned migrations and deploy canonical service  Owner: deployment-owner  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-HOSTED.7, T-HOSTED.8, T-HOSTED.9, T-HOSTED.21]  acc: [Version-aware migration workflow preserves existing production data; merged exact image/config preview applies only reviewed stack resources and canonical origin/audience together; ECS stabilizes and rollback remains available]
+- [x] T-HOSTED.9 Build and pin the reviewed registry image  Owner: deployment-owner  Est: TBD  kind: agent  stage: release  blocked-by: [T-HOSTED.6]  acc: [Existing CodeBuild/ECR produces ARM64 image from exact merged source and reviewed Containerfile, retains build/digest and failure receipts; no moving image tags]
+- [x] T-HOSTED.10 Run owned versioned migrations and deploy canonical service  Owner: deployment-owner  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-HOSTED.7, T-HOSTED.8, T-HOSTED.9, T-HOSTED.21]  acc: [Version-aware migration workflow preserves existing production data; merged exact image/config preview applies only reviewed stack resources and canonical origin/audience together; ECS stabilizes and rollback remains available]
 - [ ] T-HOSTED.11 Verify external HTTPS and authenticated catalog journey  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-HOSTED.10]  acc: [Canonical DNS/TLS/issuer/resource metadata, real operator enrollment, workload authorization, exact artifact retrieval/MCP and unauthenticated/wrong-audience/tenant/revocation denials observed; health alone cannot close acceptance]
 - [ ] T-HOSTED.12 Independently accept deployed service and operational handoff  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-HOSTED.11]  acc: [Source/image/config/live receipts agree, bounded recovery/backup/rotation/monitoring/ownership and actual remaining client/provider/publication limits are documented without claiming all historical RFC milestones complete]
 - [ ] T-HOSTED.13 Record and verify landed hosting handoff  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-HOSTED.12]  acc: [Independently reviewed evidence and canonical plan merge with source-bound production receipt; fresh main and running revision align, no ongoing watcher or unsupported marketplace completion is claimed]
@@ -2089,7 +2089,7 @@ acceptance. Foundation PR 280 is merged with an identical Pulumi source tree.
 - [x] T-HOSTED.18 Implement read-only production database inspection  Owner: registry-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-HOSTED.14, T-HOSTED.15]  acc: [Explicit runtime verification authenticates only as the runtime role and checks live privileges, ownership and forced tenant RLS; explicit sorted schema-definition output supports a legacy-prefix audit without reading application row values; default status unchanged]
 - [x] T-HOSTED.19 Verify exact database inspection source  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-HOSTED.18]  acc: [PostgreSQL race integration covers seeded tenant isolation, denied unsafe grants or disabled forced RLS and definition digest with no private row marker; hosted vet and build pass for final candidate]
 - [x] T-HOSTED.20 Independently review read-only database inspection  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-HOSTED.19]  acc: [Non-author approves exact source and actual checks; output is privately retained and does not overstate empty live row probes or OAuth acceptance]
-- [ ] T-HOSTED.21 Merge and verify landed database inspection inputs  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-HOSTED.20]  acc: [Guarded rebase respects repository policy and exact reviewed source; fresh landed checks pass before an immutable follow-on image is built and pinned]
+- [x] T-HOSTED.21 Merge and verify landed database inspection inputs  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-HOSTED.20]  acc: [Guarded rebase respects repository policy and exact reviewed source; fresh landed checks pass before an immutable follow-on image is built and pinned]
 
 #### Observed staging state
 
@@ -2109,3 +2109,21 @@ Read-only inspection candidate passed final-source PostgreSQL race integration,
 vet and build; non-author review approved its exact source. Migration-only
 Foundation PR 281 merged and applied three isolated task resources with no
 serving change; the canonical TLS and application switch are still pending.
+
+Deployment operations observed: encrypted snapshot became available before
+SQL began; all ten migrations applied with zero pending; restricted runtime
+role provisioned successfully. The follow-on immutable image built from the
+freshly checked merged inspection source, and its explicit read-only live
+attestation passed all role, grant, ownership and forced-RLS checks. Foundation
+PRs 282 and 283 merged. Canonical activation applied only the reviewed service,
+task, execution-policy and certificate-waiter/listener changes; protected data
+resources stayed unchanged. DNS now targets the existing ALB. ECS desired count
+is explicitly one; rollout and real founder enrollment remain acceptance gates.
+
+Canonical rollout completed with one desired/running task and the reviewed
+image. External TLS validation, health, real GitHub authorization redirect
+(client/callback/PKCE/secure cookie), invalid callback denial and bootstrap
+REST/MCP denials passed. Readiness remains unavailable until real founder
+enrollment; the owner has been given the direct sign-in link. Tasks for full
+authenticated acceptance, first-enrollment removal and final production handoff
+remain open; no persistent watcher or complete marketplace acceptance is claimed.
