@@ -1729,11 +1729,11 @@ Numerical latency/RSS/index-size targets are frozen in .15 from measured baselin
 and target-host capacity before scoring, never invented here or tuned afterward.
 
 - [x] T-COMPOSE.1 Freeze producer schemas, API and verification contract  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  acc: [ADR021 requirements become canonical composition and capability schemas with digest rules, statuses, limits, compatibility cases and exact verification commands; no provider calls or wire changes; requirements and design reviewed before coding]
-- [ ] T-COMPOSE.2 Implement typed composition validation and exact resolution  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.1]  acc: [Strict bounded DAG and JSON Pointer validation, capability-indexed alternatives, connection-group intersection, per-capability and composition evidence, scoped freshness and complete-schema budgets implement UC-COMP-1 and UC-COMP-2 without Cartesian search or authority grants]
-- [ ] T-COMPOSE.3 Publish local immutable fixtures and migration contracts  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.1]  acc: [New list/read contracts and inbox package/recipe fixtures have pinned digests and conformance examples; old bytes remain unchanged; this is repository fixture publication only, not registry upload or a module release]
-- [ ] T-COMPOSE.4 Verify producer behavior and compatibility  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.2, T-COMPOSE.3]  acc: [Current required checks plus missing optional/required capability, duplicate roles/keys, cycles, type mismatch, bounded iteration, partial results, same-connection/account mismatch, ambiguity, schema drift, revocation, cancellation and insufficient context pass; unsupported consumers and legacy paths covered]
+- [x] T-COMPOSE.2 Implement typed composition validation and exact resolution  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.1]  acc: [Strict bounded DAG and JSON Pointer validation, capability-indexed alternatives, connection-group intersection, per-capability and composition evidence, scoped freshness and complete-schema budgets implement UC-COMP-1 and UC-COMP-2 without Cartesian search or authority grants]
+- [x] T-COMPOSE.3 Publish local immutable fixtures and migration contracts  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.1]  acc: [New list/read contracts and inbox package/recipe fixtures have pinned digests and conformance examples; old bytes remain unchanged; this is repository fixture publication only, not registry upload or a module release]
+- [x] T-COMPOSE.4 Verify producer behavior and compatibility  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.2, T-COMPOSE.3]  acc: [Current required checks plus missing optional/required capability, duplicate roles/keys, cycles, type mismatch, bounded iteration, partial results, same-connection/account mismatch, ambiguity, schema drift, revocation, cancellation and insufficient context pass; unsupported consumers and legacy paths covered]
 - [ ] T-COMPOSE.5 Independently review producer composition candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.4]  acc: [Independent non-author reviews .1-.4 exact base/head with source and checks; findings/dispositions recorded and all blockers resolved]
-- [ ] T-COMPOSE.6 Merge reviewed producer candidate  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.5]  acc: [Exact reviewed head rebases through GitHub with current base and required checks; no bypass and landed SHA recorded]
+- [ ] T-COMPOSE.6 Merge reviewed producer candidate  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.5, T-COMPOSE.28]  acc: [Exact reviewed head rebases through GitHub with current base and required checks; no bypass and landed SHA recorded]
 - [ ] T-COMPOSE.7 Verify landed producer composition  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.6]  acc: [Fresh main reaches reviewed tree and affected additive API, immutable fixtures and legacy checks pass]
 - [ ] T-COMPOSE.8 Freeze Zati migration and owning lifecycle bindings  Owner: zati-coordinator  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-COMPOSE.7]  acc: [Current Zati contract and plan authority reconciled; exact producer revision, new skill version and typed readiness mapping selected; legacy fallback and verification recipes fixed without executing an enrolled lifecycle from this ledger]
 - [ ] T-COMPOSE.9 Implement generic Zati admission and recipe enforcement  Owner: zati-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.8]  acc: [Remove inbox-only restriction for negotiated new version; validate all required capabilities and affinity, bind typed dataflow and enforce bounded actual calls/output; preserve ordinary permissions, schema pins, effect recovery and legacy list/read mapping]
@@ -1774,3 +1774,26 @@ contract SHA256380a85c246b7bba5cb83bd829823542b382886dec613f17f4d9f60c6329e20a4.
 Review corrected exact provider reference/pin semantics and added hard parsing,
 schema and candidate ceilings before coding. This is design approval only;
 source/check/review/landing rows remain pending.
+
+Producer review remediation (2026-10-17): initial candidate5cb0491 is superseded
+before aggregate acceptance. Fixture self-review found missing frozen capability
+metadata; independent review found decimal-to-float integer validation could
+accept fractional values. These are tracked corrections, not accepted delivery.
+
+- [x] T-COMPOSE.26 Correct producer compatibility and safety findings  Owner: gist-implementer  Est: TBD  kind: agent  stage: fix  blocked-by: [T-COMPOSE.2, T-COMPOSE.3]  acc: [All accepted producer review findings have precise fixes; frozen schema conformance, exact numeric validation and any required package/runtime preservation corrections retain regression coverage and finding dispositions]
+- [x] T-COMPOSE.27 Verify corrected producer behavior  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.26]  acc: [Affected regression checks and aggregate required candidate checks pass or retain explicit inherited failure comparison; exact head and source evidence recorded]
+- [ ] T-COMPOSE.28 Independently re-review corrected producer candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: rereview  blocked-by: [T-COMPOSE.27]  acc: [Non-author approves exact corrected base/head covering all accepted findings and complete producer source before merge; no unresolved blocking findings remain]
+
+Producer source checkpoint: 51e9785 implements the additive composition package
+and new inbox v2 fixture; legacy bytes/wire formats remain unchanged. Corrections
+cover frozen schema compatibility, exact bounded integer validation, retained
+package instructions/assets and all-result context bounds. Focused Go tests and
+two actual frozen-schema fixture checks pass; aggregate verification and final
+independent approval remain pending. Source rows do not imply merged delivery.
+
+Producer aggregate evidence at51e9785: qualified Linux Go1.26.1 full root
+integration/race, vet/build/binary, frozen contracts, registry12 tests and tidy
+pass; new fixture schema checks2 pass. Full lint remains failing on exactly the
+same5 unchanged baseline findings, zero introduced. Independent source re-review
+resolved COMPOSE-R2/R3/R4; exact final documentation approval and guarded landing
+remain gates. See receipts/2026-10-17-composition-producer.md.
