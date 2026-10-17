@@ -39,5 +39,10 @@
       "product_cases": 1,
       "labels_visible_to_implementer": false
     }
-  }
+  },
+  "limitations": [
+    "Only one maintained inbox product case per split; the other118 are synthetic nonproduct probes.",
+    "This pilot can qualify source/harness mechanics and synthetic generalization only.",
+    "A richer independently labelled and preregistered inbox cohort is required before any positive product adoption decision; register it before exposing its results."
+  ]
 }

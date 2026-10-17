@@ -17,7 +17,9 @@ by domain, requested evidence, source composition, language and abstention cause
 Only one case per split uses the maintained real inbox skill. All other cases
 are synthetic nonproduct probes; their catalogue names are fixture definitions,
 not shipped product features. This small product cohort cannot qualify inbox
-performance, six-stratum product coverage or adoption. The broader corpus tests
+performance, six-stratum product coverage or adoption. A richer independently
+labelled inbox cohort must be preregistered before any positive product adoption
+decision, before its results are exposed. The broader corpus tests
 preparation mechanics and synthetic generalization only. No real mailbox,
 private account, provider credential or actual customer record is included.
 
