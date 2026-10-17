@@ -13,6 +13,7 @@ import (
 
 	"github.com/sirerun/gist/hosted/internal/app"
 	"github.com/sirerun/gist/hosted/internal/enrollment"
+	"github.com/sirerun/gist/hosted/internal/otelboot"
 )
 
 func main() {
@@ -37,6 +38,10 @@ func main() {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	otelShutdown, err := otelboot.Start(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
 	a, err := app.New(ctx, cfg)
 	if err != nil {
 		log.Fatal(err)
@@ -50,6 +55,9 @@ func main() {
 	shutdown, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := a.Shutdown(shutdown); err != nil {
+		log.Fatal(err)
+	}
+	if err := otelShutdown(shutdown); err != nil {
 		log.Fatal(err)
 	}
 }

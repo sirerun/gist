@@ -22,6 +22,7 @@ import (
 	"github.com/sirerun/gist/hosted/internal/enrollment"
 	"github.com/sirerun/gist/hosted/internal/identity"
 	"github.com/sirerun/gist/hosted/internal/oauth"
+	"github.com/sirerun/gist/hosted/internal/otelboot"
 	"github.com/sirerun/gist/hosted/internal/ports"
 	"github.com/sirerun/gist/hosted/internal/remotemcp"
 	"github.com/sirerun/gist/hosted/internal/resolution"
@@ -216,7 +217,7 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		}
 		return pool.Ping(ctx)
 	}}
-	a.server = &http.Server{Addr: cfg.ListenAddress, Handler: handler, ReadHeaderTimeout: cfg.RequestTimeout}
+	a.server = &http.Server{Addr: cfg.ListenAddress, Handler: otelboot.WrapHandler(handler), ReadHeaderTimeout: cfg.RequestTimeout}
 	if cfg.PublicationV2 != nil {
 		if err := a.startPublicationJanitor(ctx, v2); err != nil {
 			pool.Close()
