@@ -73,10 +73,10 @@ class FrozenAttemptIdentityTests(unittest.TestCase):
     def test_each_frozen_identity_and_semantic_configuration_is_enforced(self):
         from report import validate_frozen_rows
         admission = {"candidate_source": "source", "inputs_sha256": "inputs", "catalog_sha256": "catalog",
-                     "catalog_version": "sha256:catalog", "recipe_version": "inbox-v1", "model_version": "model-v1",
+                     "catalog_version": "sha256:catalog", "recipe_version": "inbox-v1", "policy_version": "policy-v1", "model_version": "model-v1",
                      "top_k": 4, "semantic_floor": 0.30, "rrf_constant": 60}
         row = {"source": "source", "inputs_sha256": "inputs", "catalog_sha256": "catalog",
-               "catalog_version": "sha256:catalog", "recipe_version": "inbox-v1", "model_version": "model-v1",
+               "catalog_version": "sha256:catalog", "recipe_version": "inbox-v1", "policy_version": "policy-v1", "model_version": "model-v1",
                "top_k": 4, "semantic_floor": 0.30, "rrf_constant": 60, "arm": "H1"}
         validate_frozen_rows([row], admission)
         for field in row:
@@ -85,5 +85,19 @@ class FrozenAttemptIdentityTests(unittest.TestCase):
             with self.subTest(field=field):
                 changed = dict(row)
                 changed[field] = "wrong"
+                with self.assertRaises(ValueError):
+                    validate_frozen_rows([changed], admission)
+
+class FrozenPolicyGridTests(unittest.TestCase):
+    def test_supported_grid_binds_policy_and_configuration(self):
+        from report import validate_frozen_rows
+        for k in (4, 8, 16):
+            admission = {"candidate_source": "s", "inputs_sha256": "i", "catalog_sha256": "c",
+                         "catalog_version": "v", "recipe_version": "r", "policy_version": "p",
+                         "top_k": k, "semantic_floor": .30, "rrf_constant": 60, "model_version": "m"}
+            row = dict(admission, source="s", arm="H0")
+            validate_frozen_rows([row], admission)
+            for field in ("policy_version", "top_k"):
+                changed = dict(row, **{field: "wrong"})
                 with self.assertRaises(ValueError):
                     validate_frozen_rows([changed], admission)
