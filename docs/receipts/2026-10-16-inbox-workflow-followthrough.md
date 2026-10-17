@@ -170,3 +170,35 @@ and redelivers only the recorded observation. A final legacy turn/step matching
 guard and mismatch regression are included in bde5dfc2; its affected unit/race,
 vet and executable checks remain in progress. Actual model comparison has not
 started, and no inference result is inferred from these source checks.
+
+
+## Fresh-base source and corrected race verification
+
+Zati main advanced to c9d77a434c031d28ebe597ce1243b7cb892bf73a during
+verification. Reconciled candidate06f9609445a3bbbb0e9f62b33504d6523b876a96
+preserves upstream provider/catalog/fixture changes and the local Narrate
+replacement. Reviewed continuation implementation is byte-identical; the old
+MCP source-identity test now asserts the intended stable per-proposal identity
+and unchanged callback turn. Upstream authored specifications were retained and
+generated mirrors rendered afresh. Independent exact-base review found no new
+source blocker, conditional on current verification.
+
+On this candidate, full Responses/controller tests passed; focused execution,
+revoked/stale authority, paired workflow and bridge tests passed. The previously
+failed joined race now passed in111.384seconds; focused controller/execution
+race checks also passed. Vet and module verification passed. Specification
+render checks and42 specification/runtime-sync tests passed. These are local
+Linux source/fixture checks, not hosted CI or real inference.
+
+The initial bde5dfc2 full execution run failed only the old SourceID==turn.ID
+assertion, retained and corrected as above. Its set-e runner did not run later
+stages; those are not credited. The reconciled aggregate stopped at tidy after
+removing two obsolete upstream Narrate checksum entries. Exact-base reproduction
+is pending before classifying that failure; module files were not changed by
+this candidate. Binary, lock/lint, actual model execution and final delivery
+remain open.
+
+Hosted current-main run39008287473 could not start its specification job because
+GitHub reports failed account payments or an insufficient spending limit. No
+billing change, paid runner or retry was made. Local evidence is not CI-green;
+unchanged required checks and branch policy must still be satisfied at merge.
