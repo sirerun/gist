@@ -13,7 +13,7 @@ wording. `family` now clusters correlated construction templates conservatively:
 44 development groups and35 held-out groups, not60 independent families per
 split. Unique IDs never establish independence. A v3 preregistration repair
 replaced32 held-out prompts before any scores, and independent construction-split
-review accepted the repaired classes; final normalized artifact review is pending. Shared capability infrastructure does not by itself mean
+review accepted the repaired classes; final normalized artifact review passed at the recorded source revision. Shared capability infrastructure does not by itself mean
 shared task output. Manual intents vary
 by domain, requested evidence, source composition, language and abstention cause.
 
@@ -74,9 +74,9 @@ fixtures do not turn synthetic capabilities into product support.
 
 `manifest.json` records counts and exact SHA-256 file hashes. It includes only
 an opaque held-out artifact ID and hashes/counts, never held-out intents, labels,
-family names or storage locations. `two_annotator_reconciled_pending_final_independent_check` records completed
-independent annotation and union reconciliation, but final normalized artifact
-review is still required before qualification. `manifest.v1.json` and retained source history preserve the
+family names or storage locations. `independently_reconciled` records independent blind annotation, union
+reconciliation and final normalized artifact review at the source revision
+recorded in the manifest. Qualification covers the synthetic source pilot only. `manifest.v1.json` and retained source history preserve the
 superseded initial corpus. Both original label sets remain intact; reconciled
 artifacts are separate files. V1 reconciliation clarified requested-versus-
 executable capability metadata and normalized an ambiguous rubric prefix so
@@ -107,8 +107,8 @@ Revision v2 is invalid and superseded: CORPUS-R2 found that32 replacement intent
 variables were not serialized, leaving old intent text against new fixture
 metadata. The frozen failed revision is retained for audit. V3 assigns the new
 intent strings and explicitly verifies32 actual input-text changes and32 changed
-capability closures against v1; independent input review/re-annotation remains
-pending. No scores were observed during either preregistration repair.
+capability closures against v1; independent input review/re-annotation and final normalized artifact review
+passed. No scores were observed during either preregistration repair.
 
 ## Fixture safety semantics and final labels
 

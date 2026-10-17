@@ -1,9 +1,9 @@
 {
   "schema": "gist.evaluation.corpus/v1",
   "corpus_id": "preparation-synthetic-pilot-20261016",
-  "label_status": "two_annotator_reconciled_pending_final_independent_check",
+  "label_status": "independently_reconciled",
   "two_annotator_reconciliation_required": true,
-  "family_design": "family is a conservatively clustered construction class; workflow_family is a distinct task identity. Distinct row IDs are not independent families. V3 repair precedes any model/retrieval scores; independent template-isolation review accepted the repaired construction classes; final normalized artifact check is pending.",
+  "family_design": "family is a conservatively clustered construction class; workflow_family is a distinct task identity. Distinct row IDs are not independent families. V3 repair precedes any model/retrieval scores; independent template-isolation review accepted the repaired construction classes; final normalized artifact review passed at the recorded exact source revision.",
   "splits": {
     "development": {
       "artifact_id": "gist-preparation-development-v3-20261016",
@@ -66,6 +66,15 @@
   "reconciliation": {
     "public_record": "reconciliation.json",
     "sealed_record_artifact_id": "gist-preparation-heldout-reconciliation-v3",
-    "sealed_record_sha256": "51a072013f2a43e0192c058f896fd81b23d9573fc7716e31bfed519cc4135d11"
+    "sealed_record_sha256": "316e2846cb186bbf7d619d0662d1f219b762cf75118424b962cce3bae9adb013"
+  },
+  "qualification_scope": "synthetic_source_pilot_only",
+  "independent_review": {
+    "reviewer": "independent-second-annotator-marketplace_final_review",
+    "reviewed_source_commit": "75ecc3bcd6d39aa3ead395157af23b0d8c017fc5",
+    "reviewed_normalized_record_sha256": "51a072013f2a43e0192c058f896fd81b23d9573fc7716e31bfed519cc4135d11",
+    "result": "passed",
+    "scope": "All120 normalized typed labels, safety/rubric union, per-ID reconciliation truth, repaired construction-family split and audit preservation. Synthetic source pilot only.",
+    "score_access": "No model or retrieval scores consulted."
   }
 }

@@ -14,12 +14,20 @@
     "heldout": 60
   },
   "template_isolation": "Independent review pending; unique workflow IDs are not proof of construction-family independence.",
-  "labels_status": "heldout replacement author1 sealed; blind author2 replacement annotation pending",
-  "validation_status": "input_only_independent_review_pending",
+  "labels_status": "two independent annotations reconciled and final normalized artifacts reviewed",
+  "validation_status": "independently_reconciled_synthetic_pilot",
   "verified_actual_changed_intent_count": 32,
   "supersedes": {
     "revision": "v2",
     "finding": "CORPUS-R2",
     "repair": "Assign replacement intent into serialized row; assert32 actual changed strings and32 changed capability closures againstv1."
+  },
+  "independent_review": {
+    "reviewer": "independent-second-annotator-marketplace_final_review",
+    "reviewed_source_commit": "75ecc3bcd6d39aa3ead395157af23b0d8c017fc5",
+    "reviewed_normalized_record_sha256": "51a072013f2a43e0192c058f896fd81b23d9573fc7716e31bfed519cc4135d11",
+    "result": "passed",
+    "scope": "All120 normalized typed labels, safety/rubric union, per-ID reconciliation truth, repaired construction-family split and audit preservation. Synthetic source pilot only.",
+    "score_access": "No model or retrieval scores consulted."
   }
 }
