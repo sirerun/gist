@@ -1,0 +1,659 @@
+{
+  "candidate_selected": false,
+  "conclusion": "Exact reversed-rank RRF ties; generic abstention is intentional, not a native/tokenizer/connection defect.",
+  "construction_families": 1,
+  "defaults_or_adoption_changed": false,
+  "evaluated_source": "3676aa17e05cf7c813a2000068bc413e99738eb4",
+  "frozen_fingerprints": {
+    "catalog/discovery/index.go": "ab0ffb670a85292b314a7a517941f62005d68abbe44fa9dc19e5b579f799679c",
+    "catalog/preparation/preparation.go": "1c13371a3cb253ef95b5fa970f8c8a168c0db1199c9847920c2862369d14e3c3",
+    "internal/cataloglexical/lexical.go": "d4306c95dac579d12d97a1f69fb773cd692e30b566db4b4ec5c8757db5573ae6",
+    "tools/evaluation/inbox-development-results/256-k16-source_cold.jsonl.gz": "5e9ecaf505e9150391d5f9991d5b0ca211adb04972970eac81e53fe7242b175e",
+    "tools/evaluation/inbox-development-results/256-k16-source_warm.jsonl.gz": "0f0acb728da696adbc3222f457ae434204f8b5c5c5ca5576bcec6182f25d2add",
+    "tools/evaluation/inbox-development-results/256-k4-source_cold.jsonl.gz": "a88ce34465082dc8f822be8da47bf09471b8c71d9303a6c15b893f08ef240dbb",
+    "tools/evaluation/inbox-development-results/256-k4-source_warm.jsonl.gz": "7f839855ab8079ca243746260370e197b143033e796bea79f97882a6ac1cf13e",
+    "tools/evaluation/inbox-development-results/256-k8-source_cold.jsonl.gz": "6e48c251edae21919f97621493e211fc94ab94a62b0c146565a048e86a957913",
+    "tools/evaluation/inbox-development-results/256-k8-source_warm.jsonl.gz": "2239a57861c1ab1537caf5a6e3e0dcef8a5b02ba25c624076cca277318330b51",
+    "tools/evaluation/inbox-development-results/768-k16-source_cold.jsonl.gz": "e5ca056cd472f06b5901fc03d261888f025ed566c5e10a346d1add4b0e8afccd",
+    "tools/evaluation/inbox-development-results/768-k16-source_warm.jsonl.gz": "941a2134b90f7688fed1e0ae70649cda100cd1bf817515d393ab370df66f877f",
+    "tools/evaluation/inbox-development-results/768-k4-source_cold.jsonl.gz": "526a1b0a899f7da900e071fee7b6a4a142eb03cdd6a3802d09fb7a798ad0a6c2",
+    "tools/evaluation/inbox-development-results/768-k4-source_warm.jsonl.gz": "7698b4ba3916c3680d2dc6cffaa2e7f4c95cc221a3d69e62b6483af2ff582c98",
+    "tools/evaluation/inbox-development-results/768-k8-source_cold.jsonl.gz": "99885fbc12ea1e7a06415fd8b1f8a3d1c778eb6d15a65a264766cf6a95479924",
+    "tools/evaluation/inbox-development-results/768-k8-source_warm.jsonl.gz": "8690578978e32c7e5db54abbc03032e788437c06c8274e17e4ad1d0dcdb49fd5",
+    "tools/evaluation/inbox-development-results/vectors-256.json.gz": "45a45706f17664e784156e3de6c58a6618d1cf93f6e6f99a2b536109bb4e0df4",
+    "tools/evaluation/inbox-development-results/vectors-768.json.gz": "5e27d3c4ae744e7d38e8d133e7997aadcce8499a9aca446d7f1ffa4dbb480f40",
+    "tools/evaluation/inbox-development/catalog.json": "dd769302f83ac062af19bb465baf48b2f6ac9a3146da7d302e40f5c51e7db67a",
+    "tools/evaluation/inbox-development/development.inputs.jsonl": "eb05b86e2498835b1607704abd75ea0f021a8bb0c520ce1fea63067bd116011b"
+  },
+  "heldout_accessed": false,
+  "inspected_source": "23ba27a7fdcd829f3407c3f3cc328a0737fa9afb",
+  "labels_read": false,
+  "model_inference_calls": 0,
+  "product_route": "Reuse Zati's existing explicitly selected immutable skill path; it is a separate caller-selected route, not an improved H1 result.",
+  "provider_calls": 0,
+  "rank_evidence": [
+    {
+      "decision": "requires_selection",
+      "dimension": 256,
+      "exact_rrf_score": "123/3782",
+      "floating_rrf_score": 0.03252247488101533,
+      "id": "inbox-menu-14",
+      "intent": "Make a compact overview of unread email with message references.",
+      "lexical": [
+        {
+          "id": "synthetic/send-mail",
+          "rank": 1,
+          "terms": 2,
+          "weight": 6
+        },
+        {
+          "id": "zati/inbox-briefing",
+          "rank": 2,
+          "terms": 2,
+          "weight": 2
+        }
+      ],
+      "semantic": [
+        {
+          "cosine": 0.8392818047149054,
+          "id": "zati/inbox-briefing",
+          "rank": 1
+        },
+        {
+          "cosine": 0.6825165802343439,
+          "id": "synthetic/send-mail",
+          "rank": 2
+        },
+        {
+          "cosine": 0.6591380169669578,
+          "id": "synthetic/warehouse",
+          "rank": 3
+        },
+        {
+          "cosine": 0.6506993935994348,
+          "id": "synthetic/files",
+          "rank": 4
+        },
+        {
+          "cosine": 0.6399634559010425,
+          "id": "synthetic/calendar",
+          "rank": 5
+        }
+      ],
+      "tied_top_ids": [
+        "synthetic/send-mail",
+        "zati/inbox-briefing"
+      ]
+    },
+    {
+      "decision": "requires_selection",
+      "dimension": 256,
+      "exact_rrf_score": "123/3782",
+      "floating_rrf_score": 0.03252247488101533,
+      "id": "inbox-menu-28",
+      "intent": "Gib mir einen kurzen \u00dcberblick \u00fcber die ungelesenen E-Mails in meinem Posteingang.",
+      "lexical": [
+        {
+          "id": "synthetic/send-mail",
+          "rank": 1,
+          "terms": 1,
+          "weight": 3
+        },
+        {
+          "id": "zati/inbox-briefing",
+          "rank": 2,
+          "terms": 1,
+          "weight": 2
+        }
+      ],
+      "semantic": [
+        {
+          "cosine": 0.7839123702769395,
+          "id": "zati/inbox-briefing",
+          "rank": 1
+        },
+        {
+          "cosine": 0.6530485505616277,
+          "id": "synthetic/send-mail",
+          "rank": 2
+        },
+        {
+          "cosine": 0.6237532326413006,
+          "id": "synthetic/files",
+          "rank": 3
+        },
+        {
+          "cosine": 0.6088919559458401,
+          "id": "synthetic/warehouse",
+          "rank": 4
+        },
+        {
+          "cosine": 0.588813984591579,
+          "id": "synthetic/calendar",
+          "rank": 5
+        }
+      ],
+      "tied_top_ids": [
+        "synthetic/send-mail",
+        "zati/inbox-briefing"
+      ]
+    },
+    {
+      "decision": "requires_selection",
+      "dimension": 256,
+      "exact_rrf_score": "123/3782",
+      "floating_rrf_score": 0.03252247488101533,
+      "id": "inbox-menu-29",
+      "intent": "Fa\u00e7a um resumo breve dos e-mails n\u00e3o lidos na minha caixa de entrada.",
+      "lexical": [
+        {
+          "id": "synthetic/send-mail",
+          "rank": 1,
+          "terms": 1,
+          "weight": 3
+        },
+        {
+          "id": "zati/inbox-briefing",
+          "rank": 2,
+          "terms": 1,
+          "weight": 2
+        }
+      ],
+      "semantic": [
+        {
+          "cosine": 0.8300770075422386,
+          "id": "zati/inbox-briefing",
+          "rank": 1
+        },
+        {
+          "cosine": 0.6625844805972513,
+          "id": "synthetic/send-mail",
+          "rank": 2
+        },
+        {
+          "cosine": 0.6302891286545327,
+          "id": "synthetic/files",
+          "rank": 3
+        },
+        {
+          "cosine": 0.6190514093355591,
+          "id": "synthetic/warehouse",
+          "rank": 4
+        },
+        {
+          "cosine": 0.6002550531778881,
+          "id": "synthetic/calendar",
+          "rank": 5
+        }
+      ],
+      "tied_top_ids": [
+        "synthetic/send-mail",
+        "zati/inbox-briefing"
+      ]
+    },
+    {
+      "decision": "requires_selection",
+      "dimension": 256,
+      "exact_rrf_score": "123/3782",
+      "floating_rrf_score": 0.03252247488101533,
+      "id": "inbox-menu-30",
+      "intent": "Prepara un breve riepilogo delle email non lette nella mia casella di posta.",
+      "lexical": [
+        {
+          "id": "synthetic/send-mail",
+          "rank": 1,
+          "terms": 1,
+          "weight": 3
+        },
+        {
+          "id": "zati/inbox-briefing",
+          "rank": 2,
+          "terms": 1,
+          "weight": 1
+        }
+      ],
+      "semantic": [
+        {
+          "cosine": 0.8112346722413006,
+          "id": "zati/inbox-briefing",
+          "rank": 1
+        },
+        {
+          "cosine": 0.6686260856463917,
+          "id": "synthetic/send-mail",
+          "rank": 2
+        },
+        {
+          "cosine": 0.5974536663941681,
+          "id": "synthetic/files",
+          "rank": 3
+        },
+        {
+          "cosine": 0.5873154280292127,
+          "id": "synthetic/warehouse",
+          "rank": 4
+        },
+        {
+          "cosine": 0.5632824490557787,
+          "id": "synthetic/calendar",
+          "rank": 5
+        }
+      ],
+      "tied_top_ids": [
+        "synthetic/send-mail",
+        "zati/inbox-briefing"
+      ]
+    },
+    {
+      "decision": "requires_selection",
+      "dimension": 768,
+      "exact_rrf_score": "123/3782",
+      "floating_rrf_score": 0.03252247488101533,
+      "id": "inbox-menu-14",
+      "intent": "Make a compact overview of unread email with message references.",
+      "lexical": [
+        {
+          "id": "synthetic/send-mail",
+          "rank": 1,
+          "terms": 2,
+          "weight": 6
+        },
+        {
+          "id": "zati/inbox-briefing",
+          "rank": 2,
+          "terms": 2,
+          "weight": 2
+        }
+      ],
+      "semantic": [
+        {
+          "cosine": 0.8295072469011027,
+          "id": "zati/inbox-briefing",
+          "rank": 1
+        },
+        {
+          "cosine": 0.6623303102238741,
+          "id": "synthetic/send-mail",
+          "rank": 2
+        },
+        {
+          "cosine": 0.6289234789438034,
+          "id": "synthetic/files",
+          "rank": 3
+        },
+        {
+          "cosine": 0.6275496703703185,
+          "id": "synthetic/warehouse",
+          "rank": 4
+        },
+        {
+          "cosine": 0.618938579516414,
+          "id": "synthetic/calendar",
+          "rank": 5
+        }
+      ],
+      "tied_top_ids": [
+        "synthetic/send-mail",
+        "zati/inbox-briefing"
+      ]
+    },
+    {
+      "decision": "requires_selection",
+      "dimension": 768,
+      "exact_rrf_score": "123/3782",
+      "floating_rrf_score": 0.03252247488101533,
+      "id": "inbox-menu-28",
+      "intent": "Gib mir einen kurzen \u00dcberblick \u00fcber die ungelesenen E-Mails in meinem Posteingang.",
+      "lexical": [
+        {
+          "id": "synthetic/send-mail",
+          "rank": 1,
+          "terms": 1,
+          "weight": 3
+        },
+        {
+          "id": "zati/inbox-briefing",
+          "rank": 2,
+          "terms": 1,
+          "weight": 2
+        }
+      ],
+      "semantic": [
+        {
+          "cosine": 0.782621950491109,
+          "id": "zati/inbox-briefing",
+          "rank": 1
+        },
+        {
+          "cosine": 0.6306660851008217,
+          "id": "synthetic/send-mail",
+          "rank": 2
+        },
+        {
+          "cosine": 0.6125796192803238,
+          "id": "synthetic/files",
+          "rank": 3
+        },
+        {
+          "cosine": 0.5940738873526568,
+          "id": "synthetic/warehouse",
+          "rank": 4
+        },
+        {
+          "cosine": 0.585998725960992,
+          "id": "synthetic/calendar",
+          "rank": 5
+        }
+      ],
+      "tied_top_ids": [
+        "synthetic/send-mail",
+        "zati/inbox-briefing"
+      ]
+    },
+    {
+      "decision": "requires_selection",
+      "dimension": 768,
+      "exact_rrf_score": "123/3782",
+      "floating_rrf_score": 0.03252247488101533,
+      "id": "inbox-menu-29",
+      "intent": "Fa\u00e7a um resumo breve dos e-mails n\u00e3o lidos na minha caixa de entrada.",
+      "lexical": [
+        {
+          "id": "synthetic/send-mail",
+          "rank": 1,
+          "terms": 1,
+          "weight": 3
+        },
+        {
+          "id": "zati/inbox-briefing",
+          "rank": 2,
+          "terms": 1,
+          "weight": 2
+        }
+      ],
+      "semantic": [
+        {
+          "cosine": 0.8172196009822229,
+          "id": "zati/inbox-briefing",
+          "rank": 1
+        },
+        {
+          "cosine": 0.6381325727153416,
+          "id": "synthetic/send-mail",
+          "rank": 2
+        },
+        {
+          "cosine": 0.6238124757495769,
+          "id": "synthetic/files",
+          "rank": 3
+        },
+        {
+          "cosine": 0.6155284234730268,
+          "id": "synthetic/warehouse",
+          "rank": 4
+        },
+        {
+          "cosine": 0.5817927400902432,
+          "id": "synthetic/calendar",
+          "rank": 5
+        }
+      ],
+      "tied_top_ids": [
+        "synthetic/send-mail",
+        "zati/inbox-briefing"
+      ]
+    },
+    {
+      "decision": "requires_selection",
+      "dimension": 768,
+      "exact_rrf_score": "123/3782",
+      "floating_rrf_score": 0.03252247488101533,
+      "id": "inbox-menu-30",
+      "intent": "Prepara un breve riepilogo delle email non lette nella mia casella di posta.",
+      "lexical": [
+        {
+          "id": "synthetic/send-mail",
+          "rank": 1,
+          "terms": 1,
+          "weight": 3
+        },
+        {
+          "id": "zati/inbox-briefing",
+          "rank": 2,
+          "terms": 1,
+          "weight": 1
+        }
+      ],
+      "semantic": [
+        {
+          "cosine": 0.7956459682656295,
+          "id": "zati/inbox-briefing",
+          "rank": 1
+        },
+        {
+          "cosine": 0.6492853473420653,
+          "id": "synthetic/send-mail",
+          "rank": 2
+        },
+        {
+          "cosine": 0.5843491946665469,
+          "id": "synthetic/files",
+          "rank": 3
+        },
+        {
+          "cosine": 0.5661734295143376,
+          "id": "synthetic/warehouse",
+          "rank": 4
+        },
+        {
+          "cosine": 0.547604241599012,
+          "id": "synthetic/calendar",
+          "rank": 5
+        }
+      ],
+      "tied_top_ids": [
+        "synthetic/send-mail",
+        "zati/inbox-briefing"
+      ]
+    }
+  ],
+  "retained_attempt_records_verified": 2520,
+  "retained_configuration_evidence": [
+    {
+      "H0_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "H1_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "artifact": "tools/evaluation/inbox-development-results/256-k4-source_cold.jsonl.gz",
+      "records": 210
+    },
+    {
+      "H0_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "H1_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "artifact": "tools/evaluation/inbox-development-results/256-k4-source_warm.jsonl.gz",
+      "records": 210
+    },
+    {
+      "H0_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "H1_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "artifact": "tools/evaluation/inbox-development-results/256-k8-source_cold.jsonl.gz",
+      "records": 210
+    },
+    {
+      "H0_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "H1_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "artifact": "tools/evaluation/inbox-development-results/256-k8-source_warm.jsonl.gz",
+      "records": 210
+    },
+    {
+      "H0_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "H1_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "artifact": "tools/evaluation/inbox-development-results/256-k16-source_cold.jsonl.gz",
+      "records": 210
+    },
+    {
+      "H0_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "H1_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "artifact": "tools/evaluation/inbox-development-results/256-k16-source_warm.jsonl.gz",
+      "records": 210
+    },
+    {
+      "H0_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "H1_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "artifact": "tools/evaluation/inbox-development-results/768-k4-source_cold.jsonl.gz",
+      "records": 210
+    },
+    {
+      "H0_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "H1_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "artifact": "tools/evaluation/inbox-development-results/768-k4-source_warm.jsonl.gz",
+      "records": 210
+    },
+    {
+      "H0_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "H1_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "artifact": "tools/evaluation/inbox-development-results/768-k8-source_cold.jsonl.gz",
+      "records": 210
+    },
+    {
+      "H0_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "H1_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "artifact": "tools/evaluation/inbox-development-results/768-k8-source_warm.jsonl.gz",
+      "records": 210
+    },
+    {
+      "H0_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "H1_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "artifact": "tools/evaluation/inbox-development-results/768-k16-source_cold.jsonl.gz",
+      "records": 210
+    },
+    {
+      "H0_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "H1_requires_selection": [
+        "inbox-menu-14",
+        "inbox-menu-28",
+        "inbox-menu-29",
+        "inbox-menu-30"
+      ],
+      "artifact": "tools/evaluation/inbox-development-results/768-k16-source_warm.jsonl.gz",
+      "records": 210
+    }
+  ],
+  "rrf_constant": 60,
+  "schema": "gist.inbox-rrf-diagnosis/v1",
+  "semantic_floor": 0.3,
+  "unique_cases": 4
+}

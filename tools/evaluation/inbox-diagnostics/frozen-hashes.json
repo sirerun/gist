@@ -1,0 +1,25 @@
+{
+  "files": {
+    "catalog/discovery/index.go": "ab0ffb670a85292b314a7a517941f62005d68abbe44fa9dc19e5b579f799679c",
+    "catalog/preparation/preparation.go": "1c13371a3cb253ef95b5fa970f8c8a168c0db1199c9847920c2862369d14e3c3",
+    "internal/cataloglexical/lexical.go": "d4306c95dac579d12d97a1f69fb773cd692e30b566db4b4ec5c8757db5573ae6",
+    "tools/evaluation/inbox-development-results/256-k16-source_cold.jsonl.gz": "5e9ecaf505e9150391d5f9991d5b0ca211adb04972970eac81e53fe7242b175e",
+    "tools/evaluation/inbox-development-results/256-k16-source_warm.jsonl.gz": "0f0acb728da696adbc3222f457ae434204f8b5c5c5ca5576bcec6182f25d2add",
+    "tools/evaluation/inbox-development-results/256-k4-source_cold.jsonl.gz": "a88ce34465082dc8f822be8da47bf09471b8c71d9303a6c15b893f08ef240dbb",
+    "tools/evaluation/inbox-development-results/256-k4-source_warm.jsonl.gz": "7f839855ab8079ca243746260370e197b143033e796bea79f97882a6ac1cf13e",
+    "tools/evaluation/inbox-development-results/256-k8-source_cold.jsonl.gz": "6e48c251edae21919f97621493e211fc94ab94a62b0c146565a048e86a957913",
+    "tools/evaluation/inbox-development-results/256-k8-source_warm.jsonl.gz": "2239a57861c1ab1537caf5a6e3e0dcef8a5b02ba25c624076cca277318330b51",
+    "tools/evaluation/inbox-development-results/768-k16-source_cold.jsonl.gz": "e5ca056cd472f06b5901fc03d261888f025ed566c5e10a346d1add4b0e8afccd",
+    "tools/evaluation/inbox-development-results/768-k16-source_warm.jsonl.gz": "941a2134b90f7688fed1e0ae70649cda100cd1bf817515d393ab370df66f877f",
+    "tools/evaluation/inbox-development-results/768-k4-source_cold.jsonl.gz": "526a1b0a899f7da900e071fee7b6a4a142eb03cdd6a3802d09fb7a798ad0a6c2",
+    "tools/evaluation/inbox-development-results/768-k4-source_warm.jsonl.gz": "7698b4ba3916c3680d2dc6cffaa2e7f4c95cc221a3d69e62b6483af2ff582c98",
+    "tools/evaluation/inbox-development-results/768-k8-source_cold.jsonl.gz": "99885fbc12ea1e7a06415fd8b1f8a3d1c778eb6d15a65a264766cf6a95479924",
+    "tools/evaluation/inbox-development-results/768-k8-source_warm.jsonl.gz": "8690578978e32c7e5db54abbc03032e788437c06c8274e17e4ad1d0dcdb49fd5",
+    "tools/evaluation/inbox-development-results/vectors-256.json.gz": "45a45706f17664e784156e3de6c58a6618d1cf93f6e6f99a2b536109bb4e0df4",
+    "tools/evaluation/inbox-development-results/vectors-768.json.gz": "5e27d3c4ae744e7d38e8d133e7997aadcce8499a9aca446d7f1ffa4dbb480f40",
+    "tools/evaluation/inbox-development/catalog.json": "dd769302f83ac062af19bb465baf48b2f6ac9a3146da7d302e40f5c51e7db67a",
+    "tools/evaluation/inbox-development/development.inputs.jsonl": "eb05b86e2498835b1607704abd75ea0f021a8bb0c520ce1fea63067bd116011b"
+  },
+  "schema": "gist.inbox-rrf-fingerprints/v1",
+  "source_ref": "23ba27a7fdcd829f3407c3f3cc328a0737fa9afb"
+}
