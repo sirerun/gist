@@ -132,6 +132,20 @@ def grade(rows, labels):
             for key, value in sorted(groups.items())]
 
 
+def validate_frozen_rows(rows, admission):
+    expected = {"source": admission["candidate_source"], "inputs_sha256": admission["inputs_sha256"],
+                "catalog_sha256": admission["catalog_sha256"], "catalog_version": admission["catalog_version"],
+                "recipe_version": admission["recipe_version"], "top_k": admission["top_k"],
+                "semantic_floor": admission["semantic_floor"], "rrf_constant": admission["rrf_constant"]}
+    if admission["top_k"] != 4 or admission["semantic_floor"] != 0.30 or admission["rrf_constant"] != 60:
+        raise ValueError("unsupported frozen semantic configuration")
+    for row in rows:
+        if any(row.get(field) != value for field, value in expected.items()):
+            raise ValueError("attempt differs from frozen source/dataset/catalog/recipe/semantic configuration")
+        if row["arm"] in ("E0", "H0", "H1") and row.get("model_version") != admission["model_version"]:
+            raise ValueError("semantic attempt differs from frozen model/runtime identity")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--attempts", required=True)
@@ -150,8 +164,8 @@ def main():
     result = aggregate(rows)
     if any(row.get("phase") != args.phase for row in rows):
         raise ValueError("attempt phase differs from report phase")
-    if admission and any(row["source"] != admission["candidate_source"] or row["inputs_sha256"] != admission["inputs_sha256"] for row in rows):
-        raise ValueError("held-out attempts differ from frozen source/dataset")
+    if admission:
+        validate_frozen_rows(rows, admission)
     if args.labels:
         import hashlib
         raw = Path(args.labels).read_bytes()

@@ -130,11 +130,12 @@ func (c *changedResolver) Resolve(ctx context.Context, r resolution.Request) (re
 }
 
 type embedding struct {
-	model   string
-	calls   int
-	seen    []string
-	invalid bool
-	omit    bool
+	model    string
+	calls    int
+	seen     []string
+	invalid  bool
+	omit     bool
+	allMatch bool
 }
 
 func (e *embedding) Embed(_ context.Context, r preparation.EmbeddingRequest) (preparation.EmbeddingResult, error) {
@@ -143,7 +144,7 @@ func (e *embedding) Embed(_ context.Context, r preparation.EmbeddingRequest) (pr
 	result := preparation.EmbeddingResult{ModelVersion: e.model}
 	for _, text := range r.Texts {
 		vector := make([]float64, 256)
-		if r.Purpose == "query" || (strings.Contains(text, "Read-only inbox briefing") && !e.omit) {
+		if e.allMatch || r.Purpose == "query" || (strings.Contains(text, "Read-only inbox briefing") && !e.omit) {
 			vector[0] = 1
 		} else {
 			vector[1] = 1
@@ -504,7 +505,7 @@ type advancingClock struct {
 
 func (c *advancingClock) Now() time.Time {
 	c.calls++
-	if c.calls > 1 {
+	if c.calls > 2 {
 		return c.at.Add(2 * time.Minute)
 	}
 	return c.at
@@ -513,10 +514,71 @@ func TestReadinessExpiryDuringResolverIOCannotEscape(t *testing.T) {
 	_, s, r := credentialed(t)
 	now := time.Now().UTC()
 	s.CurrentReadiness = &currentConnection{ready: true, now: fixedClock{now}}
+	s.TaskAdmitter = taskAdmissionFunc(func(_ context.Context, q preparation.TaskAdmissionRequest) (preparation.TaskAdmissionDecision, error) {
+		return preparation.TaskAdmissionDecision{ScopeDigest: q.ScopeDigest, Admitted: true, Generation: "test-admission", CheckedAt: now, ValidUntil: now.Add(time.Hour)}, nil
+	})
 	s.Clock = &advancingClock{at: now}
 	s.MaxReadinessAge = time.Minute
 	out, e := s.Prepare(context.Background(), r)
 	if e == nil || out.Selected != nil {
 		t.Fatal("expired current decision escaped resolver IO")
+	}
+}
+
+func TestTopKOneCannotHideSemanticAmbiguity(t *testing.T) {
+	_, s, r := ready(t)
+	embed := &embedding{model: "controlled-tie-v1", allMatch: true}
+	s.Embedder = embed
+	s.ModelVersion = embed.model
+	r.Mode = preparation.Semantic
+	r.TopK = 1
+	out, e := s.Prepare(context.Background(), r)
+	if e != nil || out.Status != "requires_selection" || out.Selected != nil {
+		t.Fatalf("TopK hid equal authorized top candidates: %+v %v", out, e)
+	}
+}
+
+type taskAdmissionFunc func(context.Context, preparation.TaskAdmissionRequest) (preparation.TaskAdmissionDecision, error)
+
+func (f taskAdmissionFunc) AdmitTask(ctx context.Context, q preparation.TaskAdmissionRequest) (preparation.TaskAdmissionDecision, error) {
+	return f(ctx, q)
+}
+func TestSimilarityNeverSubstitutesForPositiveCallerTaskCoverage(t *testing.T) {
+	_, s, r := ready(t)
+	s.TaskAdmitter = nil
+	out, e := s.Prepare(context.Background(), r)
+	if e != nil || out.Status == "ready" || out.Selected != nil {
+		t.Fatal("absent task owner implicitly admitted recipe")
+	}
+	_, s, r = ready(t)
+	embed := &embedding{model: "controlled-wrong-task-v1"}
+	s.Embedder = embed
+	s.ModelVersion = embed.model
+	r.Mode = preparation.Semantic
+	r.Intent = "Read laboratory freezer alarm summaries"
+	out, e = s.Prepare(context.Background(), r)
+	if e != nil || out.Status == "ready" || out.Selected != nil {
+		t.Fatal("similarity invented task-to-inbox coverage")
+	}
+}
+func TestTaskAdmissionScopeAndRevocationAreChecked(t *testing.T) {
+	for _, which := range []string{"wrong scope", "revoked after IO"} {
+		t.Run(which, func(t *testing.T) {
+			_, s, r := ready(t)
+			calls := 0
+			s.TaskAdmitter = taskAdmissionFunc(func(_ context.Context, q preparation.TaskAdmissionRequest) (preparation.TaskAdmissionDecision, error) {
+				calls++
+				scope := q.ScopeDigest
+				if which == "wrong scope" {
+					scope = "unbound"
+				}
+				now := time.Now().UTC()
+				return preparation.TaskAdmissionDecision{ScopeDigest: scope, Admitted: !(which == "revoked after IO" && calls > 1), Generation: "task-owner-v1", CheckedAt: now, ValidUntil: now.Add(time.Minute)}, nil
+			})
+			out, e := s.Prepare(context.Background(), r)
+			if e == nil || out.Selected != nil {
+				t.Fatalf("invalid task admission escaped: %+v %v", out, e)
+			}
+		})
 	}
 }

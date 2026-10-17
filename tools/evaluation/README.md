@@ -166,3 +166,12 @@ the pilot's declared two-tool inbox closure. Do not rewrite gold labels to erase
 that mismatch. A richer reviewed shared catalog is a real T-PREP.9 prerequisite;
 this loader makes that future data admission executable without new recipes or
 provider execution. Whole-task success/adoption remains unqualified.
+
+Structured `fixture.transition` or `fixture.scenario` mechanics are decoded.
+Until those mechanics have an actual implementation they return NOT_RUN before
+any coarse status overlay; a midflight revocation is never replaced by an upfront
+revoked state. The source fixture's explicit caller task-admission table admits
+only two source smoke requests; corpus labels and desired workflow IDs do not
+create that admission. Other intent coverage remains nonready. Held-out report
+validation rechecks every record's source/input/catalog SHA and version, recipe,
+semantic configuration and semantic model/runtime identity against admission.

@@ -93,16 +93,38 @@ type CurrentReadiness interface {
 	CheckCurrentReadiness(context.Context, ReadinessRequest) (ReadinessDecision, error)
 }
 
+// TaskAdmission is a positive caller-owned intent-to-recipe coverage decision,
+// separate from similarity, catalog read permission and connection readiness.
+type TaskAdmissionRequest struct {
+	Principal                ports.Principal
+	Intent                   string
+	RuntimeID, RecipeVersion string
+	Skill                    ports.ArtifactPin
+	RequiredCapabilities     []ports.ArtifactRef
+	ScopeDigest              string
+}
+type TaskAdmissionDecision struct {
+	ScopeDigest           string
+	Admitted              bool
+	Generation            string
+	CheckedAt, ValidUntil time.Time
+}
+type TaskAdmitter interface {
+	AdmitTask(context.Context, TaskAdmissionRequest) (TaskAdmissionDecision, error)
+}
+
 type Service struct {
-	Catalog          ports.CatalogStore
-	Authorizer       ports.Authorizer
-	Retriever        packages.Retriever
-	Resolver         Resolver
-	Embedder         Embedder
-	ModelVersion     string
-	CurrentReadiness CurrentReadiness
-	Clock            ports.Clock
-	MaxReadinessAge  time.Duration
+	Catalog             ports.CatalogStore
+	Authorizer          ports.Authorizer
+	Retriever           packages.Retriever
+	Resolver            Resolver
+	Embedder            Embedder
+	ModelVersion        string
+	CurrentReadiness    CurrentReadiness
+	Clock               ports.Clock
+	MaxReadinessAge     time.Duration
+	TaskAdmitter        TaskAdmitter
+	MaxTaskAdmissionAge time.Duration
 }
 type Candidate struct {
 	Ref   ports.ArtifactRef
@@ -249,19 +271,20 @@ func (s Service) Prepare(ctx context.Context, req Request) (Result, error) {
 		}
 	}
 	sortCandidates(ranked)
-	if len(ranked) > req.TopK {
-		ranked = ranked[:req.TopK]
-	}
 	for _, candidate := range ranked {
 		if err := s.recheck(ctx, req.Principal, records[candidate.Ref]); err != nil {
 			return Result{}, err
 		}
 	}
+	ambiguous := len(ranked) > 1 && math.Abs(ranked[0].Score-ranked[1].Score) < 1e-12
+	if len(ranked) > req.TopK {
+		ranked = ranked[:req.TopK]
+	}
 	out.Candidates = ranked
 	if len(ranked) == 0 {
 		return out, nil
 	}
-	if len(ranked) > 1 && math.Abs(ranked[0].Score-ranked[1].Score) < 1e-12 {
+	if ambiguous {
 		out.Status = "requires_selection"
 		return out, nil
 	}
@@ -274,6 +297,16 @@ func (s Service) Prepare(ctx context.Context, req Request) (Result, error) {
 		return out, nil
 	}
 	record := records[chosen]
+	taskPin := ports.ArtifactPin{Ref: chosen, Digest: record.Digest, ManifestDigest: record.ManifestDigest}
+	taskGeneration, admitted, err := s.admitTask(ctx, req, taskPin)
+	if err != nil {
+		return Result{}, err
+	}
+	if !admitted {
+		out.Status = "requires_selection"
+		out.Findings = append(out.Findings, "positive caller-owned intent-to-maintained-recipe admission is required")
+		return out, nil
+	}
 	resolved, connectionGeneration, err := s.resolveCurrent(ctx, req, chosen)
 	if err != nil {
 		return Result{}, err
@@ -396,6 +429,13 @@ func (s Service) Prepare(ctx context.Context, req Request) (Result, error) {
 	}
 	if connectionGeneration != finalConnectionGeneration || !sameResolution(resolved, refreshed) {
 		return Result{}, errors.New("preparation: current bindings or connection changed")
+	}
+	finalTaskGeneration, admitted, err := s.admitTask(ctx, req, taskPin)
+	if err != nil {
+		return Result{}, err
+	}
+	if !admitted || finalTaskGeneration != taskGeneration {
+		return Result{}, errors.New("preparation: task-to-recipe admission changed during assembly")
 	}
 	out.Status = "ready"
 	out.Selected = &bundle
@@ -618,4 +658,30 @@ func logicalManifestDigest(record ports.CatalogRecord) ports.Digest {
 		return record.DocumentDigest
 	}
 	return ports.Digest{}
+}
+
+func (s Service) admitTask(ctx context.Context, req Request, pin ports.ArtifactPin) (string, bool, error) {
+	if s.TaskAdmitter == nil {
+		return "", false, nil
+	}
+	if s.Clock == nil || s.MaxTaskAdmissionAge <= 0 {
+		return "", false, errors.New("preparation: task admission requires explicit clock/freshness")
+	}
+	query := TaskAdmissionRequest{Principal: req.Principal, Intent: req.Intent, RuntimeID: req.RuntimeID, RecipeVersion: req.RecipeVersion, Skill: pin, RequiredCapabilities: []ports.ArtifactRef{{WorkspaceID: req.Principal.WorkspaceID, Kind: ports.KindCapability, ID: inboxbriefing.CapabilityID, Version: inboxbriefing.CapabilityVersion}}}
+	principal := query.Principal
+	principal.Scopes = append([]string(nil), principal.Scopes...)
+	sort.Strings(principal.Scopes)
+	query.Principal = principal
+	encoded, _ := json.Marshal(query)
+	sum := sha256.Sum256(encoded)
+	query.ScopeDigest = hex.EncodeToString(sum[:])
+	decision, err := s.TaskAdmitter.AdmitTask(ctx, query)
+	if err != nil {
+		return "", false, err
+	}
+	now := s.Clock.Now()
+	if decision.ScopeDigest != query.ScopeDigest || decision.Generation == "" || decision.CheckedAt.IsZero() || decision.CheckedAt.After(now) || now.Sub(decision.CheckedAt) > s.MaxTaskAdmissionAge || !decision.ValidUntil.After(now) {
+		return "", false, errors.New("preparation: stale or mismatched caller task admission")
+	}
+	return decision.Generation, decision.Admitted, nil
 }

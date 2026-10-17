@@ -12,6 +12,7 @@ import (
 	"errors"
 	"io"
 	"sort"
+	"time"
 
 	"github.com/sirerun/gist/catalog/packages"
 	"github.com/sirerun/gist/catalog/ports"
@@ -152,8 +153,20 @@ func (c *Catalog) Service() (preparation.Service, error) {
 	if err != nil {
 		return preparation.Service{}, err
 	}
-	return preparation.Service{Catalog: c, Authorizer: c, Retriever: packages.Retriever{Authorizer: c, Catalog: c, Artifacts: c}, Resolver: r}, nil
+	return preparation.Service{Catalog: c, Authorizer: c, Retriever: packages.Retriever{Authorizer: c, Catalog: c, Artifacts: c}, Resolver: r, TaskAdmitter: staticTaskAdmission{}, Clock: ports.SystemClock{}, MaxTaskAdmissionAge: time.Minute}, nil
 }
 func Request(intent string) preparation.Request {
 	return preparation.Request{Principal: Principal, Intent: intent, RuntimeID: "controlled-inbox-read-fixture-v1", Mode: preparation.Lexical, Fallback: preparation.Deny, Guide: true, MaxBytes: 65536, TopK: 4, CatalogVersion: CatalogVersion, RecipeVersion: preparation.RecipeVersion}
+}
+
+// Explicit source-only caller admission supports two independently authored
+// fixture requests. It is not an NL classifier, gold-label lookup or recipe
+// inference. Other intents require a real caller-owned admission implementation.
+type staticTaskAdmission struct{}
+
+func (staticTaskAdmission) AdmitTask(_ context.Context, q preparation.TaskAdmissionRequest) (preparation.TaskAdmissionDecision, error) {
+	allowed := q.Intent == "Summarize recent unread inbox email" || q.Intent == "Summarize unread inbox email"
+	allowed = allowed && q.Principal.WorkspaceID == Principal.WorkspaceID && q.Principal.Subject == Principal.Subject && q.Skill.Ref == Ref(ports.KindSkill, inboxbriefing.SkillID) && q.RuntimeID == "controlled-inbox-read-fixture-v1" && q.RecipeVersion == preparation.RecipeVersion
+	now := time.Now().UTC()
+	return preparation.TaskAdmissionDecision{ScopeDigest: q.ScopeDigest, Admitted: allowed, Generation: "explicit-source-task-admission-v1", CheckedAt: now, ValidUntil: now.Add(time.Minute)}, nil
 }

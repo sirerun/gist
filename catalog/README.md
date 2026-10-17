@@ -66,7 +66,9 @@ consumer. No provider credentials are included in the maintained package.
 Run the source consumer checks with `go test ./catalog/...`. They use controlled
 storage and bindings, not a live mailbox. Optional preparation is available as experimental source in `preparation`.
 Its caller supplies current catalog/policy, exact resolver, package retriever and
-optional scoped embedding adapter. Credentialed readiness additionally requires
+optional scoped embedding adapter. Positive task coverage requires an explicit `TaskAdmitter` scoped to exact
+intent/principal/runtime/immutable skill and capability contract; similarity alone
+never makes an unrelated task ready. Credentialed readiness additionally requires
 an explicit fresh `CurrentReadiness` port bound to principal/runtime/skill/closure;
 absence never means a connected account. Only the maintained inbox recipe is
 covered. Complete verified instructions/assets/schemas are returned or the budget
