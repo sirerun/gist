@@ -65,7 +65,7 @@ func New(c Config) (*Embedder, error) {
 	if err != nil || !address.IsLoopback() || perr != nil || port < 1 || port > 65535 {
 		return nil, errors.New("llamacpp: explicit numeric loopback HTTP origin required")
 	}
-	if !digest(c.BinarySHA256) || c.ModelSHA256 != ModelSHA256 || (c.Dimension != 256 && c.Dimension != 768) || len(c.Alias) == 0 || len(c.Alias) > 128 || len(c.APIKey) < 32 || len(c.APIKey) > 512 {
+	if !digest(c.BinarySHA256) || c.ModelSHA256 != ModelSHA256 || (c.Dimension != 256 && c.Dimension != 768) || len(c.Alias) == 0 || len(c.Alias) > 128 || strings.Contains(c.Alias, ",") || len(c.APIKey) < 32 || len(c.APIKey) > 512 {
 		return nil, errors.New("llamacpp: invalid pinned runtime configuration")
 	}
 	for _, s := range []string{c.APIKey, c.Alias} {
@@ -137,7 +137,7 @@ func (e *Embedder) Embed(ctx context.Context, q preparation.EmbeddingRequest) (p
 		Model  string `json:"model"`
 		Object string `json:"object"`
 		Data   []struct {
-			Index     int       `json:"index"`
+			Index     *int      `json:"index"`
 			Object    string    `json:"object"`
 			Embedding []float64 `json:"embedding"`
 		} `json:"data"`
@@ -158,10 +158,10 @@ func (e *Embedder) Embed(ctx context.Context, q preparation.EmbeddingRequest) (p
 	result := preparation.EmbeddingResult{ModelVersion: e.version, Vectors: make([][]float64, len(texts))}
 	seen := make([]bool, len(texts))
 	for _, item := range response.Data {
-		if item.Index < 0 || item.Index >= len(texts) || seen[item.Index] || item.Object != "embedding" || len(item.Embedding) != 768 {
+		if item.Index == nil || *item.Index < 0 || *item.Index >= len(texts) || seen[*item.Index] || item.Object != "embedding" || len(item.Embedding) != 768 {
 			return empty, errors.New("llamacpp: invalid indexed vector response")
 		}
-		seen[item.Index] = true
+		seen[*item.Index] = true
 		fullNorm := 0.0
 		for _, v := range item.Embedding {
 			if math.IsNaN(v) || math.IsInf(v, 0) {
@@ -184,7 +184,7 @@ func (e *Embedder) Embed(ctx context.Context, q preparation.EmbeddingRequest) (p
 		for i := range vector {
 			vector[i] /= norm
 		}
-		result.Vectors[item.Index] = vector
+		result.Vectors[*item.Index] = vector
 	}
 	return result, nil
 }
@@ -216,6 +216,9 @@ func (e *Embedder) post(ctx context.Context, path string, body any, out any) err
 	if err != nil || len(raw) > maxResponseBytes {
 		return errors.New("llamacpp: bounded response read failed")
 	}
+	if err := strictKeys(json.NewDecoder(bytes.NewReader(raw))); err != nil {
+		return errors.New("llamacpp: ambiguous response schema")
+	}
 	d := json.NewDecoder(bytes.NewReader(raw))
 	d.DisallowUnknownFields()
 	if err := d.Decode(out); err != nil {
@@ -225,4 +228,45 @@ func (e *Embedder) post(ctx context.Context, path string, body any, out any) err
 		return errors.New("llamacpp: trailing response bytes")
 	}
 	return nil
+}
+
+// All native protocol field names are canonical lowercase. Reject aliases and
+// duplicate keys before encoding/json can silently reinterpret a response.
+func strictKeys(d *json.Decoder) error {
+	t, err := d.Token()
+	if err != nil {
+		return err
+	}
+	delim, ok := t.(json.Delim)
+	if !ok {
+		return nil
+	}
+	switch delim {
+	case '{':
+		seen := map[string]bool{}
+		for d.More() {
+			key, err := d.Token()
+			if err != nil {
+				return err
+			}
+			name, ok := key.(string)
+			if !ok || name != strings.ToLower(name) || seen[name] {
+				return errors.New("ambiguous response key")
+			}
+			seen[name] = true
+			if err := strictKeys(d); err != nil {
+				return err
+			}
+		}
+	case '[':
+		for d.More() {
+			if err := strictKeys(d); err != nil {
+				return err
+			}
+		}
+	default:
+		return errors.New("invalid response delimiter")
+	}
+	_, err = d.Token()
+	return err
 }
