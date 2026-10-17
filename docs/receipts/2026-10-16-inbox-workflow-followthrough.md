@@ -235,3 +235,29 @@ any corrected start must retain the original07:20:47Z absolute deadline and the
 same model arguments, template, cases, binary and remaining60-request budget.
 Missing or mismatched required model assets still stops; no retry is authorized
 until that concrete correction passes review and fresh runtime gates.
+
+
+## Final model eligibility and comparison outcome
+
+The independently reviewed corrected preloader ran at06:25:04Z and stopped on
+absent hf_quant_config.json, required by its conservative fourteen-file check.
+It never reached model Popen. Exact owned cleanup completed at06:25:22Z:
+GET404, no owned containers and resource allocation restored. Both supervisors
+and watchdogs finished; no background model work remains. Each startup occupied
+18seconds according to recorded UTC timestamps. The original absolute deadline
+was preserved; no download, retuning, paid call or third startup occurred.
+
+Portable receipt2026-10-17-inbox-model-outcome.json retains both failures and
+all12 planned attempts in the frozen order as NOT_RUN. Actual token counts,
+model turns and task latency remain null; zero is used only for known model-call
+and executed-attempt counts. Cache qualification is NOT_VERIFIED. This does not
+prove the weights are missing or the model inherently unusable; the reviewed
+conservative loader qualification failed. No inference, quality, token-savings,
+performance, Composio comparison or adoption conclusion is available.
+
+T-PREP.52 completes the frozen measurement harness and honest unavailable-route
+record, not a successful reasoning-model evaluation. T-PREP.53 completes local
+source/controlled-fixture verification with inherited failures and unavailable
+model evidence explicit. Independent final evidence review, guarded merges and
+landed acceptance remain open. The original held-out/adoption/default gates
+remain unchanged.
