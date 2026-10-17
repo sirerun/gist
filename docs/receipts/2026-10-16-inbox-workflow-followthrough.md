@@ -159,3 +159,14 @@ found INBOX-R6a: an actually failed misroute is already journaled refused, so
 normal open-entry delivery never reaches reclassification. The corrected repair
 must recover only a proven different valid owner, preserve the original fault
 and never repeat the physical effect. Launch remains held pending this fix.
+
+
+The corrected R6a source d3f60e77f547dbdcd5cf007c0e52c0c821b34cca
+passed focused controller/execution and full paired, negative and bridge checks
+in24.27seconds on the admitted Linux runner. Independent review approved the
+refused-state recovery conditionally on current verification. It requires the
+exact persisted proposal owner in the original turn, retains the original fault
+and redelivers only the recorded observation. A final legacy turn/step matching
+guard and mismatch regression are included in bde5dfc2; its affected unit/race,
+vet and executable checks remain in progress. Actual model comparison has not
+started, and no inference result is inferred from these source checks.
