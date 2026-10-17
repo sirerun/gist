@@ -1747,9 +1747,9 @@ and target-host capacity before scoring, never invented here or tuned afterward.
 - [x] T-COMPOSE.16 Implement bounded indexing and generation-aware retrieval  Owner: gist-implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.15]  acc: [Capability lookup and authorized shortlist indexes avoid per-request full schema/vector materialization; updates/rebuild/rollback, cache isolation/invalidation, cancellation and incomplete-budget outcomes preserve current policy and exact readiness; optional semantic route does not become default]
 - [x] T-COMPOSE.17 Qualify new composition inventory and evaluation cohort  Owner: evaluation-author  Est: TBD  kind: agent  stage: implement  blocked-by: [T-COMPOSE.14, T-COMPOSE.15, T-COMPOSE.32, T-COMPOSE.41]  acc: [Independent fixed inventory and caller-policy manifest use new immutable skills and actual two-tool contracts; non-author labels reconcile before scores; primary configuration and split frozen; old composite pilot remains unchanged and original held-out access ungranted]
 - [x] T-COMPOSE.18 Verify scale and composition evaluation evidence  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.16, T-COMPOSE.17, T-COMPOSE.32]  acc: [Declared synthetic 10k/100k runs report all attempts, latency percentiles, RSS/index/update cost, recall/coverage, false readiness, exposure, token availability and cold/warm phases; thresholds and failure dispositions retained; full safety and compatibility checks pass without post-score retuning]
-- [ ] T-COMPOSE.19 Independently review index and evaluation candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.18]  acc: [Independent non-author reviews .15-.18 exact base/head, label independence, reproducibility, all failures and limited claims; blockers resolved before merge]
-- [ ] T-COMPOSE.20 Merge reviewed scale and evaluation candidate  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.19]  acc: [Exact approved source and artifacts rebase through unchanged GitHub policy with landed SHA and check provenance]
-- [ ] T-COMPOSE.21 Verify landed scale evidence and publish handoff  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.20]  acc: [Fresh main matches reviewed source and deterministic report regeneration; producer and consumer compatibility recorded; results state measured envelope and remaining bottlenecks, never adoption or provider acceptance]
+- [x] T-COMPOSE.19 Independently review index and evaluation candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-COMPOSE.18]  acc: [Independent non-author reviews .15-.18 exact base/head, label independence, reproducibility, all failures and limited claims; blockers resolved before merge]
+- [x] T-COMPOSE.20 Merge reviewed scale and evaluation candidate  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-COMPOSE.19]  acc: [Exact approved source and artifacts rebase through unchanged GitHub policy with landed SHA and check provenance]
+- [x] T-COMPOSE.21 Verify landed scale evidence and publish handoff  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-COMPOSE.20]  acc: [Fresh main matches reviewed source and deterministic report regeneration; producer and consumer compatibility recorded; results state measured envelope and remaining bottlenecks, never adoption or provider acceptance]
 - [ ] T-COMPOSE.22 Authorize composition release and installation scope  Owner: owner-with-coordinator  Est: TBD  kind: human  stage: preflight  blocked-by: [T-COMPOSE.14, T-COMPOSE.21]  blocked: Separate release and installation authority required  acc: [Explicit module/consumer release versions, target platform, signing/custody, rollout and rollback authority recorded; no semantic-default, hosted or provider authority inferred]
 - [ ] T-COMPOSE.23 Release library and install approved consumer  Owner: release-owner  Est: TBD  kind: agent  stage: release  blocked-by: [T-COMPOSE.22]  acc: [Qualified release/installation binding publishes only approved artifacts, records signatures and dependency pins, verifies installed version and rollback; generic dispatch stays blocked until route and authority are qualified]
 - [ ] T-COMPOSE.24 Accept installed workflow within approved provider scope  Owner: owner-with-verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-COMPOSE.23]  acc: [Actual installed UI and workflow evidence recorded; synthetic-only versus live provider scope explicit; live inbox requires separate read-only account/call/cost/expiry authority, otherwise remains unqualified]
@@ -1951,3 +1951,21 @@ targets. Every first scored attempt is retained; no retries or retuning. Actual
 refuse explicitly. See docs/receipts/2026-10-17-composition-qualification.md.
 .18 closes; .19-.21 candidate review/delivery remain pending. Source-qualified
 Zati and synthetic index scores do not authorize release or live acceptance.
+
+Evaluation delivery complete: PR85 reviewed66537d98e530c5697cdfb8aa56a52373a2ed80e8
+againstab6b6c66ff82201309723ace1ac711ff6734119c; independent composition_doc_audit
+approved exact source, reproducible report and all retained outcomes. Guarded
+GitHub rebase landed3889cbefa7c93466699e1c958af65f1d0c64ff79 with tree equality
+and main reachability. GitHub jobs did not start due to the account billing lock;
+required checks/protections were unchanged and the established local fallback
+was used. Fresh landed runner/discovery/composition/new-inbox/legacy-inbox race
+tests, six report tests, inventory byte equality,78freeze hashes, all result
+checksums and byte-identical report regeneration passed. Archive SHA256
+224b4b81d85899d9180ba6cebb4879fd8e705e566f1d849166c93eae125a2411
+binds that fresh landed check; bounded service exited successfully and is inactive.
+
+All E-COMPOSE source, consumer, index and evaluation delivery rows .1-.21 and
+tracked repairs .26-.41 are complete. Next .22 remains an explicit human release
+and installation gate; .23-.25 cannot proceed from a source ship alone. No module
+release tag, installed application, live provider or model-default decision is
+claimed. Prior held-out/model evaluation authority is not reopened by these scores.
