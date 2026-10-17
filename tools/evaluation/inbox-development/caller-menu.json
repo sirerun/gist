@@ -1,0 +1,158 @@
+{
+  "schema": "gist.inbox-development.caller-menu/v1",
+  "menu_id": "inbox-read-only-menu-v1",
+  "family": "maintained-inbox-briefing-closed-menu-v1",
+  "scope": "Explicit caller-selected positive development menu; not natural-language classification or live authority.",
+  "entries": [
+    {
+      "id": "inbox-menu-01",
+      "locale": "en",
+      "intent": "Give me a concise briefing of unread email in my inbox."
+    },
+    {
+      "id": "inbox-menu-02",
+      "locale": "en",
+      "intent": "Summarize the unread messages waiting in my mailbox."
+    },
+    {
+      "id": "inbox-menu-03",
+      "locale": "en",
+      "intent": "Help me catch up with unread inbox mail in a short briefing."
+    },
+    {
+      "id": "inbox-menu-04",
+      "locale": "en",
+      "intent": "Prepare an overview of my recent unread email, keeping the mailbox unchanged."
+    },
+    {
+      "id": "inbox-menu-05",
+      "locale": "en",
+      "intent": "What should I know from the email I have not read yet? Make an inbox briefing."
+    },
+    {
+      "id": "inbox-menu-06",
+      "locale": "en",
+      "intent": "Turn the unread mail in my inbox into a clear, compact summary."
+    },
+    {
+      "id": "inbox-menu-07",
+      "locale": "en",
+      "intent": "I need a read-only briefing on the unread email currently waiting for me."
+    },
+    {
+      "id": "inbox-menu-08",
+      "locale": "en",
+      "intent": "Please review unread inbox messages and give me the main points."
+    },
+    {
+      "id": "inbox-menu-09",
+      "locale": "en",
+      "intent": "Create a digest of recent unread email for me to review."
+    },
+    {
+      "id": "inbox-menu-10",
+      "locale": "en",
+      "intent": "Can you organize the unread inbox mail into a useful briefing?"
+    },
+    {
+      "id": "inbox-menu-11",
+      "locale": "en",
+      "intent": "Walk me through the important points in my unread email as a short summary."
+    },
+    {
+      "id": "inbox-menu-12",
+      "locale": "en",
+      "intent": "I am catching up: give me a briefing of the unread messages in my inbox."
+    },
+    {
+      "id": "inbox-menu-13",
+      "locale": "en",
+      "intent": "Read recent unread inbox mail and summarize what needs my attention."
+    },
+    {
+      "id": "inbox-menu-14",
+      "locale": "en",
+      "intent": "Make a compact overview of unread email with message references."
+    },
+    {
+      "id": "inbox-menu-15",
+      "locale": "en",
+      "intent": "Use a read-only review of my inbox to brief me on unread messages."
+    },
+    {
+      "id": "inbox-menu-16",
+      "locale": "en",
+      "intent": "Give me an unread-email digest that separates questions from informational updates."
+    },
+    {
+      "id": "inbox-menu-17",
+      "locale": "en",
+      "intent": "Summarize unread inbox messages and note any explicit requests they contain."
+    },
+    {
+      "id": "inbox-menu-18",
+      "locale": "en",
+      "intent": "Prepare a briefing from my unread email, distinguishing stated deadlines from inference."
+    },
+    {
+      "id": "inbox-menu-19",
+      "locale": "en",
+      "intent": "Brief me on unread mail and indicate where the review has limitations."
+    },
+    {
+      "id": "inbox-menu-20",
+      "locale": "en",
+      "intent": "Help me understand my unread inbox without making changes to any message."
+    },
+    {
+      "id": "inbox-menu-21",
+      "locale": "en",
+      "intent": "I want a brief, source-referenced summary of unread email."
+    },
+    {
+      "id": "inbox-menu-22",
+      "locale": "en",
+      "intent": "Review the unread inbox mail and suggest what I should look at next."
+    },
+    {
+      "id": "inbox-menu-23",
+      "locale": "en",
+      "intent": "Provide a factual briefing of unread email, with the messages as sources."
+    },
+    {
+      "id": "inbox-menu-24",
+      "locale": "en",
+      "intent": "Gather the main points from unread inbox messages into a readable digest."
+    },
+    {
+      "id": "inbox-menu-25",
+      "locale": "es",
+      "intent": "Hazme un resumen de los correos no leídos que tengo en la bandeja de entrada."
+    },
+    {
+      "id": "inbox-menu-26",
+      "locale": "fr",
+      "intent": "Prépare un bref compte rendu des courriels non lus dans ma boîte de réception."
+    },
+    {
+      "id": "inbox-menu-27",
+      "locale": "sw",
+      "intent": "Nipe muhtasari mfupi wa barua pepe ambazo bado sijasoma kwenye kikasha changu."
+    },
+    {
+      "id": "inbox-menu-28",
+      "locale": "de",
+      "intent": "Gib mir einen kurzen Überblick über die ungelesenen E-Mails in meinem Posteingang."
+    },
+    {
+      "id": "inbox-menu-29",
+      "locale": "pt",
+      "intent": "Faça um resumo breve dos e-mails não lidos na minha caixa de entrada."
+    },
+    {
+      "id": "inbox-menu-30",
+      "locale": "it",
+      "intent": "Prepara un breve riepilogo delle email non lette nella mia casella di posta."
+    }
+  ]
+}
