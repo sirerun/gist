@@ -10,6 +10,7 @@
     return el;
   };
   const text = (value, fallback = "") => typeof value === "string" ? value : fallback;
+  const utf8Length = value => new TextEncoder().encode(value).length;
   const button = (label, action) => {
     const el = node("button", label, "button button-outline");
     el.type = "button";
@@ -27,6 +28,12 @@
     if (!response.ok) {
       const error = new Error(response.status === 401 ? "Sign in required" : "Service unavailable");
       error.status = response.status;
+      if (response.status === 400) {
+        try {
+          const detail = await response.json();
+          error.code = detail.code === "invalid_cursor" ? "invalid_cursor" : "invalid_query";
+        } catch (_) { error.code = "invalid_query"; }
+      }
       throw error;
     }
     return response.json();
@@ -44,6 +51,12 @@
   }
   function failure(container, error, retry) {
     if (error.status === 401) { unauthorized(container); return; }
+    if (error.status === 400) {
+      const expired = error.code === "invalid_cursor";
+      const box = notice(container, expired ? "This page link has expired" : "Check this search or artifact link", expired ? "Start a new search to retrieve a fresh page of catalog results." : "Try a shorter search phrase. For artifact details, choose an item from the library.", true);
+      box.append(link("Back to library →", "/library", "text-link"));
+      return;
+    }
     const title = error.status === 403 ? "This account does not have access" : error.status === 404 ? "This artifact was not found" : "We couldn’t load this just yet";
     const description = error.status === 403 ? "Ask your workspace operator to confirm your invitation and permissions." : error.status === 404 ? "Check the artifact link, or return to the library to find an available version." : "The service may be starting up or temporarily unavailable. Try again in a moment. If this is the first sign-in, the configured founder must complete enrollment.";
     const box = notice(container, title, description, true);
@@ -99,7 +112,7 @@
     const more = document.getElementById("load-more");
     const extra = document.getElementById("other-kind");
     const params = new URLSearchParams(window.location.search);
-    let q = (params.get("q") || "").slice(0, 500);
+    let q = params.get("q") || "";
     let kind = kinds.has(params.get("kind")) ? params.get("kind") : "";
     let next = "";
     let count = 0;
@@ -120,6 +133,16 @@
       if (controller) controller.abort();
       controller = new AbortController();
       const request = ++generation;
+      updateFilters();
+      if (utf8Length(q) > 200 || q.includes("\0")) {
+        input.setAttribute("aria-invalid", "true");
+        status.textContent = "Search needs a shorter phrase";
+        more.hidden = true;
+        results.setAttribute("aria-busy", "false");
+        notice(messages, "Try a shorter search", "This search is too long. Try a shorter phrase.", true);
+        return;
+      }
+      input.removeAttribute("aria-invalid");
       if (!append) { results.replaceChildren(); messages.replaceChildren(); count = 0; pages = 0; next = ""; seen.clear(); }
       results.setAttribute("aria-busy", "true");
       more.hidden = true;
@@ -161,13 +184,14 @@
         if (error.name === "AbortError" || request !== generation) return;
         status.textContent = "";
         failure(messages, error, () => search(append));
+        if (error.status === 400 && error.code === "invalid_cursor") messages.querySelector(".notice").append(button("Start a new search", () => search(false)));
       } finally {
         if (request === generation) results.setAttribute("aria-busy", "false");
       }
     }
-    form.addEventListener("submit", event => { event.preventDefault(); q = input.value.trim().slice(0, 500); search(); });
-    document.querySelectorAll(".filter").forEach(el => el.addEventListener("click", () => { kind = el.dataset.kind; q = input.value.trim().slice(0, 500); search(); }));
-    extra.addEventListener("change", () => { kind = extra.value; q = input.value.trim().slice(0, 500); search(); });
+    form.addEventListener("submit", event => { event.preventDefault(); q = input.value.trim(); search(); });
+    document.querySelectorAll(".filter").forEach(el => el.addEventListener("click", () => { kind = el.dataset.kind; q = input.value.trim(); search(); }));
+    extra.addEventListener("change", () => { kind = extra.value; q = input.value.trim(); search(); });
     more.addEventListener("click", () => { if (next && pages < 20) search(true); });
     updateFilters();
     await search();
@@ -178,7 +202,7 @@
     const kind = params.get("kind");
     const id = params.get("id");
     const version = params.get("version");
-    if (!kinds.has(kind) || !id || !version || id.length > 2048 || version.length > 512) {
+    if (!kinds.has(kind) || !id || !version || utf8Length(id) > 2048 || utf8Length(version) > 256 || id.includes("\0") || version.includes("\0")) {
       notice(container, "This link is incomplete", "Choose an artifact from the library to see its exact version and published details.");
       container.append(link("Browse the library →", "/library", "button button-outline"));
       container.setAttribute("aria-busy", "false");
@@ -231,6 +255,20 @@
       container.append(setup);
     } catch (error) { failure(container, error, artifact); }
     finally { container.setAttribute("aria-busy", "false"); }
+  }
+  if (page === "home") {
+    const form = document.getElementById("home-library-search");
+    const input = document.getElementById("home-search");
+    form.addEventListener("submit", event => {
+      if (utf8Length(input.value.trim()) <= 200 && !input.value.includes("\0")) return;
+      event.preventDefault();
+      input.setAttribute("aria-invalid", "true");
+      const help = document.getElementById("home-search-help");
+      help.textContent = "This search is too long. Try a shorter phrase.";
+      help.setAttribute("role", "alert");
+      input.focus();
+    });
+    input.addEventListener("input", () => input.removeAttribute("aria-invalid"));
   }
   if (page === "signin") {
     const code = new URLSearchParams(window.location.search).get("error");
