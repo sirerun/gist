@@ -19,6 +19,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirerun/gist/catalog/directory"
 	"github.com/sirerun/gist/hosted/internal/ports"
+	"github.com/sirerun/gist/hosted/internal/semantic"
 	"github.com/sirerun/gist/hosted/internal/storage"
 )
 
@@ -27,6 +28,7 @@ func publicDirectoryPath(path string) bool {
 }
 
 type directoryAPI struct {
+	search     *semantic.Service
 	index      *directory.Index
 	apps       *directory.AppIndex
 	origin     string
@@ -93,7 +95,12 @@ func (h *directoryAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			webError(w, 503, "service_unavailable", "App directory unavailable.")
 			return
 		}
-		result, err = h.apps.Search(directory.AppQuery{Text: v.Get("q"), Category: v.Get("category"), Offset: offset, Limit: limit})
+		query := directory.AppQuery{Text: v.Get("q"), Category: v.Get("category"), Offset: offset, Limit: limit}
+		if h.search != nil {
+			result, err = h.search.SearchApps(r.Context(), query)
+		} else {
+			result, err = h.apps.Search(query)
+		}
 		if err != nil {
 			webError(w, 400, "invalid_query", "Invalid app query.")
 			return
@@ -127,7 +134,12 @@ func (h *directoryAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		var search directory.Result
-		search, err = h.index.Search(directory.Query{Text: v.Get("q"), Kind: v.Get("kind"), Tag: v.Get("tag"), Cursor: v.Get("cursor"), Limit: limit})
+		query := directory.Query{Text: v.Get("q"), Kind: v.Get("kind"), Tag: v.Get("tag"), Cursor: v.Get("cursor"), Limit: limit}
+		if h.search != nil {
+			search, err = h.search.Search(r.Context(), query)
+		} else {
+			search, err = h.index.Search(query)
+		}
 		if err != nil {
 			webError(w, 400, "invalid_query", "Invalid directory query or expired cursor.")
 			return

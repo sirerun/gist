@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/sirerun/gist/hosted/internal/app"
+	"github.com/sirerun/gist/hosted/internal/embeddingruntime"
 	"github.com/sirerun/gist/hosted/internal/enrollment"
 	"github.com/sirerun/gist/hosted/internal/otelboot"
 )
@@ -47,6 +48,15 @@ func main() {
 		_ = otelShutdown(flushCtx)
 		flushCancel()
 	}()
+	runtime, runtimeErr := embeddingruntime.Start(ctx, embeddingruntime.Config{Enabled: os.Getenv("GIST_EMBEDDING_ENABLED") == "true", BinaryPath: os.Getenv("GIST_EMBEDDING_BINARY"), ModelPath: os.Getenv("GIST_EMBEDDING_MODEL"), BinarySHA256File: os.Getenv("GIST_EMBEDDING_BINARY_SHA256_FILE")})
+	if runtimeErr != nil {
+		log.Print("embedding runtime unavailable; lexical fallback active")
+	}
+	if runtime != nil {
+		defer runtime.Close()
+		cfg.PublicEmbedder = runtime.Embedder
+		cfg.EmbeddingHealthy = runtime.Healthy
+	}
 	a, err := app.New(ctx, cfg)
 	if err != nil {
 		log.Fatal(err)

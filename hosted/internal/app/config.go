@@ -12,11 +12,15 @@ import (
 	"github.com/sirerun/gist/hosted/internal/identity"
 	"github.com/sirerun/gist/hosted/internal/ports"
 	"github.com/sirerun/gist/hosted/internal/rest"
+	"github.com/sirerun/gist/hosted/internal/semantic"
 )
 
 // Config is the service configuration. Values are deliberately explicit so
 // deployment configuration, rather than source defaults, owns the limits.
 type Config struct {
+	// Hosted embeddings operate only on public directory projections.
+	PublicEmbedder        semantic.Embedder
+	EmbeddingHealthy      func() bool
 	ListenAddress         string
 	PublicOrigin          string
 	ResourceAudience      string

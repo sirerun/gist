@@ -298,7 +298,14 @@ func (h *webAPI) serveBookmarkCatalog(w http.ResponseWriter, r *http.Request, id
 				return
 			}
 		}
-		result, e := apps.Search(directory.AppQuery{Text: q.Get("q"), Category: q.Get("tag"), PriorityConnectorIDs: ids, Offset: offset, Limit: limit})
+		query := directory.AppQuery{Text: q.Get("q"), Category: q.Get("tag"), PriorityConnectorIDs: ids, Offset: offset, Limit: limit}
+		var result directory.AppResult
+		var e error
+		if h.publicSearch != nil {
+			result, e = h.publicSearch.SearchApps(r.Context(), query)
+		} else {
+			result, e = apps.Search(query)
+		}
 		if e != nil {
 			webError(w, 400, "invalid_query", "Invalid catalog query.")
 			return
@@ -323,7 +330,14 @@ func (h *webAPI) serveBookmarkCatalog(w http.ResponseWriter, r *http.Request, id
 		return
 	} else {
 		for cursor := ""; ; {
-			result, e := h.publicIndex.Search(directory.Query{Text: q.Get("q"), Kind: q.Get("kind"), Tag: q.Get("tag"), Cursor: cursor, Limit: 100})
+			query := directory.Query{Text: q.Get("q"), Kind: q.Get("kind"), Tag: q.Get("tag"), Cursor: cursor, Limit: 100}
+			var result directory.Result
+			var e error
+			if h.publicSearch != nil {
+				result, e = h.publicSearch.Search(r.Context(), query)
+			} else {
+				result, e = h.publicIndex.Search(query)
+			}
 			if e != nil {
 				webError(w, 400, "invalid_query", "Invalid catalog query.")
 				return

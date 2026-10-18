@@ -36,6 +36,7 @@ type AppQuery struct {
 	Offset, Limit        int
 }
 type AppResult struct {
+	SearchMode string        `json:"search_mode,omitempty"`
 	Categories []AppCategory `json:"categories"`
 	Items      []App         `json:"items"`
 	Total      int           `json:"total"`
@@ -133,6 +134,18 @@ func (i *AppIndex) Get(slug string) (App, bool) {
 	return cloneApp(i.items[n]), true
 }
 func (i *AppIndex) Search(q AppQuery) (AppResult, error) {
+	return i.search(q, nil, false)
+}
+
+// SearchRanked retains category and page bounds over an explicit app ranking.
+func (i *AppIndex) SearchRanked(q AppQuery, slugs []string) (AppResult, error) {
+	if len(slugs) > MaxEntries {
+		return AppResult{}, fmt.Errorf("too many ranked apps")
+	}
+	return i.search(q, slugs, true)
+}
+
+func (i *AppIndex) search(q AppQuery, slugs []string, ranked bool) (AppResult, error) {
 	if i == nil {
 		return AppResult{}, fmt.Errorf("app directory unavailable")
 	}
@@ -157,6 +170,16 @@ func (i *AppIndex) Search(q AppQuery) (AppResult, error) {
 	}
 	sort.Slice(result.Categories, func(a, b int) bool { return result.Categories[a].Name < result.Categories[b].Name })
 	ordered := i.items
+	if ranked {
+		ordered = make([]App, 0, len(slugs))
+		seen := map[string]bool{}
+		for _, slug := range slugs {
+			if n, ok := i.bySlug[slug]; ok && !seen[slug] {
+				ordered = append(ordered, i.items[n])
+				seen[slug] = true
+			}
+		}
+	}
 	if len(q.PriorityConnectorIDs) > 0 {
 		saved := map[string]bool{}
 		for _, id := range q.PriorityConnectorIDs {
@@ -170,13 +193,14 @@ func (i *AppIndex) Search(q AppQuery) (AppResult, error) {
 			}
 			return false
 		}
-		ordered = make([]App, 0, len(i.items))
-		for _, a := range i.items {
+		base := ordered
+		ordered = make([]App, 0, len(base))
+		for _, a := range base {
 			if pinned(a) {
 				ordered = append(ordered, a)
 			}
 		}
-		for _, a := range i.items {
+		for _, a := range base {
 			if !pinned(a) {
 				ordered = append(ordered, a)
 			}
@@ -184,7 +208,7 @@ func (i *AppIndex) Search(q AppQuery) (AppResult, error) {
 	}
 	text := strings.ToLower(q.Text)
 	for _, a := range ordered {
-		if text != "" && !strings.Contains(strings.ToLower(a.Name+" "+a.Slug+" "+a.Description), text) {
+		if !ranked && text != "" && !strings.Contains(strings.ToLower(a.Name+" "+a.Slug+" "+a.Description), text) {
 			continue
 		}
 		if q.Category != "" {

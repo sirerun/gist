@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -29,6 +30,7 @@ import (
 	"github.com/sirerun/gist/hosted/internal/remotemcp"
 	"github.com/sirerun/gist/hosted/internal/resolution"
 	"github.com/sirerun/gist/hosted/internal/rest"
+	"github.com/sirerun/gist/hosted/internal/semantic"
 	"github.com/sirerun/gist/hosted/internal/storage"
 	"github.com/sirerun/gist/hosted/internal/webui"
 )
@@ -224,9 +226,25 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		pool.Close()
 		return nil, fmt.Errorf("app: application directory: %w", err)
 	}
-	publicDirectory := &directoryAPI{index: publicIndex, apps: apps, origin: cfg.PublicOrigin, maxBytes: min(cfg.MaxResponseBytes, 512<<10), concurrent: make(chan struct{}, cfg.MaxConcurrentRequests)}
+	var publicSearch *semantic.Service
+	if cfg.PublicEmbedder != nil {
+		publicSearch = semantic.New(publicIndex, apps, cfg.PublicEmbedder, cfg.EmbeddingHealthy)
+		go func() {
+			warmCtx, cancel := context.WithTimeout(ctx, 10*time.Minute)
+			defer cancel()
+			if err := publicSearch.Warm(warmCtx); err != nil {
+				log.Print("public semantic index unavailable; lexical fallback active")
+			} else {
+				log.Print("public semantic index ready")
+			}
+		}()
+	}
+	publicDirectory := &directoryAPI{search: publicSearch, index: publicIndex, apps: apps, origin: cfg.PublicOrigin, maxBytes: min(cfg.MaxResponseBytes, 512<<10), concurrent: make(chan struct{}, cfg.MaxConcurrentRequests)}
 	directoryMCP := directorymcp.New(publicIndex, cfg.PublicOrigin, cfg.MaxConcurrentRequests)
-	web := &webAPI{bookmarks: postgresBookmarks{pool: pool}, publicIndex: publicDirectory.index, publicApps: publicDirectory.apps, directory: postgresPrivateDirectory{pool: pool}, csrfKey: deriveKey(cfg.OAuthConsentSecret, "gist web csrf v1"), sessions: sessions, policy: policy, catalog: postgresWebCatalog{pool: pool}, origin: cfg.PublicOrigin, audience: cfg.ResourceAudience, workspace: cfg.GitHubEnrollment.WorkspaceID, workspaceName: cfg.GitHubEnrollment.WorkspaceName, cursorKey: deriveKey(cfg.OAuthConsentSecret, "gist web cursor v1"), timeout: cfg.RequestTimeout, maxBytes: min(cfg.MaxResponseBytes, 256<<10), concurrent: make(chan struct{}, cfg.MaxConcurrentRequests)}
+	if publicSearch != nil {
+		directoryMCP.WithSearch(publicSearch)
+	}
+	web := &webAPI{publicSearch: publicSearch, bookmarks: postgresBookmarks{pool: pool}, publicIndex: publicDirectory.index, publicApps: publicDirectory.apps, directory: postgresPrivateDirectory{pool: pool}, csrfKey: deriveKey(cfg.OAuthConsentSecret, "gist web csrf v1"), sessions: sessions, policy: policy, catalog: postgresWebCatalog{pool: pool}, origin: cfg.PublicOrigin, audience: cfg.ResourceAudience, workspace: cfg.GitHubEnrollment.WorkspaceID, workspaceName: cfg.GitHubEnrollment.WorkspaceName, cursorKey: deriveKey(cfg.OAuthConsentSecret, "gist web cursor v1"), timeout: cfg.RequestTimeout, maxBytes: min(cfg.MaxResponseBytes, 256<<10), concurrent: make(chan struct{}, cfg.MaxConcurrentRequests)}
 	handler := requestContext{directory: publicDirectory, directoryMCP: directoryMCP, web: web, ui: webui.Handler(), lifetime: a.requests, admission: a.bootstrapAdmission, rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, enrollment: enrollmentRoutes, ready: func(ctx context.Context) error {
 		if err := a.maintenanceReady(); err != nil {
 			return err

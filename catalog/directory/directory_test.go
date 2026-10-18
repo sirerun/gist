@@ -321,3 +321,37 @@ func TestPackageDescriptorsAreNotCommands(t *testing.T) {
 		}
 	}
 }
+
+func TestRankedSearchFiltersAndBindsPagination(t *testing.T) {
+	index, err := DefaultPublic()
+	if err != nil {
+		t.Fatal(err)
+	}
+	all, err := index.Search(Query{Limit: 100})
+	if err != nil || len(all.Items) < 3 {
+		t.Fatal(err)
+	}
+	ids := []string{all.Items[2].ID, all.Items[0].ID, all.Items[1].ID, all.Items[0].ID, "unknown"}
+	q := Query{Text: "a semantic intent with no literal match", Limit: 1}
+	first, err := index.SearchRanked(q, ids, "model-corpus-a")
+	if err != nil || first.Total != 3 || first.Items[0].ID != ids[0] || first.NextCursor == "" {
+		t.Fatalf("first %+v %v", first, err)
+	}
+	q.Cursor = first.NextCursor
+	next, err := index.SearchRanked(q, ids, "model-corpus-a")
+	if err != nil || next.Items[0].ID != ids[1] {
+		t.Fatalf("next %+v %v", next, err)
+	}
+	if _, err = index.SearchRanked(q, ids, "model-corpus-b"); err == nil {
+		t.Fatal("cursor crossed model generation")
+	}
+	if _, err = index.Search(q); err == nil {
+		t.Fatal("semantic cursor accepted in lexical fallback")
+	}
+	q.Cursor = ""
+	q.Tag = "absent-tag"
+	filtered, err := index.SearchRanked(q, ids, "model-corpus-a")
+	if err != nil || filtered.Total != 0 {
+		t.Fatalf("tag bypass %+v %v", filtered, err)
+	}
+}
