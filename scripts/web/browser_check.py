@@ -112,6 +112,15 @@ def main():
         page.locator('#catalog-search').get_by_role('button', name='Search').click()
         expect(page.locator('#catalog-results')).not_to_contain_text(item['title'])
         expect(page.locator('#catalog-notice')).to_contain_text('match')
+        before = len([c for c in calls if c['path'].endswith('/catalog')])
+        page.get_by_label('Search the catalog', exact=True).fill('é' * 101)
+        page.locator('#catalog-search').get_by_role('button', name='Search').click()
+        expect(page.locator('#catalog-notice')).to_contain_text('shorter search')
+        expect(page.get_by_role('button', name='Try again')).to_have_count(0)
+        assert len([c for c in calls if c['path'].endswith('/catalog')]) == before
+        page.get_by_label('Search the catalog', exact=True).fill('é' * 100)
+        page.locator('#catalog-search').get_by_role('button', name='Search').click()
+        expect(page.locator('#catalog-results')).to_contain_text(item['title'])
         state['mode'] = 'empty'
         visit('/library')
         expect(page.locator('#catalog-notice')).to_contain_text('no published catalog records')
@@ -143,6 +152,7 @@ def main():
         state['mode'] = 'signed-in'
         page.get_by_role('button', name='Try again').click()
         expect(page.locator('#catalog-results')).to_contain_text(item['title'])
+        visit('/library')
         page.get_by_role('button', name='Sign out').click()
         expect(page.get_by_role('link', name='Sign in with GitHub')).to_be_visible()
         assert any(c['path'].endswith('/logout') for c in calls)
