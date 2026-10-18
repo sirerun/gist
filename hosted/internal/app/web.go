@@ -60,8 +60,10 @@ type webAPI struct {
 	sessions                                   oauth.SessionAuthenticator
 	policy                                     webPolicy
 	catalog                                    webCatalog
+	directory                                  privateDirectoryStore
 	origin, audience, workspace, workspaceName string
 	cursorKey                                  []byte
+	csrfKey                                    []byte
 	timeout                                    time.Duration
 	maxBytes                                   int
 	concurrent                                 chan struct{}
@@ -98,6 +100,10 @@ func (h *webAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		http.SetCookie(w, &http.Cookie{Name: oauth.SessionCookieName, Value: "", Path: "/", MaxAge: -1, Expires: time.Unix(1, 0), Secure: true, HttpOnly: true, SameSite: http.SameSiteLaxMode})
 		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	if r.URL.Path == "/app/api/directory" {
+		h.servePrivateDirectory(w, r)
 		return
 	}
 	if r.URL.Path != "/app/api/session" && r.URL.Path != "/app/api/catalog" && r.URL.Path != "/app/api/artifact" {
@@ -150,7 +156,7 @@ func (h *webAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			webError(w, 400, "invalid_query", "The session URL does not accept parameters.")
 			return
 		}
-		h.write(w, map[string]any{"authenticated": true, "workspace_id": h.workspace, "workspace_name": h.workspaceName, "subject": p.Subject})
+		h.write(w, map[string]any{"authenticated": true, "workspace_id": h.workspace, "workspace_name": h.workspaceName, "subject": p.Subject, "csrf_token": h.csrfToken(r)})
 	case "/app/api/catalog":
 		if !webQueryKeys(values, "q", "kind", "cursor") {
 			webError(w, 400, "invalid_query", "Use one search, kind, and cursor parameter.")

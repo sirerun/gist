@@ -9,7 +9,7 @@ import (
 
 func TestPublicRoutes(t *testing.T) {
 	h := Handler()
-	for _, p := range []string{"/", "/library", "/library/item", "/developers", "/docs", "/signin"} {
+	for _, p := range []string{"/", "/library", "/library/item", "/library/server", "/workspace", "/workspace/servers", "/developers", "/docs", "/signin"} {
 		t.Run(p, func(t *testing.T) {
 			if !Handles(p) {
 				t.Fatal("route not claimed")
@@ -48,7 +48,7 @@ func TestPublicRouteBoundary(t *testing.T) {
 
 func TestStaticAssetsAndMethods(t *testing.T) {
 	h := Handler()
-	for _, p := range []string{"/assets/site.css", "/assets/site.js", "/assets/brand/gist-logo-green.svg", "/assets/brand/gist-symbol-white.svg"} {
+	for _, p := range []string{"/assets/site.css", "/assets/site.js", "/assets/directory.js", "/assets/brand/gist-logo-green.svg", "/assets/brand/gist-symbol-white.svg"} {
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, p, nil))
 		if w.Code != 200 || w.Body.Len() == 0 {

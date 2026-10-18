@@ -106,6 +106,29 @@ func TestProvisionRuntimeRoleRestrictedRLSAndNoDDLOwnership(t *testing.T) {
 	if _, err := owner.Exec(ctx, `INSERT INTO public.event_outbox(workspace_id,event_type,artifact_kind,artifact_id,artifact_version,policy_generation) VALUES('tenant-a','version_published','skill','a','1.0.0',1),('tenant-b','version_published','skill','b','1.0.0',1)`); err != nil {
 		t.Fatal(err)
 	}
+	// The new descriptor relation is covered by reviewed CRUD grants and FORCE RLS.
+	if _, err := owner.Exec(ctx, `INSERT INTO public.workspaces(id,name) VALUES('tenant-a','A'),('tenant-b','B') ON CONFLICT DO NOTHING; INSERT INTO public.private_directory_entries(workspace_id,record,created_by) VALUES('tenant-a','{"id":"a"}','fixture'),('tenant-b','{"id":"b"}','fixture')`); err != nil {
+		t.Fatal(err)
+	}
+	var privateCount int
+	if err := runtime.QueryRow(ctx, `SELECT count(*) FROM public.private_directory_entries`).Scan(&privateCount); err != nil || privateCount != 0 {
+		t.Fatalf("unscoped private descriptors=%d err=%v", privateCount, err)
+	}
+	if _, err := runtime.Exec(ctx, `SELECT set_config('registry.workspace_id','tenant-a',false)`); err != nil {
+		t.Fatal(err)
+	}
+	if err := runtime.QueryRow(ctx, `SELECT count(*) FROM public.private_directory_entries`).Scan(&privateCount); err != nil || privateCount != 1 {
+		t.Fatalf("scoped private descriptors=%d err=%v", privateCount, err)
+	}
+	if _, err := runtime.Exec(ctx, `INSERT INTO public.private_directory_entries(workspace_id,record,created_by) VALUES('tenant-b','{}','fixture')`); err == nil {
+		t.Fatal("cross-tenant private descriptor write allowed")
+	}
+	if _, err := runtime.Exec(ctx, `INSERT INTO public.private_directory_entries(workspace_id,record,created_by) VALUES('tenant-a','{}','fixture'); DELETE FROM public.private_directory_entries WHERE workspace_id='tenant-a'; SELECT set_config('registry.workspace_id','',false)`); err != nil {
+		t.Fatal("reviewed private descriptor grants failed")
+	}
+	if _, err := runtime.Exec(ctx, `UPDATE public.private_directory_entries SET record='{}' WHERE false`); err == nil {
+		t.Fatal("runtime has unused private descriptor UPDATE grant")
+	}
 	var count int
 	if err := runtime.QueryRow(ctx, "SELECT count(*) FROM public.event_outbox").Scan(&count); err != nil || count != 0 {
 		t.Fatalf("unscoped rows=%d err=%v", count, err)

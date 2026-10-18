@@ -1,5 +1,14 @@
 # Gist -- Design Document
 
+## Public discovery and featured integrations — 2026-10-17
+
+[ADR023](adr/023-public-directory-and-featured-integrations.md) records public
+discovery, private custom descriptors, official MCP preference with Mint for
+gaps, and Zati-tested server/skill featured bundles. Its separate directory
+contract preserves frozen artifacts, private workspaces and client execution.
+Listings are not qualified bindings. E-DIRECTORY owns this scoped public catalog
+resumption; unrelated hosting holds and retired execution remain unchanged.
+
 ## Catalog-only decision — 2026-10-16
 
 [ADR016](adr/016-zati-library-first-rfc003-gateway-boundary.md) supersedes earlier

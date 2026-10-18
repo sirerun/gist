@@ -35,6 +35,13 @@ website/catalog slice within the existing authorized AWS deployment. Public
 informational pages do not expose private catalog content or relax bootstrap
 admission for authenticated APIs. Execution remains caller-owned.
 
+Current directory resumption (2026-10-17): owner-approved ADR023 and E-DIRECTORY
+add public discovery, private custom entries and qualified featured bundles after
+nine clarified product decisions. Existing artifact wire contracts, private
+workspace isolation and client execution authority remain. This explicit scope
+also includes implementation and population through the existing AWS release
+path, without real-provider or paid-call authority implied by catalog intake.
+
 ### Dispatch disposition and precedence
 
 This section supersedes older continuation instructions, milestone tables and unqualified “current” infrastructure notes below, which are dated historical records. All original task rows, IDs, completion states and acceptance evidence remain. Unfinished gateway rows depend on the permanently non-dispatchable retirement sentinel; catalog provenance rows .31/.35 are retained under catalog ownership with replacement prerequisites. Unfinished prior hosted/guidance rows depend on the hold sentinel. A bounded repair/current-consumer obligation requires a separately recorded scoped resumption, not blanket reactivation. No held or retired row is counted complete. The library terminal depends on neither the retired graph nor hosted production.
@@ -2186,3 +2193,72 @@ broader authenticated/operational acceptance; the website slice does not close
 the entire hosted RFC. The [web receipt](receipts/2026-10-17-web-app.md) records
 source, review, checks, image, configuration, production observations and rollback.
 No persistent agent watcher remains after the bounded deployment checks finish.
+
+
+### E-DIRECTORY -- Public discovery and qualified featured integrations
+
+fidelity: executable
+Acceptance: Anyone can browse a populated reproducible catalog; members can keep
+custom server/API descriptors private; official vendor MCP is preferred over
+Mint alternatives where justified; featured server/skill bundles have dated real
+Zati workflow evidence and guides. Discovery never grants execution authority.
+
+- [x] T-DIR.1 Freeze clarified product decisions and source inventory  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  acc: [ADR023 records all nine approved decisions, actual 2582-entry inventory, source and client limitations, new directory contract boundary and real-workflow featured standard]
+- [x] T-DIR.2 Implement reusable bounded directory metadata and search  Owner: directory-source  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.1]  acc: [Public Go package validates bounded versioned snapshots, stable source identities and safe descriptors, indexed bounded discovery, exact selection and unexpired qualification eligibility without executing code or trusting upstream quality flags]
+- [x] T-DIR.3 Implement reproducible source intake and populate candidates  Owner: directory-source  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.2]  acc: [Explicit pinned local registry and bounded official MCP source inputs produce attributed deduplicated versioned snapshots with preserved source hashes, rejected-record receipts and no private fetches; imported candidates are not featured]
+- [x] T-DIR.4 Implement public HTTP and read-only MCP directory access  Owner: hosted-directory  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.2]  acc: [Anonymous bounded search/detail/export and small schema-described MCP discovery expose only accepted public metadata while existing authenticated REST/MCP routes and tenant controls retain their contracts]
+- [x] T-DIR.5 Implement private custom descriptors and durable workspace controls  Owner: hosted-directory  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.2]  acc: [Members can read private descriptors and current maintainers can create or remove remote/local/OpenAPI entries with same-origin CSRF protection, forced tenant RLS and restricted grants; values never contain credentials or cause Gist to fetch or execute supplied targets]
+- [x] T-DIR.6 Implement populated public and private Library journeys  Owner: coordinator  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.3, T-DIR.4, T-DIR.5]  acc: [Approved visual design shows real public entries, honest verification and client requirements, exact details and exports, separate private views and usable custom-entry forms without sign-in gating public browsing or labeling candidates featured]
+- [x] T-DIR.7 Verify complete directory source and browser behavior  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.3, T-DIR.4, T-DIR.5, T-DIR.6]  acc: [Go race, restricted-role PostgreSQL, source reproducibility and real HTTP/MCP plus desktop/mobile browser tests cover public/private separation, revoked members, malicious data, budgets, paging, unknown sources, unqualified badges and custom-entry recovery]
+- [ ] T-DIR.8 Independently review the complete populated directory candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.7]  acc: [Non-author reviews exact base/head including data provenance, API/UI, migration/grants, fixtures and plan; reachable findings receive fixes and affected re-verification]
+- [ ] T-DIR.9 Merge and verify landed directory source  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.8]  acc: [Guarded GitHub rebase respects reviewed head and current base and branch controls, fresh landed tree and affected checks match approved source]
+- [ ] T-DIR.10 Release and deploy populated directory through reviewed IaC  Owner: deployment-operator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.9]  acc: [Source-pinned immutable image, independently reviewed config and actual preview deploy after available recovery snapshot and exact migration/runtime-role qualification; existing data, credentials and rollback remain protected]
+- [ ] T-DIR.11 Verify live catalog and private descriptor acceptance  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.10]  acc: [Live anonymous browser/MCP discover real entries with source and setup details, private APIs deny anonymous or foreign access, and actual authorized private write/read journey is observed or explicitly pending]
+- [ ] T-DIR.12 Build and document five reusable workflow candidates  Owner: catalog-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.1]  acc: [Inbox, calendar, file discovery, public code review and research skill sources declare exact read-only capabilities, setup and limitations; complete-package tests and explicit source pins preserve client admission and public-package trust gates]
+- [ ] T-DIR.13 Integrate current directory descriptors with Zati admission  Owner: zati-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.9, T-DIR.12]  acc: [Zati consumes the versioned library or hosted directory contract and imports selected descriptors and skills as reviewable drafts with current transport/account/schema requirements, preserving explicit client admission and refusing unsupported transports]
+- [ ] T-DIR.14 Qualify actual client/provider test prerequisites  Owner: coordinator-and-owner  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-DIR.12]  acc: [Actual installed or owned source Zati instance, named caller-owned connection profiles, concrete read-only targets, allowed requests and costs, versions and expiry are recorded before real workflow testing; missing profiles are not fabricated]
+- [ ] T-DIR.15 Verify and independently deliver Zati consumer changes  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.13]  acc: [Affected source/client/browser checks and independent exact-head review precede guarded merge and fresh landed acceptance; native installation or visible acceptance is claimed only when observed]
+- [ ] T-DIR.16 Execute useful real Zati workflows and retain dated evidence  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.14, T-DIR.15]  acc: [Each workflow uses an actual authorized profile and real server under its bounded envelope, verifies useful outcome and exact package/tool/client pins, and records failures honestly without promoting fixtures or exceeding scope]
+- [ ] T-DIR.17 Independently review featured eligibility and public package trust  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.16]  acc: [Non-author approves named successful workflows, guides and unexpired version-bound evidence; ADR019 release/trust prerequisites remain enforced and unqualified integrations stay ordinary candidates]
+- [ ] T-DIR.18 Publish qualified featured bundles and verify live presentation  Owner: coordinator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.17, T-DIR.11]  acc: [Reviewed qualification data and source-pinned release show only eligible bundles as featured, expose their actual evidence and setup guides, and retain healthy public/private behavior after deployment]
+- [ ] T-DIR.19 Document and verify refresh, expiry, rollback and operations  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.18]  acc: [Canonical receipt identifies all landed sources and live revisions, repeatable intake and coverage gaps, expiry removal, recovery/rollback and actual unresolved client/provider limits with no persistent watcher claimed]
+
+#### Directory delivery batches and authority
+
+Current-session coordinator owns integration, UI, docs and cloud operations.
+Two disjoint implementation worktrees own source intake/library and hosted
+storage/API respectively; a separate non-author reviewer owns final gates.
+The coherent first PR covers T-DIR.2-7; implementation inside that candidate
+may proceed speculatively against the frozen descriptor contract, while merge
+waits for all actual producer inputs and checks. Clients wait for producer landing.
+Later skill/client/qualification work is a separate outcome batch. Requested
+size is default three outcome members per worker, actual source assignment two
+and hosted assignment two; one coordinator UI member. Inherit session selection
+without model overrides. No acceleration claim follows from worker count.
+
+Real profile/account prerequisites block only dependent workflow qualification;
+public catalog intake and source work continue. No model or paid provider calls,
+new cloud capacity, Gist execution, universal transport support or trust promotion
+are authorized by conformance or by imported metadata. Source refresh is an
+explicit bounded command with reviewed output, not a perpetual agent watcher.
+
+
+### Directory candidate verification (2026-10-17)
+
+T-DIR.2-7 implemented and verified. Candidate source d21b85f includes the
+6,494-entry sanitized snapshot (3,913 MCP, 2,581 OpenAPI), five recommendations
+and zero featured claims. Root directory race/CLI and synthetic 100k search passed
+on f324a44; the full hosted race/PostgreSQL suite passed except a restricted-role
+UUID-default failure, corrected with pg_catalog.gen_random_uuid(). Focused
+migration and private-directory PostgreSQL race tests, hosted vet/build passed on
+d21b85f. Existing and new directory browser journeys passed on c295a83, whose UI
+is unchanged in d21b85f: 1440/768/390/320 widths, synthetic APIs only. Four Python
+intake tests, offline reproducibility and JS syntax passed. See
+[coverage and setup](guides/catalog-coverage.md). Independent review found and
+resolved login target, private navigation/refresh, research tag and descriptor
+qualification-binding issues; exact final publication head review remains T-DIR.8.
+
+The installed Zati controller returned installation-not-initialized during
+read-only preflight. An environment-selection question is pending. No provider
+or model calls occurred and no fixture result qualifies featured status.
+T-DIR.12-19 remain open; implementation source and deployment are distinct gates.

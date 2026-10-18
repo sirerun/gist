@@ -1,0 +1,185 @@
+[
+  {
+    "id": "openapi:google-gmail",
+    "kind": "openapi",
+    "service_id": "google-gmail",
+    "title": "Gmail",
+    "description": "Recommended setup candidate for read-only inbox briefing. Google API exposed through Mint using a community OpenAPI description; client-owned OAuth and read-only scope review required. Not yet qualified in Zati.",
+    "version": "v1",
+    "tags": [
+      "mail",
+      "google",
+      "zati-essentials"
+    ],
+    "official": false,
+    "official_evidence_url": "https://developers.google.com/workspace/gmail/api/guides/overview",
+    "homepage": "https://developers.google.com/gmail",
+    "repository": "https://github.com/APIs-guru/openapi-directory",
+    "openapi": {
+      "spec_url": "https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/googleapis.com/gmail/v1/openapi.yaml",
+      "mint_guide_url": "https://github.com/sirerun/mint"
+    },
+    "auth": {
+      "type": "oauth2",
+      "credential_names": [
+        "GOOGLE_OAUTH_TOKEN"
+      ],
+      "setup_url": "https://developers.google.com/identity/protocols/oauth2"
+    },
+    "skills": [
+      {
+        "id": "zati-gmail-workflow",
+        "title": "Read-only inbox briefing",
+        "status": "candidate"
+      }
+    ],
+    "recommended": true,
+    "featured": false
+  },
+  {
+    "id": "openapi:google-calendar",
+    "kind": "openapi",
+    "service_id": "google-calendar",
+    "title": "Google Calendar",
+    "description": "Recommended setup candidate for daily calendar briefing. Google API exposed through Mint using a community OpenAPI description; client-owned OAuth and read-only scope review required. Not yet qualified in Zati.",
+    "version": "v3",
+    "tags": [
+      "calendar",
+      "google",
+      "zati-essentials"
+    ],
+    "official": false,
+    "official_evidence_url": "https://developers.google.com/calendar/api/guides/overview",
+    "homepage": "https://developers.google.com/calendar",
+    "repository": "https://github.com/APIs-guru/openapi-directory",
+    "openapi": {
+      "spec_url": "https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/googleapis.com/calendar/v3/openapi.yaml",
+      "mint_guide_url": "https://github.com/sirerun/mint"
+    },
+    "auth": {
+      "type": "oauth2",
+      "credential_names": [
+        "GOOGLE_OAUTH_TOKEN"
+      ],
+      "setup_url": "https://developers.google.com/identity/protocols/oauth2"
+    },
+    "skills": [
+      {
+        "id": "zati-calendar-workflow",
+        "title": "Daily calendar briefing",
+        "status": "candidate"
+      }
+    ],
+    "recommended": true,
+    "featured": false
+  },
+  {
+    "id": "openapi:google-drive",
+    "kind": "openapi",
+    "service_id": "google-drive",
+    "title": "Google Drive",
+    "description": "Recommended setup candidate for find and summarize a file. Google API exposed through Mint using a community OpenAPI description; client-owned OAuth and read-only scope review required. Not yet qualified in Zati.",
+    "version": "v3",
+    "tags": [
+      "files",
+      "google",
+      "zati-essentials"
+    ],
+    "official": false,
+    "official_evidence_url": "https://developers.google.com/drive/api/guides/overview",
+    "homepage": "https://developers.google.com/drive",
+    "repository": "https://github.com/APIs-guru/openapi-directory",
+    "openapi": {
+      "spec_url": "https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/googleapis.com/drive/v3/openapi.yaml",
+      "mint_guide_url": "https://github.com/sirerun/mint"
+    },
+    "auth": {
+      "type": "oauth2",
+      "credential_names": [
+        "GOOGLE_OAUTH_TOKEN"
+      ],
+      "setup_url": "https://developers.google.com/identity/protocols/oauth2"
+    },
+    "skills": [
+      {
+        "id": "zati-drive-workflow",
+        "title": "Find and summarize a file",
+        "status": "candidate"
+      }
+    ],
+    "recommended": true,
+    "featured": false
+  },
+  {
+    "id": "mcp:io.github.github/github-mcp-server",
+    "kind": "mcp",
+    "service_id": "github",
+    "title": "GitHub",
+    "description": "Official GitHub MCP server. Recommended candidate for read-only repository and pull request research; select read-only tools in your client. Requires a GitHub account. Not yet qualified in Zati.",
+    "tags": [
+      "github",
+      "development",
+      "zati-essentials"
+    ],
+    "official": true,
+    "official_evidence_url": "https://github.com/github/github-mcp-server",
+    "repository": "https://github.com/github/github-mcp-server",
+    "remotes": [
+      {
+        "url": "https://api.githubcopilot.com/mcp/",
+        "transport": "streamable-http"
+      }
+    ],
+    "auth": {
+      "type": "oauth2-or-token",
+      "setup_url": "https://github.com/github/github-mcp-server"
+    },
+    "skills": [
+      {
+        "id": "zati-github-review-workflow",
+        "title": "Read-only pull request briefing",
+        "status": "candidate"
+      }
+    ],
+    "recommended": true,
+    "featured": false
+  },
+  {
+    "id": "mcp:com.brave/brave-search",
+    "kind": "mcp",
+    "service_id": "brave-search",
+    "title": "Brave Search",
+    "description": "Official Brave Search MCP package. Recommended candidate for web research with linked sources. Requires a Brave API key; account terms and charges belong to the client. Not yet qualified in Zati.",
+    "tags": [
+      "web",
+      "research",
+      "zati-essentials"
+    ],
+    "official": true,
+    "official_evidence_url": "https://github.com/brave/brave-search-mcp-server",
+    "repository": "https://github.com/brave/brave-search-mcp-server",
+    "packages": [
+      {
+        "registry": "npm",
+        "identifier": "@brave/brave-search-mcp-server",
+        "runtime": "node"
+      }
+    ],
+    "auth": {
+      "type": "api_key",
+      "credential_names": [
+        "BRAVE_API_KEY"
+      ],
+      "setup_url": "https://api-dashboard.search.brave.com/"
+    },
+    "skills": [
+      {
+        "id": "zati-web-research-workflow",
+        "title": "Research a topic with sources",
+        "status": "candidate"
+      }
+    ],
+    "recommended": true,
+    "featured": false
+  }
+]

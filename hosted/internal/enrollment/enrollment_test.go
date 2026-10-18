@@ -625,3 +625,22 @@ func TestWebsiteLoginFailureUsesFixedHelpfulPage(t *testing.T) {
 		}
 	}
 }
+
+func TestWorkspaceReturnTargetsStayExact(t *testing.T) {
+	h, _ := testHandler(t, newMemoryStore(), fakeAuth{})
+	for _, path := range []string{"/workspace", "/workspace/servers"} {
+		if got, err := h.validateReturnTo(path); err != nil || got != path {
+			t.Fatalf("target %q: %q %v", path, got, err)
+		}
+		for _, suffix := range []string{"?", "?q=private", "#x", "/"} {
+			if _, err := h.validateReturnTo(path + suffix); err == nil {
+				t.Fatalf("accepted %q", path+suffix)
+			}
+		}
+		w := httptest.NewRecorder()
+		loginFailure(w, httptest.NewRequest(http.MethodGet, CallbackPath, nil), path, 403, "private failure", "access_denied")
+		if w.Code != 303 || w.Header().Get("Location") != "/signin?error=access_denied" {
+			t.Fatalf("failure %q %d", path, w.Code)
+		}
+	}
+}

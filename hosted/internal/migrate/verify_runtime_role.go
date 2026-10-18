@@ -12,7 +12,7 @@ import (
 )
 
 var runtimeTenantTables = []string{
-	"catalog_versions", "catalog_payloads", "namespace_reservations", "review_records",
+	"private_directory_entries", "catalog_versions", "catalog_payloads", "namespace_reservations", "review_records",
 	"taxonomy_editions", "taxonomy_nodes", "workload_identities",
 	"oauth_authorization_codes", "oauth_refresh_families", "oauth_refresh_tokens",
 	"workspace_memberships", "policy_decisions", "cursors", "resolutions", "connections",
