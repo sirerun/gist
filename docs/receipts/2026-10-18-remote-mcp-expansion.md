@@ -142,12 +142,12 @@ The live acceptance checks passed:
   `Agentic Commerce`. This exercised Gist's directory MCP tools only; no
   provider server tools or accounts were called.
 - A fresh production browser page showed “127 matching integrations” and
-  visible `Vendor official` or `Operator not verified by Gist` provenance,
-  transport, and `Endpoint responded` labels on listed entries.
+  `Vendor official` or `Operator not verified by Gist` provenance and
+  `Endpoint responded` labels on listed cards.
 - The public detail page for `mcp:agentic-commerce` rendered its Streamable HTTP
-  endpoint, Make source links, `Operator not verified by Gist` label and
-  successful unauthenticated initialize check; it clearly says the check did
-  not list tools or call the provider.
+  transport and endpoint, Make source links, `Operator not verified by Gist`
+  label, and successful unauthenticated initialize check; it clearly says the
+  check did not list tools or call the provider.
 
 This deployment does not complete n8n/Make directory coverage: it includes a
 reviewed n8n subset, four Make integration-directory listings, and Make's
@@ -160,7 +160,7 @@ every MCP client is implied by an endpoint response.
 
 The final 577-task plan after T-DIR.60–63 completion revalidated successfully
 with the pinned Wazi reader/schema/semantic gate: source digest
-`sha256:194ca5ff2aa746cea9848830ed5a81f0eaf8b9ff8f255463c04b6680558d6219`,
+`sha256:01f5178206f924df3af5f7ac344e1a1ccad6b01c4f39720a90929ef5730baa0f`,
 reader digest
 `sha256:0b1292cbe93af31531647f3e2ae28c37f12decbe89023192729e010d6d7e6d67`,
 and verifier digest
