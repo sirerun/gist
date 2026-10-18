@@ -117,7 +117,7 @@
   }
   async function home() {
     const target = document.getElementById("home-directory");
-    try { const result = await api("/api/directory/apps?limit=14"); target.replaceChildren(...result.items.slice(0,14).map(appCard)); if (!target.children.length) target.append(link("Browse integrations →", "/library", "text-link")); }
+    try { const result = await api("/api/directory/apps?limit=16"); target.replaceChildren(...result.items.slice(0,16).map(appCard)); if (!target.children.length) target.append(link("Browse integrations →", "/library", "text-link")); }
     catch (_) { target.replaceChildren(link("Browse the public library →", "/library", "text-link")); }
   }
   function directory() {
@@ -129,7 +129,7 @@
     async function load(append = false, preserve = false) {
       const own=++generation, personalized=bookmarkState==="ready"&&bookmarkIDs.size>0, appView=!kind;
       const pageLimit=personalized?100:appView?100:50;
-      const wanted=preserve?Math.max(42,results.children.length):42, focused=preserve?document.activeElement:null, hadFocus=preserve&&results.contains(document.activeElement), scrollX=globalThis.scrollX||0, scrollY=globalThis.scrollY||0;
+      const wanted=preserve?Math.max(40,results.children.length):40, focused=preserve?document.activeElement:null, hadFocus=preserve&&results.contains(document.activeElement), scrollX=globalThis.scrollX||0, scrollY=globalThis.scrollY||0;
       if(!append&&!preserve)more.hidden=true;more.disabled=true;results.setAttribute("aria-busy","true");notice.replaceChildren();
       const p=new URLSearchParams({limit:String(Math.min(pageLimit,wanted))});
       if(query.value.trim())p.set("q",query.value.trim());if(kind)p.set("kind",kind);if(tag.value)p.set(appView&&!personalized?"category":"tag",tag.value);
