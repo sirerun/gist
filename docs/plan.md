@@ -2216,7 +2216,7 @@ Zati workflow evidence and guides. Discovery never grants execution authority.
 - [x] T-DIR.11 Verify live catalog and private descriptor acceptance  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.10]  acc: [Live anonymous browser/MCP discover real entries with source and setup details, private APIs deny anonymous or foreign access, and actual authorized private write/read journey is observed or explicitly pending]
 - [x] T-DIR.12 Build and document five reusable workflow candidates  Owner: catalog-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.1]  acc: [Inbox, calendar, file discovery, public code review and research skill sources declare exact read-only capabilities, setup and limitations; complete-package tests and explicit source pins preserve client admission and public-package trust gates]
 - [x] T-DIR.13 Integrate current directory descriptors with Zati admission  Owner: zati-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.9, T-DIR.21]  acc: [Zati consumes the versioned library or hosted directory contract and imports selected descriptors and skills as reviewable drafts with current transport/account/schema requirements, preserving explicit client admission and refusing unsupported transports]
-- [ ] T-DIR.14 Qualify actual client/provider test prerequisites  Owner: coordinator-and-owner  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-DIR.12, T-DIR.34]  acc: [Actual installed or owned source Zati instance, named caller-owned connection profiles, concrete read-only targets, allowed requests and costs, versions and expiry are recorded before real workflow testing; missing profiles are not fabricated]
+- [ ] T-DIR.14 Qualify actual client/provider test prerequisites  Owner: coordinator-and-owner  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-DIR.12, T-DIR.34, T-DIR.39]  acc: [Actual installed or owned source Zati instance, named caller-owned connection profiles, concrete read-only targets, allowed requests and costs, versions and expiry are recorded before real workflow testing; missing profiles are not fabricated]
 - [x] T-DIR.15 Verify and independently deliver Zati consumer changes  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.13]  acc: [Affected source/client/browser checks and independent exact-head review precede guarded merge and fresh landed acceptance; native installation or visible acceptance is claimed only when observed]
 - [ ] T-DIR.16 Execute useful real Zati workflows and retain dated evidence  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.14, T-DIR.15]  acc: [Each workflow uses an actual authorized profile and real server under its bounded envelope, verifies useful outcome and exact package/tool/client pins, and records failures honestly without promoting fixtures or exceeding scope]
 - [ ] T-DIR.17 Independently review featured eligibility and public package trust  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.16]  acc: [Non-author approves named successful workflows, guides and unexpired version-bound evidence; ADR019 release/trust prerequisites remain enforced and unqualified integrations stay ordinary candidates]
@@ -2240,6 +2240,13 @@ Zati workflow evidence and guides. Discovery never grants execution authority.
 - [ ] T-DIR.32 Verify adapter authority, conversion and client behavior  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.31]  acc: [Focused pure/fixture/integration tests exercise config/schema drift, actor/session/version/destination checks, one physical call, raw/canonical result provenance, wrong message IDs, date/labels/window/dedup/caps, missing/oversize/text-only/error results, persisted turn membership and explicit limitation display without provider/model calls]
 - [ ] T-DIR.33 Independently review complete qualified adapter source  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.32]  acc: [Non-author reviews exact aggregate diff including shared-client qualified-call and dual-provenance seams, evidence categories, operational setup and all required checks; no unresolved blocker or unqualified provider claim remains]
 - [ ] T-DIR.34 Merge and verify landed qualified client adapter  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.33]  acc: [Guarded Zati merge preserves reviewed source and current target, fresh landed tree/checks match candidate; later isolated runtime replacement/profile admission uses remaining explicit authority and exact source, never the installed unrelated controller or an expired test window]
+
+
+- [ ] T-DIR.35 Repair exact official Gmail endpoint constructor compatibility  Owner: zati-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.29]  acc: [A narrow pre-existing generic-client credential-path false positive permits only the literal documented official Gmail endpoint after ordinary URL/authority/encoding checks; other credential-bearing path denials and conservative raw-tool effects stay unchanged; the patch is independent of the unregistered qualified virtual adapter]
+- [ ] T-DIR.36 Verify endpoint compatibility and refusal regressions  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.35]  acc: [Exact literal succeeds with controlled fixtures; encoded aliases, userinfo, query, fragment, port and extra-path variants retain denial, existing generic MCP checks pass under qualified host constraints without mailbox/model calls]
+- [ ] T-DIR.37 Independently review isolated endpoint repair  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.36]  acc: [Non-author approves exact minimal endpoint-only candidate and checks against fresh main, distinct from unfinished conversion/facade changes and protected foreign shared-root work]
+- [ ] T-DIR.38 Guardedly merge endpoint-only client repair  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-DIR.37]  acc: [Current reviewed head/base, checks and policy allow head-guarded rebase merge; no unregistered adapter or shared contract/public-activation changes are included]
+- [ ] T-DIR.39 Verify landed endpoint repair and preserve adapter handoff  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.38]  acc: [Fresh main reaches exact reviewed endpoint-only tree with narrow checks valid; unique pure/conversion/facade work stays protected and T-DIR.31-34 remains open until foreign root ownership and shared contract gates are admitted; no installed or live Gmail execution is inferred]
 
 
 
@@ -2396,3 +2403,16 @@ screening source links, with no account activation or reinstall. No new SQL,
 role/secret/IAM change or Featured qualification is claimed. Earlier build failure
 and original6494-entry receipt remain recorded; no failed attempt is erased.
 Caller-owned adapter source T-DIR.31-34 remains separate work.
+
+
+### Native Gmail endpoint compatibility finding (2026-10-17)
+
+A controlled client fixture exposed a pre-existing constructor refusal before
+network: the generic credential-in-path heuristic treats the documented
+/mcp/v1 endpoint as a credential route. Python provider preflight did not use
+this Zati constructor, so earlier protocol compatibility is not native runtime
+connect evidence. T-DIR.35-39 isolate a literal official-endpoint compatibility
+repair with explicit URL-variant denials and independent SDLC gates. The larger
+qualified virtual adapter remains separate. Other active workers retain fresh
+shared specification and TaskContext/runtime ownership; no new alias claim may
+bypass those roots, and no source milestone implies final integration readiness.
