@@ -10,14 +10,14 @@ import (
 )
 
 func fixture() Snapshot {
-	return Snapshot{Format: SnapshotFormat, Revision: "test-v1", GeneratedAt: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC), Sources: []Source{{ID: "test", URL: "https://example.com/source", Revision: "abc", SHA256: strings.Repeat("a", 64), RetrievedAt: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC), Attribution: "test metadata"}}, Entries: []Record{{ID: "mcp:mail", Kind: "mcp", ServiceID: "mail", Title: "Mail Briefing", Description: "Read a mailbox", Tags: []string{"mail"}, Source: RecordSource{ID: "test", EntryID: "mail", URL: "https://example.com/mail"}, Remotes: []Remote{{URL: "https://example.com/mcp", Transport: "streamable-http"}}, Auth: Auth{Type: "oauth2"}}}}
+	return Snapshot{Format: SnapshotFormat, Revision: "test-v1", GeneratedAt: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC), Sources: []Source{{ID: "test", URL: "https://example.com/source", Revision: "abc", SHA256: strings.Repeat("a", 64), RetrievedAt: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC), Attribution: "test metadata"}}, Entries: []Record{{ID: "mcp:mail", Kind: "mcp", ServiceID: "mail", Title: "Mail Briefing", Description: "Read a mailbox", Tags: []string{"mail"}, Source: RecordSource{ID: "test", EntryID: "mail", URL: "https://example.com/mail"}, Remotes: []Remote{{URL: "https://example.com/mcp", Transport: "streamable-http"}}, Auth: Auth{Type: "oauth2"}, Official: true, OfficialEvidenceURL: "https://example.com/vendor"}}}
 }
 func TestDefaultSnapshot(t *testing.T) {
 	i, e := Default()
 	if e != nil {
 		t.Fatal(e)
 	}
-	if i.Count() != 13 {
+	if i.Count() != 127 {
 		t.Fatalf("unexpected count %d", i.Count())
 	}
 	q, e := i.Search(Query{Tag: "zati-essentials", Limit: 100})
@@ -29,18 +29,38 @@ func TestDefaultSnapshot(t *testing.T) {
 			t.Fatalf("imported qualification claim %s", r.ID)
 		}
 	}
-	all, err := i.Search(Query{Limit: 100})
-	if err != nil {
-		t.Fatal(err)
-	}
 	services := map[string]bool{}
-	for _, r := range all.Items {
-		if !r.Official || r.OfficialEvidenceURL == "" || services[r.ServiceID] || r.Kind != "mcp" || len(r.Remotes) == 0 {
-			t.Fatalf("unadmitted public connector: %s", r.ID)
+	checkedEndpoints := map[string]bool{}
+	cursor := ""
+	for {
+		page, err := i.Search(Query{Limit: 100, Cursor: cursor})
+		if err != nil {
+			t.Fatal(err)
 		}
-		services[r.ServiceID] = true
+		for _, r := range page.Items {
+			if services[r.ServiceID] || r.Kind != "mcp" || len(r.Remotes) == 0 || (r.Official && r.OfficialEvidenceURL == "") || (!r.Official && r.ServerListingURL == "") {
+				t.Fatalf("unadmitted public connector: %s", r.ID)
+			}
+			if !r.Official && r.OfficialEvidenceURL != "" {
+				t.Fatalf("operator-unverified server has vendor proof: %s", r.ID)
+			}
+			for _, remote := range r.Remotes {
+				if remote.Check == nil {
+					t.Fatalf("endpoint has no reachability evidence: %s", r.ID)
+				}
+				checkedEndpoints[remote.URL+"#"+remote.Transport] = true
+			}
+			services[r.ServiceID] = true
+		}
+		if page.NextCursor == "" {
+			break
+		}
+		cursor = page.NextCursor
 	}
-	for _, retained := range []string{"mcp:google-gmail", "mcp:io.github.github/github-mcp-server", "mcp:app.linear/linear", "mcp:ai.exa/exa"} {
+	if len(checkedEndpoints) != 126 {
+		t.Fatalf("unexpected checked endpoint count %d", len(checkedEndpoints))
+	}
+	for _, retained := range []string{"mcp:google-gmail", "mcp:io.github.github/github-mcp-server", "mcp:app.linear/linear", "mcp:ai.exa/exa", "mcp:airtable", "mcp:asana", "mcp:box", "mcp:dropbox", "mcp:gitlab", "mcp:hubspot", "mcp:monday", "mcp:salesforce", "mcp:supabase", "mcp:zoom", "mcp:com.adpeekly/linkedin-ads-library", "mcp:make", "mcp:deepwiki", "mcp:linear-read-only"} {
 		if _, ok := i.Get(retained); !ok {
 			t.Fatalf("surviving connector identity changed: %s", retained)
 		}
@@ -54,6 +74,54 @@ func TestDefaultSnapshot(t *testing.T) {
 	data[0] = '!'
 	if _, e = Default(); e != nil {
 		t.Fatal("caller mutated embedded input")
+	}
+}
+
+func TestEndpointCheckValidation(t *testing.T) {
+	now := time.Date(2026, 10, 18, 3, 0, 0, 0, time.UTC)
+	valid := fixture().Entries[0]
+	valid.Remotes[0].Check = &EndpointCheck{CheckedAt: now, HTTPStatus: 401, Result: "authentication-required"}
+	if err := ValidateRecord(valid); err != nil {
+		t.Fatal(err)
+	}
+	valid.Remotes[0].Check = &EndpointCheck{CheckedAt: now, HTTPStatus: 204, Result: "endpoint-responded"}
+	if err := ValidateRecord(valid); err != nil {
+		t.Fatal(err)
+	}
+	valid.Remotes[0].Check = &EndpointCheck{CheckedAt: now, HTTPStatus: 402, Result: "payment-required"}
+	if err := ValidateRecord(valid); err != nil {
+		t.Fatal(err)
+	}
+	valid.Remotes[0].Check = &EndpointCheck{CheckedAt: now, HTTPStatus: 200, Result: "endpoint-responded"}
+	if err := ValidateRecord(valid); err != nil {
+		t.Fatal(err)
+	}
+	for _, check := range []*EndpointCheck{
+		{CheckedAt: now, HTTPStatus: 200, Result: "authentication-required"},
+		{CheckedAt: now, HTTPStatus: 401, Result: "mcp-initialize"},
+		{CheckedAt: now, HTTPStatus: 402, Result: "endpoint-responded"},
+		{CheckedAt: now, HTTPStatus: 404, Result: "authentication-required"},
+		{HTTPStatus: 401, Result: "authentication-required"},
+	} {
+		invalid := fixture().Entries[0]
+		invalid.Remotes[0].Check = check
+		if err := ValidateRecord(invalid); err == nil {
+			t.Fatalf("invalid endpoint check accepted: %+v", check)
+		}
+	}
+}
+
+func TestIndependentPublicServerRequiresRegistryProvenance(t *testing.T) {
+	r := fixture().Entries[0]
+	r.Official = false
+	r.OfficialEvidenceURL = ""
+	r.ServerListingURL = "https://registry.modelcontextprotocol.io/v0.1/servers/example/versions/1.0.0"
+	if err := ValidateRecord(r); err != nil {
+		t.Fatal(err)
+	}
+	r.ServerListingURL = ""
+	if err := ValidateRecord(r); err == nil {
+		t.Fatal("independent server without registry provenance accepted")
 	}
 }
 func TestIndexedSearchPagingAndImmutability(t *testing.T) {

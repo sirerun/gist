@@ -1,0 +1,716 @@
+{
+  "format": "gist.make-verified-mcp-intake/v1",
+  "source_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+  "retrieved_at": "2026-10-18T04:03:13Z",
+  "source_html_sha256": "b8daac2be0f5d0729634d028d19b9232f80127a64d6b23988e6972ac203804d2",
+  "rows": [
+    {
+      "name": "Make",
+      "url": "https://mcp.make.com",
+      "eligible": true
+    },
+    {
+      "name": "ActiveCampaign",
+      "url": "See here for information.",
+      "eligible": false,
+      "reason": "no literal remote URL"
+    },
+    {
+      "name": "Agentic Commerce",
+      "url": "https://mcp-agentic-commerce.netlify.app/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Alkemi",
+      "url": "https://api.alkemi.cloud/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Amplitude",
+      "url": "https://mcp.amplitude.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Apify",
+      "url": "https://mcp.apify.com/",
+      "eligible": true
+    },
+    {
+      "name": "Apple Developer Documentation (RAG)",
+      "url": "https://mcp.apple-rag.com",
+      "eligible": true
+    },
+    {
+      "name": "Appwrite Docs",
+      "url": "https://mcp-for-docs.appwrite.io",
+      "eligible": true
+    },
+    {
+      "name": "Asana",
+      "url": "https://mcp.asana.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Astro Docs",
+      "url": "https://mcp.docs.astro.build/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Atlassian",
+      "url": "https://mcp.atlassian.com/v2/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Beat and Raise (SEC Filings)",
+      "url": "https://mcp.beatandraise.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Behavioral Prediction",
+      "url": "https://prediction.mcp.chainaware.ai/sse",
+      "eligible": true
+    },
+    {
+      "name": "BioContext Knowledgebase",
+      "url": "https://mcp.biocontext.ai/mcp/",
+      "eligible": true
+    },
+    {
+      "name": "Blooio iMessages",
+      "url": "https://mcp.blooio.com/v3",
+      "eligible": true
+    },
+    {
+      "name": "Bright Data",
+      "url": "https://mcp.brightdata.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Browserless",
+      "url": "https://mcp.browserless.io/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Canva",
+      "url": "https://mcp.canva.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "ClickUp",
+      "url": "https://mcp.clickup.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Close",
+      "url": "https://mcp.close.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "CoinGecko",
+      "url": "https://mcp.api.coingecko.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Company Ethics Information (Boikot)",
+      "url": "https://mcp.boikot.xyz/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Contextual AI",
+      "url": "https://mcp.app.contextual.ai/mcp/",
+      "eligible": true
+    },
+    {
+      "name": "Coresignal",
+      "url": "https://mcp.coresignal.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Crossbeam",
+      "url": "https://mcp.crossbeam.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Currency Conversion",
+      "url": "https://currency-mcp.wesbos.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "CurrentTimeUTC",
+      "url": "https://a.currenttimeutc.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Datadog",
+      "url": "https://mcp.<YOUR_DATADOG_SITE>/v1/mcp",
+      "eligible": false,
+      "reason": "no literal remote URL"
+    },
+    {
+      "name": "DeepWiki",
+      "url": "https://mcp.deepwiki.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "DevCycle",
+      "url": "https://mcp.devcycle.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Dice Rolling",
+      "url": "https://dice-rolling-mcp.vercel.app/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Excel to JSON",
+      "url": "https://mcp.wtsolutions.cn/excel-to-json-mcp-sse",
+      "eligible": true
+    },
+    {
+      "name": "Flight Search",
+      "url": "https://flights.fctolabs.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Fulcra Context",
+      "url": "https://mcp.fulcradynamics.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Galileo",
+      "url": "https://api.galileo.ai/mcp/http/mcp",
+      "eligible": true
+    },
+    {
+      "name": "GitHub",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "eligible": true
+    },
+    {
+      "name": "GitMCP",
+      "url": "https://gitmcp.io/docs",
+      "eligible": true
+    },
+    {
+      "name": "Gmail",
+      "url": "https://gmailmcp.googleapis.com/mcp/v1",
+      "eligible": true
+    },
+    {
+      "name": "GoHighLevel",
+      "url": "https://services.leadconnectorhq.com/mcp/",
+      "eligible": true
+    },
+    {
+      "name": "GoogleAds",
+      "url": "https://googleads.hireotto.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Google Calendar",
+      "url": "https://calendarmcp.googleapis.com/mcp/v1",
+      "eligible": true
+    },
+    {
+      "name": "Google Drive",
+      "url": "https://drivemcp.googleapis.com/mcp/v1",
+      "eligible": true
+    },
+    {
+      "name": "GoWeb3",
+      "url": "https://mcp.goweb3.fyi/mcp/",
+      "eligible": true
+    },
+    {
+      "name": "Gralio",
+      "url": "https://gralio.ai/mcp/sse",
+      "eligible": true
+    },
+    {
+      "name": "Grep",
+      "url": "https://mcp.grep.app",
+      "eligible": true
+    },
+    {
+      "name": "Gumlet",
+      "url": "https://docs.gumlet.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Higgsfield",
+      "url": "https://mcp.higgsfield.ai/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Himalayas Remote Jobs",
+      "url": "https://mcp.himalayas.app/mcp",
+      "eligible": true
+    },
+    {
+      "name": "HMR Docs",
+      "url": "https://pyth-on-line.promplate.dev/hmr/mcp",
+      "eligible": true
+    },
+    {
+      "name": "HubSpot",
+      "url": "https://mcp.hubspot.com/",
+      "eligible": true
+    },
+    {
+      "name": "Hugging Face",
+      "url": "https://hf.co/mcp",
+      "eligible": true
+    },
+    {
+      "name": "ilert",
+      "url": "https://mcp.ilert.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "ImagineArt",
+      "url": "https://mcp.imagine.art",
+      "eligible": true
+    },
+    {
+      "name": "Intercom",
+      "url": "https://mcp.intercom.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "IO Aerospace",
+      "url": "https://mcp.io-aerospace.org/mcp",
+      "eligible": true
+    },
+    {
+      "name": "JustCall",
+      "url": "https://mcp.justcall.host/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Keboola",
+      "url": "https://mcp.<YOUR_REGION>.keboola.com/sse",
+      "eligible": false,
+      "reason": "no literal remote URL"
+    },
+    {
+      "name": "Kismet Travel",
+      "url": "https://mcp.kismet.travel/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Kiwi Flight Search",
+      "url": "https://mcp.kiwi.com",
+      "eligible": true
+    },
+    {
+      "name": "LaEi.ro",
+      "url": "https://laei.ro/mcp",
+      "eligible": true
+    },
+    {
+      "name": "LangChain Hub",
+      "url": "https://mcp.prompts.mcpcentral.io/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Linear",
+      "url": "https://mcp.linear.app/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Linear (read-only)",
+      "url": "https://mcp.linear.app/mcp/readonly",
+      "eligible": true
+    },
+    {
+      "name": "Listenetic",
+      "url": "https://mcp.listenetic.com/v1/mcp",
+      "eligible": true
+    },
+    {
+      "name": "LunarCrush",
+      "url": "https://lunarcrush.ai/mcp",
+      "eligible": true
+    },
+    {
+      "name": "MailerLite",
+      "url": "https://mcp.mailerlite.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "MailerSend",
+      "url": "https://mcp.mailersend.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Marketo Engage",
+      "url": "https://marketo-mcp.adobe.io/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Microsoft Entra (Microsoft 365)",
+      "url": "https://mcp.svc.cloud.microsoft/enterprise",
+      "eligible": true
+    },
+    {
+      "name": "Microsoft Learn",
+      "url": "https://learn.microsoft.com/api/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Mobile Text Alerts",
+      "url": "https://mcp.mobile-text-alerts.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "monday.com",
+      "url": "https://mcp.monday.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Neon",
+      "url": "https://mcp.neon.tech/sse",
+      "eligible": true
+    },
+    {
+      "name": "Notion",
+      "url": "https://mcp.notion.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Opalstack",
+      "url": "https://my.opalstack.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Parallel Search",
+      "url": "https://search-mcp.parallel.ai/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Parallel.ai Task Management",
+      "url": "https://task-mcp.parallel.ai/mcp",
+      "eligible": true
+    },
+    {
+      "name": "PayPal",
+      "url": "https://mcp.paypal.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "PDF4me",
+      "url": "https://mcp.pdf4me.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Pearl",
+      "url": "https://mcp.pearl.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Peek",
+      "url": "https://mcp.peek.com",
+      "eligible": true
+    },
+    {
+      "name": "Poku Labs (Human-in-the-loop)",
+      "url": "https://mcp.pokulabs.com",
+      "eligible": true
+    },
+    {
+      "name": "PostHog",
+      "url": "https://mcp.posthog.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Postman",
+      "url": "https://mcp.postman.com/minimal",
+      "eligible": true
+    },
+    {
+      "name": "pre.dev Architect",
+      "url": "https://api.pre.dev/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Prisma Postgres MCP Server",
+      "url": "https://mcp.prisma.io/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Reflag",
+      "url": "https://app.reflag.com/api/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Replicate",
+      "url": "https://mcp.replicate.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Rostro",
+      "url": "https://proto.rostro.dev/mcp/",
+      "eligible": true
+    },
+    {
+      "name": "Rotunda",
+      "url": "https://rotunda.bullpenstrategygroup.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Saleor Commerce",
+      "url": "https://mcp.saleor.app/mcp",
+      "eligible": true
+    },
+    {
+      "name": "ScamShield",
+      "url": "https://mcp.brokerchooser.com/servers/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Semgrep",
+      "url": "https://mcp.semgrep.ai/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Sentry",
+      "url": "https://mcp.sentry.dev/mcp",
+      "eligible": true
+    },
+    {
+      "name": "SEO LinkMap",
+      "url": "https://seolinkmap.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Shopify Storefront",
+      "url": "https://<YOUR_STORE>.myshopify.com/api/mcp",
+      "eligible": false,
+      "reason": "no literal remote URL"
+    },
+    {
+      "name": "Shutter Network",
+      "url": "https://shutter-mcp-b76e270d48c5.herokuapp.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Simplescraper",
+      "url": "https://mcp.simplescraper.io/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Slack",
+      "url": "https://mcp.slack.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Square",
+      "url": "https://mcp.squareup.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Stripe",
+      "url": "https://mcp.stripe.com",
+      "eligible": true
+    },
+    {
+      "name": "Stytch",
+      "url": "https://mcp.stytch.dev/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Supabase",
+      "url": "https://mcp.supabase.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Superhuman Docs",
+      "url": "https://docs.superhuman.com/apis/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Superhuman Mail",
+      "url": "https://mcp.mail.superhuman.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Svelte",
+      "url": "https://mcp.svelte.dev/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Svelte Documentation",
+      "url": "https://svelte-llm.stanislav.garden/mcp/sse",
+      "eligible": true
+    },
+    {
+      "name": "Tally",
+      "url": "https://api.tally.so/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Tavily Search",
+      "url": "https://mcp.tavily.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Ticket Tailor",
+      "url": "http://mcp.tickettailor.ai/sse",
+      "eligible": false,
+      "reason": "HTTPS route must be literal and contain no credentials, query or fragment"
+    },
+    {
+      "name": "TimeCamp",
+      "url": "https://my-mcp-server.timecamp-s-a.workers.dev/sse",
+      "eligible": true
+    },
+    {
+      "name": "Twelve Data",
+      "url": "https://mcp.twelvedata.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "TwelveLabs",
+      "url": "https://mcp.twelvelabs.io/jockey/mcp",
+      "eligible": true
+    },
+    {
+      "name": "UIDriver",
+      "url": "https://mcp.uidriver.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Vapi",
+      "url": "https://mcp.vapi.ai/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Veed",
+      "url": "https://www.veed.io/api/v1/mcp",
+      "eligible": true
+    },
+    {
+      "name": "vLEI.wiki",
+      "url": "https://mcp.vlei.wiki/mcp",
+      "eligible": true
+    },
+    {
+      "name": "WayStation",
+      "url": "https://waystation.ai/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Webflow",
+      "url": "https://mcp.webflow.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Windsor",
+      "url": "https://mcp.windsor.ai",
+      "eligible": true
+    },
+    {
+      "name": "Wix",
+      "url": "https://mcp.wix.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "WooCommerce",
+      "url": "https://<YOUR_STORE>/wp-json/woocommerce/mcp",
+      "eligible": false,
+      "reason": "no literal remote URL"
+    },
+    {
+      "name": "WordPress Trac",
+      "url": "https://mcp-server-wporg-trac-staging.a8cai.workers.dev/mcp",
+      "eligible": true
+    },
+    {
+      "name": "ZoomInfo",
+      "url": "https://mcp.zoominfo.com/mcp",
+      "eligible": true
+    },
+    {
+      "name": "Cloudflare Workers",
+      "url": "https://bindings.mcp.cloudflare.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Cloudflare Observability",
+      "url": "https://observability.mcp.cloudflare.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Cloudflare Radar",
+      "url": "https://radar.mcp.cloudflare.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Cloudflare AI Gateway",
+      "url": "https://ai-gateway.mcp.cloudflare.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Cloudflare Audit Logs",
+      "url": "https://auditlogs.mcp.cloudflare.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Cloudflare AutoRAG",
+      "url": "https://autorag.mcp.cloudflare.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Cloudflare Browser Rendering",
+      "url": "https://browser.mcp.cloudflare.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Cloudflare Sandbox Container",
+      "url": "https://containers.mcp.cloudflare.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Cloudflare Dex Analysis",
+      "url": "https://dex.mcp.cloudflare.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Cloudflare DNS Analytics",
+      "url": "https://dns-analytics.mcp.cloudflare.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Cloudflare Documentation",
+      "url": "https://docs.mcp.cloudflare.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Cloudflare Logpush",
+      "url": "https://logs.mcp.cloudflare.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "Cloudflare One CASB",
+      "url": "https://casb.mcp.cloudflare.com/sse",
+      "eligible": true
+    },
+    {
+      "name": "GitMCP Documentation",
+      "url": "https://gitmcp.io/docs",
+      "eligible": true
+    },
+    {
+      "name": "GitMCP Public Repository",
+      "url": "http://gitmcp.io/<username>/<repository>",
+      "eligible": false,
+      "reason": "no literal remote URL"
+    },
+    {
+      "name": "GitMCP Custom Repository",
+      "url": "http://<username>.gitmcp.io/<repository>",
+      "eligible": false,
+      "reason": "no literal remote URL"
+    }
+  ]
+}

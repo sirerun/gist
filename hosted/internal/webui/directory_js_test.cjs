@@ -4,8 +4,8 @@ const {readFileSync} = require('node:fs');
 const vm = require('node:vm');
 const source = readFileSync(__dirname + '/assets/directory.js', 'utf8');
 const records = [
-  {id:'github', service_id:'github', title:'GitHub', kind:'mcp', recommended:true},
-  {id:'brave', service_id:'brave-search', title:'Brave', kind:'mcp', recommended:true},
+  {id:'github', service_id:'github', title:'GitHub', kind:'mcp', recommended:true, remotes:[{url:'https://example.com/mcp',transport:'streamable-http',check:{checked_at:'2026-10-18T03:00:00Z',http_status:401,result:'authentication-required'}}]},
+  {id:'community', service_id:'linkedin-ads-library', title:'LinkedIn Ads Library', kind:'mcp', recommended:true, official:false, server_listing_url:'https://registry.example.com/server'},
 ];
 const flush = () => new Promise(resolve => setImmediate(resolve));
 function fixture({page='home', search='', handle}={}) {
@@ -32,6 +32,8 @@ function fixture({page='home', search='', handle}={}) {
 }
 test('public cards render while authentication is unresolved; guest links use an allowed return URL',async()=>{
  let release;const f=fixture({handle:url=>url==='/app/api/session'?new Promise(resolve=>release=resolve):undefined});await flush();assert.equal(f.controls().length,2);assert.equal(f.controls()[0].children[0].disabled,true);
+ assert.ok(f.root.walk().some(node=>node.textContent.startsWith('Endpoint responded')));
+ assert.ok(f.root.walk().some(node=>node.textContent==='Operator not verified by Gist'));
  release({status:401});await flush();for(const c of f.controls()){const [save,signIn]=c.children;assert.equal(save.hidden,true);assert.equal(signIn.hidden,false);assert.equal(signIn.tag,'a');assert.equal(signIn.textContent,'');assert.ok(signIn.attrs['aria-label'].startsWith('Sign in to bookmark '));assert.equal(new URL(signIn.href,'https://gist.example').searchParams.get('return_to'),'/library');}
 });
 test('retry refreshes every control, and saving has a stable accessible toggle name',async()=>{

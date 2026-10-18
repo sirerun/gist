@@ -1,10 +1,10 @@
 {
-  "policy": "n8n-or-make/vendor-official",
-  "curated_input": 13,
-  "membership_apps": 13,
-  "accepted": 13,
+  "policy": "n8n-or-make-verified/reachable-remote-mcp",
+  "curated_input": 127,
+  "membership_apps": 127,
+  "accepted": 127,
   "by_kind": {
-    "mcp": 13,
+    "mcp": 127,
     "openapi": 0
   },
   "curated_recommended": 4,
@@ -13,9 +13,13 @@
   "duplicates": [],
   "rejected_count": 0,
   "rejected": [],
-  "curated_sha256": "040ff8d02e51d3704b68f637e572b1a8923c589d7bd19c15c7aab3fb86d20ae5",
-  "membership_sha256": "e061c4370e15be3595285befe5e7c3d2d91adf1d3dd9f59f19151393e71dae21",
+  "curated_sha256": "13881bedf392f29d9deda81854dbe4692ed00e207c3db4040d76694d67749f55",
+  "membership_sha256": "672ede4c1a9a1824ecd00b6796cd072220030cc4fe72b4f6dca58576c3fd6a03",
+  "endpoint_checks_sha256": "d35de0eb5963fb646f4394859eff6ab35e6b10279693048c042f28377110a923",
+  "make_inventory_sha256": "c5d8945cac0c654142979e2a99d9314492e4392cc546d5f7b0e9a325ad1cfcf0",
+  "make_source_html_sha256": "b8daac2be0f5d0729634d028d19b9232f80127a64d6b23988e6972ac203804d2",
+  "checked_endpoints": 126,
   "network_requests": 0,
   "registry_imports": 0,
-  "revision": "sha256:8ee6929d7a6af04ecf0d33e9a0a86dd0d61d81ab56f1d495fe196c2eed571822"
+  "revision": "sha256:4eac7551bc0d7bf1bdcbfff553e4cf78bb6acf8410fd0bb9b724515c11a125e7"
 }

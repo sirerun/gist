@@ -24,7 +24,8 @@ def record(service='example', kind='mcp'):
               'auth': {'type': 'oauth2', 'credential_names': ['EXAMPLE_TOKEN']},
               'featured': False, 'recommended': False}
     if kind == 'mcp':
-        result['remotes'] = [{'url': 'https://vendor.example.com/mcp', 'transport': 'streamable-http'}]
+        result['remotes'] = [{'url': 'https://vendor.example.com/mcp', 'transport': 'streamable-http',
+                              'check': {'checked_at': '2026-10-18T03:00:00Z', 'http_status': 200, 'result': 'mcp-initialize'}}]
     else:
         result['openapi'] = {'spec_url': 'https://vendor.example.com/openapi.yaml', 'mint_guide_url': 'https://github.com/sirerun/mint'}
     return result
@@ -34,6 +35,15 @@ def membership(*services):
     return {'format': 'gist.directory.admission/v1', 'policy': intake.POLICY,
             'retrieved_at': '2026-10-18T03:00:00Z',
             'apps': [{'service_id': service, 'listings': [{'directory': 'n8n', 'url': 'https://n8n.io/integrations/' + service + '/'}]} for service in services or ('example',)]}
+
+
+def endpoint_checks(entries):
+    urls = sorted({(remote['url'], remote['transport']) for item in entries if item['kind'] == 'mcp' for remote in item.get('remotes', [])})
+    return {'format':'gist.mcp-endpoint-check/v1', 'checked_at':'2026-10-18T03:00:01Z',
+            'endpoint_set_sha256':hashlib.sha256(json.dumps(urls,separators=(',',':')).encode()).hexdigest(),
+            'probe':'unauthenticated remote HTTP reachability; streamable initialize or bounded SSE GET; no tools/list or tools/call',
+            'checks':[{'url':item['url'],'transport':item['transport'],'method':'GET' if item['transport']=='sse' else 'POST', **item['check']} for item in entries if item['kind']=='mcp' for item in item.get('remotes',[])],
+            'failures':[]}
 
 
 class IntakeTests(unittest.TestCase):
@@ -108,7 +118,7 @@ class IntakeTests(unittest.TestCase):
         self.assertFalse(intake.listing_url('make', 'https://make.com/en/integrations/example'))
         self.assertFalse(intake.listing_url('other', 'https://www.make.com/en/integrations/example'))
 
-    def test_vendor_official_is_mandatory_and_no_featured_or_community_evidence(self):
+    def test_provenance_is_required_and_no_featured_claims_are_imported(self):
         for mutate in [lambda r:r.update(official=False), lambda r:r.pop('official'),
                        lambda r:r.pop('official_evidence_url'),
                        lambda r:r.update(official_evidence_url='https://user:secret@example.com/docs'),
@@ -120,12 +130,41 @@ class IntakeTests(unittest.TestCase):
             mutate(value)
             self.reject(entries=[value])
 
+    def test_independent_remote_mcp_is_admitted_with_explicit_registry_provenance(self):
+        value=record()
+        value['official']=False
+        value.pop('official_evidence_url')
+        value['server_listing_url']='https://registry.modelcontextprotocol.io/v0.1/servers/io.github%2Fexample%2Fmcp/versions/1.0.0'
+        snapshot,_=intake.build_snapshot([value],membership())
+        self.assertFalse(snapshot['entries'][0]['official'])
+        self.assertEqual(snapshot['entries'][0]['source']['url'],value['server_listing_url'])
+        for mutate in [lambda r:r.pop('server_listing_url'),
+                       lambda r:r.update(server_listing_url='https://user:secret@example.com/server'),
+                       lambda r:r.update(official_evidence_url='https://vendor.example.com/docs')]:
+            invalid=copy.deepcopy(value); mutate(invalid); self.reject(entries=[invalid])
+
+    def test_make_verified_remote_mcp_membership_matches_server_title(self):
+        value=record()
+        value.update(official=False, title='Example MCP')
+        value.pop('official_evidence_url')
+        value['server_listing_url']=intake.MAKE_VERIFIED_MCP_URL
+        approved=membership()
+        approved['apps'][0]['listings']=[{'directory':'make-verified-mcp','url':intake.MAKE_VERIFIED_MCP_URL,'server_name':'Example MCP'}]
+        approved['make_verified_source']={'url':intake.MAKE_VERIFIED_MCP_URL,'retrieved_at':'2026-10-18T03:00:00Z','source_html_sha256':'a'*64,'inventory_sha256':'b'*64}
+        snapshot,_=intake.build_snapshot([value],approved)
+        self.assertIn('make-verified-remote-mcp-list',{source['id'] for source in snapshot['sources']})
+        invalid=copy.deepcopy(approved); invalid.pop('make_verified_source')
+        self.reject(entries=[value],approved=invalid)
+        approved['apps'][0]['listings'][0]['server_name']='Other'
+        self.reject(entries=[value],approved=approved)
+
     def test_endpoint_or_raw_spec_required_not_packages_or_html(self):
         snapshot, _ = intake.build_snapshot([record(kind='openapi')], membership())
         self.assertEqual(snapshot['entries'][0]['kind'], 'openapi')
         for mutate in [lambda r:r.pop('remotes'), lambda r:r.update(remotes=[]),
                        lambda r:r.update(packages=[{'registry':'npm','identifier':'@vendor/server'}]),
                        lambda r:r['remotes'][0].update(transport='stdio'),
+                       lambda r:r['remotes'][0].update(check={'checked_at':'2026-10-18T03:00:00Z','http_status':404,'result':'mcp-initialize'}),
                        lambda r:r['remotes'][0].update(headers={'Authorization':'Bearer secret'}),
                        lambda r:r['remotes'][0].update(url='https://vendor.example.com/mcp?key=secret')]:
             value = record()
@@ -138,6 +177,28 @@ class IntakeTests(unittest.TestCase):
             value = record(kind='openapi')
             value['openapi']['spec_url'] = url
             self.reject(entries=[value])
+
+    def test_endpoint_check_receipt_matches_every_mcp_url_and_result(self):
+        value, checks = record(), None
+        checks = endpoint_checks([value])
+        snapshot, receipt = intake.build_snapshot([value], membership(), checks=checks)
+        self.assertEqual(receipt['checked_endpoints'], 1)
+        self.assertEqual(snapshot['entries'][0]['remotes'][0]['check']['result'], 'mcp-initialize')
+        for mutate in [lambda x:x.update(endpoint_set_sha256='0'*64),
+                       lambda x:x['checks'][0].update(http_status=401),
+                       lambda x:x['checks'].append(copy.deepcopy(x['checks'][0])),
+                       lambda x:x.update(failures=[{'url':'https://vendor.example.com/mcp','error':'timeout'}])]:
+            invalid=copy.deepcopy(checks); mutate(invalid)
+            with self.assertRaises(ValueError): intake.build_snapshot([value], membership(), checks=invalid)
+
+    def test_sse_and_plain_http_responses_can_pass_without_claiming_initialize(self):
+        value=record()
+        value['remotes'][0]={'url':'https://vendor.example.com/sse','transport':'sse','check':{'checked_at':'2026-10-18T03:00:00Z','http_status':200,'result':'endpoint-responded'}}
+        checks=endpoint_checks([value])
+        snapshot,_=intake.build_snapshot([value],membership(),checks=checks)
+        self.assertEqual(snapshot['entries'][0]['remotes'][0]['transport'],'sse')
+        value['remotes'][0]['check']['result']='mcp-initialize'
+        with self.assertRaises(ValueError): intake.build_snapshot([value],membership(),checks=endpoint_checks([value]))
 
     def test_credential_url_and_descriptor_values_are_rejected(self):
         for url in ['http://example.com/mcp', 'https://localhost/mcp',
@@ -200,19 +261,21 @@ class IntakeTests(unittest.TestCase):
     def test_offline_cli_reproduces_exact_outputs_without_legacy_inputs(self):
         with tempfile.TemporaryDirectory(prefix='intake-unit-') as path:
             root = pathlib.Path(path)
-            curated, approved = root/'curated.json', root/'approved.json'
+            curated, approved, checked = root/'curated.json', root/'approved.json', root/'checks.json'
             curated.write_text(json.dumps([record('z-last'), record('a-first', 'openapi')]))
             approved.write_text(json.dumps(membership('z-last', 'a-first')))
-            original = curated.read_bytes(), approved.read_bytes()
-            command = [sys.executable, str(HERE/'build_snapshot.py'), '--curated', str(curated), '--membership', str(approved), '--output', str(root/'snapshot.json'), '--receipt', str(root/'receipt.json')]
+            checked.write_text(json.dumps(endpoint_checks(json.loads(curated.read_text()))))
+            original = curated.read_bytes(), approved.read_bytes(), checked.read_bytes()
+            command = [sys.executable, str(HERE/'build_snapshot.py'), '--curated', str(curated), '--membership', str(approved), '--checks', str(checked), '--output', str(root/'snapshot.json'), '--receipt', str(root/'receipt.json')]
             subprocess.run(command, check=True, capture_output=True, timeout=10)
             first = (root/'snapshot.json').read_bytes(), (root/'receipt.json').read_bytes()
             subprocess.run(command, check=True, capture_output=True, timeout=10)
             self.assertEqual(first, ((root/'snapshot.json').read_bytes(), (root/'receipt.json').read_bytes()))
-            self.assertEqual(original, (curated.read_bytes(), approved.read_bytes()))
+            self.assertEqual(original, (curated.read_bytes(), approved.read_bytes(), checked.read_bytes()))
             snapshot = json.loads(first[0])
             self.assertEqual([r['service_id'] for r in snapshot['entries']], ['z-last', 'a-first']) # sorted by full record ID
             self.assertEqual(snapshot['generated_at'], membership()['retrieved_at'])
+            self.assertEqual(json.loads(first[1])['checked_endpoints'], 1)
             legacy = subprocess.run([sys.executable, str(HERE/'build_snapshot.py'), '--fetch'], capture_output=True, timeout=10)
             self.assertNotEqual(legacy.returncode, 0)
             self.assertIn(b'unrecognized arguments', legacy.stderr)

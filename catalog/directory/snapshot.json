@@ -1,27 +1,74 @@
 {
   "format": "gist.directory.snapshot/v1",
-  "revision": "sha256:8ee6929d7a6af04ecf0d33e9a0a86dd0d61d81ab56f1d495fe196c2eed571822",
-  "generated_at": "2026-10-18T02:54:36Z",
+  "revision": "sha256:4eac7551bc0d7bf1bdcbfff553e4cf78bb6acf8410fd0bb9b724515c11a125e7",
+  "generated_at": "2026-10-18T04:03:13Z",
   "sources": [
     {
       "id": "gist-curation",
       "url": "https://github.com/sirerun/gist",
-      "revision": "sha256:040ff8d02e51d3704b68f637e572b1a8923c589d7bd19c15c7aab3fb86d20ae5",
-      "sha256": "040ff8d02e51d3704b68f637e572b1a8923c589d7bd19c15c7aab3fb86d20ae5",
-      "retrieved_at": "2026-10-18T02:54:36Z",
+      "revision": "sha256:13881bedf392f29d9deda81854dbe4692ed00e207c3db4040d76694d67749f55",
+      "sha256": "13881bedf392f29d9deda81854dbe4692ed00e207c3db4040d76694d67749f55",
+      "retrieved_at": "2026-10-18T04:03:13Z",
       "license": "Apache-2.0 (Gist metadata; vendor rights retained)",
-      "attribution": "Gist maintainers; individually reviewed vendor-official routes. Source membership is not execution qualification."
+      "attribution": "Gist maintainers; vendor routes and independent server listings are identified separately. Source membership and reachability are not execution qualification."
     },
     {
       "id": "marketplace-membership",
       "url": "https://github.com/sirerun/gist/blob/main/catalog/directory/intake/approved-membership.json",
-      "revision": "sha256:e061c4370e15be3595285befe5e7c3d2d91adf1d3dd9f59f19151393e71dae21",
-      "sha256": "e061c4370e15be3595285befe5e7c3d2d91adf1d3dd9f59f19151393e71dae21",
-      "retrieved_at": "2026-10-18T02:54:36Z",
+      "revision": "sha256:672ede4c1a9a1824ecd00b6796cd072220030cc4fe72b4f6dca58576c3fd6a03",
+      "sha256": "672ede4c1a9a1824ecd00b6796cd072220030cc4fe72b4f6dca58576c3fd6a03",
+      "retrieved_at": "2026-10-18T04:03:13Z",
       "attribution": "Operator-reviewed n8n or Make listing membership; factual source links only, not copied node code or descriptions."
+    },
+    {
+      "id": "make-verified-remote-mcp-list",
+      "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "revision": "sha256:b8daac2be0f5d0729634d028d19b9232f80127a64d6b23988e6972ac203804d2",
+      "sha256": "b8daac2be0f5d0729634d028d19b9232f80127a64d6b23988e6972ac203804d2",
+      "retrieved_at": "2026-10-18T04:03:13Z",
+      "attribution": "Make verified remote MCP listing extracted into intake inventory SHA-256 c5d8945cac0c654142979e2a99d9314492e4392cc546d5f7b0e9a325ad1cfcf0; source listing is not Gist ownership, safety or workflow qualification."
+    },
+    {
+      "id": "remote-endpoint-checks",
+      "url": "https://github.com/sirerun/gist/blob/main/catalog/directory/intake/endpoint-checks.json",
+      "revision": "sha256:d35de0eb5963fb646f4394859eff6ab35e6b10279693048c042f28377110a923",
+      "sha256": "d35de0eb5963fb646f4394859eff6ab35e6b10279693048c042f28377110a923",
+      "retrieved_at": "2026-10-18T04:06:59Z",
+      "attribution": "Unauthenticated remote HTTP reachability checks. 401/403 records an authentication challenge; 402 records payment-required; successful initialize responses separately verify the MCP handshake. No tools/list or tools/call."
     }
   ],
   "entries": [
+    {
+      "id": "mcp:agentic-commerce",
+      "kind": "mcp",
+      "service_id": "agentic-commerce",
+      "title": "Agentic Commerce",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp-agentic-commerce.netlify.app/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:agentic-commerce",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
     {
       "id": "mcp:ai.exa/exa",
       "kind": "mcp",
@@ -37,7 +84,12 @@
       "remotes": [
         {
           "url": "https://mcp.exa.ai/mcp",
-          "transport": "streamable-http"
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
         }
       ],
       "auth": {
@@ -50,6 +102,135 @@
         "id": "gist-curation",
         "entry_id": "mcp:ai.exa/exa",
         "url": "https://exa.ai/mcp"
+      }
+    },
+    {
+      "id": "mcp:airtable",
+      "kind": "mcp",
+      "service_id": "airtable",
+      "title": "Airtable",
+      "description": "Official Airtable remote MCP server. Requires Airtable account authorization and client support for Streamable HTTP and OAuth. Gist's no-credential endpoint check does not test tools or account access.",
+      "tags": [
+        "productivity",
+        "files"
+      ],
+      "homepage": "https://support.airtable.com/articles/9897799762-using-the-airtable-mcp-server",
+      "official": true,
+      "official_evidence_url": "https://support.airtable.com/articles/9897799762-using-the-airtable-mcp-server",
+      "remotes": [
+        {
+          "url": "https://mcp.airtable.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "setup_url": "https://support.airtable.com/articles/9897799762-using-the-airtable-mcp-server"
+      },
+      "recommended": false,
+      "featured": false,
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:airtable",
+        "url": "https://support.airtable.com/articles/9897799762-using-the-airtable-mcp-server"
+      }
+    },
+    {
+      "id": "mcp:alkemi",
+      "kind": "mcp",
+      "service_id": "alkemi",
+      "title": "Alkemi",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://api.alkemi.cloud/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:alkemi",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:amplitude",
+      "kind": "mcp",
+      "service_id": "amplitude",
+      "title": "Amplitude",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.amplitude.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:amplitude",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:apify",
+      "kind": "mcp",
+      "service_id": "apify",
+      "title": "Apify",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.apify.com/",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:apify",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
       }
     },
     {
@@ -67,7 +248,12 @@
       "remotes": [
         {
           "url": "https://mcp.linear.app/mcp",
-          "transport": "streamable-http"
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
         }
       ],
       "auth": {
@@ -80,6 +266,450 @@
         "id": "gist-curation",
         "entry_id": "mcp:app.linear/linear",
         "url": "https://linear.app/docs/mcp"
+      }
+    },
+    {
+      "id": "mcp:apple-developer-documentation-rag",
+      "kind": "mcp",
+      "service_id": "apple-developer-documentation-rag",
+      "title": "Apple Developer Documentation (RAG)",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.apple-rag.com",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 400,
+            "result": "endpoint-responded"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:apple-developer-documentation-rag",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:appwrite-docs",
+      "kind": "mcp",
+      "service_id": "appwrite-docs",
+      "title": "Appwrite Docs",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp-for-docs.appwrite.io",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:appwrite-docs",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:asana",
+      "kind": "mcp",
+      "service_id": "asana",
+      "title": "Asana",
+      "description": "Official Asana remote MCP server. Requires Asana account authorization and client support for Streamable HTTP and OAuth. Gist's no-credential endpoint check does not test tools or account access.",
+      "tags": [
+        "productivity",
+        "project-management"
+      ],
+      "homepage": "https://developers.asana.com/docs/integrating-with-asanas-mcp-server",
+      "official": true,
+      "official_evidence_url": "https://developers.asana.com/docs/integrating-with-asanas-mcp-server",
+      "remotes": [
+        {
+          "url": "https://mcp.asana.com/v2/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "setup_url": "https://developers.asana.com/docs/integrating-with-asanas-mcp-server"
+      },
+      "recommended": false,
+      "featured": false,
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:asana",
+        "url": "https://developers.asana.com/docs/integrating-with-asanas-mcp-server"
+      }
+    },
+    {
+      "id": "mcp:astro-docs",
+      "kind": "mcp",
+      "service_id": "astro-docs",
+      "title": "Astro Docs",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.docs.astro.build/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:astro-docs",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:beat-and-raise-sec-filings",
+      "kind": "mcp",
+      "service_id": "beat-and-raise-sec-filings",
+      "title": "Beat and Raise (SEC Filings)",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.beatandraise.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:beat-and-raise-sec-filings",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:behavioral-prediction",
+      "kind": "mcp",
+      "service_id": "behavioral-prediction",
+      "title": "Behavioral Prediction",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://prediction.mcp.chainaware.ai/sse",
+          "transport": "sse",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "endpoint-responded"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:behavioral-prediction",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:biocontext-knowledgebase",
+      "kind": "mcp",
+      "service_id": "biocontext-knowledgebase",
+      "title": "BioContext Knowledgebase",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.biocontext.ai/mcp/",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 301,
+            "result": "endpoint-responded"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:biocontext-knowledgebase",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:blooio-imessages",
+      "kind": "mcp",
+      "service_id": "blooio-imessages",
+      "title": "Blooio iMessages",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.blooio.com/v3",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 308,
+            "result": "endpoint-responded"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:blooio-imessages",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:box",
+      "kind": "mcp",
+      "service_id": "box",
+      "title": "Box",
+      "description": "Official Box remote MCP server. Requires Box account authorization and client support for Streamable HTTP and OAuth. Gist's no-credential endpoint check does not test tools or account access.",
+      "tags": [
+        "files",
+        "files"
+      ],
+      "homepage": "https://support.box.com/hc/en-us/articles/43615620258195-Announcing-the-new-remote-Box-MCP-Server-GA-release",
+      "official": true,
+      "official_evidence_url": "https://support.box.com/hc/en-us/articles/43615620258195-Announcing-the-new-remote-Box-MCP-Server-GA-release",
+      "remotes": [
+        {
+          "url": "https://mcp.box.com",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "setup_url": "https://support.box.com/hc/en-us/articles/43615620258195-Announcing-the-new-remote-Box-MCP-Server-GA-release"
+      },
+      "recommended": false,
+      "featured": false,
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:box",
+        "url": "https://support.box.com/hc/en-us/articles/43615620258195-Announcing-the-new-remote-Box-MCP-Server-GA-release"
+      }
+    },
+    {
+      "id": "mcp:bright-data",
+      "kind": "mcp",
+      "service_id": "bright-data",
+      "title": "Bright Data",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.brightdata.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:bright-data",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:browserless",
+      "kind": "mcp",
+      "service_id": "browserless",
+      "title": "Browserless",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.browserless.io/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:browserless",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:canva",
+      "kind": "mcp",
+      "service_id": "canva",
+      "title": "Canva",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.canva.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:canva",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:clickup",
+      "kind": "mcp",
+      "service_id": "clickup",
+      "title": "ClickUp",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.clickup.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:clickup",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:close",
+      "kind": "mcp",
+      "service_id": "close",
+      "title": "Close",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.close.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:close",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
       }
     },
     {
@@ -97,7 +727,12 @@
       "remotes": [
         {
           "url": "https://mcp.cloudflare.com/mcp",
-          "transport": "streamable-http"
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
         }
       ],
       "auth": {
@@ -110,6 +745,109 @@
         "id": "gist-curation",
         "entry_id": "mcp:cloudflare",
         "url": "https://developers.cloudflare.com/agents/model-context-protocol/cloudflare/servers-for-cloudflare/"
+      }
+    },
+    {
+      "id": "mcp:coingecko",
+      "kind": "mcp",
+      "service_id": "coingecko",
+      "title": "CoinGecko",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.api.coingecko.com/sse",
+          "transport": "sse",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "endpoint-responded"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:coingecko",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:com.adpeekly/linkedin-ads-library",
+      "kind": "mcp",
+      "service_id": "linkedin-ads-library",
+      "title": "LinkedIn Ads Library",
+      "description": "Independent AdPeekly remote MCP server; not operated or approved by LinkedIn. Searches the public LinkedIn Ads Library only. Requires an AdPeekly API key; review the operator and access terms before connecting. Not qualified in Zati.",
+      "version": "1.0.1",
+      "tags": [
+        "advertising",
+        "linkedin",
+        "research"
+      ],
+      "homepage": "https://adpeekly.com/mcp",
+      "server_listing_url": "https://registry.modelcontextprotocol.io/v0.1/servers/com.adpeekly%2Flinkedin-ads-library/versions/1.0.1",
+      "official": false,
+      "remotes": [
+        {
+          "url": "https://spkftjsjduykrvzeuzld.supabase.co/functions/v1/mcp-server",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "api_key",
+        "credential_names": [
+          "ADPEEKLY_API_KEY"
+        ],
+        "setup_url": "https://adpeekly.com/signup-mcp-freemium"
+      },
+      "recommended": false,
+      "featured": false,
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:com.adpeekly/linkedin-ads-library",
+        "url": "https://registry.modelcontextprotocol.io/v0.1/servers/com.adpeekly%2Flinkedin-ads-library/versions/1.0.1"
+      }
+    },
+    {
+      "id": "mcp:company-ethics-information-boikot",
+      "kind": "mcp",
+      "service_id": "company-ethics-information-boikot",
+      "title": "Company Ethics Information (Boikot)",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.boikot.xyz/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:company-ethics-information-boikot",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
       }
     },
     {
@@ -127,7 +865,12 @@
       "remotes": [
         {
           "url": "https://mcp.atlassian.com/v2/mcp",
-          "transport": "streamable-http"
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
         }
       ],
       "auth": {
@@ -140,6 +883,512 @@
         "id": "gist-curation",
         "entry_id": "mcp:confluence",
         "url": "https://support.atlassian.com/atlassian-ai-gateway/docs/get-started-with-the-atlassian-remote-mcp-server/"
+      }
+    },
+    {
+      "id": "mcp:contextual-ai",
+      "kind": "mcp",
+      "service_id": "contextual-ai",
+      "title": "Contextual AI",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.app.contextual.ai/mcp/",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 307,
+            "result": "endpoint-responded"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:contextual-ai",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:coresignal",
+      "kind": "mcp",
+      "service_id": "coresignal",
+      "title": "Coresignal",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.coresignal.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:coresignal",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:crossbeam",
+      "kind": "mcp",
+      "service_id": "crossbeam",
+      "title": "Crossbeam",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.crossbeam.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:crossbeam",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:currency-conversion",
+      "kind": "mcp",
+      "service_id": "currency-conversion",
+      "title": "Currency Conversion",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://currency-mcp.wesbos.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:currency-conversion",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:currenttimeutc",
+      "kind": "mcp",
+      "service_id": "currenttimeutc",
+      "title": "CurrentTimeUTC",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://a.currenttimeutc.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:currenttimeutc",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:deepwiki",
+      "kind": "mcp",
+      "service_id": "deepwiki",
+      "title": "DeepWiki",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.deepwiki.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:deepwiki",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:devcycle",
+      "kind": "mcp",
+      "service_id": "devcycle",
+      "title": "DevCycle",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.devcycle.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:devcycle",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:dice-rolling",
+      "kind": "mcp",
+      "service_id": "dice-rolling",
+      "title": "Dice Rolling",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://dice-rolling-mcp.vercel.app/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:dice-rolling",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:dropbox",
+      "kind": "mcp",
+      "service_id": "dropbox",
+      "title": "Dropbox",
+      "description": "Official Dropbox remote MCP server. Requires Dropbox account authorization and client support for Streamable HTTP and OAuth. Gist's no-credential endpoint check does not test tools or account access.",
+      "tags": [
+        "files",
+        "files"
+      ],
+      "homepage": "https://help.dropbox.com/integrations/connect-dropbox-mcp-server",
+      "official": true,
+      "official_evidence_url": "https://help.dropbox.com/integrations/connect-dropbox-mcp-server",
+      "remotes": [
+        {
+          "url": "https://mcp.dropbox.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "setup_url": "https://help.dropbox.com/integrations/connect-dropbox-mcp-server"
+      },
+      "recommended": false,
+      "featured": false,
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:dropbox",
+        "url": "https://help.dropbox.com/integrations/connect-dropbox-mcp-server"
+      }
+    },
+    {
+      "id": "mcp:excel-to-json",
+      "kind": "mcp",
+      "service_id": "excel-to-json",
+      "title": "Excel to JSON",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.wtsolutions.cn/excel-to-json-mcp-sse",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 405,
+            "result": "endpoint-responded"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:excel-to-json",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:flight-search",
+      "kind": "mcp",
+      "service_id": "flight-search",
+      "title": "Flight Search",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://flights.fctolabs.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:flight-search",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:fulcra-context",
+      "kind": "mcp",
+      "service_id": "fulcra-context",
+      "title": "Fulcra Context",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.fulcradynamics.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:fulcra-context",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:galileo",
+      "kind": "mcp",
+      "service_id": "galileo",
+      "title": "Galileo",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://api.galileo.ai/mcp/http/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:galileo",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:gitlab",
+      "kind": "mcp",
+      "service_id": "gitlab",
+      "title": "GitLab",
+      "description": "Official GitLab remote MCP server. Requires GitLab account authorization and client support for Streamable HTTP and OAuth. Gist's no-credential endpoint check does not test tools or account access.",
+      "tags": [
+        "development",
+        "development"
+      ],
+      "homepage": "https://docs.gitlab.com/user/model_context_protocol/mcp_server/",
+      "official": true,
+      "official_evidence_url": "https://docs.gitlab.com/user/model_context_protocol/mcp_server/",
+      "remotes": [
+        {
+          "url": "https://gitlab.com/api/v4/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "setup_url": "https://docs.gitlab.com/user/model_context_protocol/mcp_server/"
+      },
+      "recommended": false,
+      "featured": false,
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:gitlab",
+        "url": "https://docs.gitlab.com/user/model_context_protocol/mcp_server/"
+      }
+    },
+    {
+      "id": "mcp:gitmcp",
+      "kind": "mcp",
+      "service_id": "gitmcp",
+      "title": "GitMCP",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://gitmcp.io/docs",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:gitmcp",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:gohighlevel",
+      "kind": "mcp",
+      "service_id": "gohighlevel",
+      "title": "GoHighLevel",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://services.leadconnectorhq.com/mcp/",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:gohighlevel",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
       }
     },
     {
@@ -175,7 +1424,12 @@
       "remotes": [
         {
           "url": "https://calendarmcp.googleapis.com/mcp/v1",
-          "transport": "streamable-http"
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
         }
       ],
       "source": {
@@ -217,7 +1471,12 @@
       "remotes": [
         {
           "url": "https://drivemcp.googleapis.com/mcp/v1",
-          "transport": "streamable-http"
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
         }
       ],
       "source": {
@@ -244,7 +1503,12 @@
       "remotes": [
         {
           "url": "https://gmailmcp.googleapis.com/mcp/v1",
-          "transport": "streamable-http"
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
         }
       ],
       "auth": {
@@ -272,6 +1536,445 @@
       }
     },
     {
+      "id": "mcp:googleads",
+      "kind": "mcp",
+      "service_id": "googleads",
+      "title": "GoogleAds",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://googleads.hireotto.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:googleads",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:goweb3",
+      "kind": "mcp",
+      "service_id": "goweb3",
+      "title": "GoWeb3",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.goweb3.fyi/mcp/",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:goweb3",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:gralio",
+      "kind": "mcp",
+      "service_id": "gralio",
+      "title": "Gralio",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://gralio.ai/mcp/sse",
+          "transport": "sse",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 301,
+            "result": "endpoint-responded"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:gralio",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:grep",
+      "kind": "mcp",
+      "service_id": "grep",
+      "title": "Grep",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.grep.app",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:grep",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:gumlet",
+      "kind": "mcp",
+      "service_id": "gumlet",
+      "title": "Gumlet",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://docs.gumlet.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:gumlet",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:higgsfield",
+      "kind": "mcp",
+      "service_id": "higgsfield",
+      "title": "Higgsfield",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.higgsfield.ai/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:higgsfield",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:himalayas-remote-jobs",
+      "kind": "mcp",
+      "service_id": "himalayas-remote-jobs",
+      "title": "Himalayas Remote Jobs",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.himalayas.app/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:himalayas-remote-jobs",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:hmr-docs",
+      "kind": "mcp",
+      "service_id": "hmr-docs",
+      "title": "HMR Docs",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://pyth-on-line.promplate.dev/hmr/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:hmr-docs",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:hubspot",
+      "kind": "mcp",
+      "service_id": "hubspot",
+      "title": "HubSpot",
+      "description": "Official HubSpot remote MCP server. Requires HubSpot account authorization and client support for Streamable HTTP and OAuth. Gist's no-credential endpoint check does not test tools or account access.",
+      "tags": [
+        "sales",
+        "crm"
+      ],
+      "homepage": "https://developers.hubspot.com/changelog/remote-hubspot-mcp-server-is-now-generally-available",
+      "official": true,
+      "official_evidence_url": "https://developers.hubspot.com/changelog/remote-hubspot-mcp-server-is-now-generally-available",
+      "remotes": [
+        {
+          "url": "https://mcp.hubspot.com",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "setup_url": "https://developers.hubspot.com/changelog/remote-hubspot-mcp-server-is-now-generally-available"
+      },
+      "recommended": false,
+      "featured": false,
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:hubspot",
+        "url": "https://developers.hubspot.com/changelog/remote-hubspot-mcp-server-is-now-generally-available"
+      }
+    },
+    {
+      "id": "mcp:hugging-face",
+      "kind": "mcp",
+      "service_id": "hugging-face",
+      "title": "Hugging Face",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://hf.co/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:hugging-face",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:ilert",
+      "kind": "mcp",
+      "service_id": "ilert",
+      "title": "ilert",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.ilert.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:ilert",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:imagineart",
+      "kind": "mcp",
+      "service_id": "imagineart",
+      "title": "ImagineArt",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.imagine.art",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:imagineart",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:intercom",
+      "kind": "mcp",
+      "service_id": "intercom",
+      "title": "Intercom",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.intercom.com/sse",
+          "transport": "sse",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:intercom",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:io-aerospace",
+      "kind": "mcp",
+      "service_id": "io-aerospace",
+      "title": "IO Aerospace",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.io-aerospace.org/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:io-aerospace",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
       "id": "mcp:io.github.github/github-mcp-server",
       "kind": "mcp",
       "service_id": "github",
@@ -288,7 +1991,12 @@
       "remotes": [
         {
           "url": "https://api.githubcopilot.com/mcp/",
-          "transport": "streamable-http"
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
         }
       ],
       "auth": {
@@ -327,7 +2035,12 @@
       "remotes": [
         {
           "url": "https://mcp.atlassian.com/v2/mcp",
-          "transport": "streamable-http"
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
         }
       ],
       "auth": {
@@ -340,6 +2053,539 @@
         "id": "gist-curation",
         "entry_id": "mcp:jira",
         "url": "https://support.atlassian.com/atlassian-ai-gateway/docs/get-started-with-the-atlassian-remote-mcp-server/"
+      }
+    },
+    {
+      "id": "mcp:justcall",
+      "kind": "mcp",
+      "service_id": "justcall",
+      "title": "JustCall",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.justcall.host/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:justcall",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:kismet-travel",
+      "kind": "mcp",
+      "service_id": "kismet-travel",
+      "title": "Kismet Travel",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.kismet.travel/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:kismet-travel",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:kiwi-flight-search",
+      "kind": "mcp",
+      "service_id": "kiwi-flight-search",
+      "title": "Kiwi Flight Search",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.kiwi.com",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:kiwi-flight-search",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:laei-ro",
+      "kind": "mcp",
+      "service_id": "laei-ro",
+      "title": "LaEi.ro",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://laei.ro/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "endpoint-responded"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:laei-ro",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:langchain-hub",
+      "kind": "mcp",
+      "service_id": "langchain-hub",
+      "title": "LangChain Hub",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.prompts.mcpcentral.io/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:langchain-hub",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:linear-read-only",
+      "kind": "mcp",
+      "service_id": "linear-read-only",
+      "title": "Linear (read-only)",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.linear.app/mcp/readonly",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:linear-read-only",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:listenetic",
+      "kind": "mcp",
+      "service_id": "listenetic",
+      "title": "Listenetic",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.listenetic.com/v1/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:listenetic",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:lunarcrush",
+      "kind": "mcp",
+      "service_id": "lunarcrush",
+      "title": "LunarCrush",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://lunarcrush.ai/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:lunarcrush",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:mailerlite",
+      "kind": "mcp",
+      "service_id": "mailerlite",
+      "title": "MailerLite",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.mailerlite.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:mailerlite",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:mailersend",
+      "kind": "mcp",
+      "service_id": "mailersend",
+      "title": "MailerSend",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.mailersend.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:mailersend",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:make",
+      "kind": "mcp",
+      "service_id": "make",
+      "title": "Make",
+      "description": "Official Make MCP server. Users authorize Make through their own MCP client; this endpoint check does not create an account connection or execute a scenario.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.make.com",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": true,
+      "homepage": "https://developers.make.com/mcp-server",
+      "official_evidence_url": "https://developers.make.com/mcp-server",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:make",
+        "url": "https://developers.make.com/mcp-server"
+      }
+    },
+    {
+      "id": "mcp:marketo-engage",
+      "kind": "mcp",
+      "service_id": "marketo-engage",
+      "title": "Marketo Engage",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://marketo-mcp.adobe.io/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:marketo-engage",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:microsoft-entra-microsoft-365",
+      "kind": "mcp",
+      "service_id": "microsoft-entra-microsoft-365",
+      "title": "Microsoft Entra (Microsoft 365)",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.svc.cloud.microsoft/enterprise",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:microsoft-entra-microsoft-365",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:microsoft-learn",
+      "kind": "mcp",
+      "service_id": "microsoft-learn",
+      "title": "Microsoft Learn",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://learn.microsoft.com/api/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:microsoft-learn",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:mobile-text-alerts",
+      "kind": "mcp",
+      "service_id": "mobile-text-alerts",
+      "title": "Mobile Text Alerts",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.mobile-text-alerts.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:mobile-text-alerts",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:monday",
+      "kind": "mcp",
+      "service_id": "monday",
+      "title": "monday.com",
+      "description": "Official monday.com remote MCP server. Requires monday.com account authorization and client support for Streamable HTTP and OAuth. Gist's no-credential endpoint check does not test tools or account access.",
+      "tags": [
+        "productivity",
+        "project-management"
+      ],
+      "homepage": "https://developer.monday.com/api-reference/docs/integrate-with-monday-mcp",
+      "official": true,
+      "official_evidence_url": "https://developer.monday.com/api-reference/docs/integrate-with-monday-mcp",
+      "remotes": [
+        {
+          "url": "https://mcp.monday.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "setup_url": "https://developer.monday.com/api-reference/docs/integrate-with-monday-mcp"
+      },
+      "recommended": false,
+      "featured": false,
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:monday",
+        "url": "https://developer.monday.com/api-reference/docs/integrate-with-monday-mcp"
+      }
+    },
+    {
+      "id": "mcp:neon",
+      "kind": "mcp",
+      "service_id": "neon",
+      "title": "Neon",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.neon.tech/sse",
+          "transport": "sse",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:neon",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
       }
     },
     {
@@ -357,7 +2603,12 @@
       "remotes": [
         {
           "url": "https://mcp.notion.com/mcp",
-          "transport": "streamable-http"
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
         }
       ],
       "auth": {
@@ -370,6 +2621,631 @@
         "id": "gist-curation",
         "entry_id": "mcp:notion",
         "url": "https://developers.notion.com/guides/mcp/get-started-with-mcp"
+      }
+    },
+    {
+      "id": "mcp:opalstack",
+      "kind": "mcp",
+      "service_id": "opalstack",
+      "title": "Opalstack",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://my.opalstack.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 403,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:opalstack",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:parallel-ai-task-management",
+      "kind": "mcp",
+      "service_id": "parallel-ai-task-management",
+      "title": "Parallel.ai Task Management",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://task-mcp.parallel.ai/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:parallel-ai-task-management",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:parallel-search",
+      "kind": "mcp",
+      "service_id": "parallel-search",
+      "title": "Parallel Search",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://search-mcp.parallel.ai/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:parallel-search",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:paypal",
+      "kind": "mcp",
+      "service_id": "paypal",
+      "title": "PayPal",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.paypal.com/sse",
+          "transport": "sse",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:paypal",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:pdf4me",
+      "kind": "mcp",
+      "service_id": "pdf4me",
+      "title": "PDF4me",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.pdf4me.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:pdf4me",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:pearl",
+      "kind": "mcp",
+      "service_id": "pearl",
+      "title": "Pearl",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.pearl.com/sse",
+          "transport": "sse",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "endpoint-responded"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:pearl",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:peek",
+      "kind": "mcp",
+      "service_id": "peek",
+      "title": "Peek",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.peek.com",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:peek",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:poku-labs-human-in-the-loop",
+      "kind": "mcp",
+      "service_id": "poku-labs-human-in-the-loop",
+      "title": "Poku Labs (Human-in-the-loop)",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.pokulabs.com",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:poku-labs-human-in-the-loop",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:posthog",
+      "kind": "mcp",
+      "service_id": "posthog",
+      "title": "PostHog",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.posthog.com/sse",
+          "transport": "sse",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 308,
+            "result": "endpoint-responded"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:posthog",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:postman",
+      "kind": "mcp",
+      "service_id": "postman",
+      "title": "Postman",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.postman.com/minimal",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:postman",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:pre-dev-architect",
+      "kind": "mcp",
+      "service_id": "pre-dev-architect",
+      "title": "pre.dev Architect",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://api.pre.dev/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:pre-dev-architect",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:prisma-postgres-mcp-server",
+      "kind": "mcp",
+      "service_id": "prisma-postgres-mcp-server",
+      "title": "Prisma Postgres MCP Server",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.prisma.io/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:prisma-postgres-mcp-server",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:reflag",
+      "kind": "mcp",
+      "service_id": "reflag",
+      "title": "Reflag",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://app.reflag.com/api/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:reflag",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:replicate",
+      "kind": "mcp",
+      "service_id": "replicate",
+      "title": "Replicate",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.replicate.com/sse",
+          "transport": "sse",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:replicate",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:rostro",
+      "kind": "mcp",
+      "service_id": "rostro",
+      "title": "Rostro",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://proto.rostro.dev/mcp/",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:rostro",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:rotunda",
+      "kind": "mcp",
+      "service_id": "rotunda",
+      "title": "Rotunda",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://rotunda.bullpenstrategygroup.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:rotunda",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:saleor-commerce",
+      "kind": "mcp",
+      "service_id": "saleor-commerce",
+      "title": "Saleor Commerce",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.saleor.app/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:saleor-commerce",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:salesforce",
+      "kind": "mcp",
+      "service_id": "salesforce",
+      "title": "Salesforce",
+      "description": "Official Salesforce remote MCP server. Requires Salesforce account authorization and client support for Streamable HTTP and OAuth. Gist's no-credential endpoint check does not test tools or account access.",
+      "tags": [
+        "sales",
+        "crm"
+      ],
+      "homepage": "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/postman.html",
+      "official": true,
+      "official_evidence_url": "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/postman.html",
+      "remotes": [
+        {
+          "url": "https://api.salesforce.com/platform/mcp/v1/platform/sobject-all",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "setup_url": "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/postman.html"
+      },
+      "recommended": false,
+      "featured": false,
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:salesforce",
+        "url": "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/postman.html"
+      }
+    },
+    {
+      "id": "mcp:scamshield",
+      "kind": "mcp",
+      "service_id": "scamshield",
+      "title": "ScamShield",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.brokerchooser.com/servers/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:scamshield",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:semgrep",
+      "kind": "mcp",
+      "service_id": "semgrep",
+      "title": "Semgrep",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.semgrep.ai/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:semgrep",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
       }
     },
     {
@@ -387,7 +3263,12 @@
       "remotes": [
         {
           "url": "https://mcp.sentry.dev/mcp",
-          "transport": "streamable-http"
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
         }
       ],
       "auth": {
@@ -400,6 +3281,99 @@
         "id": "gist-curation",
         "entry_id": "mcp:sentry",
         "url": "https://mcp.sentry.dev/"
+      }
+    },
+    {
+      "id": "mcp:seo-linkmap",
+      "kind": "mcp",
+      "service_id": "seo-linkmap",
+      "title": "SEO LinkMap",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://seolinkmap.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:seo-linkmap",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:shutter-network",
+      "kind": "mcp",
+      "service_id": "shutter-network",
+      "title": "Shutter Network",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://shutter-mcp-b76e270d48c5.herokuapp.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:shutter-network",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:simplescraper",
+      "kind": "mcp",
+      "service_id": "simplescraper",
+      "title": "Simplescraper",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.simplescraper.io/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:simplescraper",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
       }
     },
     {
@@ -417,7 +3391,12 @@
       "remotes": [
         {
           "url": "https://mcp.slack.com/mcp",
-          "transport": "streamable-http"
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
         }
       ],
       "auth": {
@@ -430,6 +3409,37 @@
         "id": "gist-curation",
         "entry_id": "mcp:slack",
         "url": "https://docs.slack.dev/ai/slack-mcp-server/"
+      }
+    },
+    {
+      "id": "mcp:square",
+      "kind": "mcp",
+      "service_id": "square",
+      "title": "Square",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.squareup.com/sse",
+          "transport": "sse",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:square",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
       }
     },
     {
@@ -447,7 +3457,12 @@
       "remotes": [
         {
           "url": "https://mcp.stripe.com",
-          "transport": "streamable-http"
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
         }
       ],
       "auth": {
@@ -460,6 +3475,667 @@
         "id": "gist-curation",
         "entry_id": "mcp:stripe",
         "url": "https://docs.stripe.com/mcp"
+      }
+    },
+    {
+      "id": "mcp:stytch",
+      "kind": "mcp",
+      "service_id": "stytch",
+      "title": "Stytch",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.stytch.dev/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:stytch",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:supabase",
+      "kind": "mcp",
+      "service_id": "supabase",
+      "title": "Supabase",
+      "description": "Official Supabase remote MCP server. Requires Supabase account authorization and client support for Streamable HTTP and OAuth. Gist's no-credential endpoint check does not test tools or account access.",
+      "tags": [
+        "development",
+        "database"
+      ],
+      "homepage": "https://supabase.com/docs/guides/ai-tools/mcp",
+      "official": true,
+      "official_evidence_url": "https://supabase.com/docs/guides/ai-tools/mcp",
+      "remotes": [
+        {
+          "url": "https://mcp.supabase.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "setup_url": "https://supabase.com/docs/guides/ai-tools/mcp"
+      },
+      "recommended": false,
+      "featured": false,
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:supabase",
+        "url": "https://supabase.com/docs/guides/ai-tools/mcp"
+      }
+    },
+    {
+      "id": "mcp:superhuman-docs",
+      "kind": "mcp",
+      "service_id": "superhuman-docs",
+      "title": "Superhuman Docs",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://docs.superhuman.com/apis/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:superhuman-docs",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:superhuman-mail",
+      "kind": "mcp",
+      "service_id": "superhuman-mail",
+      "title": "Superhuman Mail",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.mail.superhuman.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:superhuman-mail",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:svelte",
+      "kind": "mcp",
+      "service_id": "svelte",
+      "title": "Svelte",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.svelte.dev/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:svelte",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:svelte-documentation",
+      "kind": "mcp",
+      "service_id": "svelte-documentation",
+      "title": "Svelte Documentation",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://svelte-llm.stanislav.garden/mcp/sse",
+          "transport": "sse",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "endpoint-responded"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:svelte-documentation",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:tally",
+      "kind": "mcp",
+      "service_id": "tally",
+      "title": "Tally",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://api.tally.so/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:tally",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:tavily-search",
+      "kind": "mcp",
+      "service_id": "tavily-search",
+      "title": "Tavily Search",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.tavily.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:tavily-search",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:timecamp",
+      "kind": "mcp",
+      "service_id": "timecamp",
+      "title": "TimeCamp",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://my-mcp-server.timecamp-s-a.workers.dev/sse",
+          "transport": "sse",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:timecamp",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:twelve-data",
+      "kind": "mcp",
+      "service_id": "twelve-data",
+      "title": "Twelve Data",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.twelvedata.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:twelve-data",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:twelvelabs",
+      "kind": "mcp",
+      "service_id": "twelvelabs",
+      "title": "TwelveLabs",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.twelvelabs.io/jockey/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:twelvelabs",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:vapi",
+      "kind": "mcp",
+      "service_id": "vapi",
+      "title": "Vapi",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.vapi.ai/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:vapi",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:veed",
+      "kind": "mcp",
+      "service_id": "veed",
+      "title": "Veed",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://www.veed.io/api/v1/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:veed",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:vlei-wiki",
+      "kind": "mcp",
+      "service_id": "vlei-wiki",
+      "title": "vLEI.wiki",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.vlei.wiki/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:vlei-wiki",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:waystation",
+      "kind": "mcp",
+      "service_id": "waystation",
+      "title": "WayStation",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://waystation.ai/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 402,
+            "result": "payment-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:waystation",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:webflow",
+      "kind": "mcp",
+      "service_id": "webflow",
+      "title": "Webflow",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.webflow.com/sse",
+          "transport": "sse",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:webflow",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:windsor",
+      "kind": "mcp",
+      "service_id": "windsor",
+      "title": "Windsor",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.windsor.ai",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:windsor",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:wix",
+      "kind": "mcp",
+      "service_id": "wix",
+      "title": "Wix",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.wix.com/sse",
+          "transport": "sse",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:wix",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:wordpress-trac",
+      "kind": "mcp",
+      "service_id": "wordpress-trac",
+      "title": "WordPress Trac",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp-server-wporg-trac-staging.a8cai.workers.dev/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 200,
+            "result": "mcp-initialize"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:wordpress-trac",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
+      }
+    },
+    {
+      "id": "mcp:zoom",
+      "kind": "mcp",
+      "service_id": "zoom",
+      "title": "Zoom",
+      "description": "Official Zoom remote MCP server. Requires Zoom account authorization and client support for Streamable HTTP and OAuth. Gist's no-credential endpoint check does not test tools or account access.",
+      "tags": [
+        "communication",
+        "calendar"
+      ],
+      "homepage": "https://developers.zoom.us/docs/mcp/servers/",
+      "official": true,
+      "official_evidence_url": "https://developers.zoom.us/docs/mcp/servers/",
+      "remotes": [
+        {
+          "url": "https://zoom.us/mcp/meeting/streamable",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "setup_url": "https://developers.zoom.us/docs/mcp/servers/"
+      },
+      "recommended": false,
+      "featured": false,
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:zoom",
+        "url": "https://developers.zoom.us/docs/mcp/servers/"
+      }
+    },
+    {
+      "id": "mcp:zoominfo",
+      "kind": "mcp",
+      "service_id": "zoominfo",
+      "title": "ZoomInfo",
+      "description": "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. Review its account permissions, credential flow, tool behavior and terms before connecting. This reachability check is not an authenticated session or workflow qualification.",
+      "tags": [],
+      "remotes": [
+        {
+          "url": "https://mcp.zoominfo.com/mcp",
+          "transport": "streamable-http",
+          "check": {
+            "checked_at": "2026-10-18T04:06:59Z",
+            "http_status": 401,
+            "result": "authentication-required"
+          }
+        }
+      ],
+      "auth": {
+        "type": "unknown"
+      },
+      "recommended": false,
+      "featured": false,
+      "official": false,
+      "server_listing_url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:zoominfo",
+        "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt"
       }
     }
   ]

@@ -42,14 +42,15 @@ workspace isolation and client execution authority remain. This explicit scope
 also includes implementation and population through the existing AWS release
 path, without real-provider or paid-call authority implied by catalog intake.
 
-Current public catalog reset (2026-10-17): the owner chose the deduplicated union
-of apps listed by n8n OR Make, admitting only vendor-official HTTPS MCP endpoints
-or raw public OpenAPI specifications. T-DIR.40-54 below supersede the earlier
-bulk public intake policy prospectively; historical task completion and receipts
-remain unchanged. This is an initial explicitly evidenced subset, not complete
-n8n/Make coverage. Existing private records, stable bookmark identities and
-merged icon/card work are preserved; migration012 and deployment remain separate
-gates. No new credential, account, tool execution or model-call authority follows.
+Current public catalog reset (2026-10-18): the owner clarified that verified
+reachability through a basic unauthenticated HTTP check is sufficient; Zati
+workflow qualification is not required for admission. T-DIR.55-63 and ADR-025
+supersede the vendor-only rule from the prior reset while preserving its history.
+The candidate includes the current Make verified remote MCP server list and the
+existing reviewed n8n subset; it does not claim exhaustive coverage of every app
+in either automation marketplace. Existing private records, stable bookmark
+identities and merged icon/card work are preserved. Endpoint checks make no
+provider tool calls and imply no credential, account or model-call authority.
 
 ### Dispatch disposition and precedence
 
@@ -2490,6 +2491,18 @@ These route labels are not executor admission or fresh deployment authority.
 - [x] T-DIR.52 Deploy the reviewed vendor catalog image  Owner: deployment-operator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.49, T-DIR.51]  acc: [Reviewed saved IaC activation uses the exact qualified image on existing AWS resources, preserves credentials/data/recovery and reaches completed healthy rollout; actual source/image/task/configuration revisions and rollback target are recorded]
 - [x] T-DIR.53 Verify live curated discovery and personal library behavior  Owner: live-verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.52]  acc: [Live gist.sire.run API/MCP and desktop/mobile browser observe the exact curated snapshot and preserved icon/card design; an authorized same-user bookmark save/reload/remove journey and private read/preservation checks pass while anonymous/foreign access stays denied, or unmet owner-session prerequisites remain explicitly open; no provider/account/model execution is inferred]
 - [x] T-DIR.54 Complete catalog reset operations and evidence handoff  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.53]  acc: [Final receipt binds reviewed and landed source, image, migration/grants, production observations and recovery target; ongoing source refresh/admission and incomplete n8n/Make coverage limits are documented, old bulk public policy is prospectively superseded without deleting history, and no persistent watcher or unqualified Featured claim remains]
+
+- [x] T-DIR.55 Reconcile owner correction and choose response-based MCP admission  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-DIR.54]  acc: [Either-directory membership remains; vendor-only restriction is superseded; exact endpoint response check is accepted without requiring a Zati workflow, while ownership and endpoint-check limits stay visible]
+- [x] T-DIR.56 Define operator provenance and basic reachability semantics  Owner: catalog-owner  Est: TBD  kind: agent  stage: design  blocked-by: [T-DIR.55]  acc: [ADR-025 distinguishes vendor-evidenced routes from operator-unverified Make-list or MCP Registry routes; initialize, HTTP response, authentication and payment results are separate; no tools/list, tools/call, authenticated workflow or Featured claim is implied]
+- [x] T-DIR.57 Implement bounded remote HTTP checks and reproducible snapshot  Owner: catalog-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.56]  acc: [Checker pins public DNS, verifies TLS, has bounded time and body limits, uses no credentials, checks each unique URL/transport once, supports Streamable HTTP initialize and bounded SSE GET, emits hashed results, and offline builder validates exact routes and deterministic snapshot]
+- [x] T-DIR.58 Admit responding Make verified MCP servers and preserve existing marketplace entries  Owner: catalog-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.57]  acc: [Each new record matches a named Make verified-server listing and exact URL/transport response; unverified ownership is labeled, nonresponding candidates are excluded, existing n8n/Make app entries and Zati recommendations remain, and no quality or compatibility claim is added]
+- [x] T-DIR.59 Verify intake, library, hosted handler and browser changes  Owner: integration-verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.58]  acc: [Intake and endpoint-check unit tests, deterministic snapshot build, Go race test, hosted handler/UI/app tests, Node browser tests, Wazi plan conformance and diff hygiene pass; final frozen endpoint set has no check failures and no provider tool calls occur]
+- [ ] T-DIR.60 Independently review exact source candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.59]  delivers: [Exact-head review and finding dispositions]  acc: [Non-author reviews all changed source, snapshot, endpoint report, ADR, plan and receipt at exact base/head; findings are fixed and affected checks plus exact-head review pass]
+- [ ] T-DIR.61 Guardedly merge the reviewed catalog expansion  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-DIR.60]  delivers: [Merged source and candidate snapshot]  acc: [Repository policy and required checks permit guarded merge of the reviewed exact head without bypass; landed commit and tree parity are recorded]
+- [ ] T-DIR.62 Publish and deploy the landed catalog expansion  Owner: release-operator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.61]  acc: [Use the existing qualified hosted release path, preserve current data and recovery, publish source-pinned immutable artifact and complete healthy rollout; record exact artifact, task and rollback target]
+- [ ] T-DIR.63 Verify live directory and close evidence handoff  Owner: live-verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.62]  delivers: [Production observation receipt]  acc: [Live gist.sire.run API/MCP and web UI show the exact 127-entry snapshot with operator-provenance, transport and endpoint-result labels; public links and browse behavior pass; receipt distinguishes actual live observation from source checks and records remaining directory-coverage/client-workflow limits]
+
+The expansion acceptance rule is recorded in [ADR-025](adr/025-reachable-remote-mcp-admission.md); dated source and endpoint evidence is in the [2026-10-18 expansion receipt](receipts/2026-10-18-remote-mcp-expansion.md). These tasks supersede the preceding 2026-10-17 catalog count and vendor-only policy for the next release.
 
 Release observation: T-DIR.46-54 completed for the reviewed public catalog
 release. PR101 landed348a6d09, Foundation migration PR291 landed3cd3a0c1 and

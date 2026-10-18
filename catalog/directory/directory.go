@@ -74,13 +74,16 @@ func validateRecord(r Record, private bool) error {
 	if !bounded(r.Source.ID, 200) || !bounded(r.Source.EntryID, 300) {
 		return fail("invalid source identity")
 	}
-	for _, u := range []string{r.Homepage, r.Repository, r.Auth.SetupURL, r.OfficialEvidenceURL} {
+	for _, u := range []string{r.Homepage, r.Repository, r.Auth.SetupURL, r.OfficialEvidenceURL, r.ServerListingURL} {
 		if u != "" && !safeURL(u, private) {
 			return fail("unsafe metadata URL")
 		}
 	}
-	if r.Official && r.OfficialEvidenceURL == "" {
+	if !private && r.Official && r.OfficialEvidenceURL == "" {
 		return fail("official requires vendor evidence")
+	}
+	if !private && !r.Official && (r.Kind != "mcp" || r.ServerListingURL == "" || r.OfficialEvidenceURL != "") {
+		return fail("independent remote MCP requires registry provenance and no vendor claim")
 	}
 	if len(r.Tags) > 20 || len(r.Remotes) > 16 || len(r.Packages) > 16 || len(r.Skills) > 12 || len(r.Verification) > 12 || len(r.Auth.CredentialNames) > 24 {
 		return fail("too many descriptor fields")
@@ -108,6 +111,27 @@ func validateRecord(r Record, private bool) error {
 	for _, v := range r.Remotes {
 		if !safeURL(v.URL, private) || (v.Transport != "streamable-http" && v.Transport != "sse") {
 			return fail("invalid remote")
+		}
+		if v.Check != nil {
+			status := v.Check.HTTPStatus
+			validStatus := status >= 200 && status < 400 || status == 400 || status == 401 || status == 402 || status == 403 || status == 405
+			if v.Check.CheckedAt.IsZero() || !validStatus {
+				return fail("invalid endpoint check")
+			}
+			resultValid := false
+			switch v.Check.Result {
+			case "mcp-initialize":
+				resultValid = status == 200 && v.Transport == "streamable-http"
+			case "endpoint-responded":
+				resultValid = status >= 200 && status < 400 || status == 400 || status == 405
+			case "authentication-required":
+				resultValid = status == 401 || status == 403
+			case "payment-required":
+				resultValid = status == 402
+			}
+			if !resultValid {
+				return fail("endpoint check result does not match HTTP status and transport")
+			}
 		}
 	}
 	for _, v := range r.Packages {

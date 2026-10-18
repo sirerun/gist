@@ -11,7 +11,7 @@ import (
 
 func fixture(t *testing.T) *Handler {
 	t.Helper()
-	idx, err := directory.New(directory.Snapshot{Format: directory.SnapshotFormat, Revision: "test", GeneratedAt: time.Now(), Sources: []directory.Source{{ID: "fixture", URL: "https://example.com", Revision: "1", SHA256: strings.Repeat("a", 64), RetrievedAt: time.Now(), Attribution: "Fixture"}}, Entries: []directory.Record{{ID: "fixture/example", Kind: "mcp", ServiceID: "example", Title: "Example", Description: "Example public descriptor", Tags: []string{"files"}, Source: directory.RecordSource{ID: "fixture", EntryID: "example", URL: "https://example.com"}, Remotes: []directory.Remote{{URL: "https://example.com/mcp", Transport: "streamable-http"}}, Auth: directory.Auth{Type: "none"}}}})
+	idx, err := directory.New(directory.Snapshot{Format: directory.SnapshotFormat, Revision: "test", GeneratedAt: time.Now(), Sources: []directory.Source{{ID: "fixture", URL: "https://example.com", Revision: "1", SHA256: strings.Repeat("a", 64), RetrievedAt: time.Now(), Attribution: "Fixture"}}, Entries: []directory.Record{{ID: "fixture/example", Kind: "mcp", ServiceID: "example", Title: "Example", Description: "Example public descriptor", Tags: []string{"files"}, Source: directory.RecordSource{ID: "fixture", EntryID: "example", URL: "https://example.com"}, Remotes: []directory.Remote{{URL: "https://example.com/mcp", Transport: "streamable-http"}}, Auth: directory.Auth{Type: "none"}, Official: true, OfficialEvidenceURL: "https://example.com/vendor"}}})
 	if err != nil {
 		t.Fatal(err)
 	}
