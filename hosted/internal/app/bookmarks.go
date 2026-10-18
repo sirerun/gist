@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -98,7 +99,7 @@ func (h *webAPI) serveBookmarks(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(204)
 		return
 	}
-	if !webQueryKeys(v, "view", "q", "kind", "tag", "offset") || len(v.Get("q")) > 200 || len(v.Get("tag")) > 64 || (v.Get("kind") != "" && v.Get("kind") != "mcp" && v.Get("kind") != "openapi") || (v.Get("view") != "" && v.Get("view") != "entries") {
+	if !webQueryKeys(v, "view", "q", "kind", "tag", "offset", "limit") || len(v.Get("q")) > 200 || len(v.Get("tag")) > 64 || (v.Get("kind") != "" && v.Get("kind") != "mcp" && v.Get("kind") != "openapi") || (v.Get("view") != "" && v.Get("view") != "entries" && v.Get("view") != "catalog") {
 		webError(w, 400, "invalid_query", "Invalid bookmark query.")
 		return
 	}
@@ -114,6 +115,14 @@ func (h *webAPI) serveBookmarks(w http.ResponseWriter, r *http.Request) {
 	}
 	if ids == nil {
 		ids = []string{}
+	}
+	if v.Get("view") == "catalog" {
+		h.serveBookmarkCatalog(w, r, ids)
+		return
+	}
+	if v.Has("limit") {
+		webError(w, 400, "invalid_query", "Limit is only supported for the catalog view.")
+		return
 	}
 	if v.Get("view") != "entries" {
 		h.write(w, map[string]any{"ids": ids})
@@ -250,4 +259,111 @@ func (s postgresBookmarks) set(ctx context.Context, p ports.Principal, id string
 		_, err := tx.Exec(ctx, `INSERT INTO directory_bookmarks(workspace_id,issuer,subject,entry_id) SELECT $1,$2,$3,$5 WHERE `+webAuthority+` ON CONFLICT DO NOTHING`, p.WorkspaceID, p.Issuer, p.Subject, p.PolicyGeneration, id)
 		return err
 	})
+}
+
+// The authenticated catalog partitions matching public results before pagination.
+// Bookmark IDs never enter public URLs, caches or directory search responses.
+func (h *webAPI) serveBookmarkCatalog(w http.ResponseWriter, r *http.Request, ids []string) {
+	q := r.URL.Query()
+	offset, limit := 0, 24
+	var err error
+	if q.Has("offset") {
+		offset, err = strconv.Atoi(q.Get("offset"))
+		if err != nil || offset < 0 || offset > directory.MaxEntries {
+			webError(w, 400, "invalid_query", "Invalid page.")
+			return
+		}
+	}
+	if q.Has("limit") {
+		limit, err = strconv.Atoi(q.Get("limit"))
+		if err != nil || limit < 1 || limit > 100 {
+			webError(w, 400, "invalid_query", "Invalid limit.")
+			return
+		}
+	}
+	saved := map[string]bool{}
+	for _, id := range ids {
+		saved[id] = true
+	}
+	items := []any{}
+	priority := []bool{}
+	categories := []directory.AppCategory{}
+	if q.Get("kind") == "" {
+		apps := h.publicApps
+		if apps == nil {
+			var e error
+			apps, e = directory.DefaultApps(h.publicIndex)
+			if e != nil {
+				webError(w, 503, "unavailable", "Catalog unavailable.")
+				return
+			}
+		}
+		result, e := apps.Search(directory.AppQuery{Text: q.Get("q"), Category: q.Get("tag"), PriorityConnectorIDs: ids, Offset: offset, Limit: limit})
+		if e != nil {
+			webError(w, 400, "invalid_query", "Invalid catalog query.")
+			return
+		}
+		page := result.Items
+		for len(page) > 0 {
+			raw, _ := json.Marshal(map[string]any{"items": page, "total": result.Total, "next_cursor": strconv.Itoa(offset + len(page)), "categories": result.Categories})
+			if len(raw) <= h.maxBytes {
+				break
+			}
+			page = page[:len(page)-1]
+		}
+		if len(page) == 0 && offset < result.Total {
+			webError(w, 503, "response_too_large", "This entry exceeds the library display limit.")
+			return
+		}
+		next := ""
+		if offset+len(page) < result.Total {
+			next = strconv.Itoa(offset + len(page))
+		}
+		h.write(w, map[string]any{"items": page, "total": result.Total, "next_cursor": next, "categories": result.Categories})
+		return
+	} else {
+		for cursor := ""; ; {
+			result, e := h.publicIndex.Search(directory.Query{Text: q.Get("q"), Kind: q.Get("kind"), Tag: q.Get("tag"), Cursor: cursor, Limit: 100})
+			if e != nil {
+				webError(w, 400, "invalid_query", "Invalid catalog query.")
+				return
+			}
+			for _, c := range result.Items {
+				items = append(items, directory.PublicRecordOf(c))
+				priority = append(priority, saved[c.ID])
+			}
+			if result.NextCursor == "" {
+				break
+			}
+			cursor = result.NextCursor
+		}
+	}
+	order := make([]int, len(items))
+	for i := range order {
+		order[i] = i
+	}
+	sort.SliceStable(order, func(i, j int) bool { return priority[order[i]] && !priority[order[j]] })
+	total := len(items)
+	offset = min(offset, total)
+	end := min(offset+limit, total)
+	page := []any{}
+	for _, i := range order[offset:end] {
+		page = append(page, items[i])
+	}
+	for len(page) > 0 {
+		raw, _ := json.Marshal(map[string]any{"items": page, "total": total, "next_cursor": strconv.Itoa(offset + len(page)), "categories": categories})
+		if len(raw) <= h.maxBytes {
+			break
+		}
+		page = page[:len(page)-1]
+	}
+	if len(page) == 0 && offset < total {
+		webError(w, 503, "response_too_large", "This entry exceeds the library display limit.")
+		return
+	}
+	next := ""
+	if offset+len(page) < total {
+		next = strconv.Itoa(offset + len(page))
+	}
+	h.write(w, map[string]any{"items": page, "total": total, "next_cursor": next, "categories": categories})
 }

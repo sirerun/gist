@@ -1,0 +1,12 @@
+# Library type paths and saved-first ordering — 2026-10-18
+
+Owner direction: use the approved compact card design for MCP/OpenAPI views; replace kind query URLs with paths; remove My bookmarks and put saved items first. The owner also asked how other MCP clients connect. Live initialize/tools/list verified the existing anonymous Streamable HTTP directory at `/directory/mcp`; `/mcp` remains the authenticated workspace registry.
+
+- `/library/mcp` and `/library/openapi` have canonical URLs and sitemap entries. Old kind URLs301redirect, preserving search. Client navigation uses paths. Search/category state still uses ordinary query parameters.
+- Connector tiles share the app card frame, padded brand icons, dimensions, title spacing and one category/tag on hover. Bookmark controls remain in the corner; redundant type badges are removed. A generated icon-color manifest preserves brands without changing API descriptors or source artwork.
+- My bookmarks is removed. Authenticated `GET /app/api/bookmarks?view=catalog` returns the full matching public catalog, saved first before pagination. The user's saved connection IDs rank matching apps on All apps and exact connectors on typed views. Existing bookmark mutation and entries APIs stay intact; no new app bookmark identity or database schema is introduced.
+- Personalization is authenticated, user-scoped and uncached. Anonymous/public search responses contain no bookmark state. Filters apply before display; shared catalog order stays immutable. Removed catalog entries remain available through the existing bookmark entries API.
+- On bookmark changes, refresh the loaded result count, reuse matching card nodes and restore focus/scroll. Keep public browsing available when a personal session expires. Existing provider connections and execution authority remain in the client.
+- Library links now expose public MCP connection instructions directly.
+
+Checks: Node21/21; root directory tests; hosted app/webui tests and vet; icon unit tests3/3. Candidate browser1440/390/320 verifies card consistency, typed URLs, no overflow and no obsolete filter. A controlled signed-in browser fixture verifies saved-first order,72loaded cards across pages, no duplicates and retained focus on removal. This fixture uses synthetic session state/public metadata and performs no real account writes. Guest browser data is proxied read-only from production. Deployment evidence is separate.

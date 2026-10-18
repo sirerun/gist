@@ -146,7 +146,7 @@ func serveSitemap(w http.ResponseWriter, r *http.Request, apps *directory.AppInd
 		XMLNS   string   `xml:"xmlns,attr"`
 		URLs    []entry  `xml:"url"`
 	}{XMLNS: "http://www.sitemaps.org/schemas/sitemap/0.9"}
-	doc.URLs = append(doc.URLs, entry{publicOrigin + "/library"}, entry{publicOrigin + "/apps/openai-gpt-3/airtable"})
+	doc.URLs = append(doc.URLs, entry{publicOrigin + "/library"}, entry{publicOrigin + "/library/mcp"}, entry{publicOrigin + "/library/openapi"}, entry{publicOrigin + "/apps/openai-gpt-3/airtable"})
 	for offset := 0; ; offset += 100 {
 		result, _ := apps.Search(directory.AppQuery{Offset: offset, Limit: 100})
 		for _, a := range result.Items {

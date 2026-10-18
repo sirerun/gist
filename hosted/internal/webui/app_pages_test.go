@@ -87,7 +87,30 @@ func TestSitemapContainsCanonicalPublicInventory(t *testing.T) {
 			t.Fatal("noncanonical URL", u.Loc)
 		}
 	}
-	if len(doc.URLs) != 3380+127+2 || !seen[publicOrigin+"/apps/google-email"] {
+	if len(doc.URLs) != 3380+127+4 || !seen[publicOrigin+"/apps/google-email"] {
 		t.Fatalf("unexpected sitemap size%d", len(doc.URLs))
+	}
+}
+
+func TestTypedLibraryRoutes(t *testing.T) {
+	h := Handler()
+	for _, kind := range []string{"mcp", "openapi"} {
+		path := "/library/" + kind
+		if !Handles(path) {
+			t.Fatal("unclaimed", path)
+		}
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest("GET", path, nil))
+		if w.Code != 200 || !strings.Contains(w.Body.String(), `rel="canonical" href="`+publicOrigin+path+`"`) {
+			t.Fatal("missing typed page", w.Code)
+		}
+		if strings.Contains(w.Body.String(), "bookmark-filter") {
+			t.Fatal("obsolete filter")
+		}
+		w = httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest("GET", "/library?kind="+kind+"&q=mail", nil))
+		if w.Code != 301 || w.Header().Get("Location") != path+"?q=mail" {
+			t.Fatal("bad old redirect", w.Code, w.Header().Get("Location"))
+		}
 	}
 }

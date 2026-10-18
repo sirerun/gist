@@ -95,15 +95,18 @@
     icon.width = 48; icon.height = 48;
     icon.loading = "lazy";
     const heading = el("div", undefined, "directory-card-heading");
-    heading.append(icon, el("h2", record.title || record.id));
-    const useCase = (record.tags || [])[0] || "";
-    const b = el("div", undefined, "directory-badges"); badges(record,b);
+    const frame = el("span", undefined, "directory-logo-frame");
+    const color = globalThis.GIST_APP_ICON_COLORS?.[connectorIcon(record)];
+    if (/^#[0-9a-f]{6}$/i.test(color || "")) frame.style.backgroundColor = color;
+    frame.append(icon);
+    heading.append(frame, el("h2", record.title || record.id));
+    const useCase = record.kind === "unavailable" ? "Unavailable" : (record.tags || [])[0] || "";
     c.append(heading);
-    if (useCase) c.append(el("p", useCase, "directory-card-use-case"));
-    const wrapper = el("article", undefined, "catalog-card directory-card bookmark-card");
+    c.append(el("p", useCase, "directory-card-use-case"));
+    const wrapper = el("article", undefined, "catalog-card directory-card app-card bookmark-card");
     c.className = "directory-card-content";
     wrapper.dataset.entryId = record.id;
-    wrapper.append(c, b, bookmarkButton(record));
+    wrapper.append(c, bookmarkButton(record));
     return wrapper;
   }
   function appCard(record) {
@@ -123,6 +126,7 @@
     arrow.setAttribute("aria-hidden", "true");
     c.append(arrow);
     const wrapper = el("article", undefined, "catalog-card directory-card app-card");
+    wrapper.dataset.appSlug = record.slug;
     wrapper.append(c); return wrapper;
   }
   async function home() {
@@ -133,63 +137,53 @@
   function directory() {
     const form = document.getElementById("directory-search"), query = document.getElementById("directory-query"), tag = document.getElementById("directory-tag"), results = document.getElementById("directory-results"), status = document.getElementById("directory-status"), notice = document.getElementById("directory-notice"), more = document.getElementById("directory-more");
     const params = new URLSearchParams(location.search); query.value = params.get("q") || ""; tag.value = params.get("category") || params.get("tag") || "";
-    let savedOnly = params.get("saved") === "1";
-    const savedFilter = document.getElementById("bookmark-filter");
-    savedFilter.setAttribute("aria-pressed", String(savedOnly)); savedFilter.classList.toggle("active", savedOnly);
-    let kind = ["mcp","openapi"].includes(params.get("kind")) ? params.get("kind") : "", cursor = "", generation = 0, total = 0;
-    function filters() { tag.disabled = Boolean(kind || savedOnly); document.querySelectorAll("[data-directory-kind]").forEach(b=>{const active=b.dataset.directoryKind===kind; b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));}); }
-    async function load(append = false) {
-      const ownSaved = savedOnly, own = ++generation; if (!append) more.hidden = true; more.disabled = true; results.setAttribute("aria-busy","true"); notice.replaceChildren();
-      if (!append) results.replaceChildren();
-      const p = new URLSearchParams({limit:"24"}); if(query.value.trim()) p.set("q",query.value.trim()); if(kind)p.set("kind",kind); if(tag.value)p.set(!ownSaved && !kind ? "category" : "tag",tag.value); if(append&&cursor)p.set(ownSaved || !kind ? "offset" : "cursor",cursor);
-      const visible = new URLSearchParams(p); visible.delete("limit");visible.delete("cursor");visible.delete("offset");if(ownSaved)visible.set("saved","1"); history.replaceState(null,"","/library"+(visible.size?"?"+visible:""));
+    const pathKind = ({"/library/mcp":"mcp","/library/openapi":"openapi"})[location.pathname];
+    let kind = pathKind || (["mcp","openapi"].includes(params.get("kind")) ? params.get("kind") : ""), cursor = "", generation = 0, total = 0;
+    function filters() { tag.disabled = Boolean(kind); document.querySelectorAll("[data-directory-kind]").forEach(b=>{const active=b.dataset.directoryKind===kind; b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));}); }
+    async function load(append = false, preserve = false) {
+      const own=++generation, personalized=bookmarkState==="ready"&&bookmarkIDs.size>0, appView=!kind;
+      const pageLimit=personalized?100:appView?100:50;
+      const wanted=preserve?Math.max(24,results.children.length):24, focused=preserve?document.activeElement:null, hadFocus=preserve&&results.contains(document.activeElement), scrollX=globalThis.scrollX||0, scrollY=globalThis.scrollY||0;
+      if(!append&&!preserve)more.hidden=true;more.disabled=true;results.setAttribute("aria-busy","true");notice.replaceChildren();
+      const p=new URLSearchParams({limit:String(Math.min(pageLimit,wanted))});
+      if(query.value.trim())p.set("q",query.value.trim());if(kind)p.set("kind",kind);if(tag.value)p.set(appView&&!personalized?"category":"tag",tag.value);
+      if(append&&cursor)p.set(personalized||appView?"offset":"cursor",cursor);
+      const visible=new URLSearchParams(p);for(const key of ["limit","cursor","offset","kind","saved"])visible.delete(key);
+      if(appView&&visible.has("tag")){visible.set("category",visible.get("tag"));visible.delete("tag");}
+      history.replaceState(null,"","/library"+(kind?"/"+kind:"")+(visible.size?"?"+visible:""));
+      let endpoint=personalized?"/app/api/bookmarks?":"/api/directory"+(appView?"/apps?":"?");if(personalized)p.set("view","catalog");
       try {
         if(new TextEncoder().encode(query.value.trim()).length>200){const e=new Error();e.status=400;throw e;}
-        if (ownSaved && bookmarkState === "loading") await bookmarksReady;
-        if (ownSaved && bookmarkState === "error") await loadBookmarks();
-        if (own !== generation) return;
-        if (ownSaved && bookmarkState === "guest") {
-          status.textContent = "Sign in to view your personal bookmarks.";
-          notice.append(link("Sign in with GitHub →", bookmarkSignIn, "button button-primary")); return;
-        }
-        if (ownSaved && bookmarkState === "error") throw new Error("Bookmarks unavailable");
-        const appView = !ownSaved && !kind;
-        let endpoint = appView ? "/api/directory/apps?" : "/api/directory?";
-        if (ownSaved) { p.delete("limit"); p.set("view", "entries"); endpoint = "/app/api/bookmarks?"; }
-        const data = await api(endpoint+p); if(own!==generation)return;
+        let data,items=[],next="";
+        do {
+          data=await api(endpoint+p);if(own!==generation)return;
+          items.push(...data.items);next=personalized?data.next_cursor||"":appView?String(data.next_offset||""):data.next_cursor||"";
+          if(!preserve||items.length>=wanted||!next)break;
+          p.set(personalized||appView?"offset":"cursor",next);p.set("limit",String(Math.min(pageLimit,wanted-items.length)));
+        } while(true);
         if(appView) {
-          const categories=new Map();
-          for(const option of tag.children) if(option.value)categories.set(option.value,option.textContent);
-          for(const category of data.categories || data.items.flatMap(item=>item.categories||[]))categories.set(category.slug,category.name);
-          const selected=tag.value;
-          tag.replaceChildren(el("option","All categories"));tag.children[0].value="";
-          for(const [slug,name] of [...categories].sort((a,b)=>a[1].localeCompare(b[1]))) {const option=el("option",name);option.value=slug;tag.append(option);}
-          tag.value=selected;
+          const categories=new Map();for(const option of tag.children)if(option.value)categories.set(option.value,option.textContent);
+          for(const category of data.categories||items.flatMap(item=>item.categories||[]))categories.set(category.slug,category.name);
+          const selected=tag.value;tag.replaceChildren(el("option","All categories"));tag.children[0].value="";
+          for(const [slug,name]of [...categories].sort((a,b)=>a[1].localeCompare(b[1]))){const option=el("option",name);option.value=slug;tag.append(option);}tag.value=selected;
         }
-        results.append(...data.items.map(appView ? appCard : card)); total=data.total; cursor=appView ? String(data.next_offset || "") : data.next_cursor||""; more.hidden=!cursor;
-        status.textContent=data.total.toLocaleString()+(ownSaved ? " matching bookmarks · only visible to you" : (appView ? " matching apps" : " matching integrations"));
-        if(!data.items.length&&!append)notice.append(el("p",(ownSaved ? "No matching bookmarks. Bookmark entries from the library to find them here." : "No matching integrations. Try another term or clear your filters."),"notice"));
-      } catch(e) {if(own===generation){status.textContent="Search unavailable";if(ownSaved){const box=el("div",undefined,"notice error");box.append(el("p","Couldn’t load your bookmarks."),button("Try again",async()=>{await loadBookmarks();load(append);}));notice.replaceChildren(box);}else failure(notice,e,()=>load(append));}}
-      finally {if(own===generation){results.setAttribute("aria-busy","false");more.disabled=false;}}
+        const existing=new Map([...results.children].map(node=>[node.dataset.appSlug||node.dataset.entryId,node]));
+        const nodes=items.map(item=>preserve&&existing.get(item.slug||item.id)|| (appView?appCard(item):card(item)));
+        if(append)results.append(...nodes);else results.replaceChildren(...nodes);
+        if(hadFocus){const next=results.contains(focused)?focused:results.querySelector(".bookmark-control button:not([hidden])");if(next)next.focus({preventScroll:true});else{status.tabIndex=-1;status.focus({preventScroll:true});}}
+        if(preserve)globalThis.scrollTo?.(scrollX,scrollY);
+        total=data.total;cursor=next;more.hidden=!cursor;
+        status.textContent=total.toLocaleString()+(appView?" matching apps":" matching integrations");
+        if(!items.length&&!append)notice.append(el("p","No matching integrations. Try another term or clear your filters.","notice"));
+      }catch(e){if(own===generation){
+        if(personalized&&[401,403].includes(e.status)){bookmarkIDs=new Set();bookmarkState=e.status===401?"guest":"error";refreshBookmarkControls();load(false,true);return;}
+        status.textContent="Search unavailable";failure(notice,e,()=>load(append,preserve));}}
+      finally{if(own===generation){results.setAttribute("aria-busy","false");more.disabled=false;}}
     }
     form.addEventListener("submit",e=>{e.preventDefault();load();}); tag.addEventListener("change",()=>load());
     document.querySelectorAll("[data-directory-kind]").forEach(b=>b.addEventListener("click",()=>{kind=b.dataset.directoryKind;tag.value="";filters();load();}));
-    savedFilter.addEventListener("click", () => { savedOnly = !savedOnly; tag.value=""; filters(); savedFilter.setAttribute("aria-pressed", String(savedOnly)); savedFilter.classList.toggle("active", savedOnly); load(); });
-    document.addEventListener("bookmarks-changed", event => {
-      if (!savedOnly || !event.detail.removed) return;
-      const cards = [...results.children], index = cards.findIndex(card => card.dataset.entryId === event.detail.id);
-      if (index < 0) return;
-      const removed = cards[index], focused = removed.contains(document.activeElement);
-      const neighbour = cards[index + 1] || cards[index - 1];
-      removed.remove(); total = Math.max(0, total - 1);
-      if (cursor) cursor = String(Math.max(0, Number(cursor) - 1));
-      status.textContent = total.toLocaleString() + " matching bookmarks · only visible to you · Bookmark removed.";
-      if (!results.children.length && !cursor) notice.replaceChildren(el("p", "No matching bookmarks. Bookmark entries from the library to find them here.", "notice"));
-      if (focused) {
-        const next = neighbour?.querySelector(".bookmark-control button:not([hidden])");
-        if (next) next.focus(); else { status.tabIndex = -1; status.focus(); }
-      }
-    });
+    document.addEventListener("bookmarks-changed",()=>load(false,true));
+    bookmarksReady.then(()=>{if(bookmarkState==="ready"&&bookmarkIDs.size)load(false,true);});
     more.addEventListener("click",()=>load(true)); filters();load();
   }
   function field(target,label,value) { if(value) {const d=el("div"); d.append(el("dt",label),el("dd",String(value)));target.append(d);} }

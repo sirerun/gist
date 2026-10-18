@@ -8,8 +8,8 @@ const records = [
   {id:'community', service_id:'linkedin-ads-library', title:'LinkedIn Ads Library', kind:'mcp', official:false, server_listing_url:'https://registry.example.com/server'},
 ];
 const flush = () => new Promise(resolve => setImmediate(resolve));
-function fixture({page='home', search='', pathname='/library', handle, icons={}}={}) {
-  const calls=[], listeners={}; let document;
+function fixture({page='home', search='', pathname='/library', handle, icons={}, colors={}}={}) {
+  const calls=[], listeners={},historyURLs=[]; let document;
   class Element {
     constructor(tag) { this.tag=tag; this.children=[];this.attrs={};this.style={};this.dataset={};this.handlers={};this.hidden=false;this.className='';this.textContent='';this.classList={toggle(){}}; }
     append(...children) {for(const child of children){if(child.parent)child.remove();child.parent=this;this.children.push(child);}}
@@ -27,8 +27,8 @@ function fixture({page='home', search='', pathname='/library', handle, icons={}}
   for(const id of ['home-directory','directory-search','directory-query','directory-tag','directory-results','directory-status','directory-notice','directory-more','bookmark-filter','directory-detail']) {ids[id]=new Element('div');ids[id].value='';root.append(ids[id]);}
   document={body:root,activeElement:root,createElement:tag=>new Element(tag),getElementById:id=>ids[id],querySelectorAll:selector=>selector==='.bookmark-control'?root.walk().filter(e=>e.className==='bookmark-control'):[],addEventListener:(name,fn)=>{(listeners[name]??=[]).push(fn);},dispatchEvent:e=>{for(const fn of listeners[e.type]||[])fn(e);}};
   const fetch=async(url,options={})=>{calls.push({url,options});let response=await handle?.(url,options);if(!response){if(url==='/api/directory?limit=6'||url.startsWith('/api/directory?'))response={data:{items:records,total:2}};else if(url==='/app/api/session')response={data:{authenticated:true,csrf_token:'token'}};else response={data:{ids:[]}};}return {ok:!response.status||response.status<400,status:response.status||200,json:async()=>response.data};};
-  vm.runInNewContext(source,{GIST_APP_ICONS:icons,document,fetch,URL,URLSearchParams,TextEncoder,WeakMap,Set,Event:class{constructor(type){this.type=type}},CustomEvent:class{constructor(type,options){this.type=type;Object.assign(this,options)}},location:{search,pathname},history:{replaceState(){}},console});
-  return {root,ids,calls,document,controls:()=>root.walk().filter(e=>e.className==='bookmark-control'),click:async el=>{if(el.disabled)throw Error('disabled');el.focus();await el.handlers.click({preventDefault(){}});await flush();}};
+  vm.runInNewContext(source,{GIST_APP_ICONS:icons,GIST_APP_ICON_COLORS:colors,document,fetch,URL,URLSearchParams,TextEncoder,WeakMap,Set,Event:class{constructor(type){this.type=type}},CustomEvent:class{constructor(type,options){this.type=type;Object.assign(this,options)}},location:{search,pathname},history:{replaceState(_state,_title,url){historyURLs.push(url)}},console});
+  return {root,ids,calls,document,historyURLs,controls:()=>root.walk().filter(e=>e.className==='bookmark-control'),click:async el=>{if(el.disabled)throw Error('disabled');el.focus();await el.handlers.click({preventDefault(){}});await flush();}};
 }
 test('public cards render while authentication is unresolved; guest links use an allowed return URL',async()=>{
  let release;const f=fixture({handle:url=>url==='/app/api/session'?new Promise(resolve=>release=resolve):undefined});await flush();assert.equal(f.controls().length,2);assert.equal(f.controls()[0].children[0].disabled,true);
@@ -49,14 +49,13 @@ test('retry refreshes every control, and saving has a stable accessible toggle n
 test('an expired write session updates all controls to sign-in links',async()=>{
  const f=fixture({handle:(url,options)=>options.method==='PUT'?{status:401}:undefined});await flush();await f.click(f.controls()[0].children[0]);assert.ok(f.controls().every(c=>c.children[0].hidden&&!c.children[1].hidden));
 });
-test('saved removal preserves other cards, keyboard focus and loaded-page offset',async()=>{
- const f=fixture({page:'directory',search:'?saved=1',handle:(url,options)=>{
+test('bookmark changes preserve existing cards and keyboard focus while reranking',async()=>{
+ const f=fixture({page:'directory',pathname:'/library/mcp',handle:(url,options)=>{
   if(url==='/app/api/bookmarks')return {data:{ids:records.map(r=>r.id)}};
-  if(url.startsWith('/app/api/bookmarks?view='))return {data:{items:records,total:3,next_cursor:'2'}};
+  if(url.startsWith('/app/api/bookmarks?'))return {data:{items:records,total:2,next_cursor:''}};
   if(options.method==='DELETE')return {status:204};
- }});await flush();const cards=f.ids['directory-results'].children;assert.equal(cards.length,2);const second=cards[1];const views=()=>f.calls.filter(c=>c.url.includes('view=entries'));
- const before=views().length;await f.click(f.controls()[0].children[0]);assert.equal(f.ids['directory-results'].children[0],second);assert.equal(f.document.activeElement,second.querySelector('button'));assert.equal(views().length,before);
- await f.click(f.ids['directory-more']);assert.ok(f.calls.some(c=>c.url.includes('offset=1')));
+ }});await flush();await flush();const cards=f.ids['directory-results'].children;assert.equal(cards.length,2);const first=cards[0],second=cards[1];
+ await f.click(f.controls()[0].children[0]);await flush();assert.equal(f.ids['directory-results'].children[0],first);assert.equal(f.ids['directory-results'].children[1],second);assert.equal(f.document.activeElement,first.querySelector('button'));
 });
 test('all apps browse uses local identity icons without app bookmarks or connector claims',async()=>{
  const f=fixture({page:'directory',handle:url=>url.startsWith('/api/directory/apps?')?{data:{items:[{slug:'gmail',name:'Gmail',description:'Read and organize email.',categories:[{slug:'mail',name:'Mail'}],icon_url:'/assets/apps/gmail.svg',connector_ids:[]}],total:3380}}:undefined});
@@ -129,4 +128,21 @@ test('clean connector path wins over conflicting legacy query parameters',async(
 
 test('app logo keeps a padded circular brand frame and rejects invalid colors',async()=>{
  const f=fixture({page:'directory',handle:url=>url.startsWith('/api/directory/apps?')?{data:{items:[{slug:'gmail',name:'Gmail',background_color:'#f14336'},{slug:'unsafe',name:'Unsafe',background_color:'url(https://bad.example)'}],total:2}}:undefined});await flush();const frames=f.ids['directory-results'].walk().filter(n=>n.className==='directory-logo-frame');assert.equal(frames[0].style.backgroundColor,'#f14336');assert.equal(frames[0].children[0].tag,'img');assert.equal(frames[1].style.backgroundColor,undefined);
+});
+
+test('typed library paths select the API kind and keep clean display URLs',async()=>{
+ for(const kind of ['mcp','openapi']) {
+  const f=fixture({page:'directory',pathname:'/library/'+kind,search:'?q=github'});await flush();assert.ok(f.calls.some(c=>c.url.includes('/api/directory?')&&c.url.includes('kind='+kind)));assert.equal(f.historyURLs.at(-1),'/library/'+kind+'?q=github');
+ }
+});
+test('connector cards share the compact app frame and brand padding',async()=>{
+ const f=fixture({icons:{github:'/assets/apps/github.png'},colors:{'/assets/apps/github.png':'#112233'}});await flush();const card=f.ids['home-directory'].children[0];assert.ok(card.className.includes('app-card'));const frame=card.walk().find(n=>n.className==='directory-logo-frame');assert.equal(frame.style.backgroundColor,'#112233');assert.ok(!card.walk().some(n=>n.className==='directory-badges'));
+});
+
+test('personalized catalog pagination appends saved-first results without duplicates',async()=>{
+ const list=Array.from({length:30},(_,i)=>({...records[0],id:'tool-'+i,title:'Tool '+i}));const ranked=[list[29],...list.slice(0,29)];
+ const f=fixture({page:'directory',pathname:'/library/mcp',handle:url=>{
+  if(url==='/app/api/bookmarks')return {data:{ids:['tool-29']}};
+  if(url.startsWith('/app/api/bookmarks?')){const q=new URL(url,'https://gist.example').searchParams,o=Number(q.get('offset')||0),end=Math.min(30,o+Number(q.get('limit')||24));return {data:{items:ranked.slice(o,end),total:30,next_cursor:end<30?String(end):''}};}
+ }});await flush();await flush();assert.equal(f.ids['directory-results'].children[0].dataset.entryId,'tool-29');assert.equal(f.ids['directory-results'].children.length,24);await f.click(f.ids['directory-more']);const ids=f.ids['directory-results'].children.map(n=>n.dataset.entryId);assert.equal(ids.length,30);assert.equal(new Set(ids).size,30);assert.ok(f.calls.some(c=>c.url.includes('offset=24')));
 });

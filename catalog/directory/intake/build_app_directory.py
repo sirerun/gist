@@ -38,7 +38,8 @@ def write_manifest(records, icons_dir):
             if aliases[slug] == service and slug in icons:
                 manifest[service] = icons[slug]
                 break
-    (icons_dir.parent / "app-icons.js").write_text("globalThis.GIST_APP_ICONS=Object.freeze(" + json.dumps(manifest, sort_keys=True, separators=(",", ":")) + ");\n")
+    colors = {"/assets/apps/" + r["icon_path"]: r["background_color"] for r in records if "/assets/apps/" + r["icon_path"] in manifest.values()}
+    (icons_dir.parent / "app-icons.js").write_text("globalThis.GIST_APP_ICONS=Object.freeze(" + json.dumps(manifest, sort_keys=True, separators=(",", ":")) + ");\n" + "globalThis.GIST_APP_ICON_COLORS=Object.freeze(" + json.dumps(colors, sort_keys=True, separators=(",", ":")) + ");\n")
 
 
 def fetch_json(url):

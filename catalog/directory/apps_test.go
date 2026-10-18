@@ -143,3 +143,38 @@ func TestReviewedAppConnectorAliases(t *testing.T) {
 		t.Fatalf("canonical Tavily %+v", app)
 	}
 }
+
+func TestAppPriorityIsAppliedBeforePagingWithoutChangingDefaultOrder(t *testing.T) {
+	idx, err := DefaultPublic()
+	if err != nil {
+		t.Fatal(err)
+	}
+	apps, err := DefaultApps(idx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	before, _ := apps.Search(AppQuery{Limit: 2})
+	ranked, err := apps.Search(AppQuery{Limit: 1, PriorityConnectorIDs: []string{"mcp:google-gmail"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ranked.Items) != 1 || ranked.Items[0].Slug != "google-email" {
+		t.Fatalf("not pinned: %+v", ranked.Items)
+	}
+	next, _ := apps.Search(AppQuery{Offset: 1, Limit: 1, PriorityConnectorIDs: []string{"mcp:google-gmail"}})
+	if next.Items[0].Slug == "google-email" {
+		t.Fatal("duplicate pinned item")
+	}
+	filtered, _ := apps.Search(AppQuery{Category: "crm-sales", Limit: 100, PriorityConnectorIDs: []string{"mcp:google-gmail"}})
+	for _, a := range filtered.Items {
+		if a.Slug == "google-email" {
+			t.Fatal("priority bypassed filter")
+		}
+	}
+	after, _ := apps.Search(AppQuery{Limit: 2})
+	for i := range before.Items {
+		if before.Items[i].Slug != after.Items[i].Slug {
+			t.Fatal("priority mutated shared index")
+		}
+	}
+}

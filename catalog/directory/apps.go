@@ -31,7 +31,9 @@ type AppCategory struct {
 }
 type AppQuery struct {
 	Text, Category string
-	Offset, Limit  int
+	// PriorityConnectorIDs affects ordering only; callers retain ownership of saved state.
+	PriorityConnectorIDs []string
+	Offset, Limit        int
 }
 type AppResult struct {
 	Categories []AppCategory `json:"categories"`
@@ -137,6 +139,9 @@ func (i *AppIndex) Search(q AppQuery) (AppResult, error) {
 	if q.Limit == 0 {
 		q.Limit = 24
 	}
+	if len(q.PriorityConnectorIDs) > MaxEntries {
+		return AppResult{}, fmt.Errorf("too many priority IDs")
+	}
 	if q.Limit < 1 || q.Limit > 100 || q.Offset < 0 || q.Offset > MaxEntries || !bounded(q.Text, 512) || !bounded(q.Category, 200) {
 		return AppResult{}, fmt.Errorf("invalid app query")
 	}
@@ -151,8 +156,34 @@ func (i *AppIndex) Search(q AppQuery) (AppResult, error) {
 		result.Categories = append(result.Categories, AppCategory{Slug: slug, Name: name})
 	}
 	sort.Slice(result.Categories, func(a, b int) bool { return result.Categories[a].Name < result.Categories[b].Name })
+	ordered := i.items
+	if len(q.PriorityConnectorIDs) > 0 {
+		saved := map[string]bool{}
+		for _, id := range q.PriorityConnectorIDs {
+			saved[id] = true
+		}
+		pinned := func(a App) bool {
+			for _, id := range a.ConnectorIDs {
+				if saved[id] {
+					return true
+				}
+			}
+			return false
+		}
+		ordered = make([]App, 0, len(i.items))
+		for _, a := range i.items {
+			if pinned(a) {
+				ordered = append(ordered, a)
+			}
+		}
+		for _, a := range i.items {
+			if !pinned(a) {
+				ordered = append(ordered, a)
+			}
+		}
+	}
 	text := strings.ToLower(q.Text)
-	for _, a := range i.items {
+	for _, a := range ordered {
 		if text != "" && !strings.Contains(strings.ToLower(a.Name+" "+a.Slug+" "+a.Description), text) {
 			continue
 		}
