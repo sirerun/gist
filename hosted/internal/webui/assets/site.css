@@ -440,3 +440,9 @@ h1{font-size:65px}
 @media(max-width:450px){.related-apps{grid-template-columns:1fr}.app-profile-title{align-items:flex-start}.app-profile-title h1{font-size:29px}.app-profile-title .app-profile-icon{width:48px;height:48px}.app-profile-description{font-size:17px}.app-zati-panel{padding:24px}}
 
 .app-category-list .pill{margin:0}
+
+/* Keep the mark inside its brand circle, with room between icon and name. */
+#directory-results .app-card .directory-card-heading{gap:14px}
+#directory-results .app-card .directory-logo-frame{display:grid;place-items:center;flex:none;width:44px;height:44px;overflow:hidden;border:0;border-radius:50%}
+#directory-results .app-card .directory-logo-frame .directory-logo{display:block;width:70%;height:70%;padding:0;border:0;border-radius:0;object-fit:contain}
+@media(max-width:450px){#directory-results .app-card .directory-logo-frame{width:42px;height:42px}}
