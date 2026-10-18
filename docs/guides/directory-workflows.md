@@ -2,7 +2,10 @@
 
 Start by choosing a directory entry for a useful task. A listing tells you where
 to investigate; it does not connect an account, install a server or make a skill
-runnable. The five packages below are **screening candidates**, not Featured
+runnable. These historical packages remain available independently of the public connector
+set. The approved vendor-only catalog reset removes the former community Google
+OpenAPI alternatives and Brave package listing; Calendar and Drive now use
+Google preview MCP endpoints. None of these changes qualifies a binding. The five packages below are **screening candidates**, not Featured
 workflows. They have not been run against providers or evaluated with a model.
 
 | Candidate package at `0.1.0` | Intended result | Maximum work per run |

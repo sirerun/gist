@@ -21,7 +21,7 @@ func TestBookmarkTextMatchesDirectorySearch(t *testing.T) {
 			}
 		}
 	}
-	record, ok := index.Get("openapi:google-calendar")
+	record, ok := index.Get("mcp:google-calendar")
 	if !ok {
 		t.Fatal("calendar fixture missing")
 	}

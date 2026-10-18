@@ -1,0 +1,124 @@
+{
+  "format": "gist.directory.admission/v1",
+  "policy": "n8n-or-make/vendor-official",
+  "retrieved_at": "2026-10-18T02:54:36Z",
+  "apps": [
+    {
+      "service_id": "linear",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/linear/"
+        }
+      ]
+    },
+    {
+      "service_id": "cloudflare",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/cloudflare/"
+        }
+      ]
+    },
+    {
+      "service_id": "confluence",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/confluence/"
+        }
+      ]
+    },
+    {
+      "service_id": "exa",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/exa/"
+        }
+      ]
+    },
+    {
+      "service_id": "google-calendar",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/google-calendar/"
+        }
+      ]
+    },
+    {
+      "service_id": "google-drive",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/google-drive/"
+        }
+      ]
+    },
+    {
+      "service_id": "google-gmail",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/gmail/"
+        }
+      ]
+    },
+    {
+      "service_id": "github",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/github/"
+        }
+      ]
+    },
+    {
+      "service_id": "jira",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/jira-software/"
+        }
+      ]
+    },
+    {
+      "service_id": "notion",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/notion/"
+        }
+      ]
+    },
+    {
+      "service_id": "sentry",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/sentryio/"
+        }
+      ]
+    },
+    {
+      "service_id": "slack",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/slack/"
+        }
+      ]
+    },
+    {
+      "service_id": "stripe",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/stripe/"
+        }
+      ]
+    }
+  ]
+}

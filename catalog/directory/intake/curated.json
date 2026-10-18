@@ -1,5 +1,179 @@
 [
   {
+    "id": "mcp:app.linear/linear",
+    "kind": "mcp",
+    "service_id": "linear",
+    "title": "Linear",
+    "description": "Official Linear MCP connection. Use OAuth or a permitted API key. Restrict scopes or select the documented read-only route when needed. Not qualified in Zati.",
+    "tags": [
+      "development"
+    ],
+    "homepage": "https://linear.app/docs/mcp",
+    "official": true,
+    "official_evidence_url": "https://linear.app/docs/mcp",
+    "remotes": [
+      {
+        "url": "https://mcp.linear.app/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "auth": {
+      "type": "oauth2-or-token",
+      "setup_url": "https://linear.app/docs/mcp"
+    },
+    "recommended": false,
+    "featured": false
+  },
+  {
+    "id": "mcp:cloudflare",
+    "kind": "mcp",
+    "service_id": "cloudflare",
+    "title": "Cloudflare",
+    "description": "Official Cloudflare MCP connection. Uses search/execute tools. Requires OAuth or a scoped Cloudflare API token; permissions and execution remain client-owned. Not qualified in Zati.",
+    "tags": [
+      "infrastructure"
+    ],
+    "homepage": "https://developers.cloudflare.com/agents/model-context-protocol/cloudflare/servers-for-cloudflare/",
+    "official": true,
+    "official_evidence_url": "https://developers.cloudflare.com/agents/model-context-protocol/cloudflare/servers-for-cloudflare/",
+    "remotes": [
+      {
+        "url": "https://mcp.cloudflare.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "auth": {
+      "type": "oauth2-or-token",
+      "setup_url": "https://developers.cloudflare.com/agents/model-context-protocol/cloudflare/servers-for-cloudflare/"
+    },
+    "recommended": false,
+    "featured": false
+  },
+  {
+    "id": "mcp:confluence",
+    "kind": "mcp",
+    "service_id": "confluence",
+    "title": "Confluence",
+    "description": "Official Confluence MCP connection. Requires Atlassian product access and administrator policy approval. Shares the Atlassian server with Jira; some tools consume Rovo credits. Not qualified in Zati.",
+    "tags": [
+      "knowledge"
+    ],
+    "homepage": "https://support.atlassian.com/atlassian-ai-gateway/docs/get-started-with-the-atlassian-remote-mcp-server/",
+    "official": true,
+    "official_evidence_url": "https://support.atlassian.com/atlassian-ai-gateway/docs/get-started-with-the-atlassian-remote-mcp-server/",
+    "remotes": [
+      {
+        "url": "https://mcp.atlassian.com/v2/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "auth": {
+      "type": "oauth2",
+      "setup_url": "https://support.atlassian.com/atlassian-ai-gateway/docs/get-started-with-the-atlassian-remote-mcp-server/"
+    },
+    "recommended": false,
+    "featured": false
+  },
+  {
+    "id": "mcp:exa",
+    "kind": "mcp",
+    "service_id": "exa",
+    "title": "Exa",
+    "description": "Official Exa MCP connection. Hosted web search and content retrieval. Vendor documents a no-key route; service limits and client admission still apply. Not qualified in Zati.",
+    "tags": [
+      "web"
+    ],
+    "homepage": "https://exa.ai/mcp",
+    "official": true,
+    "official_evidence_url": "https://exa.ai/mcp",
+    "remotes": [
+      {
+        "url": "https://mcp.exa.ai/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "auth": {
+      "type": "none",
+      "setup_url": "https://exa.ai/mcp"
+    },
+    "recommended": false,
+    "featured": false
+  },
+  {
+    "id": "mcp:google-calendar",
+    "kind": "mcp",
+    "service_id": "google-calendar",
+    "title": "Google Calendar",
+    "description": "Google’s official Google Calendar MCP server in Developer Preview. Requires preview enrollment, enabled APIs and an agent-enabled OAuth client. Review permitted tools and scopes in your client; not qualified in Zati.",
+    "version": "preview-docs-2026-10-17",
+    "tags": [
+      "calendar",
+      "google",
+      "zati-essentials"
+    ],
+    "official": true,
+    "official_evidence_url": "https://developers.google.com/workspace/calendar/api/guides/configure-mcp-server",
+    "homepage": "https://developers.google.com/workspace/calendar/api/guides/configure-mcp-server",
+    "auth": {
+      "type": "oauth2",
+      "setup_url": "https://developers.google.com/workspace/calendar/api/guides/configure-mcp-server"
+    },
+    "skills": [
+      {
+        "id": "gist/essentials/calendar-briefing@0.1.0",
+        "title": "Read-only calendar briefing",
+        "url": "https://github.com/sirerun/gist/tree/94ef81edc7eaf191a9d3606b6f34c52d2098816e/catalog/skills/essentials/sources/calendar-briefing",
+        "status": "candidate",
+        "source_digest": "sha256:c45f1e70a74a3d6bfea8ed03bab2e52dde1e49decf7e1bd403350bac56755c8f"
+      }
+    ],
+    "recommended": true,
+    "featured": false,
+    "remotes": [
+      {
+        "url": "https://calendarmcp.googleapis.com/mcp/v1",
+        "transport": "streamable-http"
+      }
+    ]
+  },
+  {
+    "id": "mcp:google-drive",
+    "kind": "mcp",
+    "service_id": "google-drive",
+    "title": "Google Drive",
+    "description": "Google’s official Google Drive MCP server in Developer Preview. Requires preview enrollment, enabled APIs and an agent-enabled OAuth client. Review permitted tools and scopes in your client; not qualified in Zati.",
+    "version": "preview-docs-2026-10-17",
+    "tags": [
+      "files",
+      "google",
+      "zati-essentials"
+    ],
+    "official": true,
+    "official_evidence_url": "https://developers.google.com/workspace/drive/api/guides/configure-mcp-server",
+    "homepage": "https://developers.google.com/workspace/drive/api/guides/configure-mcp-server",
+    "auth": {
+      "type": "oauth2",
+      "setup_url": "https://developers.google.com/workspace/drive/api/guides/configure-mcp-server"
+    },
+    "skills": [
+      {
+        "id": "gist/essentials/file-discovery@0.1.0",
+        "title": "Read-only file discovery",
+        "url": "https://github.com/sirerun/gist/tree/94ef81edc7eaf191a9d3606b6f34c52d2098816e/catalog/skills/essentials/sources/file-discovery",
+        "status": "candidate",
+        "source_digest": "sha256:800ed09a5c6827e806debbafe63c4b90d5feacfa6d10bc23083a2022af5c1b14"
+      }
+    ],
+    "recommended": true,
+    "featured": false,
+    "remotes": [
+      {
+        "url": "https://drivemcp.googleapis.com/mcp/v1",
+        "transport": "streamable-http"
+      }
+    ]
+  },
+  {
     "id": "mcp:google-gmail",
     "kind": "mcp",
     "service_id": "google-gmail",
@@ -34,122 +208,6 @@
         "url": "https://github.com/sirerun/gist/tree/94ef81edc7eaf191a9d3606b6f34c52d2098816e/catalog/skills/essentials/sources/inbox-briefing",
         "status": "candidate",
         "source_digest": "sha256:7d3a926131fdb8b517fc67beec7e8ff253139778b1ca29ed47095a8f2fff8875"
-      }
-    ],
-    "recommended": true,
-    "featured": false
-  },
-  {
-    "id": "openapi:google-gmail",
-    "kind": "openapi",
-    "service_id": "google-gmail",
-    "title": "Gmail",
-    "description": "Alternative Gmail setup through Mint using a community OpenAPI description, including for clients outside the Google MCP Developer Preview. Caller-owned OAuth, schema inspection and explicit read-only admission required. Not yet qualified in Zati.",
-    "version": "v1",
-    "tags": [
-      "mail",
-      "google"
-    ],
-    "official": false,
-    "official_evidence_url": "https://developers.google.com/workspace/gmail/api/guides/overview",
-    "homepage": "https://developers.google.com/gmail",
-    "repository": "https://github.com/APIs-guru/openapi-directory",
-    "openapi": {
-      "spec_url": "https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/googleapis.com/gmail/v1/openapi.yaml",
-      "mint_guide_url": "https://github.com/sirerun/mint"
-    },
-    "auth": {
-      "type": "oauth2",
-      "credential_names": [
-        "GOOGLE_OAUTH_TOKEN"
-      ],
-      "setup_url": "https://developers.google.com/identity/protocols/oauth2"
-    },
-    "skills": [
-      {
-        "id": "gist/essentials/inbox-briefing@0.1.0",
-        "title": "Read-only inbox briefing",
-        "url": "https://github.com/sirerun/gist/tree/94ef81edc7eaf191a9d3606b6f34c52d2098816e/catalog/skills/essentials/sources/inbox-briefing",
-        "status": "candidate",
-        "source_digest": "sha256:7d3a926131fdb8b517fc67beec7e8ff253139778b1ca29ed47095a8f2fff8875"
-      }
-    ],
-    "recommended": false,
-    "featured": false
-  },
-  {
-    "id": "openapi:google-calendar",
-    "kind": "openapi",
-    "service_id": "google-calendar",
-    "title": "Google Calendar",
-    "description": "Recommended setup candidate for daily calendar briefing. Google API exposed through Mint using a community OpenAPI description; client-owned OAuth and read-only scope review required. Not yet qualified in Zati.",
-    "version": "v3",
-    "tags": [
-      "calendar",
-      "google",
-      "zati-essentials"
-    ],
-    "official": false,
-    "official_evidence_url": "https://developers.google.com/calendar/api/guides/overview",
-    "homepage": "https://developers.google.com/calendar",
-    "repository": "https://github.com/APIs-guru/openapi-directory",
-    "openapi": {
-      "spec_url": "https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/googleapis.com/calendar/v3/openapi.yaml",
-      "mint_guide_url": "https://github.com/sirerun/mint"
-    },
-    "auth": {
-      "type": "oauth2",
-      "credential_names": [
-        "GOOGLE_OAUTH_TOKEN"
-      ],
-      "setup_url": "https://developers.google.com/identity/protocols/oauth2"
-    },
-    "skills": [
-      {
-        "id": "gist/essentials/calendar-briefing@0.1.0",
-        "title": "Read-only calendar briefing",
-        "url": "https://github.com/sirerun/gist/tree/94ef81edc7eaf191a9d3606b6f34c52d2098816e/catalog/skills/essentials/sources/calendar-briefing",
-        "status": "candidate",
-        "source_digest": "sha256:c45f1e70a74a3d6bfea8ed03bab2e52dde1e49decf7e1bd403350bac56755c8f"
-      }
-    ],
-    "recommended": true,
-    "featured": false
-  },
-  {
-    "id": "openapi:google-drive",
-    "kind": "openapi",
-    "service_id": "google-drive",
-    "title": "Google Drive",
-    "description": "Recommended setup candidate for find and summarize a file. Google API exposed through Mint using a community OpenAPI description; client-owned OAuth and read-only scope review required. Not yet qualified in Zati.",
-    "version": "v3",
-    "tags": [
-      "files",
-      "google",
-      "zati-essentials"
-    ],
-    "official": false,
-    "official_evidence_url": "https://developers.google.com/drive/api/guides/overview",
-    "homepage": "https://developers.google.com/drive",
-    "repository": "https://github.com/APIs-guru/openapi-directory",
-    "openapi": {
-      "spec_url": "https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/googleapis.com/drive/v3/openapi.yaml",
-      "mint_guide_url": "https://github.com/sirerun/mint"
-    },
-    "auth": {
-      "type": "oauth2",
-      "credential_names": [
-        "GOOGLE_OAUTH_TOKEN"
-      ],
-      "setup_url": "https://developers.google.com/identity/protocols/oauth2"
-    },
-    "skills": [
-      {
-        "id": "gist/essentials/file-discovery@0.1.0",
-        "title": "Read-only file discovery",
-        "url": "https://github.com/sirerun/gist/tree/94ef81edc7eaf191a9d3606b6f34c52d2098816e/catalog/skills/essentials/sources/file-discovery",
-        "status": "candidate",
-        "source_digest": "sha256:800ed09a5c6827e806debbafe63c4b90d5feacfa6d10bc23083a2022af5c1b14"
       }
     ],
     "recommended": true,
@@ -192,43 +250,128 @@
     "featured": false
   },
   {
-    "id": "mcp:com.brave/brave-search",
+    "id": "mcp:jira",
     "kind": "mcp",
-    "service_id": "brave-search",
-    "title": "Brave Search",
-    "description": "Official Brave Search MCP package. Recommended candidate for web research with linked sources. Requires a Brave API key; account terms and charges belong to the client. Not yet qualified in Zati.",
+    "service_id": "jira",
+    "title": "Jira",
+    "description": "Official Jira MCP connection. Requires Atlassian product access and administrator policy approval. Uses Rovo discovery/execute tools; some tools consume credits. Not qualified in Zati.",
     "tags": [
-      "web",
-      "research",
-      "zati-essentials"
+      "development"
     ],
+    "homepage": "https://support.atlassian.com/atlassian-ai-gateway/docs/get-started-with-the-atlassian-remote-mcp-server/",
     "official": true,
-    "official_evidence_url": "https://github.com/brave/brave-search-mcp-server",
-    "repository": "https://github.com/brave/brave-search-mcp-server",
-    "packages": [
+    "official_evidence_url": "https://support.atlassian.com/atlassian-ai-gateway/docs/get-started-with-the-atlassian-remote-mcp-server/",
+    "remotes": [
       {
-        "registry": "npm",
-        "identifier": "@brave/brave-search-mcp-server",
-        "runtime": "node"
+        "url": "https://mcp.atlassian.com/v2/mcp",
+        "transport": "streamable-http"
       }
     ],
     "auth": {
-      "type": "api_key",
-      "credential_names": [
-        "BRAVE_API_KEY"
-      ],
-      "setup_url": "https://api-dashboard.search.brave.com/"
+      "type": "oauth2",
+      "setup_url": "https://support.atlassian.com/atlassian-ai-gateway/docs/get-started-with-the-atlassian-remote-mcp-server/"
     },
-    "skills": [
+    "recommended": false,
+    "featured": false
+  },
+  {
+    "id": "mcp:notion",
+    "kind": "mcp",
+    "service_id": "notion",
+    "title": "Notion",
+    "description": "Official Notion MCP connection. Workspace OAuth; bearer MCP tokens are available to workspace owners on eligible plans. Not qualified in Zati.",
+    "tags": [
+      "productivity"
+    ],
+    "homepage": "https://developers.notion.com/guides/mcp/get-started-with-mcp",
+    "official": true,
+    "official_evidence_url": "https://developers.notion.com/guides/mcp/get-started-with-mcp",
+    "remotes": [
       {
-        "id": "gist/essentials/web-research@0.1.0",
-        "title": "Read-only web research",
-        "url": "https://github.com/sirerun/gist/tree/94ef81edc7eaf191a9d3606b6f34c52d2098816e/catalog/skills/essentials/sources/web-research",
-        "status": "candidate",
-        "source_digest": "sha256:ee84cda90111416dd63b45ecff7a11db8fb047db18450da9fce85cacf69b2732"
+        "url": "https://mcp.notion.com/mcp",
+        "transport": "streamable-http"
       }
     ],
-    "recommended": true,
+    "auth": {
+      "type": "oauth2-or-token",
+      "setup_url": "https://developers.notion.com/guides/mcp/get-started-with-mcp"
+    },
+    "recommended": false,
+    "featured": false
+  },
+  {
+    "id": "mcp:sentry",
+    "kind": "mcp",
+    "service_id": "sentry",
+    "title": "Sentry",
+    "description": "Official Sentry MCP connection. Requires a Sentry account and organization/project authorization. Not qualified in Zati.",
+    "tags": [
+      "development"
+    ],
+    "homepage": "https://mcp.sentry.dev/",
+    "official": true,
+    "official_evidence_url": "https://mcp.sentry.dev/",
+    "remotes": [
+      {
+        "url": "https://mcp.sentry.dev/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "auth": {
+      "type": "oauth2",
+      "setup_url": "https://mcp.sentry.dev/"
+    },
+    "recommended": false,
+    "featured": false
+  },
+  {
+    "id": "mcp:slack",
+    "kind": "mcp",
+    "service_id": "slack",
+    "title": "Slack",
+    "description": "Official Slack MCP connection. Requires a registered Marketplace-published or internal Slack app, user OAuth and tool-specific scopes. Dynamic client registration is not supported. Not qualified in Zati.",
+    "tags": [
+      "communication"
+    ],
+    "homepage": "https://docs.slack.dev/ai/slack-mcp-server/",
+    "official": true,
+    "official_evidence_url": "https://docs.slack.dev/ai/slack-mcp-server/",
+    "remotes": [
+      {
+        "url": "https://mcp.slack.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "auth": {
+      "type": "oauth2",
+      "setup_url": "https://docs.slack.dev/ai/slack-mcp-server/"
+    },
+    "recommended": false,
+    "featured": false
+  },
+  {
+    "id": "mcp:stripe",
+    "kind": "mcp",
+    "service_id": "stripe",
+    "title": "Stripe",
+    "description": "Official Stripe MCP connection. Requires Stripe account authorization through OAuth or an agent API key; review sandbox versus live permissions and charges. Not qualified in Zati.",
+    "tags": [
+      "payments"
+    ],
+    "homepage": "https://docs.stripe.com/mcp",
+    "official": true,
+    "official_evidence_url": "https://docs.stripe.com/mcp",
+    "remotes": [
+      {
+        "url": "https://mcp.stripe.com",
+        "transport": "streamable-http"
+      }
+    ],
+    "auth": {
+      "type": "oauth2-or-token",
+      "setup_url": "https://docs.stripe.com/mcp"
+    },
+    "recommended": false,
     "featured": false
   }
 ]
