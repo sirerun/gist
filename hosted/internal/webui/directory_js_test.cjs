@@ -26,7 +26,7 @@ function fixture({page='directory', search='', pathname='/library/mcp', handle, 
   const root=new Element('body');root.dataset.page=page;const ids={};
   for(const id of ['home-directory','directory-search','directory-query','directory-tag','directory-results','directory-status','directory-notice','directory-more','bookmark-filter','directory-detail']) {ids[id]=new Element('div');ids[id].value='';root.append(ids[id]);}
   document={body:root,activeElement:root,createElement:tag=>new Element(tag),getElementById:id=>ids[id],querySelectorAll:selector=>selector==='.bookmark-control'?root.walk().filter(e=>e.className==='bookmark-control'):[],addEventListener:(name,fn)=>{(listeners[name]??=[]).push(fn);},dispatchEvent:e=>{for(const fn of listeners[e.type]||[])fn(e);}};
-  const fetch=async(url,options={})=>{calls.push({url,options});let response=await handle?.(url,options);if(!response){if(url.startsWith('/api/directory/apps?'))response={data:{items:[{slug:'github',name:'GitHub',icon_url:'/assets/apps/github.png',background_color:'#112233',categories:[{slug:'development',name:'Development'}]}],total:1}};else if(url==='/api/directory?limit=6'||url.startsWith('/api/directory?'))response={data:{items:records,total:2}};else if(url==='/app/api/session')response={data:{authenticated:true,csrf_token:'token'}};else response={data:{ids:[]}};}return {ok:!response.status||response.status<400,status:response.status||200,json:async()=>response.data};};
+  const fetch=async(url,options={})=>{calls.push({url,options});let response=await handle?.(url,options);if(!response){if(url.startsWith('/api/directory/apps?'))response={data:{items:[{slug:'github',name:'GitHub',icon_url:'/assets/apps/github.png',background_color:'#112233',categories:[{slug:'development',name:'Development'}]}],total:1}};else if(url==='/api/directory?limit=14'||url.startsWith('/api/directory?'))response={data:{items:records,total:2}};else if(url==='/app/api/session')response={data:{authenticated:true,csrf_token:'token'}};else response={data:{ids:[]}};}return {ok:!response.status||response.status<400,status:response.status||200,json:async()=>response.data};};
   vm.runInNewContext(source,{GIST_APP_ICONS:icons,GIST_APP_ICON_COLORS:colors,document,fetch,URL,URLSearchParams,TextEncoder,WeakMap,Set,Event:class{constructor(type){this.type=type}},CustomEvent:class{constructor(type,options){this.type=type;Object.assign(this,options)}},location:{search,pathname},history:{replaceState(_state,_title,url){historyURLs.push(url)}},console});
   return {root,ids,calls,document,historyURLs,controls:()=>root.walk().filter(e=>e.className==='bookmark-control'),click:async el=>{if(el.disabled)throw Error('disabled');el.focus();await el.handlers.click({preventDefault(){}});await flush();}};
 }
@@ -140,16 +140,22 @@ test('connector cards share the compact app frame and brand padding',async()=>{
 });
 
 test('personalized catalog pagination appends saved-first results without duplicates',async()=>{
- const list=Array.from({length:30},(_,i)=>({...records[0],id:'tool-'+i,title:'Tool '+i}));const ranked=[list[29],...list.slice(0,29)];
+ const list=Array.from({length:60},(_,i)=>({...records[0],id:'tool-'+i,title:'Tool '+i}));const ranked=[list[59],...list.slice(0,59)];
  const f=fixture({page:'directory',pathname:'/library/mcp',handle:url=>{
-  if(url==='/app/api/bookmarks')return {data:{ids:['tool-29']}};
-  if(url.startsWith('/app/api/bookmarks?')){const q=new URL(url,'https://gist.example').searchParams,o=Number(q.get('offset')||0),end=Math.min(30,o+Number(q.get('limit')||24));return {data:{items:ranked.slice(o,end),total:30,next_cursor:end<30?String(end):''}};}
- }});await flush();await flush();assert.equal(f.ids['directory-results'].children[0].dataset.entryId,'tool-29');assert.equal(f.ids['directory-results'].children.length,24);await f.click(f.ids['directory-more']);const ids=f.ids['directory-results'].children.map(n=>n.dataset.entryId);assert.equal(ids.length,30);assert.equal(new Set(ids).size,30);assert.ok(f.calls.some(c=>c.url.includes('offset=24')));
+  if(url==='/app/api/bookmarks')return {data:{ids:['tool-59']}};
+  if(url.startsWith('/app/api/bookmarks?')){const q=new URL(url,'https://gist.example').searchParams,o=Number(q.get('offset')||0),end=Math.min(60,o+Number(q.get('limit')||42));return {data:{items:ranked.slice(o,end),total:60,next_cursor:end<60?String(end):''}};}
+ }});await flush();await flush();assert.equal(f.ids['directory-results'].children[0].dataset.entryId,'tool-59');assert.equal(f.ids['directory-results'].children.length,42);await f.click(f.ids['directory-more']);const ids=f.ids['directory-results'].children.map(n=>n.dataset.entryId);assert.equal(ids.length,60);assert.equal(new Set(ids).size,60);assert.ok(f.calls.some(c=>c.url.includes('offset=42')));
 });
 
 test('home and library app tiles expose identical markup without connector bookmarks',async()=>{
  const home=fixture({page:'home'}),library=fixture({page:'directory',pathname:'/library'});
  await flush();await flush();
  const shape=n=>({tag:n.tag,cls:n.className,text:n.textContent,href:n.href,src:n.src,style:n.style,attrs:n.attrs,children:n.children.map(shape)});
- assert.deepEqual(shape(home.ids['home-directory'].children[0]),shape(library.ids['directory-results'].children[0]));assert.equal(home.controls().length,0);assert.ok(home.calls.some(c=>c.url==='/api/directory/apps?limit=6'));
+ assert.deepEqual(shape(home.ids['home-directory'].children[0]),shape(library.ids['directory-results'].children[0]));assert.equal(home.controls().length,0);assert.ok(home.calls.some(c=>c.url==='/api/directory/apps?limit=14'));
 });
+
+ test('home requests and caps 14 apps; library requests 42 per page',async()=>{
+ const apps=Array.from({length:60},(_,i)=>({slug:'app-'+i,name:'App '+i}));
+ const home=fixture({page:'home',handle:url=>url.startsWith('/api/directory/apps?')?{data:{items:apps,total:60}}:undefined});await flush();assert.equal(home.ids['home-directory'].children.length,14);assert.ok(home.calls.some(c=>c.url==='/api/directory/apps?limit=14'));
+ const library=fixture({page:'directory',pathname:'/library',handle:url=>{if(!url.startsWith('/api/directory/apps?'))return;const q=new URL(url,'https://gist.example').searchParams,start=Number(q.get('offset')||0),limit=Number(q.get('limit'));return {data:{items:apps.slice(start,start+limit),total:60,next_offset:start+limit<60?start+limit:0}};}});await flush();assert.equal(library.ids['directory-results'].children.length,42);await library.click(library.ids['directory-more']);assert.equal(library.ids['directory-results'].children.length,60);assert.equal(new Set(library.ids['directory-results'].children.map(n=>n.dataset.appSlug)).size,60);assert.ok(library.calls.some(c=>c.url.includes('limit=42')&&c.url.includes('offset=42')));
+ });
