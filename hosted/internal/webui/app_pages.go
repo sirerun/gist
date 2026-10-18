@@ -15,7 +15,7 @@ import (
 const publicOrigin = "https://gist.sire.run"
 
 type workflowIdea struct{ Title, Description, Prompt string }
-type appLink struct{ Name, URL, Icon string }
+type appLink struct{ Name, URL, Icon, BackgroundColor string }
 type appPage struct {
 	App         directory.App
 	Categories  []directory.AppCategory
@@ -98,7 +98,7 @@ func appView(app directory.App, apps *directory.AppIndex, connectors *directory.
 		result, _ := apps.Search(directory.AppQuery{Category: v.Categories[0].Slug, Limit: 8})
 		for _, related := range result.Items {
 			if related.Slug != app.Slug && len(v.Related) < 6 {
-				v.Related = append(v.Related, appLink{Name: related.Name, URL: appPath(related.Slug), Icon: related.IconURL})
+				v.Related = append(v.Related, appLink{Name: related.Name, URL: appPath(related.Slug), Icon: related.IconURL, BackgroundColor: related.BackgroundColor})
 			}
 		}
 	}
