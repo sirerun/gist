@@ -64,6 +64,21 @@ class IntakeTests(unittest.TestCase):
         self.assertEqual(sum(bool(r.get('featured')) for r in snapshot['entries']), 0)
         self.assertTrue(all(not r.get('verification') and not r.get('featured_selection') for r in snapshot['entries']))
         self.assertEqual(sum(bool(r.get('recommended')) for r in snapshot['entries']), 5)
+        records = {r['id']: r for r in snapshot['entries']}
+        self.assertEqual(records['mcp:google-gmail']['remotes'],
+                         [{'url': 'https://gmailmcp.googleapis.com/mcp/v1', 'transport': 'streamable-http'}])
+        self.assertFalse(records['openapi:google-gmail']['recommended'])
+        self.assertEqual(json.loads((HERE / 'receipt.json').read_text())['curated_recommended'], 5)
+        for record in snapshot['entries']:
+            if not record.get('recommended'):
+                continue
+            skill = record['skills'][0]
+            key = skill['id'].split('/')[-1].split('@')[0]
+            manifest = json.loads((HERE.parents[2] / 'skills' / 'essentials' / 'sources' / key / 'manifest.json').read_text())
+            self.assertEqual(skill['id'], manifest['id'] + '@' + manifest['version'])
+            self.assertEqual(skill['source_digest'], 'sha256:' + manifest['package_digest']['value'])
+            self.assertEqual(skill['status'], 'candidate')
+            self.assertIn('/94ef81edc7eaf191a9d3606b6f34c52d2098816e/', skill['url'])
 
 
 if __name__ == '__main__':

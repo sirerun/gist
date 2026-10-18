@@ -3,9 +3,9 @@
   "official_input": 4000,
   "official_active_latest_skipped": 33,
   "official_complete": false,
-  "accepted": 6494,
+  "accepted": 6495,
   "by_kind": {
-    "mcp": 3913,
+    "mcp": 3914,
     "openapi": 2581
   },
   "curated_recommended": 5,
@@ -300,5 +300,5 @@
       "reason": "no supported credential-free public endpoint or package descriptor"
     }
   ],
-  "revision": "sha256:8fcc6ef1ebc6f18e4362b33d4647f7769f597424eeda18d4540d0d9f5a11224b"
+  "revision": "sha256:933e80e8d3e39abf5fb919f03a8cb3d32548d4f78af9887cbf8eae2d1ee38a38"
 }

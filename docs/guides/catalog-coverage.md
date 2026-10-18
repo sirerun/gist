@@ -5,9 +5,9 @@ Search by intent or service, inspect the source and connection requirements, the
 export a descriptor for review in your client. An export is setup metadata;
 it does not install a server or connect a provider account.
 
-## Initial coverage
+## Current coverage
 
-The pinned intake contains **6,494 candidates**: 3,913 MCP entries and 2,581
+The pinned intake contains **6,495 candidates**: 3,914 MCP entries and 2,581
 OpenAPI entries. It combines the reviewed Sire Run API registry with a bounded
 40-page official MCP Registry sample. It is not the entire official registry
 or every server on the internet. Distinct implementations and versions remain
@@ -19,14 +19,18 @@ or official labels do not supply Gist workflow qualification.
 
 | Need | Initial recommendation | Useful read-only operations | Current setup requirement |
 | --- | --- | --- | --- |
-| Mail | Gmail | List unread messages; read selected messages | Community OpenAPI + Mint; caller-owned Google authorization; adapter and schema admission still needed |
+| Mail | Gmail official MCP (Developer Preview) | Search unread threads; retrieve selected threads | Preview enrollment, enabled Gmail APIs, agent-enabled OAuth client and caller-owned read-only authorization; explicit thread mapping and schema admission still needed |
 | Calendar | Google Calendar | List events in a bounded window | Community OpenAPI + Mint; caller-owned authorization; client transport compatibility still needed |
 | Files | Google Drive | Search approved folders; inspect selected file metadata | Community OpenAPI + Mint; scope and folder admission still needed |
 | Code review | GitHub official MCP | Read a public PR and selected changed files | Vendor endpoint and client-owned authorization; admit exact read tools |
 | Web research | Brave official MCP package | Search a topic; cite selected public sources | Client with local package support, or separately qualified compatible hosting; provider account may be required |
 
-These five are **recommended candidates**. None is featured at initial
-publication. Featured requires a useful real workflow tested in Zati, a reusable
+The original publication contained 6,494 candidates. This refresh adds Google’s
+[official Gmail MCP endpoint](https://developers.google.com/workspace/gmail/api/guides/configure-mcp-server)
+and retains the Mint/OpenAPI alternative. The five recommendations link to
+immutable screening skill sources and digests.
+
+These five are **recommended candidates**. None is featured. Featured requires a useful real workflow tested in Zati, a reusable
 skill, documented setup and unexpired evidence tied to the exact descriptor,
 tool/schema, skill and client versions. API reachability, fixture success and
 vendor maintenance do not meet that standard on their own.

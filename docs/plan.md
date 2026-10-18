@@ -2224,6 +2224,11 @@ Zati workflow evidence and guides. Discovery never grants execution authority.
 - [ ] T-DIR.19 Document and verify refresh, expiry, rollback and operations  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.18]  acc: [Canonical receipt identifies all landed sources and live revisions, repeatable intake and coverage gaps, expiry removal, recovery/rollback and actual unresolved client/provider limits with no persistent watcher claimed]
 - [x] T-DIR.20 Independently review complete essentials screening packages  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.12]  acc: [Non-author reviews exact source and plan, all five complete manifests and assets, draft requirements and trust limits; real archive/digest/screening race tests and vet pass without invented provider qualification]
 - [x] T-DIR.21 Merge and verify landed essentials screening sources  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.20]  acc: [Guarded rebase merge preserves reviewed head and current base, fresh landed tree matches validated candidate, evidence distinguishes screening sources from admitted runnable skills]
+- [ ] T-DIR.22 Correct official Gmail discovery and link real screening sources  Owner: coordinator  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.21]  acc: [Current primary Google docs establish official preview HTTPS endpoint and readonly search/thread scopes; deterministic sanitized metadata keeps OpenAPI fallback, exactly five recommendations and zero Featured claims, and links all five actual pinned complete screening sources; offline and Go validation pass]
+- [ ] T-DIR.23 Independently review official Gmail metadata repair  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.22]  acc: [Non-author approves exact source and plan, vendor evidence, candidate setup restrictions and source pins after changed-behavior checks, with no fabricated runtime or quality evidence]
+- [ ] T-DIR.24 Merge and deploy reviewed metadata repair  Owner: coordinator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.23]  acc: [Guarded source landing and exact immutable build precede independently reviewed saved IaC preview and activation; SQL and permissions equivalence reuses valid migration evidence without database mutations; expected image rollout completes]
+- [ ] T-DIR.25 Verify live catalog refresh through existing Zati consumer  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.24, T-DIR.15]  acc: [Live public API/browser and unchanged isolated consumer binary observe the new pinned official Gmail descriptor and five screening references, without reinstall, account admission or Featured claims; source and runtime receipts identify actual versions]
+
 
 #### Directory delivery batches and authority
 
@@ -2294,3 +2299,16 @@ pending under T-DIR.11's acceptance alternative. Screening sources landed PR #94
 they are not admitted or Featured. Owner approved isolated local Zati setup,
 which is initialized; provider profiles, targets and inference limits are pending.
 T-DIR.13/15 consumer source work and T-DIR.14/16-19 qualification remain open.
+
+
+### Official Gmail preview follow-through (2026-10-17)
+
+Owner selected the provided OpenRouter route and read-only Gmail MCP setup,
+approved a one-dollar total ceiling, at most 20 model requests and 20 read-only
+tool calls within one hour of testing, and confirmed Google Developer Preview
+access/MCP enablement. OAuth consent and actual tool/profile admission remain
+prerequisites; client credentials alone are not a mailbox grant. Official Google
+Gmail MCP at gmailmcp.googleapis.com now supersedes the earlier recommended Mint
+route for eligible preview users. Primary search_threads/get_thread references
+both allow gmail.readonly alone. T-DIR.22-25 capture this bounded source correction,
+real screening links and its independent delivery gates. OpenAPI remains a fallback.

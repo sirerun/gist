@@ -63,9 +63,18 @@ No new connection, model call or provider test is authorized merely by this guid
 
 ## Choosing the first implementation
 
-**Mail, calendar and files:** the initial directory recommendations point to Google
-APIs through community OpenAPI descriptions and Mint. They require actual schema
-inspection, adapter generation and Google account authorization in the client.
+**Mail:** Google’s [official Gmail MCP server](https://developers.google.com/workspace/gmail/api/guides/configure-mcp-server)
+is available in Developer Preview at `https://gmailmcp.googleapis.com/mcp/v1`.
+It requires enrollment, enabled Gmail/Gmail MCP APIs and an agent-enabled OAuth
+client. Use only `gmail.readonly` for this workflow. Its search/retrieval tools
+operate on threads; the message-oriented screening requirements below do not
+already map to those schemas. Capture the real tools and implement a separately
+admitted caller-owned conversion contract before execution. The catalog version
+identifies reviewed preview documentation, not a measured server version.
+
+**Calendar, files and alternative mail:** these directory entries use community
+OpenAPI descriptions and Mint. They require actual schema inspection, adapter
+generation and Google account authorization in the client.
 An OAuth client ID/secret identifies an application; it is not mailbox, calendar
 or Drive authorization. A Mint stdio adapter also needs an execution host and
 compatible client transport. These paths are not ready-to-run Zati integrations.
