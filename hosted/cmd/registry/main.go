@@ -56,6 +56,7 @@ func main() {
 		defer runtime.Close()
 		cfg.PublicEmbedder = runtime.Embedder
 		cfg.EmbeddingHealthy = runtime.Healthy
+		cfg.PublicEmbeddingSnapshotPath = env("GIST_EMBEDDING_SNAPSHOT", "/models/public-embeddings.json.gz")
 	}
 	a, err := app.New(ctx, cfg)
 	if err != nil {

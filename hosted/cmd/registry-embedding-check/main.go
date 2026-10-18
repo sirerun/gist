@@ -3,16 +3,20 @@
 package main
 
 import (
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"math"
 	"os"
 	"time"
 
+	"github.com/sirerun/gist/catalog/directory"
 	"github.com/sirerun/gist/catalog/preparation"
 	"github.com/sirerun/gist/hosted/internal/embeddingruntime"
+	"github.com/sirerun/gist/hosted/internal/semantic"
 )
 
 type receipt struct {
@@ -21,6 +25,8 @@ type receipt struct {
 	ModelVersion        string  `json:"model_version"`
 	QueryDocumentCosine float64 `json:"query_document_cosine"`
 	ElapsedSeconds      float64 `json:"elapsed_seconds"`
+	PublicIndexVerified bool    `json:"public_index_verified"`
+	PublicAppMatches    int     `json:"public_app_matches"`
 }
 
 func installed(name, fallback string) string {
@@ -31,17 +37,33 @@ func installed(name, fallback string) string {
 }
 
 func main() {
+	output := flag.String("write-public-index", "", "Generate the release public-corpus snapshot at this absolute path")
+	flag.Parse()
+	if flag.NArg() != 0 {
+		fmt.Fprintln(os.Stderr, "unexpected arguments")
+		os.Exit(1)
+	}
 	started := time.Now()
-	ctx, cancel := context.WithTimeout(context.Background(), 180*time.Second)
+	budget := 180 * time.Second
+	if *output != "" {
+		budget = 1800 * time.Second
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), budget)
 	defer cancel()
-	result, err := check(ctx, embeddingruntime.Config{
+	cfg := embeddingruntime.Config{
 		Enabled:          true,
 		BinaryPath:       installed("GIST_EMBEDDING_BINARY", "/usr/local/bin/llama-server"),
 		ModelPath:        installed("GIST_EMBEDDING_MODEL", "/models/embeddinggemma-2-BF16.gguf"),
 		BinarySHA256File: installed("GIST_EMBEDDING_BINARY_SHA256_FILE", "/usr/local/share/llama-server.sha256"),
-	})
+	}
+	if *output != "" {
+		cfg.BatchSlots = 8
+		cfg.Threads = 8
+	}
+	result, err := check(ctx, cfg, *output)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "embedding qualification failed")
+		fmt.Fprintln(os.Stderr, "embedding qualification failed:", err)
 		os.Exit(1)
 	}
 	result.ElapsedSeconds = time.Since(started).Seconds()
@@ -50,7 +72,7 @@ func main() {
 	}
 }
 
-func check(ctx context.Context, cfg embeddingruntime.Config) (result receipt, err error) {
+func check(ctx context.Context, cfg embeddingruntime.Config, output string) (result receipt, err error) {
 	runtime, err := embeddingruntime.Start(ctx, cfg)
 	if err != nil || runtime == nil {
 		return result, errors.New("runtime unavailable")
@@ -73,7 +95,38 @@ func check(ctx context.Context, cfg embeddingruntime.Config) (result receipt, er
 	if err != nil || !runtime.Healthy() {
 		return result, errors.New("embedding validation failed")
 	}
-	return receipt{Status: "verified", Dimension: 768, ModelVersion: version, QueryDocumentCosine: cosine}, nil
+	index, err := directory.DefaultPublic()
+	if err != nil {
+		return result, errors.New("public corpus unavailable")
+	}
+	apps, err := directory.DefaultApps(index)
+	if err != nil {
+		return result, errors.New("public apps unavailable")
+	}
+	search := semantic.New(index, apps, runtime.Embedder, runtime.Healthy)
+	if output != "" {
+		if err := search.Warm(ctx); err != nil {
+			return result, fmt.Errorf("public corpus qualification failed: %w", err)
+		}
+		f, err := os.OpenFile(output, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+		if err != nil {
+			return result, errors.New("snapshot output unavailable")
+		}
+		z := gzip.NewWriter(f)
+		writeErr := search.WriteSnapshot(z)
+		zipErr := z.Close()
+		closeErr := f.Close()
+		if writeErr != nil || zipErr != nil || closeErr != nil {
+			return result, errors.New("snapshot output failed")
+		}
+	} else if err := search.LoadSnapshotFile(installed("GIST_EMBEDDING_SNAPSHOT", "/models/public-embeddings.json.gz")); err != nil {
+		return result, fmt.Errorf("public snapshot qualification failed: %w", err)
+	}
+	found, err := search.SearchApps(ctx, directory.AppQuery{Text: "find leads for my startup", Limit: 10})
+	if err != nil || found.SearchMode != "hybrid" || found.Total == 0 {
+		return result, errors.New("public retrieval qualification failed")
+	}
+	return receipt{Status: "verified", Dimension: 768, ModelVersion: version, QueryDocumentCosine: cosine, PublicIndexVerified: true, PublicAppMatches: found.Total}, nil
 }
 
 // Validate numerical output, not semantic relevance: no minimum similarity is

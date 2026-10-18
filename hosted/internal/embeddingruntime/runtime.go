@@ -28,6 +28,9 @@ type Config struct {
 	BinaryPath       string
 	ModelPath        string
 	BinarySHA256File string
+	// BatchSlots is 8 only for offline public-corpus generation; serving uses 1.
+	BatchSlots int
+	Threads    int
 }
 
 // Runtime remains usable only while Healthy reports true. Callers must fall
@@ -63,6 +66,20 @@ func (r *Runtime) Close() error {
 func Start(ctx context.Context, cfg Config) (_ *Runtime, resultErr error) {
 	if !cfg.Enabled {
 		return nil, nil
+	}
+	slots := cfg.BatchSlots
+	if slots == 0 {
+		slots = 1
+	}
+	if slots != 1 && slots != 8 {
+		return nil, errors.New("embedding runtime: invalid batch slots")
+	}
+	threads := cfg.Threads
+	if threads == 0 {
+		threads = 2
+	}
+	if threads < 1 || threads > 8 {
+		return nil, errors.New("embedding runtime: invalid thread bound")
 	}
 	startup, cancel := context.WithTimeout(ctx, 120*time.Second)
 	defer cancel()
@@ -124,7 +141,7 @@ func Start(ctx context.Context, cfg Config) (_ *Runtime, resultErr error) {
 	aliasDigest := sha256.Sum256([]byte(key))
 	alias := "gist-embedding-" + hex.EncodeToString(aliasDigest[:8])
 	origin := fmt.Sprintf("http://127.0.0.1:%d", port)
-	args := []string{"--model", model, "--embedding", "--pooling", "mean", "--embd-normalize", "2", "--ctx-size", "8192", "--batch-size", "8192", "--ubatch-size", "8192", "--parallel", "1", "--threads", "2", "--threads-batch", "2", "--n-gpu-layers", "0", "--no-warmup", "--no-log-prefix", "--no-log-timestamps", "--log-colors", "off", "--host", "127.0.0.1", "--port", fmt.Sprint(port), "--alias", alias, "--api-key-file", keyFile}
+	args := []string{"--model", model, "--embedding", "--pooling", "mean", "--embd-normalize", "2", "--ctx-size", "8192", "--batch-size", "8192", "--ubatch-size", "8192", "--parallel", fmt.Sprint(slots), "--threads", fmt.Sprint(threads), "--threads-batch", fmt.Sprint(threads), "--n-gpu-layers", "0", "--no-warmup", "--no-log-prefix", "--no-log-timestamps", "--log-colors", "off", "--host", "127.0.0.1", "--port", fmt.Sprint(port), "--alias", alias, "--api-key-file", keyFile}
 	if startup.Err() != nil {
 		return nil, errors.New("embedding runtime: startup cancelled")
 	}

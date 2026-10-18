@@ -232,8 +232,14 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		go func() {
 			warmCtx, cancel := context.WithTimeout(ctx, 10*time.Minute)
 			defer cancel()
-			if err := publicSearch.Warm(warmCtx); err != nil {
-				log.Print("public semantic index unavailable; lexical fallback active")
+			var warmErr error
+			if cfg.PublicEmbeddingSnapshotPath != "" {
+				warmErr = publicSearch.LoadSnapshotFile(cfg.PublicEmbeddingSnapshotPath)
+			} else {
+				warmErr = publicSearch.Warm(warmCtx)
+			}
+			if err := warmErr; err != nil {
+				log.Printf("public semantic index unavailable (%v); lexical fallback active", err)
 			} else {
 				log.Print("public semantic index ready")
 			}
