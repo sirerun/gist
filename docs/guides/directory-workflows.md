@@ -66,10 +66,14 @@ No new connection, model call or provider test is authorized merely by this guid
 **Mail:** Google’s [official Gmail MCP server](https://developers.google.com/workspace/gmail/api/guides/configure-mcp-server)
 is available in Developer Preview at `https://gmailmcp.googleapis.com/mcp/v1`.
 It requires enrollment, enabled Gmail/Gmail MCP APIs and an agent-enabled OAuth
-client. Use only `gmail.readonly` for this workflow. Its search/retrieval tools
-operate on threads; the message-oriented screening requirements below do not
-already map to those schemas. Capture the real tools and implement a separately
-admitted caller-owned conversion contract before execution. The catalog version
+client. Use only `gmail.readonly` for this workflow. An authenticated metadata
+check on 2026-10-17 negotiated MCP `2025-11-25` and found `search_threads`,
+`get_thread` and `get_message` among 23 descriptors. Search is thread-based;
+individual message retrieval is available. These actual schemas still do not
+already implement the message-oriented screening requirements below. Admit
+only the needed read tools and implement a separately reviewed caller-owned
+conversion before execution; the server also advertises write tools even with
+a read-only grant. This metadata check did not read mail or run a model. The catalog version
 identifies reviewed preview documentation, not a measured server version.
 
 **Calendar, files and alternative mail:** these directory entries use community

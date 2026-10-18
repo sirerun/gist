@@ -2343,3 +2343,17 @@ establish MCP client acceptance, tool-schema admission or a useful inbox result.
 No mailbox tool calls or paid model calls have occurred at this checkpoint.
 Actual protocol/schema inspection and caller-owned thread conversion remain
 prerequisites to T-DIR.14/16, and the other four workflows remain unqualified.
+
+
+Authenticated schema preflight subsequently completed with three metadata-only
+HTTP requests: Gmail negotiated MCP 2025-11-25, matching the maintained Zati
+protocol, and returned 23 tool descriptors without pagination. Captured schema
+set digest is d21f6ab20413fd826c72833174539574e61dbbe8630fc7be301ecd83d0e12ec6
+under the recorded sorted compact UTF-8 JSON encoding (not RFC 8785 JCS).
+Actual tools include search_threads, get_thread and get_message; names are not
+inferred from the shorter public documentation list. This proves authenticated
+metadata interoperability only, not tool execution or a working skill. A new
+explicit caller-owned adapter is still needed for the maintained canonical
+message list/read contracts; write descriptors remain unselected. The bounded
+qualification window began 2026-10-18T01:57:45Z and ends 02:57:45Z; no mailbox
+or model calls have run. Expiry blocks dependent live calls, not source work.
