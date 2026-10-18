@@ -1,0 +1,54 @@
+{
+  "id": "gist/essentials/github-pr-review",
+  "version": "0.1.0",
+  "name": "Read-only public GitHub pull request review",
+  "summary": "Review bounded public pull request evidence without modifying a repository.",
+  "trust": "operator_asserted",
+  "publication": {
+    "status": "screening",
+    "provenance": "publisher_asserted; authored draft, not provenance-verified or workflow-qualified"
+  },
+  "required_capabilities": [
+    {
+      "id": "draft/github/pull-request/read",
+      "contract_version": "0.1.0"
+    },
+    {
+      "id": "draft/github/pull-request/diff/read",
+      "contract_version": "0.1.0"
+    }
+  ],
+  "runtime_requirements": {
+    "local_execution": false,
+    "filesystem": []
+  },
+  "package_digest": {
+    "algorithm": "sha256",
+    "value": "18308f3f960394cf5997342b96814354836f4e09354bdcc8f62a15f64e1fab32"
+  },
+  "inventory": [
+    {
+      "path": "SKILL.md",
+      "size": 2409,
+      "sha256": "a4419886016ead52f55f07359897bd36c996b5d55f705491de1ff6d07b10ae0b",
+      "media_type": "text/markdown"
+    },
+    {
+      "path": "assets/outcome-template.md",
+      "size": 409,
+      "sha256": "a65f5bffdbecdc7cce23d338a0e8033d020020d33fff9cee44f131b5d23142b2",
+      "media_type": "text/markdown"
+    },
+    {
+      "path": "assets/requirements.json",
+      "size": 1236,
+      "sha256": "fd7605b6017b94e932daedf44c39408239adc0d37cd2e0d9f952bf92bb790bf0",
+      "media_type": "application/json"
+    }
+  ],
+  "manifest_version": "1",
+  "entrypoint": "SKILL.md",
+  "effects": [
+    "github.read"
+  ]
+}

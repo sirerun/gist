@@ -1,0 +1,54 @@
+{
+  "id": "gist/essentials/web-research",
+  "version": "0.1.0",
+  "name": "Read-only web research",
+  "summary": "Answer a focused question from bounded public sources with dated citations.",
+  "trust": "operator_asserted",
+  "publication": {
+    "status": "screening",
+    "provenance": "publisher_asserted; authored draft, not provenance-verified or workflow-qualified"
+  },
+  "required_capabilities": [
+    {
+      "id": "draft/web/search",
+      "contract_version": "0.1.0"
+    },
+    {
+      "id": "draft/web/page/read",
+      "contract_version": "0.1.0"
+    }
+  ],
+  "runtime_requirements": {
+    "local_execution": false,
+    "filesystem": []
+  },
+  "package_digest": {
+    "algorithm": "sha256",
+    "value": "ee84cda90111416dd63b45ecff7a11db8fb047db18450da9fce85cacf69b2732"
+  },
+  "inventory": [
+    {
+      "path": "SKILL.md",
+      "size": 2502,
+      "sha256": "1d7a52117105bf65f2b2a52c710a05c27843c084440fbc3838659ebcfddd8d1f",
+      "media_type": "text/markdown"
+    },
+    {
+      "path": "assets/outcome-template.md",
+      "size": 306,
+      "sha256": "cfa7ff0d1524be3c8281b4f7ab0e7288ce9333006e5b173de369eb448f745815",
+      "media_type": "text/markdown"
+    },
+    {
+      "path": "assets/requirements.json",
+      "size": 1195,
+      "sha256": "0e326c5858a7411b4e49791b05c8b8f5bb76fafc973832a78a303da3fb25903d",
+      "media_type": "application/json"
+    }
+  ],
+  "manifest_version": "1",
+  "entrypoint": "SKILL.md",
+  "effects": [
+    "web.read"
+  ]
+}

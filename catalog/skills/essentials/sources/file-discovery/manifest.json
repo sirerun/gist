@@ -1,0 +1,54 @@
+{
+  "id": "gist/essentials/file-discovery",
+  "version": "0.1.0",
+  "name": "Read-only file discovery",
+  "summary": "Find relevant files and compare their metadata without opening executable content.",
+  "trust": "operator_asserted",
+  "publication": {
+    "status": "screening",
+    "provenance": "publisher_asserted; authored draft, not provenance-verified or workflow-qualified"
+  },
+  "required_capabilities": [
+    {
+      "id": "draft/files/search",
+      "contract_version": "0.1.0"
+    },
+    {
+      "id": "draft/files/metadata/read",
+      "contract_version": "0.1.0"
+    }
+  ],
+  "runtime_requirements": {
+    "local_execution": false,
+    "filesystem": []
+  },
+  "package_digest": {
+    "algorithm": "sha256",
+    "value": "800ed09a5c6827e806debbafe63c4b90d5feacfa6d10bc23083a2022af5c1b14"
+  },
+  "inventory": [
+    {
+      "path": "SKILL.md",
+      "size": 2276,
+      "sha256": "a3f05ebddf27d40082ebc1eaeaaa25068b3c84b737043bc70b1b43eb246fcf2b",
+      "media_type": "text/markdown"
+    },
+    {
+      "path": "assets/outcome-template.md",
+      "size": 384,
+      "sha256": "0f930d754ce381a5e1818071acf0cea3a89e0fa9c76ad96abba979d62736b269",
+      "media_type": "text/markdown"
+    },
+    {
+      "path": "assets/requirements.json",
+      "size": 1210,
+      "sha256": "21b6ea7162e4def704014e0e5cbf1356321d2dd757805048f1bad5c77ec1fd72",
+      "media_type": "application/json"
+    }
+  ],
+  "manifest_version": "1",
+  "entrypoint": "SKILL.md",
+  "effects": [
+    "files.read"
+  ]
+}
