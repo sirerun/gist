@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.sirerun/gist",
+  "title": "Gist public directory",
+  "description": "Find MCP servers and OpenAPI integrations, inspect setup and export connection descriptors.",
+  "version": "1.0.0",
+  "websiteUrl": "https://gist.sire.run/",
+  "repository": {
+    "url": "https://github.com/sirerun/gist",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://gist.sire.run/directory/mcp"
+    }
+  ]
+}

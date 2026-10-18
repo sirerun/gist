@@ -29,6 +29,7 @@ type appPage struct {
 type siteData struct {
 	Title, Page, Description, Canonical string
 	Body                                template.HTML
+	StructuredData                      template.HTML
 }
 
 func appPath(slug string) string     { return "/apps/" + url.PathEscape(slug) }
@@ -47,6 +48,16 @@ func appInventory() (*directory.AppIndex, *directory.Index) {
 }
 
 func renderPage(w http.ResponseWriter, r *http.Request, name string, view any, data siteData) {
+	renderPageStatus(w, r, name, view, data, 200)
+}
+func renderPageStatus(w http.ResponseWriter, r *http.Request, name string, view any, data siteData, status int) {
+	w.Header().Set("Vary", "Accept")
+	if wantsMarkdown(r.Header.Get("Accept")) {
+		if body, ok := publicMarkdown(name, view); ok {
+			writeMarkdown(w, r, status, body)
+			return
+		}
+	}
 	var body, out bytes.Buffer
 	if err := pages.ExecuteTemplate(&body, name, view); err != nil {
 		http.Error(w, "Page unavailable", 500)
@@ -58,6 +69,7 @@ func renderPage(w http.ResponseWriter, r *http.Request, name string, view any, d
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(status)
 	if r.Method != http.MethodHead {
 		_, _ = w.Write(out.Bytes())
 	}
@@ -126,11 +138,11 @@ func serveAppPage(w http.ResponseWriter, r *http.Request, apps *directory.AppInd
 	}
 	a, ok := apps.Get(slug)
 	if !ok {
-		http.NotFound(w, r)
+		NotFound(w, r)
 		return
 	}
 	if r.URL.Path != appPath(a.Slug) && r.URL.EscapedPath() != appPath(a.Slug) {
-		http.NotFound(w, r)
+		NotFound(w, r)
 		return
 	}
 	v := appView(a, apps, connectors)
@@ -146,6 +158,9 @@ func serveSitemap(w http.ResponseWriter, r *http.Request, apps *directory.AppInd
 		XMLNS   string   `xml:"xmlns,attr"`
 		URLs    []entry  `xml:"url"`
 	}{XMLNS: "http://www.sitemaps.org/schemas/sitemap/0.9"}
+	for _, p := range []string{"/developers", "/docs", "/about", "/contact", "/privacy", "/pricing", "/cli"} {
+		doc.URLs = append(doc.URLs, entry{publicOrigin + p})
+	}
 	doc.URLs = append(doc.URLs, entry{publicOrigin + "/library"}, entry{publicOrigin + "/library/mcp"}, entry{publicOrigin + "/library/openapi"}, entry{publicOrigin + "/apps/openai-gpt-3/airtable"})
 	for offset := 0; ; offset += 100 {
 		result, _ := apps.Search(directory.AppQuery{Offset: offset, Limit: 100})
