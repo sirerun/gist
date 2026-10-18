@@ -397,7 +397,7 @@ h1{font-size:65px}
 
 /* Public app and connector tiles share one layout on home and library pages. */
 .integration-grid.catalog-grid{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:12px}
-.integration-grid .app-card{position:relative;min-width:0;height:156px;min-height:156px;padding:14px 10px 12px;border:0;box-sizing:border-box;align-items:stretch}
+.integration-grid .app-card{position:relative;min-width:0;aspect-ratio:1;height:auto;min-height:0;padding:14px 10px 12px;border:0;box-sizing:border-box;align-items:stretch}
 .integration-grid .directory-card-content{display:flex;flex:1;min-width:0;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:inherit;text-decoration:none}
 .integration-grid .directory-card-heading{width:100%;flex-direction:column;justify-content:flex-start;gap:14px}
 .integration-grid .directory-card-heading h2{width:100%;margin:0;font-size:15px;line-height:1.2;letter-spacing:-.2px;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-height:36px}
@@ -411,7 +411,7 @@ h1{font-size:65px}
 .directory-card-arrow{position:absolute;top:7px;right:7px;display:grid;place-items:center;width:22px;height:22px;border:1px solid var(--line);border-radius:50%;background:var(--cream);color:var(--green);font:14px/1 var(--sans);opacity:0;transition:opacity .16s ease}
 .app-card:is(:hover,:focus-within) .directory-card-arrow{opacity:1}
 @media(max-width:700px){.integration-grid.catalog-grid{gap:10px}}
-@media(max-width:450px){.integration-grid.catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.integration-grid .app-card{height:148px;min-height:148px;padding:12px 9px 10px}.integration-grid .directory-card-heading h2{font-size:14px}.directory-logo-frame{width:42px;height:42px}}
+@media(max-width:450px){.integration-grid.catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.integration-grid .app-card{padding:12px 9px 10px}.integration-grid .directory-card-heading h2{font-size:14px}.directory-logo-frame{width:42px;height:42px}}
 @media(hover:none){.integration-grid .directory-card-use-case{opacity:1}}
 @media(prefers-reduced-motion:reduce){.integration-grid .directory-card-use-case,.directory-card-arrow{transition:none}}
 
