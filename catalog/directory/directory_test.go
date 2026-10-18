@@ -111,6 +111,35 @@ func TestEndpointCheckValidation(t *testing.T) {
 	}
 }
 
+func TestEndpointCheckIsDeepCopied(t *testing.T) {
+	s := fixture()
+	now := time.Date(2026, 10, 17, 12, 0, 0, 0, time.UTC)
+	s.Entries[0].Remotes[0].Check = &EndpointCheck{CheckedAt: now, HTTPStatus: 401, Result: "authentication-required"}
+	i, err := New(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.Entries[0].Remotes[0].Check.Result = "endpoint-responded"
+	r, _ := i.Get("mcp:mail")
+	if r.Remotes[0].Check.Result != "authentication-required" {
+		t.Fatal("snapshot input mutation changed indexed endpoint evidence")
+	}
+	r.Remotes[0].Check.Result = "payment-required"
+	r, _ = i.Get("mcp:mail")
+	if r.Remotes[0].Check.Result != "authentication-required" {
+		t.Fatal("Get result mutation changed indexed endpoint evidence")
+	}
+	page, err := i.Search(Query{Text: "mail", Limit: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	page.Items[0].Remotes[0].Check.Result = "endpoint-responded"
+	r, _ = i.Get("mcp:mail")
+	if r.Remotes[0].Check.Result != "authentication-required" {
+		t.Fatal("Search result mutation changed indexed endpoint evidence")
+	}
+}
+
 func TestIndependentPublicServerRequiresRegistryProvenance(t *testing.T) {
 	r := fixture().Entries[0]
 	r.Official = false

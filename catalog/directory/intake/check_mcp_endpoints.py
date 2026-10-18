@@ -10,10 +10,11 @@ import datetime
 import hashlib
 import ipaddress
 import json
+import os
 import pathlib
 import re
-import socket
 import subprocess
+import sys
 import tempfile
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -33,11 +34,22 @@ def resolve_public_ipv4(url):
         raise ValueError('endpoint must be an HTTPS URL without credentials, query or fragment')
     if parsed.port not in (None, 443):
         raise ValueError('endpoint must use the standard HTTPS port')
-    host = parsed.hostname.rstrip('.').lower()
+    host = parsed.hostname.lower()
+    if host.endswith('.'):
+        raise ValueError('endpoint hostname must not use a trailing-dot alias')
     if not re.fullmatch(r'(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?', host):
         raise ValueError('invalid public endpoint hostname')
-    values = socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM, family=socket.AF_INET)
-    ips = sorted({item[4][0] for item in values})
+    resolver = ('import json,socket,sys; print(json.dumps(sorted({item[4][0] for item in '
+                'socket.getaddrinfo(sys.argv[1],443,type=socket.SOCK_STREAM,family=socket.AF_INET)})))')
+    try:
+        resolved = subprocess.run([sys.executable, '-c', resolver, host], capture_output=True,
+                                  text=True, timeout=3, check=True)
+        ips = json.loads(resolved.stdout)
+    except (subprocess.SubprocessError, json.JSONDecodeError) as error:
+        raise ValueError('endpoint DNS lookup failed or exceeded 3 seconds') from error
+    if not isinstance(ips, list) or not all(isinstance(value, str) for value in ips):
+        raise ValueError('endpoint DNS returned an invalid address set')
+    ips = sorted(set(ips))
     if not ips or any(not ipaddress.ip_address(value).is_global for value in ips):
         raise ValueError('endpoint DNS did not resolve exclusively to public IPv4 addresses')
     return host, ips[0]
@@ -64,7 +76,15 @@ def classify(status, body):
         except (json.JSONDecodeError, UnicodeDecodeError):
             continue
         result = value.get('result') if isinstance(value, dict) else None
-        if isinstance(result, dict) and isinstance(result.get('protocolVersion'), str):
+        server = result.get('serverInfo') if isinstance(result, dict) else None
+        capabilities = result.get('capabilities') if isinstance(result, dict) else None
+        expected_version = json.loads(BODY)['params']['protocolVersion']
+        if (isinstance(value, dict) and value.get('jsonrpc') == '2.0' and value.get('id') == 1
+                and type(value.get('id')) is int and 'error' not in value and isinstance(result, dict)
+                and result.get('protocolVersion') == expected_version
+                and isinstance(server, dict) and isinstance(server.get('name'), str) and server['name']
+                and isinstance(server.get('version'), str) and server['version']
+                and isinstance(capabilities, dict)):
             return 'mcp-initialize'
     return 'endpoint-responded'
 
@@ -76,9 +96,10 @@ def probe(url, transport, timeout=12):
         output = pathlib.Path(folder) / 'response'
         method = 'GET' if transport == 'sse' else 'POST'
         command = [
-            'curl', '--silent', '--show-error', '--proto', '=https',
+            'curl', '--disable', '--globoff', '--silent', '--show-error', '--proto', '=https',
             '--connect-timeout', '4', '--max-time', str(min(timeout, 5) if method == 'GET' else timeout),
             '--max-redirs', '0', '--max-filesize', '65536',
+            '--proxy', '', '--noproxy', '*',
             '--resolve', host + ':443:' + address,
             '--header', 'Accept: text/event-stream' if method == 'GET' else 'Accept: application/json, text/event-stream',
             '--output', str(output), '--write-out', '%{http_code}',
@@ -86,7 +107,10 @@ def probe(url, transport, timeout=12):
         if method == 'POST':
             command += ['--request', 'POST', '--header', 'Content-Type: application/json', '--data-binary', '@-']
         command.append(url)
-        result = subprocess.run(command, input=BODY if method == 'POST' else None,
+        clean_env = {key: value for key, value in os.environ.items()
+                     if key.upper() not in {'HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY', 'NO_PROXY',
+                                            'CURL_HOME', 'CURL_CA_BUNDLE', 'SSL_CERT_FILE', 'SSL_CERT_DIR'}}
+        result = subprocess.run(command, input=BODY if method == 'POST' else None, env=clean_env,
                                 capture_output=True, timeout=timeout + 5, check=False)
         try:
             status = int(result.stdout.decode('ascii').strip())

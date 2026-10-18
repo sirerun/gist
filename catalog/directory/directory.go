@@ -317,6 +317,12 @@ func Parse(data []byte) (*Index, error) {
 func clone(r Record) Record {
 	r.Tags = append([]string(nil), r.Tags...)
 	r.Remotes = append([]Remote(nil), r.Remotes...)
+	for n := range r.Remotes {
+		if r.Remotes[n].Check != nil {
+			check := *r.Remotes[n].Check
+			r.Remotes[n].Check = &check
+		}
+	}
 	r.Packages = append([]Package(nil), r.Packages...)
 	r.Auth.CredentialNames = append([]string(nil), r.Auth.CredentialNames...)
 	r.Skills = append([]Skill(nil), r.Skills...)

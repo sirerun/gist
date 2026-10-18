@@ -9,11 +9,13 @@ The hosted Gist service never connects to advertised servers, starts packages,
 generates Mint adapters, authenticates provider accounts, or stores credentials.
 The offline intake checker makes a bounded, no-credential request to each
 reviewed remote endpoint. Streamable HTTP routes receive `initialize`; legacy
-SSE routes receive a short GET. HTTP 200 with an MCP initialize result confirms
-that handshake. HTTP 401/403 records an authentication challenge, 402 records
+SSE routes receive a short GET. HTTP 200 with a matching, structurally valid
+MCP initialize result confirms that handshake. HTTP 401/403 records an authentication challenge, 402 records
 a payment requirement, and other accepted responses record URL reachability
-only. Nothing lists tools, authorizes an account, verifies tool behavior, or
-qualifies a client workflow. Credential names are labels, never values.
+only. Response headers received before the bounded stream/body timeout establish
+reachability only; timeouts before any HTTP response fail. Nothing lists tools,
+authorizes an account, verifies tool behavior, or qualifies a client workflow.
+Credential names are labels, never values.
 
 ## Reproducing the pinned snapshot
 
@@ -46,8 +48,10 @@ descriptor together; refresh endpoint checks; regenerate and review the diff.
 The builder rejects missing membership, duplicate apps, missing provenance,
 unsafe URLs, mismatched checks and qualification claims. It never fetches
 listings, packages or specifications. Endpoint checks pin a public IPv4 address,
-verify TLS, use no credentials, do not follow redirects, and make no
-`tools/list` or `tools/call` requests.
+verify TLS, use no credentials, disable ambient curl configuration and proxy
+settings, disable URL globbing, do not follow redirects, and make no
+`tools/list` or `tools/call` requests. DNS lookup is separately bounded to three
+seconds and accepts only public IPv4 answers.
 
 The current snapshot admits 127 remote MCP entries: 24 vendor-verified routes
 and 103 routes whose operator Gist has not independently verified. The 103 new
