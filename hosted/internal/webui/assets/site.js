@@ -22,7 +22,7 @@
     el.href = href;
     return el;
   };
-  const signinURL = "/auth/github/start?return_to=%2Flibrary";
+  const signinURL = "/auth/github/start?return_to=%2Fworkspace";
   async function api(url, signal) {
     const response = await fetch(url, { credentials: "same-origin", cache: "no-store", headers: { Accept: "application/json" }, signal });
     if (!response.ok) {
@@ -54,14 +54,14 @@
     if (error.status === 400) {
       const expired = error.code === "invalid_cursor";
       const box = notice(container, expired ? "This page link has expired" : "Check this search or artifact link", expired ? "Start a new search to retrieve a fresh page of catalog results." : "Try a shorter search phrase. For artifact details, choose an item from the library.", true);
-      box.append(link("Back to library →", "/library", "text-link"));
+      box.append(link("Back to workspace →", "/workspace", "text-link"));
       return;
     }
     const title = error.status === 403 ? "This account does not have access" : error.status === 404 ? "This artifact was not found" : "We couldn’t load this just yet";
     const description = error.status === 403 ? "Ask your workspace operator to confirm your invitation and permissions." : error.status === 404 ? "Check the artifact link, or return to the library to find an available version." : "The service may be starting up or temporarily unavailable. Try again in a moment. If this is the first sign-in, the configured founder must complete enrollment.";
     const box = notice(container, title, description, true);
     if (error.status !== 403 && error.status !== 404) box.append(button("Try again", retry));
-    box.append(link("Back to library →", "/library", "text-link"));
+    box.append(link("Back to workspace →", "/workspace", "text-link"));
   }
   async function loadSession() {
     try {
@@ -69,7 +69,7 @@
       if (session.authenticated !== true) return null;
       const account = document.getElementById("account-nav");
       const menu = node("div", undefined, "account-menu");
-      menu.append(link(text(session.workspace_name, text(session.workspace_id, "Your workspace")), "/library"));
+      menu.append(link(text(session.workspace_name, text(session.workspace_id, "Your workspace")), "/workspace"));
       const logout = node("button", "Sign out");
       logout.type = "button";
       logout.addEventListener("click", async () => {
@@ -84,7 +84,7 @@
           if (!message) { message = node("p", "Sign-out failed. Please try again.", "logout-error"); message.setAttribute("role", "alert"); account.append(message); }
         }
       });
-      menu.append(logout);
+      menu.append(link("Private integrations", "/workspace/servers"), logout);
       account.replaceChildren(menu);
       return session;
     } catch (_) { return null; }
@@ -154,7 +154,7 @@
       const locationQuery = new URLSearchParams();
       if (q) locationQuery.set("q", q);
       if (kind) locationQuery.set("kind", kind);
-      window.history.replaceState(null, "", "/library" + (locationQuery.size ? "?" + locationQuery : ""));
+      window.history.replaceState(null, "", "/workspace" + (locationQuery.size ? "?" + locationQuery : ""));
       updateFilters();
       try {
         const data = await api("/app/api/catalog?" + query, controller.signal);
@@ -204,7 +204,7 @@
     const version = params.get("version");
     if (!kinds.has(kind) || !id || !version || utf8Length(id) > 2048 || utf8Length(version) > 256 || id.includes("\0") || version.includes("\0")) {
       notice(container, "This link is incomplete", "Choose an artifact from the library to see its exact version and published details.");
-      container.append(link("Browse the library →", "/library", "button button-outline"));
+      container.append(link("Browse your workspace →", "/workspace", "button button-outline"));
       container.setAttribute("aria-busy", "false");
       return;
     }
@@ -286,6 +286,6 @@
     }
   }
   loadSession();
-  if (page === "library") library();
+  if (page === "workspace") library();
   if (page === "artifact") artifact();
 })();

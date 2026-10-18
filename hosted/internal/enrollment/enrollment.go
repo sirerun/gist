@@ -228,10 +228,14 @@ func (h *Handler) readReturnTo(values url.Values) (string, error) {
 	return h.validateReturnTo(raw[0])
 }
 
+func websiteReturnTarget(raw string) bool {
+	return raw == "/library" || raw == "/workspace" || raw == "/workspace/servers"
+}
+
 func (h *Handler) validateReturnTo(raw string) (string, error) {
-	// The website gets exactly one fixed local destination. Queries, fragments,
+	// The website gets only fixed local destinations. Queries, fragments,
 	// escaped paths and other relative URLs remain invalid redirect targets.
-	if raw == "/library" {
+	if websiteReturnTarget(raw) {
 		return raw, nil
 	}
 	if raw == "" || len(raw) > maxRequestBytes || strings.Contains(raw, "#") {
@@ -312,7 +316,7 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 // Only a verified encrypted website flow can select this fixed error page.
 // OAuth callers and existing API enrollment flows keep their HTTP contract.
 func loginFailure(w http.ResponseWriter, r *http.Request, returnTo string, status int, message, code string) {
-	if returnTo == "/library" {
+	if websiteReturnTarget(returnTo) {
 		http.Redirect(w, r, "/signin?error="+code, http.StatusSeeOther)
 		return
 	}

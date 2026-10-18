@@ -1,5 +1,4 @@
-// Package webui serves Gist's embedded public website. Catalog data remains
-// behind the authenticated application API; the public pages contain examples.
+// Package webui serves the public directory and workspace website.
 package webui
 
 import (
@@ -21,7 +20,7 @@ var pages = template.Must(template.ParseFS(files, "templates/*.html"))
 // leaves authentication, API, OAuth, and MCP routes to the application router.
 func Handles(p string) bool {
 	switch p {
-	case "/", "/library", "/library/item", "/developers", "/docs", "/signin", "/favicon.ico":
+	case "/", "/library", "/library/item", "/library/server", "/workspace", "/workspace/servers", "/developers", "/docs", "/signin", "/favicon.ico":
 		return true
 	}
 	return strings.HasPrefix(p, "/assets/")
@@ -70,7 +69,13 @@ func Handler() http.Handler {
 		switch r.URL.Path {
 		case "/":
 		case "/library":
-			page, title = "library", "Your library · Gist"
+			page, title = "directory", "The library · Gist"
+		case "/library/server":
+			page, title = "directory-detail", "Integration details · Gist"
+		case "/workspace":
+			page, title = "workspace", "Your workspace · Gist"
+		case "/workspace/servers":
+			page, title = "private-directory", "Private integrations · Gist"
 		case "/library/item":
 			page, title = "artifact", "Artifact details · Gist"
 		case "/developers":

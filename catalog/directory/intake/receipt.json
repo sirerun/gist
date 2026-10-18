@@ -1,0 +1,304 @@
+{
+  "local_input": 2582,
+  "official_input": 4000,
+  "official_active_latest_skipped": 33,
+  "official_complete": false,
+  "accepted": 6494,
+  "by_kind": {
+    "mcp": 3913,
+    "openapi": 2581
+  },
+  "curated_recommended": 5,
+  "featured": 0,
+  "duplicate_count": 0,
+  "duplicates": [],
+  "rejected_count": 57,
+  "rejected": [
+    {
+      "source": "sirerun-openapi",
+      "id": "servicenow",
+      "reason": "unsafe or missing HTTPS specification URL"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.agentxray/amazon-seller-mcp",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.ankimcp/anki-mcp-server-addon",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.autorfp/mcp",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.biel/biel-ai",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.complyme.mcp/mcp",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.cybernative/ats-jobs-watch",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.cybernative/image-upscaler-8mp",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.cybernative/upgrade-xray",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.darkfunnels/whatsapp-sales-agent",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.eml/email",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.featureboard/featureboard",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.gatana/gateway",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.gatetest.www/gatetest",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.glasser/glasser",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.karmafor/karma-library",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.megastructure/arc",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.nebelus/construction",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.rallyprop/gov-funding",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.rechtssysteem/rechtssysteem-mcp",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.rillsoft/rillsoft-project",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.rosterresolve/roster",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.stealthstack/discovery",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "ai.zimac/mnema",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "al.square/fiskalizimi",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.anakior/atlas-mind",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.cardog/mcp",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.everjust/mcp",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.futbolatlas/futbol-atlas",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.keyslip/keyslip",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.m1k3/m1k3",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.metadock/metadock",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.netlify.gleaming-cassata-d41682/lion-mcp",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.ownmemory/ownmemory",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.qwady.thorns/thornguard",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.relaymcp/whatsapp",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.ridedesk/bookings",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.sallim/contract-compass",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.sallim/korea-realty",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.sallim/korea-stay",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.ternary/mcp",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.workalong/data-tools",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "app.ytbulktranscript/transcripts",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "au.com.motorloop/motorloop",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "au.com.premrest/premrest",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "bid.scope/healthcare",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "bid.scope/pharma",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "build.automo/automo-build",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "capital.hove/read-only-mysql-mcp-server",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "cash.flat/flatcash-mcp",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "cloud.freebase/freebase",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "cloud.iox/iox-cloud",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "cloud.local/localcloud",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "cn.savantcat/content-router",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "cn.savantcat/memory-dream-engine",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "cn.savantcat/pattern-radar",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    },
+    {
+      "source": "mcp-official",
+      "id": "co.finalpeace/estate-planning",
+      "reason": "no supported credential-free public endpoint or package descriptor"
+    }
+  ],
+  "revision": "sha256:8fcc6ef1ebc6f18e4362b33d4647f7769f597424eeda18d4540d0d9f5a11224b"
+}

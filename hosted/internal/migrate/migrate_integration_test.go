@@ -82,7 +82,7 @@ func TestMigrationFreshApplyAndConcurrentReplay(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if before.LedgerExists || len(before.Applied) != 0 || len(before.Pending) != 10 {
+	if before.LedgerExists || len(before.Applied) != 0 || len(before.Pending) != len(r.Migrations) {
 		t.Fatal("status mutated empty database")
 	}
 	// Two release processes serialize; the second verifies and replays no SQL.
@@ -99,7 +99,7 @@ func TestMigrationFreshApplyAndConcurrentReplay(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(status.Applied) != 10 || len(status.Pending) != 0 {
+	if len(status.Applied) != len(r.Migrations) || len(status.Pending) != 0 {
 		t.Fatal("incomplete migration ledger")
 	}
 	if status.SchemaSHA256 == before.SchemaSHA256 {
@@ -185,7 +185,7 @@ func TestMigrationExplicitAdoptionAndSchemaFingerprint(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(final.Applied) != 10 {
+	if len(final.Applied) != len(r.Migrations) {
 		t.Fatal("did not migrate suffix")
 	}
 	if _, err := conn.Exec(ctx, `ALTER TABLE public.workspaces ADD COLUMN fixture_drift boolean`); err != nil {

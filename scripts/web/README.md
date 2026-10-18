@@ -24,3 +24,10 @@ tenant role to exercise the actual browser APIs, membership revocation, isolatio
 and metadata projection. Enrollment tests cover the fixed return target. These
 checks complement one another; intercepted browser responses do not qualify
 live identity, provider or authenticated production behavior.
+
+`directory_check.py` exercises the public directory and private descriptor UI
+against intercepted synthetic APIs: anonymous search/filter/paging, metadata
+injection, descriptor download, authenticated CSRF saves/removals and responsive
+layout at 1440/768/390/320 pixels. It uses the same preview/Playwright/Chromium
+arguments as `browser_check.py`. Neither browser script qualifies a provider
+connection; real PostgreSQL and restricted-role behavior are checked separately.

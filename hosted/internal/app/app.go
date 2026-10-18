@@ -18,6 +18,8 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/sirerun/gist/catalog/directory"
+	"github.com/sirerun/gist/hosted/internal/directorymcp"
 	"github.com/sirerun/gist/hosted/internal/discovery"
 	"github.com/sirerun/gist/hosted/internal/enrollment"
 	"github.com/sirerun/gist/hosted/internal/identity"
@@ -212,8 +214,15 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		pool.Close()
 		return nil, maintenanceErr
 	}
-	web := &webAPI{sessions: sessions, policy: policy, catalog: postgresWebCatalog{pool: pool}, origin: cfg.PublicOrigin, audience: cfg.ResourceAudience, workspace: cfg.GitHubEnrollment.WorkspaceID, workspaceName: cfg.GitHubEnrollment.WorkspaceName, cursorKey: deriveKey(cfg.OAuthConsentSecret, "gist web cursor v1"), timeout: cfg.RequestTimeout, maxBytes: min(cfg.MaxResponseBytes, 256<<10), concurrent: make(chan struct{}, cfg.MaxConcurrentRequests)}
-	handler := requestContext{web: web, ui: webui.Handler(), lifetime: a.requests, admission: a.bootstrapAdmission, rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, enrollment: enrollmentRoutes, ready: func(ctx context.Context) error {
+	publicIndex, err := directory.Default()
+	if err != nil {
+		pool.Close()
+		return nil, fmt.Errorf("app: public directory: %w", err)
+	}
+	publicDirectory := &directoryAPI{index: publicIndex, origin: cfg.PublicOrigin, maxBytes: min(cfg.MaxResponseBytes, 512<<10), concurrent: make(chan struct{}, cfg.MaxConcurrentRequests)}
+	directoryMCP := directorymcp.New(publicIndex, cfg.PublicOrigin, cfg.MaxConcurrentRequests)
+	web := &webAPI{directory: postgresPrivateDirectory{pool: pool}, csrfKey: deriveKey(cfg.OAuthConsentSecret, "gist web csrf v1"), sessions: sessions, policy: policy, catalog: postgresWebCatalog{pool: pool}, origin: cfg.PublicOrigin, audience: cfg.ResourceAudience, workspace: cfg.GitHubEnrollment.WorkspaceID, workspaceName: cfg.GitHubEnrollment.WorkspaceName, cursorKey: deriveKey(cfg.OAuthConsentSecret, "gist web cursor v1"), timeout: cfg.RequestTimeout, maxBytes: min(cfg.MaxResponseBytes, 256<<10), concurrent: make(chan struct{}, cfg.MaxConcurrentRequests)}
+	handler := requestContext{directory: publicDirectory, directoryMCP: directoryMCP, web: web, ui: webui.Handler(), lifetime: a.requests, admission: a.bootstrapAdmission, rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, enrollment: enrollmentRoutes, ready: func(ctx context.Context) error {
 		if err := a.maintenanceReady(); err != nil {
 			return err
 		}
@@ -373,12 +382,13 @@ func (a *App) Shutdown(ctx context.Context) error {
 }
 
 type requestContext struct {
-	lifetime         *requestLifetime
-	rest, mcp, oauth http.Handler
-	enrollment       http.Handler
-	web, ui          http.Handler
-	ready            func(context.Context) error
-	admission        func() error
+	lifetime                *requestLifetime
+	rest, mcp, oauth        http.Handler
+	enrollment              http.Handler
+	web, ui                 http.Handler
+	directory, directoryMCP http.Handler
+	ready                   func(context.Context) error
+	admission               func() error
 }
 
 func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -408,7 +418,7 @@ func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Enrollment cannot require a pre-existing maintainer. All other APIs,
 	// including OAuth issuance, remain unavailable until normal maintenance
 	// has verified the enrolled identity against current durable policy.
-	if h.admission != nil && !(h.ui != nil && webui.Handles(r.URL.Path)) && r.URL.Path != "/app/api/logout" && r.URL.Path != "/healthz" && r.URL.Path != "/readyz" && r.URL.Path != enrollment.StartPath && r.URL.Path != enrollment.CallbackPath {
+	if h.admission != nil && !(h.ui != nil && webui.Handles(r.URL.Path)) && !(h.directory != nil && publicDirectoryPath(r.URL.Path)) && !(h.directoryMCP != nil && r.URL.Path == "/directory/mcp") && r.URL.Path != "/app/api/logout" && r.URL.Path != "/healthz" && r.URL.Path != "/readyz" && r.URL.Path != enrollment.StartPath && r.URL.Path != enrollment.CallbackPath {
 		if err := h.admission(); err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.Header().Set("Retry-After", "60")
@@ -420,6 +430,14 @@ func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	if h.ui != nil && webui.Handles(r.URL.Path) {
 		h.ui.ServeHTTP(w, r)
+		return
+	}
+	if h.directory != nil && publicDirectoryPath(r.URL.Path) {
+		h.directory.ServeHTTP(w, r)
+		return
+	}
+	if h.directoryMCP != nil && r.URL.Path == "/directory/mcp" {
+		h.directoryMCP.ServeHTTP(w, r)
 		return
 	}
 	if h.web != nil && strings.HasPrefix(r.URL.Path, "/app/api/") {

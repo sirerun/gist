@@ -94,15 +94,15 @@ def main():
         visit('/signin')
         start = page.locator('a[href^="/auth/github/start"]')
         expect(start).to_be_visible()
-        assert parse_qs(urlparse(start.get_attribute('href')).query)['return_to'] == ['/library']
+        assert parse_qs(urlparse(start.get_attribute('href')).query)['return_to'] == ['/workspace']
         for path in ('/developers', '/docs'):
             visit(path)
             no_overflow()
-        visit('/library')
+        visit('/workspace')
         expect(page.locator('#catalog-notice')).to_contain_text(re.compile('sign.in', re.I))
 
         state['mode'] = 'signed-in'
-        visit('/library')
+        visit('/workspace')
         expect(page.locator('#catalog-results')).to_contain_text(item['title'])
         page.screenshot(path=str(args.output / 'library-desktop.png'), full_page=True)
         page.get_by_role('button', name='Tools', exact=True).click()
@@ -122,10 +122,10 @@ def main():
         page.locator('#catalog-search').get_by_role('button', name='Search').click()
         expect(page.locator('#catalog-results')).to_contain_text(item['title'])
         state['mode'] = 'empty'
-        visit('/library')
+        visit('/workspace')
         expect(page.locator('#catalog-notice')).to_contain_text('no published catalog records')
         state['mode'] = 'paged'
-        visit('/library')
+        visit('/workspace')
         expect(page.locator('#load-more')).to_be_visible()
         page.locator('#load-more').click()
         expect(page.locator('#load-more')).to_be_hidden()
@@ -146,20 +146,20 @@ def main():
         visit('/library/item?kind=skill&id=example%2Finbox&version=1.0.0')
         expect(page.locator('#artifact')).to_contain_text('not found')
         state['mode'] = 'unavailable'
-        visit('/library')
+        visit('/workspace')
         expect(page.locator('#catalog-notice')).to_contain_text('unavailable')
         expect(page.get_by_role('button', name='Try again')).to_be_visible()
         state['mode'] = 'signed-in'
         page.get_by_role('button', name='Try again').click()
         expect(page.locator('#catalog-results')).to_contain_text(item['title'])
-        visit('/library')
+        visit('/workspace')
         page.get_by_role('button', name='Sign out').click()
         expect(page.get_by_role('link', name='Sign in with GitHub')).to_be_visible()
         assert any(c['path'].endswith('/logout') for c in calls)
 
         for width in (390, 320, 768):
             page.set_viewport_size({'width': width, 'height': 844})
-            for path in ('/', '/signin', '/developers', '/docs', '/library'):
+            for path in ('/', '/signin', '/developers', '/docs', '/workspace'):
                 visit(path)
                 no_overflow()
                 if path == '/' and width == 390:
