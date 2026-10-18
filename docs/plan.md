@@ -2215,19 +2215,24 @@ Zati workflow evidence and guides. Discovery never grants execution authority.
 - [x] T-DIR.10 Release and deploy populated directory through reviewed IaC  Owner: deployment-operator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.9]  acc: [Source-pinned immutable image, independently reviewed config and actual preview deploy after available recovery snapshot and exact migration/runtime-role qualification; existing data, credentials and rollback remain protected]
 - [x] T-DIR.11 Verify live catalog and private descriptor acceptance  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.10]  acc: [Live anonymous browser/MCP discover real entries with source and setup details, private APIs deny anonymous or foreign access, and actual authorized private write/read journey is observed or explicitly pending]
 - [x] T-DIR.12 Build and document five reusable workflow candidates  Owner: catalog-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.1]  acc: [Inbox, calendar, file discovery, public code review and research skill sources declare exact read-only capabilities, setup and limitations; complete-package tests and explicit source pins preserve client admission and public-package trust gates]
-- [ ] T-DIR.13 Integrate current directory descriptors with Zati admission  Owner: zati-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.9, T-DIR.21]  acc: [Zati consumes the versioned library or hosted directory contract and imports selected descriptors and skills as reviewable drafts with current transport/account/schema requirements, preserving explicit client admission and refusing unsupported transports]
+- [x] T-DIR.13 Integrate current directory descriptors with Zati admission  Owner: zati-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.9, T-DIR.21]  acc: [Zati consumes the versioned library or hosted directory contract and imports selected descriptors and skills as reviewable drafts with current transport/account/schema requirements, preserving explicit client admission and refusing unsupported transports]
 - [ ] T-DIR.14 Qualify actual client/provider test prerequisites  Owner: coordinator-and-owner  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-DIR.12]  acc: [Actual installed or owned source Zati instance, named caller-owned connection profiles, concrete read-only targets, allowed requests and costs, versions and expiry are recorded before real workflow testing; missing profiles are not fabricated]
-- [ ] T-DIR.15 Verify and independently deliver Zati consumer changes  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.13]  acc: [Affected source/client/browser checks and independent exact-head review precede guarded merge and fresh landed acceptance; native installation or visible acceptance is claimed only when observed]
+- [x] T-DIR.15 Verify and independently deliver Zati consumer changes  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.13]  acc: [Affected source/client/browser checks and independent exact-head review precede guarded merge and fresh landed acceptance; native installation or visible acceptance is claimed only when observed]
 - [ ] T-DIR.16 Execute useful real Zati workflows and retain dated evidence  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.14, T-DIR.15]  acc: [Each workflow uses an actual authorized profile and real server under its bounded envelope, verifies useful outcome and exact package/tool/client pins, and records failures honestly without promoting fixtures or exceeding scope]
 - [ ] T-DIR.17 Independently review featured eligibility and public package trust  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.16]  acc: [Non-author approves named successful workflows, guides and unexpired version-bound evidence; ADR019 release/trust prerequisites remain enforced and unqualified integrations stay ordinary candidates]
 - [ ] T-DIR.18 Publish qualified featured bundles and verify live presentation  Owner: coordinator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.17, T-DIR.11]  acc: [Reviewed qualification data and source-pinned release show only eligible bundles as featured, expose their actual evidence and setup guides, and retain healthy public/private behavior after deployment]
 - [ ] T-DIR.19 Document and verify refresh, expiry, rollback and operations  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.18]  acc: [Canonical receipt identifies all landed sources and live revisions, repeatable intake and coverage gaps, expiry removal, recovery/rollback and actual unresolved client/provider limits with no persistent watcher claimed]
 - [x] T-DIR.20 Independently review complete essentials screening packages  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.12]  acc: [Non-author reviews exact source and plan, all five complete manifests and assets, draft requirements and trust limits; real archive/digest/screening race tests and vet pass without invented provider qualification]
 - [x] T-DIR.21 Merge and verify landed essentials screening sources  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.20]  acc: [Guarded rebase merge preserves reviewed head and current base, fresh landed tree matches validated candidate, evidence distinguishes screening sources from admitted runnable skills]
-- [ ] T-DIR.22 Correct official Gmail discovery and link real screening sources  Owner: coordinator  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.21]  acc: [Current primary Google docs establish official preview HTTPS endpoint and readonly search/thread scopes; deterministic sanitized metadata keeps OpenAPI fallback, exactly five recommendations and zero Featured claims, and links all five actual pinned complete screening sources; offline and Go validation pass]
-- [ ] T-DIR.23 Independently review official Gmail metadata repair  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.22]  acc: [Non-author approves exact source and plan, vendor evidence, candidate setup restrictions and source pins after changed-behavior checks, with no fabricated runtime or quality evidence]
-- [ ] T-DIR.24 Merge and deploy reviewed metadata repair  Owner: coordinator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.23]  acc: [Guarded source landing and exact immutable build precede independently reviewed saved IaC preview and activation; SQL and permissions equivalence reuses valid migration evidence without database mutations; expected image rollout completes]
+- [x] T-DIR.22 Correct official Gmail discovery and link real screening sources  Owner: coordinator  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.21]  acc: [Current primary Google docs establish official preview HTTPS endpoint and readonly search/thread scopes; deterministic sanitized metadata keeps OpenAPI fallback, exactly five recommendations and zero Featured claims, and links all five actual pinned complete screening sources; offline and Go validation pass]
+- [x] T-DIR.23 Independently review official Gmail metadata repair  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.22]  acc: [Non-author approves exact source and plan, vendor evidence, candidate setup restrictions and source pins after changed-behavior checks, with no fabricated runtime or quality evidence]
+- [ ] T-DIR.24 Merge and deploy reviewed metadata repair  Owner: coordinator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.23, T-DIR.28]  acc: [Guarded source landing and exact immutable build precede independently reviewed saved IaC preview and activation; SQL and permissions equivalence reuses valid migration evidence without database mutations; expected image rollout completes]
 - [ ] T-DIR.25 Verify live catalog refresh through existing Zati consumer  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.24, T-DIR.15]  acc: [Live public API/browser and unchanged isolated consumer binary observe the new pinned official Gmail descriptor and five screening references, without reinstall, account admission or Featured claims; source and runtime receipts identify actual versions]
+
+- [ ] T-DIR.26 Pin a verified official builder publication  Owner: infrastructure-owner  Est: TBD  kind: agent  stage: implement  acc: [Verify exact Go 1.26 patch, official publisher provenance and multiarchitecture manifest digest through a bounded public-registry check; update only the builder source and required recipe assertions, preserve runtime/IAM/resources and pass focused recipe checks; do not evade quotas or retry-loop a throttled registry]
+- [ ] T-DIR.27 Independently review builder source repair  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.26]  acc: [Non-author approves exact builder provenance, digest/platform compatibility and focused checks, with no unreviewed runtime or resource changes]
+- [ ] T-DIR.28 Merge and apply reviewed buildspec-only repair  Owner: coordinator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.27]  acc: [Guarded Foundation merge and exact tree parity precede independently reviewed actual saved IaC preview and buildspec-only apply; no data, runtime image or permissions change; rebuild of the exact landed Gist source proceeds only after this gate]
+
 
 
 #### Directory delivery batches and authority
@@ -2297,8 +2302,10 @@ The exact image is running as ECS revision 5 with a completed rollout. Snapshot,
 checks passed. Actual human private write/read acceptance remains explicitly
 pending under T-DIR.11's acceptance alternative. Screening sources landed PR #94;
 they are not admitted or Featured. Owner approved isolated local Zati setup,
-which is initialized; provider profiles, targets and inference limits are pending.
-T-DIR.13/15 consumer source work and T-DIR.14/16-19 qualification remain open.
+which is initialized. T-DIR.13/15 consumer source delivery subsequently landed
+Zati PR #58 at 5ce0a12bb664344b41b0cd6984136ec2b8aa85cb with exact reviewed-tree
+parity, focused Go/Flutter checks and a fresh landed specification check. Installed
+GUI and actual provider workflows remain separate under T-DIR.14/16-19.
 
 
 ### Official Gmail preview follow-through (2026-10-17)
@@ -2312,3 +2319,27 @@ Gmail MCP at gmailmcp.googleapis.com now supersedes the earlier recommended Mint
 route for eligible preview users. Primary search_threads/get_thread references
 both allow gmail.readonly alone. T-DIR.22-25 capture this bounded source correction,
 real screening links and its independent delivery gates. OpenAPI remains a fallback.
+
+
+### Gmail source delivery and actual OAuth preflight (2026-10-17)
+
+T-DIR.22/23 source correction landed Gist PR #96 at
+d4de98cc81a8591782599bbfcd18c85b90ca5ad0, tree-identical to independently
+reviewed head 76e94154. Four offline intake checks, deterministic regeneration,
+directory/essentials/CLI race checks, CLI validation and vet pass. Snapshot
+933e80e8d3e39abf5fb919f03a8cb3d32548d4f78af9887cbf8eae2d1ee38a38 contains
+6,495 candidates, five recommendations and zero Featured entries. Production
+still serves the prior 6,494-entry snapshot: the immutable build stopped before
+compilation when Docker Hub returned HTTP 429 for the Go builder. T-DIR.26-28
+track a reviewed durable builder publication repair; no retry loop, deployment,
+SQL mutation or private-data transfer occurred from that failed attempt.
+
+The owner-authorized isolated OAuth flow obtained an actual temporary
+gmail.readonly-only grant with no refresh token, retained in protected local
+custody. The first callback rejected Google's optional issuer metadata before
+exchange; exact-issuer validation was independently reviewed and ten synthetic
+callback checks passed before the successful retry. Authentication does not yet
+establish MCP client acceptance, tool-schema admission or a useful inbox result.
+No mailbox tool calls or paid model calls have occurred at this checkpoint.
+Actual protocol/schema inspection and caller-owned thread conversion remain
+prerequisites to T-DIR.14/16, and the other four workflows remain unqualified.
