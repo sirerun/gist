@@ -137,7 +137,7 @@
     let kind = ["mcp","openapi"].includes(params.get("kind")) ? params.get("kind") : "", cursor = "", generation = 0, total = 0;
     function filters() { tag.disabled = Boolean(kind || savedOnly); document.querySelectorAll("[data-directory-kind]").forEach(b=>{const active=b.dataset.directoryKind===kind; b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));}); }
     async function load(append = false) {
-      const ownSaved = savedOnly, own = ++generation; more.hidden = true; results.setAttribute("aria-busy","true"); notice.replaceChildren();
+      const ownSaved = savedOnly, own = ++generation; if (!append) more.hidden = true; more.disabled = true; results.setAttribute("aria-busy","true"); notice.replaceChildren();
       if (!append) results.replaceChildren();
       const p = new URLSearchParams({limit:"24"}); if(query.value.trim()) p.set("q",query.value.trim()); if(kind)p.set("kind",kind); if(tag.value)p.set(!ownSaved && !kind ? "category" : "tag",tag.value); if(append&&cursor)p.set(ownSaved || !kind ? "offset" : "cursor",cursor);
       const visible = new URLSearchParams(p); visible.delete("limit");visible.delete("cursor");visible.delete("offset");if(ownSaved)visible.set("saved","1"); history.replaceState(null,"","/library"+(visible.size?"?"+visible:""));
@@ -168,7 +168,7 @@
         status.textContent=data.total.toLocaleString()+(ownSaved ? " matching bookmarks · only visible to you" : (appView ? " matching apps" : " matching integrations"));
         if(!data.items.length&&!append)notice.append(el("p",(ownSaved ? "No matching bookmarks. Bookmark entries from the library to find them here." : "No matching integrations. Try another term or clear your filters."),"notice"));
       } catch(e) {if(own===generation){status.textContent="Search unavailable";if(ownSaved){const box=el("div",undefined,"notice error");box.append(el("p","Couldn’t load your bookmarks."),button("Try again",async()=>{await loadBookmarks();load(append);}));notice.replaceChildren(box);}else failure(notice,e,()=>load(append));}}
-      finally {if(own===generation)results.setAttribute("aria-busy","false");}
+      finally {if(own===generation){results.setAttribute("aria-busy","false");more.disabled=false;}}
     }
     form.addEventListener("submit",e=>{e.preventDefault();load();}); tag.addEventListener("change",()=>load());
     document.querySelectorAll("[data-directory-kind]").forEach(b=>b.addEventListener("click",()=>{kind=b.dataset.directoryKind;tag.value="";filters();load();}));
