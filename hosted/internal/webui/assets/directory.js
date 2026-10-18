@@ -192,7 +192,7 @@
   function field(target,label,value) { if(value) {const d=el("div"); d.append(el("dt",label),el("dd",String(value)));target.append(d);} }
   function sourceLink(target,label,value) {const url=external(value);if(url)target.append(link(label+" ↗",url,"text-link"));}
   async function detail() {
-    const target=document.getElementById("directory-detail"), params=new URLSearchParams(location.search), id=params.get("id") || ((location.pathname||"").startsWith("/connectors/") ? decodeURIComponent(location.pathname.slice(12)) : ""), app=params.get("app");
+    const target=document.getElementById("directory-detail"), params=new URLSearchParams(location.search), cleanConnector=(location.pathname||"").startsWith("/connectors/"), id=cleanConnector ? decodeURIComponent(location.pathname.slice(12)) : params.get("id"), app=cleanConnector ? null : params.get("app");
     try {
       if (app) {
         const r = await api("/api/directory/app?" + new URLSearchParams({slug:app}));
