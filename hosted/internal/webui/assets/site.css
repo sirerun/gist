@@ -422,3 +422,10 @@ h1{font-size:65px}
 .app-category-list .pill{margin:0}
 
 .library-setup-links{display:flex;gap:24px;flex-wrap:wrap}
+
+/* Keep public Library search and category selection on one row. */
+.library-search-row{display:flex;align-items:center;gap:16px;min-width:0}
+.library-search-row .library-search{flex:1;min-width:0;width:auto}
+.library-search-row .advanced-filter{flex:none}
+.library-search-row .advanced-filter select{max-width:220px}
+@media(max-width:600px){.library-search-row{gap:8px}.library-search-row .library-search input{padding-left:12px;font-size:13px}.library-search-row .library-search button{padding:12px 8px}.library-search-row .advanced-filter{flex-direction:column;align-items:flex-start;gap:4px}.library-search-row .advanced-filter select{width:112px;max-width:112px}}
