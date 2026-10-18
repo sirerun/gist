@@ -11,7 +11,7 @@ const flush = () => new Promise(resolve => setImmediate(resolve));
 function fixture({page='home', search='', pathname='/library', handle, icons={}}={}) {
   const calls=[], listeners={}; let document;
   class Element {
-    constructor(tag) { this.tag=tag; this.children=[];this.attrs={};this.dataset={};this.handlers={};this.hidden=false;this.className='';this.textContent='';this.classList={toggle(){}}; }
+    constructor(tag) { this.tag=tag; this.children=[];this.attrs={};this.style={};this.dataset={};this.handlers={};this.hidden=false;this.className='';this.textContent='';this.classList={toggle(){}}; }
     append(...children) {for(const child of children){if(child.parent)child.remove();child.parent=this;this.children.push(child);}}
     replaceChildren(...children) {this.children.forEach(c=>c.parent=null);this.children=[];this.append(...children);}
     setAttribute(k,v){this.attrs[k]=String(v);}
@@ -125,4 +125,8 @@ test('library cards omit descriptions and expose only one hover category',async(
 
 test('clean connector path wins over conflicting legacy query parameters',async()=>{
  const f=fixture({page:'directory-detail',pathname:'/connectors/github',search:'?id=other&app=gmail',handle:url=>url==='/api/directory/item?id=github'?{data:records[0]}:undefined});await flush();assert.ok(f.calls.some(c=>c.url==='/api/directory/item?id=github'));assert.ok(!f.calls.some(c=>c.url.startsWith('/api/directory/app?')));assert.ok(f.ids['directory-detail'].walk().some(n=>n.textContent==='GitHub'));
+});
+
+test('app logo keeps a padded circular brand frame and rejects invalid colors',async()=>{
+ const f=fixture({page:'directory',handle:url=>url.startsWith('/api/directory/apps?')?{data:{items:[{slug:'gmail',name:'Gmail',background_color:'#f14336'},{slug:'unsafe',name:'Unsafe',background_color:'url(https://bad.example)'}],total:2}}:undefined});await flush();const frames=f.ids['directory-results'].walk().filter(n=>n.className==='directory-logo-frame');assert.equal(frames[0].style.backgroundColor,'#f14336');assert.equal(frames[0].children[0].tag,'img');assert.equal(frames[1].style.backgroundColor,undefined);
 });

@@ -112,7 +112,10 @@
     const icon = el("img", undefined, "directory-logo app-logo");
     if (localAppIcon(record.icon_url)) icon.src = record.icon_url;
     icon.alt = ""; icon.width = 54; icon.height = 54; icon.loading = "lazy";
-    heading.append(icon, el("h2", record.name || record.slug));
+    const frame = el("span", undefined, "directory-logo-frame");
+    if (/^#[0-9a-f]{6}$/i.test(record.background_color || "")) frame.style.backgroundColor = record.background_color;
+    frame.append(icon);
+    heading.append(frame, el("h2", record.name || record.slug));
     c.append(heading);
     const category = (record.categories || []).filter(category => category.slug !== "app-families").map(category => category.name).find(Boolean) || "";
     c.append(el("p", category, "directory-card-use-case"));
