@@ -2212,8 +2212,8 @@ Zati workflow evidence and guides. Discovery never grants execution authority.
 - [x] T-DIR.7 Verify complete directory source and browser behavior  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.3, T-DIR.4, T-DIR.5, T-DIR.6]  acc: [Go race, restricted-role PostgreSQL, source reproducibility and real HTTP/MCP plus desktop/mobile browser tests cover public/private separation, revoked members, malicious data, budgets, paging, unknown sources, unqualified badges and custom-entry recovery]
 - [x] T-DIR.8 Independently review the complete populated directory candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.7]  acc: [Non-author reviews exact base/head including data provenance, API/UI, migration/grants, fixtures and plan; reachable findings receive fixes and affected re-verification]
 - [x] T-DIR.9 Merge and verify landed directory source  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.8]  acc: [Guarded GitHub rebase respects reviewed head and current base and branch controls, fresh landed tree and affected checks match approved source]
-- [ ] T-DIR.10 Release and deploy populated directory through reviewed IaC  Owner: deployment-operator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.9]  acc: [Source-pinned immutable image, independently reviewed config and actual preview deploy after available recovery snapshot and exact migration/runtime-role qualification; existing data, credentials and rollback remain protected]
-- [ ] T-DIR.11 Verify live catalog and private descriptor acceptance  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.10]  acc: [Live anonymous browser/MCP discover real entries with source and setup details, private APIs deny anonymous or foreign access, and actual authorized private write/read journey is observed or explicitly pending]
+- [x] T-DIR.10 Release and deploy populated directory through reviewed IaC  Owner: deployment-operator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.9]  acc: [Source-pinned immutable image, independently reviewed config and actual preview deploy after available recovery snapshot and exact migration/runtime-role qualification; existing data, credentials and rollback remain protected]
+- [x] T-DIR.11 Verify live catalog and private descriptor acceptance  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.10]  acc: [Live anonymous browser/MCP discover real entries with source and setup details, private APIs deny anonymous or foreign access, and actual authorized private write/read journey is observed or explicitly pending]
 - [x] T-DIR.12 Build and document five reusable workflow candidates  Owner: catalog-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.1]  acc: [Inbox, calendar, file discovery, public code review and research skill sources declare exact read-only capabilities, setup and limitations; complete-package tests and explicit source pins preserve client admission and public-package trust gates]
 - [ ] T-DIR.13 Integrate current directory descriptors with Zati admission  Owner: zati-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.9, T-DIR.21]  acc: [Zati consumes the versioned library or hosted directory contract and imports selected descriptors and skills as reviewable drafts with current transport/account/schema requirements, preserving explicit client admission and refusing unsupported transports]
 - [ ] T-DIR.14 Qualify actual client/provider test prerequisites  Owner: coordinator-and-owner  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-DIR.12]  acc: [Actual installed or owned source Zati instance, named caller-owned connection profiles, concrete read-only targets, allowed requests and costs, versions and expiry are recorded before real workflow testing; missing profiles are not fabricated]
@@ -2223,7 +2223,7 @@ Zati workflow evidence and guides. Discovery never grants execution authority.
 - [ ] T-DIR.18 Publish qualified featured bundles and verify live presentation  Owner: coordinator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.17, T-DIR.11]  acc: [Reviewed qualification data and source-pinned release show only eligible bundles as featured, expose their actual evidence and setup guides, and retain healthy public/private behavior after deployment]
 - [ ] T-DIR.19 Document and verify refresh, expiry, rollback and operations  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.18]  acc: [Canonical receipt identifies all landed sources and live revisions, repeatable intake and coverage gaps, expiry removal, recovery/rollback and actual unresolved client/provider limits with no persistent watcher claimed]
 - [x] T-DIR.20 Independently review complete essentials screening packages  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.12]  acc: [Non-author reviews exact source and plan, all five complete manifests and assets, draft requirements and trust limits; real archive/digest/screening race tests and vet pass without invented provider qualification]
-- [ ] T-DIR.21 Merge and verify landed essentials screening sources  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.20]  acc: [Guarded rebase merge preserves reviewed head and current base, fresh landed tree matches validated candidate, evidence distinguishes screening sources from admitted runnable skills]
+- [x] T-DIR.21 Merge and verify landed essentials screening sources  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.20]  acc: [Guarded rebase merge preserves reviewed head and current base, fresh landed tree matches validated candidate, evidence distinguishes screening sources from admitted runnable skills]
 
 #### Directory delivery batches and authority
 
@@ -2281,3 +2281,16 @@ IDs deliberately have no fabricated implementation or tool schema; import is not
 admission. Separate source delivery T-DIR.21 gates Zati consumption. Adding this
 explicit review/landing pair preserves first-class review for the additional
 coding candidate. No provider/model calls or live featured result is claimed.
+
+
+### Public directory production acceptance (2026-10-17)
+
+T-DIR.10-11 and T-DIR.21 are delivered; see the
+[version-bound production receipt](receipts/2026-10-17-public-directory.md).
+The exact image is running as ECS revision 5 with a completed rollout. Snapshot,
+11 migrations, restricted grants/RLS and live anonymous/public desktop/mobile
+checks passed. Actual human private write/read acceptance remains explicitly
+pending under T-DIR.11's acceptance alternative. Screening sources landed PR #94;
+they are not admitted or Featured. Owner approved isolated local Zati setup,
+which is initialized; provider profiles, targets and inference limits are pending.
+T-DIR.13/15 consumer source work and T-DIR.14/16-19 qualification remain open.

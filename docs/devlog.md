@@ -1,5 +1,17 @@
 # Gist development log
 
+## 2026-10-17 — Public directory in production
+
+Owner approved public discovery with private custom entries, official MCP first,
+Mint for gaps and genuinely workflow-tested Featured bundles. PRs #93/#94 retain
+6,494 attributed candidates and five complete screening skills. Reviewed immutable
+image and Foundation PRs #285/#286 deployed after an available recovery snapshot,
+migration 11 and actual runtime-role/RLS verification. Live API/MCP and desktop/
+mobile acceptance passed. Zero Featured claims; private human-session and real
+provider/model workflow qualification remain separate. See the
+[production receipt](receipts/2026-10-17-public-directory.md).
+
+
 ## 2026-10-16 — Task preparation evaluation planning
 
 Owner selected read-only inbox briefing, clarified Zati has no Gmail MCP yet, and requested an EmbeddingGemma2 evaluation plan, ADRs and RFC update. Added ADR017/018, a preregistered protocol and E-PREP lifecycle; retained hosted holds and retired execution. The protocol separates retrieval from guide effects and includes Composio direct tools. No model download, benchmark, paid provider call, live email read or performance result occurred. In-flight catalog extraction remains a separate unmerged code candidate.
