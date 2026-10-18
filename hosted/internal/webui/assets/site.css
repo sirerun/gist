@@ -393,6 +393,7 @@ h1{font-size:65px}
 .bookmark-message{font-size:11px}
 
 .directory-logo.app-logo{padding:0;border:0;background:transparent;object-fit:contain}
+.app-connection{display:block;margin-top:12px}
 
 /* Public app and connector tiles share one layout on home and library pages. */
 .integration-grid.catalog-grid{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:12px}
