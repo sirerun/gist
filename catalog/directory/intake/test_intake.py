@@ -74,7 +74,7 @@ class IntakeTests(unittest.TestCase):
                 continue
             skill = record['skills'][0]
             key = skill['id'].split('/')[-1].split('@')[0]
-            manifest = json.loads((HERE.parents[2] / 'skills' / 'essentials' / 'sources' / key / 'manifest.json').read_text())
+            manifest = json.loads((HERE.parents[1] / 'skills' / 'essentials' / 'sources' / key / 'manifest.json').read_text())
             self.assertEqual(skill['id'], manifest['id'] + '@' + manifest['version'])
             self.assertEqual(skill['source_digest'], 'sha256:' + manifest['package_digest']['value'])
             self.assertEqual(skill['status'], 'candidate')
