@@ -1,8 +1,8 @@
 # Vendor-only public directory reset — 2026-10-17
 
-Status: source implementation and qualified Linux checks pass. Final independent
-evidence review, guarded merge, production migration/grants, image deployment and
-live acceptance remain separate gates. This receipt does not declare the reset deployed.
+Status: reviewed public catalog replacement is merged and deployed; public
+HTTP/MCP and desktop/mobile acceptance passed. The authenticated production
+bookmark/private-content owner journey remains unperformed and is not implied.
 
 ## Settled scope
 
@@ -145,3 +145,95 @@ available recovery snapshot `gist-pre-bookmarks-20261017` predates this release.
 Migration012, minimal grants and actual runtime verification must precede image
 activation. No tables are dropped, no private UUIDs reset and no stored user
 preferences deleted. Later review/merge/deployment/live gates remain explicit.
+
+## Reviewed landing and production release
+
+Gist [PR101](https://github.com/sirerun/gist/pull/101) landed at
+`348a6d09b9a4ebc610b3f60bca8b23f37c28811b`, with exact tree parity to the
+independently approved head `6c63d5f150151f19010b993b94ee20bf20dbddf9`.
+The product code is exactly the verified `9cb0c023` source; subsequent changes
+only record evidence. The pinned Wazi final source plan passed 568 tasks with
+reader/schema/semantics valid; source digest
+`19f1687f4854ceefb54a543171d4490ceed20bf9ec42ee8e956fb5cb5a0b3e3f`.
+
+Existing CodeBuild `gist-registry-image:f9d976a3-b8e6-4470-9e9c-c8d9b28f8953`
+succeeded against that full landed source SHA. Immutable image digest:
+`sha256:0937b758b4d89213cac83ffb91b3c1c0f86e2ac4f2a0cd4af7425107287d7249`.
+No new infrastructure or model route was provisioned.
+
+The final merge guard detected Foundation main advancing for the other session's
+bookmark migration stage. The stale own candidate/preview was discarded without
+apply; own PR290 was closed. Fresh independently reviewed
+[Foundation PR291](https://github.com/sirerun/foundation/pull/291) landed
+`3cd3a0c19607e7e1bec8a27936cc60817da17906` with exact tree parity to
+`c4bb192e38e712ee1cd841eb0d8b2f035e0a3e08`. Its fresh saved plan changed only
+the isolated migrator image: one replacement, 59 unchanged resources.
+
+An available recovery snapshot, `gist-pre-bookmarks-20261017`, was rechecked
+before any SQL release step. The exact new image observed migration012 already
+applied by the other session; its checksum is
+`17a113d9baa43ddf48cbf44eacaa72d00231f79af0855bef38080ae198bf38a5`.
+Ledger1-11 matched the preflight exactly. **SQL apply was skipped.**
+The first real restricted-role check failed for missing required table privileges.
+The reviewed provisioning operation then completed once, using the existing
+credential and approved matrix; the new bookmark privileges are SELECT, INSERT
+and DELETE. No secret, ownership or membership changes were requested.
+Post-provision status reported all 12 migrations, no pending migration and manifest
+`380a916fafaa7c6feabf09e7291e26fe0c755020bfdb5d4d532cae84279a2a6e`.
+A subsequent read-only authentication as the actual runtime role passed every
+attestation: restricted attributes, non-owner, no memberships, reviewed privileges
+only, required grants, forced RLS and hidden unscoped/mismatched-tenant rows.
+Row-hiding probes can be vacuous on empty tables; seeded isolation is separately
+proved by the PostgreSQL source tests. No table was dropped and no row deletion
+or private UUID reset was part of this release.
+
+After separate independent activation approval,
+[Foundation PR293](https://github.com/sirerun/foundation/pull/293) landed
+`ce213611b54e70c1007ae846648752b039f5a6ec`, matching reviewed
+`6c0cb595addd978c8ff897591a5f33360abe3d71`. Its constrained saved plan updated
+only the app task and service reference: two changes, 58 unchanged resources.
+PR292's older bookmark-only image activation was independently proved wholly
+superseded and closed reversibly after its exact head check; its foreign branch
+and image were preserved. The new image includes both merged icon/bookmark work
+and the catalog replacement.
+
+## Actual public acceptance
+
+ECS `gist-registry:7` reached one completed deployment, desired/running1 and
+pending0. The sole running task
+`43fedc9f27484956918f87ccaa5de5ad` reports the expected0937 image digest.
+The sole ALB target is healthy and HTTP health/readiness return200. Container
+health is UNKNOWN because no Docker container check is configured; that field
+is not used as a healthy observation.
+
+Actual `https://gist.sire.run` checks passed:
+
+- Exact snapshot revision `sha256:8ee6929d7a6af04ecf0d33e9a0a86dd0d61d81ab56f1d495fe196c2eed571822`,
+  all13 descriptors and all13 exports equal the reviewed snapshot.
+- Four removed Google OpenAPI/Brave package routes return404; public MCP search
+  returns the same13-entry revision. Anonymous private/bookmark routes return401.
+- Four recommendations and zero Featured claims; no provider or model execution.
+- Fresh anonymous browser contexts pass home/library/Gmail detail at widths1440,
+  390 and320. Icons load, qualification/setup text and immutable skill link remain,
+  no horizontal overflow, no page errors and no off-origin requests. The release
+  screenshot was visually inspected and preserves the merged icon/card layout.
+
+Two private acceptance-harness corrections were needed, without product changes:
+use the API's supported50-entry limit rather than100, and locate badge text on
+the complete card after PR99 moved it outside the title link. Failed harness
+receipts are retained separately from the corrected passing checks.
+
+**Outstanding owner observation:** the authenticated production bookmark
+save/reload/remove and private-content journey was not run. The public browser
+harness imports no account credentials and performs no new authorization. Local
+PostgreSQL/HTTP isolation, persistence and Node/browser fixture results do not
+substitute for that production account journey. T-DIR.53 records this through its
+explicit prerequisite-disclosure alternative. The public catalog reset is deployed;
+this does not qualify Gmail execution or the unfinished private Zati adapter.
+
+Refreshes must continue through explicit membership/vendor-route review, offline
+regeneration, checks, independent review and immutable source/image release. The
+previous serving image remains the application rollback target; the additive
+bookmark table is retained. No persistent watcher or ongoing provider/model run
+is claimed. Private receipts retain actual saved plans, build/task logs, role
+attestations, HTTP results and all nine browser screenshots.
