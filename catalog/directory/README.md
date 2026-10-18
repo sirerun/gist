@@ -17,6 +17,10 @@ descriptors. Their projection retains fields required by strict clients and
 skill-integrity pins, but keeps upstream intake, endpoint checks and workflow
 evidence out of browsing responses. Public provenance identifies the Gist
 catalog; original intake evidence remains in the operator snapshot.
+The hosted service uses `DefaultPublic()` for REST, MCP and bookmark searches,
+so hidden intake phrases cannot affect result membership and public purpose
+descriptions are searchable. Its deterministic revision differs from the raw
+operator snapshot, keeping cursors and descriptor selections bound to the view.
 
 Brand icons are served locally. Transparent white marks are traced from a
 normalized alpha mask and composed over an explicit six-digit brand background

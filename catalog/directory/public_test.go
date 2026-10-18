@@ -9,6 +9,39 @@ import (
 	"time"
 )
 
+func TestPublicSearchIndexesPurposeAndNotPrivateIntake(t *testing.T) {
+	public, err := DefaultPublic()
+	if err != nil {
+		t.Fatal(err)
+	}
+	private, err := Default()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if public.snapshot.Revision == private.snapshot.Revision {
+		t.Fatal("public cursor revision reused operator snapshot")
+	}
+	for _, query := range []string{"listed by make", "operator verified", "reachability check"} {
+		result, err := public.Search(Query{Text: query, Limit: 100})
+		if err != nil || result.Total != 0 {
+			t.Fatalf("hidden query %q: total=%d err=%v", query, result.Total, err)
+		}
+	}
+	result, err := public.Search(Query{Text: "contacts companies deals", Limit: 100})
+	if err != nil || len(result.Items) != 1 || result.Items[0].ServiceID != "hubspot" {
+		t.Fatalf("public purpose not searchable: %+v %v", result, err)
+	}
+	for _, record := range result.Items {
+		if ValidateRecord(record) != nil || record.Source.ID != "gist" {
+			t.Fatal("invalid projected index record")
+		}
+	}
+	again, err := DefaultPublic()
+	if err != nil || again.snapshot.Revision != public.snapshot.Revision {
+		t.Fatal("unstable public revision")
+	}
+}
+
 func TestPublicProjectionKeepsConnectionDetailsAndHidesIntakeEvidence(t *testing.T) {
 	pin := "sha256:" + strings.Repeat("a", 64)
 	record := Record{
