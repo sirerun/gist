@@ -28,6 +28,13 @@ execution. The accepted ADR008 stack architecture, standing apply grant and
 data protections apply. No Zati marketplace rollout is implied by this hosting
 request.
 
+Current website direction (2026-10-17): the owner approved the Library visual
+direction, its refinement and Gist logo, then requested building the web app.
+[ADR022](adr/022-hosted-library-web-app.md) and E-WEB below own this usable
+website/catalog slice within the existing authorized AWS deployment. Public
+informational pages do not expose private catalog content or relax bootstrap
+admission for authenticated APIs. Execution remains caller-owned.
+
 ### Dispatch disposition and precedence
 
 This section supersedes older continuation instructions, milestone tables and unqualified “current” infrastructure notes below, which are dated historical records. All original task rows, IDs, completion states and acceptance evidence remain. Unfinished gateway rows depend on the permanently non-dispatchable retirement sentinel; catalog provenance rows .31/.35 are retained under catalog ownership with replacement prerequisites. Unfinished prior hosted/guidance rows depend on the hold sentinel. A bounded repair/current-consumer obligation requires a separately recorded scoped resumption, not blanket reactivation. No held or retired row is counted complete. The library terminal depends on neither the retired graph nor hosted production.
@@ -2127,3 +2134,32 @@ REST/MCP denials passed. Readiness remains unavailable until real founder
 enrollment; the owner has been given the direct sign-in link. Tasks for full
 authenticated acceptance, first-enrollment removal and final production handoff
 remain open; no persistent watcher or complete marketplace acceptance is claimed.
+
+
+### E-WEB -- Approved Library website and authenticated catalog
+
+fidelity: executable
+Acceptance: The approved Gist identity and Library design become a responsive
+website at gist.sire.run with GitHub sign-in, live authorized catalog search,
+version details, useful client/developer guidance and honest empty/error states;
+source, browser, review, landed and deployment evidence remain distinct.
+
+- [x] T-WEB.1 Freeze approved design, product boundary and browser access contract  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  acc: [ADR022 records the owner-approved Library direction and logo, current private catalog and client-owned execution boundaries, fixed sign-in return path and source-bound deployment acceptance]
+- [ ] T-WEB.2 Implement responsive website and catalog experience  Owner: web-frontend  Est: TBD  kind: agent  stage: implement  blocked-by: [T-WEB.1]  acc: [Embedded accessible pages implement approved visual identity, search and actual kind filters, bounded paging, exact detail, client guidance, sign-in and sign-out with loading, no-result, empty and error states]
+- [ ] T-WEB.3 Implement current-policy browser catalog access and route wiring  Owner: web-backend  Est: TBD  kind: agent  stage: implement  blocked-by: [T-WEB.1]  acc: [Every private read checks current cookie identity, membership and read policy in configured tenant; public pages work during enrollment while existing API admission and OAuth contracts remain enforced]
+- [ ] T-WEB.4 Verify the complete changed source and browser journeys  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-WEB.2, T-WEB.3]  acc: [Race integration and browser checks pass real HTTP status/body, authorization revocation/isolation, bootstrap routes, sign-in return target, search, details, empty/errors and desktop/mobile layouts without private-token storage or injected metadata execution]
+- [ ] T-WEB.5 Independently review final web app candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-WEB.4]  acc: [Non-author reviews exact base/head and complete frontend/backend/docs diff; reachable security, correctness and usability findings have verified dispositions and required re-review]
+- [ ] T-WEB.6 Merge reviewed website source  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-WEB.5]  acc: [Guarded GitHub rebase merges only the reviewed head after current base and required branch checks are reconciled]
+- [ ] T-WEB.7 Verify fresh landed source and build immutable release image  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-WEB.6]  acc: [Fresh main is reachable and tree-equivalent to reviewed source, affected checks pass and CodeBuild produces a source-pinned immutable ECR image]
+- [ ] T-WEB.8 Review and deploy the website image through existing IaC  Owner: deployment-operator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-WEB.7]  acc: [Independently reviewed Foundation image-pin PR merges, actual preview changes only the expected app task/service, and apply converges without data or secret mutation]
+- [ ] T-WEB.9 Verify production website and retain authentication limits  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-WEB.8]  acc: [Live TLS pages/assets render approved identity at desktop/mobile sizes, GitHub authorization redirects correctly and unauthenticated private APIs deny access; actual founder enrollment is observed or explicitly left pending]
+- [ ] T-WEB.10 Record reviewed production handoff  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-WEB.9]  acc: [Canonical receipt names source/image/config, actual source and browser checks, independent review, operational rollback and any remaining owner sign-in or content-publication prerequisites]
+
+#### Website execution notes
+
+Execution: one current-session coordinator, frontend and backend implementers
+with disjoint file ownership, and a separate final non-author reviewer. No model
+or effort override. Bounded Linux checks reuse existing capacity while Mac load
+is above the build threshold. No new cloud infrastructure or model/provider
+calls are part of this slice. The existing E-HOSTED authenticated acceptance
+and full operational handoff remain open until their own predicates are met.

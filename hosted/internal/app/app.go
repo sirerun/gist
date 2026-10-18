@@ -28,6 +28,7 @@ import (
 	"github.com/sirerun/gist/hosted/internal/resolution"
 	"github.com/sirerun/gist/hosted/internal/rest"
 	"github.com/sirerun/gist/hosted/internal/storage"
+	"github.com/sirerun/gist/hosted/internal/webui"
 )
 
 type App struct {
@@ -211,7 +212,8 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		pool.Close()
 		return nil, maintenanceErr
 	}
-	handler := requestContext{lifetime: a.requests, admission: a.bootstrapAdmission, rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, enrollment: enrollmentRoutes, ready: func(ctx context.Context) error {
+	web := &webAPI{sessions: sessions, policy: policy, catalog: postgresWebCatalog{pool: pool}, origin: cfg.PublicOrigin, audience: cfg.ResourceAudience, workspace: cfg.GitHubEnrollment.WorkspaceID, workspaceName: cfg.GitHubEnrollment.WorkspaceName, cursorKey: deriveKey(cfg.OAuthConsentSecret, "gist web cursor v1"), timeout: cfg.RequestTimeout, maxBytes: min(cfg.MaxResponseBytes, 256<<10), concurrent: make(chan struct{}, cfg.MaxConcurrentRequests)}
+	handler := requestContext{web: web, ui: webui.Handler(), lifetime: a.requests, admission: a.bootstrapAdmission, rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, enrollment: enrollmentRoutes, ready: func(ctx context.Context) error {
 		if err := a.maintenanceReady(); err != nil {
 			return err
 		}
@@ -374,6 +376,7 @@ type requestContext struct {
 	lifetime         *requestLifetime
 	rest, mcp, oauth http.Handler
 	enrollment       http.Handler
+	web, ui          http.Handler
 	ready            func(context.Context) error
 	admission        func() error
 }
@@ -405,7 +408,7 @@ func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Enrollment cannot require a pre-existing maintainer. All other APIs,
 	// including OAuth issuance, remain unavailable until normal maintenance
 	// has verified the enrolled identity against current durable policy.
-	if h.admission != nil && r.URL.Path != "/healthz" && r.URL.Path != "/readyz" && r.URL.Path != enrollment.StartPath && r.URL.Path != enrollment.CallbackPath {
+	if h.admission != nil && !(h.ui != nil && webui.Handles(r.URL.Path)) && r.URL.Path != "/app/api/logout" && r.URL.Path != "/healthz" && r.URL.Path != "/readyz" && r.URL.Path != enrollment.StartPath && r.URL.Path != enrollment.CallbackPath {
 		if err := h.admission(); err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.Header().Set("Retry-After", "60")
@@ -414,6 +417,14 @@ func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			_ = json.NewEncoder(w).Encode(rest.Error{Code: "service_unavailable", Message: "Service unavailable", RequestID: "req_bootstrap", Retryable: true})
 			return
 		}
+	}
+	if h.ui != nil && webui.Handles(r.URL.Path) {
+		h.ui.ServeHTTP(w, r)
+		return
+	}
+	if h.web != nil && strings.HasPrefix(r.URL.Path, "/app/api/") {
+		h.web.ServeHTTP(w, r)
+		return
 	}
 	if h.oauth != nil && oauth.Handles(r.URL.Path) {
 		h.oauth.ServeHTTP(w, r)

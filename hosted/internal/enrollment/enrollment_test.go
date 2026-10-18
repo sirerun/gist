@@ -583,3 +583,45 @@ func TestRoutesServeLoginOverHTTP(t *testing.T) {
 		t.Fatalf("callback status=%d subject=%q body=%s", callbackResponse.StatusCode, sessions.subject, body)
 	}
 }
+
+func TestWebsiteReturnTargetIsFixedAndSurvivesLogin(t *testing.T) {
+	h, sessions := testHandler(t, newMemoryStore(), fakeAuth{})
+	for _, bad := range []string{"/library?next=https://evil.example", "/library#x", "//evil.example/library", "/library/", "/%6cibrary", "https://gist.example/library", "/signin", "/library?"} {
+		if _, err := h.validateReturnTo(bad); err == nil {
+			t.Fatalf("accepted unsafe website return %q", bad)
+		}
+	}
+	start := httptest.NewRecorder()
+	h.start(start, httptest.NewRequest(http.MethodGet, StartPath+"?return_to=%2Flibrary", nil))
+	if start.Code != 302 {
+		t.Fatalf("start status=%d body=%s", start.Code, start.Body)
+	}
+	cookies := start.Result().Cookies()
+	state, _, _, target, _, err := h.openFlow(cookies[0].Value)
+	if err != nil || target != "/library" {
+		t.Fatalf("flow target=%q err=%v", target, err)
+	}
+	callback := httptest.NewRequest(http.MethodGet, CallbackPath+"?code=synthetic-code&state="+url.QueryEscape(state), nil)
+	callback.AddCookie(cookies[0])
+	out := httptest.NewRecorder()
+	h.callback(out, callback)
+	if out.Code != 302 || out.Header().Get("Location") != "/library" || sessions.subject != "12345" || strings.Contains(out.Body.String(), "csrf_token") {
+		t.Fatalf("website callback status=%d target=%q", out.Code, out.Header().Get("Location"))
+	}
+}
+
+func TestWebsiteLoginFailureUsesFixedHelpfulPage(t *testing.T) {
+	for _, code := range []string{"access_denied", "github_failed", "service_unavailable"} {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest(http.MethodGet, CallbackPath, nil)
+		loginFailure(w, r, "/library", http.StatusForbidden, "private failure", code)
+		if w.Code != http.StatusSeeOther || w.Header().Get("Location") != "/signin?error="+code || strings.Contains(w.Body.String(), "private failure") {
+			t.Fatalf("website error=%d %q", w.Code, w.Header().Get("Location"))
+		}
+		legacy := httptest.NewRecorder()
+		loginFailure(legacy, r, "", http.StatusForbidden, "workspace access denied", code)
+		if legacy.Code != http.StatusForbidden || legacy.Header().Get("Location") != "" {
+			t.Fatal("legacy API error contract changed")
+		}
+	}
+}
