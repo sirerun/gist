@@ -2242,11 +2242,11 @@ Zati workflow evidence and guides. Discovery never grants execution authority.
 - [ ] T-DIR.34 Merge and verify landed qualified client adapter  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.33]  acc: [Guarded Zati merge preserves reviewed source and current target, fresh landed tree/checks match candidate; later isolated runtime replacement/profile admission uses remaining explicit authority and exact source, never the installed unrelated controller or an expired test window]
 
 
-- [ ] T-DIR.35 Repair exact official Gmail endpoint constructor compatibility  Owner: zati-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.29]  acc: [A narrow pre-existing generic-client credential-path false positive permits only the literal documented official Gmail endpoint after ordinary URL/authority/encoding checks; other credential-bearing path denials and conservative raw-tool effects stay unchanged; the patch is independent of the unregistered qualified virtual adapter]
-- [ ] T-DIR.36 Verify endpoint compatibility and refusal regressions  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.35]  acc: [Exact literal succeeds with controlled fixtures; encoded aliases, userinfo, query, fragment, port and extra-path variants retain denial, existing generic MCP checks pass under qualified host constraints without mailbox/model calls]
-- [ ] T-DIR.37 Independently review isolated endpoint repair  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.36]  acc: [Non-author approves exact minimal endpoint-only candidate and checks against fresh main, distinct from unfinished conversion/facade changes and protected foreign shared-root work]
-- [ ] T-DIR.38 Guardedly merge endpoint-only client repair  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-DIR.37]  acc: [Current reviewed head/base, checks and policy allow head-guarded rebase merge; no unregistered adapter or shared contract/public-activation changes are included]
-- [ ] T-DIR.39 Verify landed endpoint repair and preserve adapter handoff  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.38]  acc: [Fresh main reaches exact reviewed endpoint-only tree with narrow checks valid; unique pure/conversion/facade work stays protected and T-DIR.31-34 remains open until foreign root ownership and shared contract gates are admitted; no installed or live Gmail execution is inferred]
+- [x] T-DIR.35 Repair exact official Gmail endpoint constructor compatibility  Owner: zati-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.29]  acc: [A narrow pre-existing generic-client credential-path false positive permits only the literal documented official Gmail endpoint after ordinary URL/authority/encoding checks; other credential-bearing path denials and conservative raw-tool effects stay unchanged; the patch is independent of the unregistered qualified virtual adapter]
+- [x] T-DIR.36 Verify endpoint compatibility and refusal regressions  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.35]  acc: [Exact literal succeeds with controlled fixtures; encoded aliases, userinfo, query, fragment, port and extra-path variants retain denial, existing generic MCP checks pass under qualified host constraints without mailbox/model calls]
+- [x] T-DIR.37 Independently review isolated endpoint repair  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.36]  acc: [Non-author approves exact minimal endpoint-only candidate and checks against fresh main, distinct from unfinished conversion/facade changes and protected foreign shared-root work]
+- [x] T-DIR.38 Guardedly merge endpoint-only client repair  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-DIR.37]  acc: [Current reviewed head/base, checks and policy allow head-guarded rebase merge; no unregistered adapter or shared contract/public-activation changes are included]
+- [x] T-DIR.39 Verify landed endpoint repair and preserve adapter handoff  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.38]  acc: [Fresh main reaches exact reviewed endpoint-only tree with narrow checks valid; unique pure/conversion/facade work stays protected and T-DIR.31-34 remains open until foreign root ownership and shared contract gates are admitted; no installed or live Gmail execution is inferred]
 
 
 
@@ -2416,3 +2416,23 @@ repair with explicit URL-variant denials and independent SDLC gates. The larger
 qualified virtual adapter remains separate. Other active workers retain fresh
 shared specification and TaskContext/runtime ownership; no new alias claim may
 bypass those roots, and no source milestone implies final integration readiness.
+
+
+The isolated endpoint-only repair subsequently landed Zati PR #60 at
+a5bbdada57fbf9fa053d176027a6deee2e24e01b, matching independently reviewed
+5cd42c48f20dc3e81e5ef5c14d65747340b332a2 against 5ce0a12b exactly. Full
+mcpclient race passed in 4.566 seconds, vet passed and fresh landed specification
+validation checked 50 files, 43 scopes and 367 operations. Hosted CI again did
+not start because of the confirmed billing issue; the authorized local fallback
+was used without changing policy. T-DIR.35-39 are complete as source delivery
+only. The previous isolated binary and installed application were not replaced,
+and no native Gmail connection or further provider/model call is inferred.
+
+Pure conversion/shared-session facade work has a separately reviewed private
+source checkpoint with controlled SDK fixtures. It remains unregistered and
+unmerged: Connections, Execution, Controller, assembly, specification and UI
+integration have not been admitted over the other coordinator's protected shared
+roots. T-DIR.31-34 stay open. No alternate claim or partial codec success may
+stand in for that complete integration, canonical ResultArtifact and final-context
+projection. All unique source work and actual evidence remain protected for
+an explicit continuation after producer ownership is released.
