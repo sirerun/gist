@@ -32,12 +32,12 @@ function fixture({page='home', search='', handle}={}) {
 }
 test('public cards render while authentication is unresolved; guest links use an allowed return URL',async()=>{
  let release;const f=fixture({handle:url=>url==='/app/api/session'?new Promise(resolve=>release=resolve):undefined});await flush();assert.equal(f.controls().length,2);assert.equal(f.controls()[0].children[0].disabled,true);
- release({status:401});await flush();for(const c of f.controls()){const [save,signIn]=c.children;assert.equal(save.hidden,true);assert.equal(signIn.hidden,false);assert.equal(signIn.tag,'a');assert.equal(new URL(signIn.href,'https://gist.example').searchParams.get('return_to'),'/library');}
+ release({status:401});await flush();for(const c of f.controls()){const [save,signIn]=c.children;assert.equal(save.hidden,true);assert.equal(signIn.hidden,false);assert.equal(signIn.tag,'a');assert.equal(signIn.textContent,'');assert.ok(signIn.attrs['aria-label'].startsWith('Sign in to bookmark '));assert.equal(new URL(signIn.href,'https://gist.example').searchParams.get('return_to'),'/library');}
 });
 test('retry refreshes every control, and saving has a stable accessible toggle name',async()=>{
- let failing=true;const f=fixture({handle:url=>url==='/app/api/session'&&failing?{status:503}:undefined});await flush();assert.ok(f.controls().every(c=>c.children[0].textContent==='Retry bookmarks'));
- failing=false;await f.click(f.controls()[0].children[0]);assert.ok(f.controls().every(c=>c.children[0].textContent==='Bookmark'));assert.equal(f.calls.filter(c=>c.options.method==='PUT').length,0);
- const save=f.controls()[0].children[0];await f.click(save);assert.equal(save.textContent,'Bookmark');assert.equal(save.attrs['aria-label'],'Bookmark GitHub');assert.equal(save.attrs['aria-pressed'],'true');
+ let failing=true;const f=fixture({handle:url=>url==='/app/api/session'&&failing?{status:503}:undefined});await flush();assert.ok(f.controls().every(c=>c.children[0].attrs['aria-label'].startsWith('Retry bookmarks for')));
+ failing=false;await f.click(f.controls()[0].children[0]);assert.ok(f.controls().every(c=>c.children[0].textContent==='' && c.children[0].attrs['aria-label'].startsWith('Bookmark ')));assert.equal(f.calls.filter(c=>c.options.method==='PUT').length,0);
+ const save=f.controls()[0].children[0];await f.click(save);assert.equal(save.textContent,'');assert.equal(save.children[0].src,'/assets/bookmark-filled.svg');assert.equal(save.attrs['aria-label'],'Bookmark GitHub');assert.equal(save.attrs['aria-pressed'],'true');
 });
 test('an expired write session updates all controls to sign-in links',async()=>{
  const f=fixture({handle:(url,options)=>options.method==='PUT'?{status:401}:undefined});await flush();await f.click(f.controls()[0].children[0]);assert.ok(f.controls().every(c=>c.children[0].hidden&&!c.children[1].hidden));

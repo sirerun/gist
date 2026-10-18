@@ -44,7 +44,7 @@
   function bookmarkButton(record) {
     const control = el("div", undefined, "bookmark-control");
     let pending = false;
-    const save = button("Bookmark", async () => {
+    const save = button("", async () => {
       if (pending || bookmarkState === "loading" || bookmarkState === "guest") return;
       pending = true; message.textContent = ""; refresh();
       if (bookmarkState === "error") {
@@ -64,14 +64,22 @@
         if (e.status === 401) { bookmarkState = "guest"; refreshBookmarkControls(); signIn.focus(); }
       } finally { pending = false; refresh(); }
     });
-    const signIn = link("Sign in to bookmark", bookmarkSignIn, "button button-outline");
+    save.className += " bookmark-icon-button";
+    const icon = el("img"); icon.alt = ""; icon.width = 18; icon.height = 18;
+    save.append(icon);
+    const signIn = link("", bookmarkSignIn, "button button-outline bookmark-icon-button");
+    const signInLabel = "Sign in to bookmark " + (record.title || record.id);
+    signIn.setAttribute("aria-label", signInLabel); signIn.title = signInLabel;
+    const guestIcon = el("img"); guestIcon.src = "/assets/bookmark.svg"; guestIcon.alt = ""; guestIcon.width = 18; guestIcon.height = 18;
+    signIn.append(guestIcon);
     const message = el("span", "", "quiet bookmark-message"); message.setAttribute("role", "status");
     function refresh() {
       save.hidden = bookmarkState === "guest";
       signIn.hidden = bookmarkState !== "guest";
       save.disabled = pending || bookmarkState === "loading";
-      save.textContent = bookmarkState === "loading" ? "Loading bookmarks…" : bookmarkState === "error" ? "Retry bookmarks" : "Bookmark";
-      save.setAttribute("aria-label", save.textContent + " " + (record.title || record.id));
+      const label = (bookmarkState === "loading" ? "Loading bookmarks for" : bookmarkState === "error" ? "Retry bookmarks for" : "Bookmark") + " " + (record.title || record.id);
+      save.setAttribute("aria-label", label); save.title = label;
+      icon.src = bookmarkState === "ready" && bookmarkIDs.has(record.id) ? "/assets/bookmark-filled.svg" : "/assets/bookmark.svg";
       if (bookmarkState === "ready") save.setAttribute("aria-pressed", String(bookmarkIDs.has(record.id)));
       else save.removeAttribute("aria-pressed");
     }
