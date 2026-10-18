@@ -14,7 +14,6 @@ HERE = pathlib.Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location('intake', HERE / 'build_snapshot.py')
 intake = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(intake)
-TEMP_ROOT = pathlib.Path('/Volumes/BuildOffload/checks/gist-catalog-reset-20261017')
 
 
 def record(service='example', kind='mcp'):
@@ -199,8 +198,7 @@ class IntakeTests(unittest.TestCase):
         self.assertNotEqual(receipt['revision'], altered['revision'])
 
     def test_offline_cli_reproduces_exact_outputs_without_legacy_inputs(self):
-        TEMP_ROOT.mkdir(parents=True, exist_ok=True)
-        with tempfile.TemporaryDirectory(prefix='intake-unit-', dir=TEMP_ROOT) as path:
+        with tempfile.TemporaryDirectory(prefix='intake-unit-') as path:
             root = pathlib.Path(path)
             curated, approved = root/'curated.json', root/'approved.json'
             curated.write_text(json.dumps([record('z-last'), record('a-first', 'openapi')]))
