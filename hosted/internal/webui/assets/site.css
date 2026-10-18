@@ -379,3 +379,13 @@ h1{font-size:65px}
 .directory-card-heading h2{min-width:0}
 .directory-logo{width:48px;height:48px;flex:none;object-fit:contain;padding:8px;border:1px solid var(--line);border-radius:14px;background:#fff;box-sizing:border-box}
 .directory-card>.directory-badges{margin-top:auto;margin-bottom:0;padding-top:16px}
+
+/* Personal bookmark controls remain outside entry navigation links. */
+.bookmark-card{display:flex;flex-direction:column}
+.bookmark-entry-link{display:block;flex:1;color:inherit;text-decoration:none;min-width:0}
+.bookmark-entry-link>p{font-size:12px;color:#68705f;white-space:pre-wrap;overflow-wrap:anywhere}
+.bookmark-control{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px}
+.bookmark-control .button{font-size:11px;padding:8px 12px}
+.bookmark-control [aria-pressed="true"]{background:var(--green);color:white}
+.bookmark-control button:disabled{opacity:.65;cursor:wait}
+.bookmark-message{font-size:11px}

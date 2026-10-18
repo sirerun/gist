@@ -18,6 +18,7 @@ import (
 // Explicit grants are reviewed alongside application changes. Publisher review
 // evidence and namespace ownership are readable, never writable by the service.
 var runtimeTables = map[string]string{
+	"directory_bookmarks":       "SELECT, INSERT, DELETE",
 	"private_directory_entries": "SELECT, INSERT, DELETE",
 	"catalog_versions":          "SELECT, INSERT, UPDATE",
 	"catalog_payloads":          "SELECT, INSERT, UPDATE",
