@@ -12,8 +12,8 @@ then restricted admitted public routes to vendor-official HTTPS MCP endpoints
 or the vendor's raw public OpenAPI specifications. App membership is necessary
 but does not establish vendor ownership, a callable route or qualification.
 Community packages, generated wrappers and bulk registry membership alone are
-not admitted public routes. Distinct approved implementations remain distinct;
-explicit service aliases deduplicate app identity without equating contracts.
+not admitted public routes. One admitted route per app is selected; explicit service aliases deduplicate
+app identity without equating contracts. Different apps may share a vendor route.
 
 This prospective policy supersedes earlier broad public bulk intake. The dated
 6,495-entry snapshot and its release/check receipts remain historical evidence;

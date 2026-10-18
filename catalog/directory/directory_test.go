@@ -40,6 +40,11 @@ func TestDefaultSnapshot(t *testing.T) {
 		}
 		services[r.ServiceID] = true
 	}
+	for _, retained := range []string{"mcp:google-gmail", "mcp:io.github.github/github-mcp-server", "mcp:app.linear/linear", "mcp:ai.exa/exa"} {
+		if _, ok := i.Get(retained); !ok {
+			t.Fatalf("surviving connector identity changed: %s", retained)
+		}
+	}
 	for _, removed := range []string{"openapi:google-gmail", "openapi:google-calendar", "openapi:google-drive", "mcp:com.brave/brave-search"} {
 		if _, ok := i.Get(removed); ok {
 			t.Fatalf("retired route remains: %s", removed)

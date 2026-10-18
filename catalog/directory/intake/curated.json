@@ -75,7 +75,7 @@
     "featured": false
   },
   {
-    "id": "mcp:exa",
+    "id": "mcp:ai.exa/exa",
     "kind": "mcp",
     "service_id": "exa",
     "title": "Exa",

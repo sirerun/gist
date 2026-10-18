@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -179,6 +180,11 @@ func TestPersonalBookmarksPostgresIsolationAndPersistence(t *testing.T) {
 	savedIDs := []string{}
 	for _, record := range public.Items {
 		savedIDs = append(savedIDs, record.ID)
+	}
+	// Retired entries remain pageable too; the production catalog may contain
+	// fewer than 50 admitted apps. Do not inflate it to exercise saved paging.
+	for len(savedIDs) < 50 {
+		savedIDs = append(savedIDs, fmt.Sprintf("mcp:retired-page-fixture-%02d", len(savedIDs)))
 	}
 	if _, err := f.adminPool.Exec(ctx, `INSERT INTO directory_bookmarks(workspace_id,issuer,subject,entry_id) SELECT $1,$2,$3,unnest($4::text[])`, compositionWorkspace, compositionIssuer, compositionSubject, savedIDs); err != nil {
 		t.Fatal(err)

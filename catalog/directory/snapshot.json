@@ -1,13 +1,13 @@
 {
   "format": "gist.directory.snapshot/v1",
-  "revision": "sha256:e42f691837b3b4f12f28bcc7642d48a0bd097c35f5603972c4ae749a9307948c",
+  "revision": "sha256:8ee6929d7a6af04ecf0d33e9a0a86dd0d61d81ab56f1d495fe196c2eed571822",
   "generated_at": "2026-10-18T02:54:36Z",
   "sources": [
     {
       "id": "gist-curation",
       "url": "https://github.com/sirerun/gist",
-      "revision": "sha256:47d7a82cee3fe65b287f3dd8d69cd7eb4e755a745abaa3aa38565462e5a02900",
-      "sha256": "47d7a82cee3fe65b287f3dd8d69cd7eb4e755a745abaa3aa38565462e5a02900",
+      "revision": "sha256:040ff8d02e51d3704b68f637e572b1a8923c589d7bd19c15c7aab3fb86d20ae5",
+      "sha256": "040ff8d02e51d3704b68f637e572b1a8923c589d7bd19c15c7aab3fb86d20ae5",
       "retrieved_at": "2026-10-18T02:54:36Z",
       "license": "Apache-2.0 (Gist metadata; vendor rights retained)",
       "attribution": "Gist maintainers; individually reviewed vendor-official routes. Source membership is not execution qualification."
@@ -22,6 +22,36 @@
     }
   ],
   "entries": [
+    {
+      "id": "mcp:ai.exa/exa",
+      "kind": "mcp",
+      "service_id": "exa",
+      "title": "Exa",
+      "description": "Official Exa MCP connection. Hosted web search and content retrieval. Vendor documents a no-key route; service limits and client admission still apply. Not qualified in Zati.",
+      "tags": [
+        "web"
+      ],
+      "homepage": "https://exa.ai/mcp",
+      "official": true,
+      "official_evidence_url": "https://exa.ai/mcp",
+      "remotes": [
+        {
+          "url": "https://mcp.exa.ai/mcp",
+          "transport": "streamable-http"
+        }
+      ],
+      "auth": {
+        "type": "none",
+        "setup_url": "https://exa.ai/mcp"
+      },
+      "recommended": false,
+      "featured": false,
+      "source": {
+        "id": "gist-curation",
+        "entry_id": "mcp:ai.exa/exa",
+        "url": "https://exa.ai/mcp"
+      }
+    },
     {
       "id": "mcp:app.linear/linear",
       "kind": "mcp",
@@ -110,36 +140,6 @@
         "id": "gist-curation",
         "entry_id": "mcp:confluence",
         "url": "https://support.atlassian.com/atlassian-ai-gateway/docs/get-started-with-the-atlassian-remote-mcp-server/"
-      }
-    },
-    {
-      "id": "mcp:exa",
-      "kind": "mcp",
-      "service_id": "exa",
-      "title": "Exa",
-      "description": "Official Exa MCP connection. Hosted web search and content retrieval. Vendor documents a no-key route; service limits and client admission still apply. Not qualified in Zati.",
-      "tags": [
-        "web"
-      ],
-      "homepage": "https://exa.ai/mcp",
-      "official": true,
-      "official_evidence_url": "https://exa.ai/mcp",
-      "remotes": [
-        {
-          "url": "https://mcp.exa.ai/mcp",
-          "transport": "streamable-http"
-        }
-      ],
-      "auth": {
-        "type": "none",
-        "setup_url": "https://exa.ai/mcp"
-      },
-      "recommended": false,
-      "featured": false,
-      "source": {
-        "id": "gist-curation",
-        "entry_id": "mcp:exa",
-        "url": "https://exa.ai/mcp"
       }
     },
     {

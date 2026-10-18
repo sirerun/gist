@@ -13,9 +13,9 @@
   "duplicates": [],
   "rejected_count": 0,
   "rejected": [],
-  "curated_sha256": "47d7a82cee3fe65b287f3dd8d69cd7eb4e755a745abaa3aa38565462e5a02900",
+  "curated_sha256": "040ff8d02e51d3704b68f637e572b1a8923c589d7bd19c15c7aab3fb86d20ae5",
   "membership_sha256": "e061c4370e15be3595285befe5e7c3d2d91adf1d3dd9f59f19151393e71dae21",
   "network_requests": 0,
   "registry_imports": 0,
-  "revision": "sha256:e42f691837b3b4f12f28bcc7642d48a0bd097c35f5603972c4ae749a9307948c"
+  "revision": "sha256:8ee6929d7a6af04ecf0d33e9a0a86dd0d61d81ab56f1d495fe196c2eed571822"
 }
