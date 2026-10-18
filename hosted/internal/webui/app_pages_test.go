@@ -114,3 +114,17 @@ func TestTypedLibraryRoutes(t *testing.T) {
 		}
 	}
 }
+
+func TestAppDetailLogosUseSharedBrandFrames(t *testing.T) {
+	for _, path := range []string{"/apps/google-email", "/apps/openai-gpt-3/airtable"} {
+		w := httptest.NewRecorder()
+		Handler().ServeHTTP(w, httptest.NewRequest("GET", path, nil))
+		body := w.Body.String()
+		if w.Code != 200 || !strings.Contains(body, `class="directory-logo-frame app-profile-icon`) || !strings.Contains(body, `style="background-color:#`) {
+			t.Fatalf("missing padded brand frame %s", path)
+		}
+		if path == "/apps/google-email" && (!strings.Contains(body, `directory-logo-frame related-app-logo`) || !strings.Contains(body, `class="related-app-name"`)) {
+			t.Fatal("related logos missing shared frame")
+		}
+	}
+}
