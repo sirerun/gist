@@ -120,11 +120,24 @@ func TestAppDetailLogosUseSharedBrandFrames(t *testing.T) {
 		w := httptest.NewRecorder()
 		Handler().ServeHTTP(w, httptest.NewRequest("GET", path, nil))
 		body := w.Body.String()
-		if w.Code != 200 || !strings.Contains(body, `class="directory-logo-frame app-profile-icon`) || !strings.Contains(body, `style="background-color:#`) {
+		if w.Code != 200 || !strings.Contains(body, `class="directory-logo-frame app-profile-icon`) || !strings.Contains(body, `data-brand-color="#`) {
 			t.Fatalf("missing padded brand frame %s", path)
 		}
 		if path == "/apps/google-email" && (!strings.Contains(body, `directory-logo-frame related-app-logo`) || !strings.Contains(body, `class="related-app-name"`)) {
 			t.Fatal("related logos missing shared frame")
 		}
+	}
+}
+
+func TestBrandPaletteStylesheet(t *testing.T) {
+	w := httptest.NewRecorder()
+	Handler().ServeHTTP(w, httptest.NewRequest("GET", "/assets/app-brand-colors.css", nil))
+	if w.Code != 200 || w.Header().Get("Content-Type") != "text/css; charset=utf-8" || !strings.Contains(w.Body.String(), `.directory-logo-frame[data-brand-color="#f14336"]{background-color:#f14336}`) {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	head := httptest.NewRecorder()
+	Handler().ServeHTTP(head, httptest.NewRequest("HEAD", "/assets/app-brand-colors.css", nil))
+	if head.Code != 200 || head.Body.Len() != 0 {
+		t.Fatal("bad HEAD")
 	}
 }

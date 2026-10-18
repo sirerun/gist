@@ -7,7 +7,9 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"sort"
 	"strings"
+	"sync"
 
 	"github.com/sirerun/gist/catalog/directory"
 )
@@ -191,3 +193,34 @@ func serveSitemap(w http.ResponseWriter, r *http.Request, apps *directory.AppInd
 		_, _ = w.Write(append([]byte(xml.Header), raw...))
 	}
 }
+
+// Derive the shared brand palette from admitted inventory, never inline styles.
+var appBrandColors = sync.OnceValue(func() string {
+	apps, _ := appInventory()
+	colors := map[string]bool{}
+	for offset := 0; ; {
+		result, err := apps.Search(directory.AppQuery{Limit: 100, Offset: offset})
+		if err != nil {
+			panic(err)
+		}
+		for _, app := range result.Items {
+			if app.BackgroundColor != "" {
+				colors[app.BackgroundColor] = true
+			}
+		}
+		if result.NextOffset == nil {
+			break
+		}
+		offset = *result.NextOffset
+	}
+	ordered := make([]string, 0, len(colors))
+	for color := range colors {
+		ordered = append(ordered, color)
+	}
+	sort.Strings(ordered)
+	var css strings.Builder
+	for _, color := range ordered {
+		fmt.Fprintf(&css, ".directory-logo-frame[data-brand-color=%q]{background-color:%s}\n", color, color)
+	}
+	return css.String()
+})
