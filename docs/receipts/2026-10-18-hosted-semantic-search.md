@@ -68,3 +68,12 @@ strictly rejects unknown JSON fields. Retrieval mode therefore stays internal
 and is exposed through an HTTP header rather than an added response-body field.
 The real REST/MCP handler regression checks both header parity and unchanged
 JSON shape; no client dependency update is required to receive semantic results.
+
+The release image includes a bounded `registry-embedding-check` command. Before
+publishing, CodeBuild runs it inside the final ARM64 image with networking
+disabled, one CPU and3GiB memory. It uses the actual installed model/runtime and
+same owned supervisor/adapter, performs one query and one document embedding,
+checks exact identity, counts, dimension, finite unit vectors and cosine bounds,
+then reaps the process. This checks runtime closure and model execution before
+public activation; it is not a retrieval benchmark or full ARM/Python parity.
+Its source tests pass. Actual image qualification remains pending until recorded.
