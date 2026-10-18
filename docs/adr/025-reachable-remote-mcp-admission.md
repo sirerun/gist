@@ -24,13 +24,17 @@ vendor ownership or endorsement by Gist.
 
 The release intake checker sends an unauthenticated request to each unique
 HTTPS route. Streamable HTTP routes receive only `initialize`; SSE routes receive
-a bounded GET. It pins a public IPv4 address, verifies TLS, does not follow
-redirects, and sends no credentials. HTTP 200 with an MCP initialize result
-records a successful handshake. HTTP 401 or 403 records an authentication
+a bounded GET. It pins a public IPv4 address, bounds DNS lookup to three seconds,
+verifies TLS, disables ambient curl configuration, proxy settings and URL
+globbing, does not follow redirects, and sends no credentials. HTTP 200 with a
+matching, structurally valid MCP initialize result records a successful
+handshake. HTTP 401 or 403 records an authentication
 challenge; HTTP 402 records payment-required; other accepted responses record
-reachability only. None proves an authenticated session or successful tool use.
-HTTP 410, unresolved DNS targets, timeouts and other unaccepted responses fail
-intake. The check does not list or call tools.
+reachability only. If response headers arrive before a bounded body or SSE
+stream timeout, only reachability is recorded; a timeout before any HTTP
+response fails. None proves an authenticated session or successful tool use.
+HTTP 410, unresolved DNS targets and other unaccepted responses fail intake.
+The check does not list or call tools.
 
 The check is intentionally a low bar for connection discovery. It does not
 claim safe tools, compatibility with every client, provider account access,

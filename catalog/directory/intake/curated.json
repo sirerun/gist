@@ -16,7 +16,7 @@
         "url": "https://mcp.exa.ai/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -47,7 +47,7 @@
         "url": "https://mcp.airtable.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -77,7 +77,7 @@
         "url": "https://mcp.linear.app/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -108,7 +108,7 @@
         "url": "https://mcp.asana.com/v2/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -139,7 +139,7 @@
         "url": "https://mcp.box.com",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -169,7 +169,7 @@
         "url": "https://mcp.cloudflare.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -202,7 +202,7 @@
         "url": "https://spkftjsjduykrvzeuzld.supabase.co/functions/v1/mcp-server",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -235,7 +235,7 @@
         "url": "https://mcp.atlassian.com/v2/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -266,7 +266,7 @@
         "url": "https://mcp.dropbox.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -297,7 +297,7 @@
         "url": "https://gitlab.com/api/v4/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -345,7 +345,7 @@
         "url": "https://calendarmcp.googleapis.com/mcp/v1",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -387,7 +387,7 @@
         "url": "https://drivemcp.googleapis.com/mcp/v1",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -414,7 +414,7 @@
         "url": "https://gmailmcp.googleapis.com/mcp/v1",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -457,7 +457,7 @@
         "url": "https://mcp.hubspot.com",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -489,7 +489,7 @@
         "url": "https://api.githubcopilot.com/mcp/",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -528,7 +528,7 @@
         "url": "https://mcp.atlassian.com/v2/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -559,7 +559,7 @@
         "url": "https://mcp.monday.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -589,7 +589,7 @@
         "url": "https://mcp.notion.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -620,7 +620,7 @@
         "url": "https://api.salesforce.com/platform/mcp/v1/platform/sobject-all",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -650,7 +650,7 @@
         "url": "https://mcp.sentry.dev/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -680,7 +680,7 @@
         "url": "https://mcp.slack.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -710,7 +710,7 @@
         "url": "https://mcp.stripe.com",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -741,7 +741,7 @@
         "url": "https://mcp.supabase.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -772,7 +772,7 @@
         "url": "https://zoom.us/mcp/meeting/streamable",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -797,7 +797,7 @@
         "url": "https://mcp.make.com",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -824,7 +824,7 @@
         "url": "https://mcp-agentic-commerce.netlify.app/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -850,7 +850,7 @@
         "url": "https://api.alkemi.cloud/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -876,7 +876,7 @@
         "url": "https://mcp.amplitude.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -902,7 +902,7 @@
         "url": "https://mcp.apify.com/",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -928,7 +928,7 @@
         "url": "https://mcp.apple-rag.com",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 400,
           "result": "endpoint-responded"
         }
@@ -954,7 +954,7 @@
         "url": "https://mcp-for-docs.appwrite.io",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -980,7 +980,7 @@
         "url": "https://mcp.docs.astro.build/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -1006,7 +1006,7 @@
         "url": "https://mcp.beatandraise.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -1032,7 +1032,7 @@
         "url": "https://prediction.mcp.chainaware.ai/sse",
         "transport": "sse",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "endpoint-responded"
         }
@@ -1058,7 +1058,7 @@
         "url": "https://mcp.biocontext.ai/mcp/",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 301,
           "result": "endpoint-responded"
         }
@@ -1084,7 +1084,7 @@
         "url": "https://mcp.blooio.com/v3",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 308,
           "result": "endpoint-responded"
         }
@@ -1110,7 +1110,7 @@
         "url": "https://mcp.brightdata.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -1136,7 +1136,7 @@
         "url": "https://mcp.browserless.io/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -1162,7 +1162,7 @@
         "url": "https://mcp.canva.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -1188,7 +1188,7 @@
         "url": "https://mcp.clickup.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -1214,7 +1214,7 @@
         "url": "https://mcp.close.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -1240,7 +1240,7 @@
         "url": "https://mcp.api.coingecko.com/sse",
         "transport": "sse",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "endpoint-responded"
         }
@@ -1266,9 +1266,9 @@
         "url": "https://mcp.boikot.xyz/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
-          "result": "mcp-initialize"
+          "result": "endpoint-responded"
         }
       }
     ],
@@ -1292,7 +1292,7 @@
         "url": "https://mcp.app.contextual.ai/mcp/",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 307,
           "result": "endpoint-responded"
         }
@@ -1318,7 +1318,7 @@
         "url": "https://mcp.coresignal.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -1344,7 +1344,7 @@
         "url": "https://mcp.crossbeam.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -1370,7 +1370,7 @@
         "url": "https://currency-mcp.wesbos.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -1396,9 +1396,9 @@
         "url": "https://a.currenttimeutc.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
-          "result": "mcp-initialize"
+          "result": "endpoint-responded"
         }
       }
     ],
@@ -1422,7 +1422,7 @@
         "url": "https://mcp.deepwiki.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -1448,7 +1448,7 @@
         "url": "https://mcp.devcycle.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -1474,7 +1474,7 @@
         "url": "https://dice-rolling-mcp.vercel.app/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -1500,7 +1500,7 @@
         "url": "https://mcp.wtsolutions.cn/excel-to-json-mcp-sse",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 405,
           "result": "endpoint-responded"
         }
@@ -1526,7 +1526,7 @@
         "url": "https://flights.fctolabs.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -1552,7 +1552,7 @@
         "url": "https://mcp.fulcradynamics.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -1578,7 +1578,7 @@
         "url": "https://api.galileo.ai/mcp/http/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -1604,9 +1604,9 @@
         "url": "https://gitmcp.io/docs",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
-          "result": "mcp-initialize"
+          "result": "endpoint-responded"
         }
       }
     ],
@@ -1630,7 +1630,7 @@
         "url": "https://services.leadconnectorhq.com/mcp/",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -1656,7 +1656,7 @@
         "url": "https://googleads.hireotto.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -1682,7 +1682,7 @@
         "url": "https://mcp.goweb3.fyi/mcp/",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -1708,7 +1708,7 @@
         "url": "https://gralio.ai/mcp/sse",
         "transport": "sse",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 301,
           "result": "endpoint-responded"
         }
@@ -1734,7 +1734,7 @@
         "url": "https://mcp.grep.app",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -1760,7 +1760,7 @@
         "url": "https://docs.gumlet.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -1786,7 +1786,7 @@
         "url": "https://mcp.higgsfield.ai/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -1812,7 +1812,7 @@
         "url": "https://mcp.himalayas.app/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -1838,7 +1838,7 @@
         "url": "https://pyth-on-line.promplate.dev/hmr/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -1864,7 +1864,7 @@
         "url": "https://hf.co/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -1890,7 +1890,7 @@
         "url": "https://mcp.ilert.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -1916,7 +1916,7 @@
         "url": "https://mcp.imagine.art",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -1942,7 +1942,7 @@
         "url": "https://mcp.intercom.com/sse",
         "transport": "sse",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -1968,7 +1968,7 @@
         "url": "https://mcp.io-aerospace.org/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -1994,7 +1994,7 @@
         "url": "https://mcp.justcall.host/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2020,9 +2020,9 @@
         "url": "https://mcp.kismet.travel/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
-          "result": "mcp-initialize"
+          "result": "endpoint-responded"
         }
       }
     ],
@@ -2046,9 +2046,9 @@
         "url": "https://mcp.kiwi.com",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
-          "result": "mcp-initialize"
+          "result": "endpoint-responded"
         }
       }
     ],
@@ -2072,7 +2072,7 @@
         "url": "https://laei.ro/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "endpoint-responded"
         }
@@ -2098,7 +2098,7 @@
         "url": "https://mcp.prompts.mcpcentral.io/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -2124,7 +2124,7 @@
         "url": "https://mcp.linear.app/mcp/readonly",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2150,7 +2150,7 @@
         "url": "https://mcp.listenetic.com/v1/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2176,7 +2176,7 @@
         "url": "https://lunarcrush.ai/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2202,7 +2202,7 @@
         "url": "https://mcp.mailerlite.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2228,7 +2228,7 @@
         "url": "https://mcp.mailersend.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2254,7 +2254,7 @@
         "url": "https://marketo-mcp.adobe.io/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2280,7 +2280,7 @@
         "url": "https://mcp.svc.cloud.microsoft/enterprise",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2306,7 +2306,7 @@
         "url": "https://learn.microsoft.com/api/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -2332,7 +2332,7 @@
         "url": "https://mcp.mobile-text-alerts.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2358,7 +2358,7 @@
         "url": "https://mcp.neon.tech/sse",
         "transport": "sse",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2384,7 +2384,7 @@
         "url": "https://my.opalstack.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 403,
           "result": "authentication-required"
         }
@@ -2410,7 +2410,7 @@
         "url": "https://search-mcp.parallel.ai/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2436,7 +2436,7 @@
         "url": "https://task-mcp.parallel.ai/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2462,7 +2462,7 @@
         "url": "https://mcp.paypal.com/sse",
         "transport": "sse",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2488,7 +2488,7 @@
         "url": "https://mcp.pdf4me.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2514,7 +2514,7 @@
         "url": "https://mcp.pearl.com/sse",
         "transport": "sse",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "endpoint-responded"
         }
@@ -2540,9 +2540,9 @@
         "url": "https://mcp.peek.com",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
-          "result": "mcp-initialize"
+          "result": "endpoint-responded"
         }
       }
     ],
@@ -2566,7 +2566,7 @@
         "url": "https://mcp.pokulabs.com",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2592,7 +2592,7 @@
         "url": "https://mcp.posthog.com/sse",
         "transport": "sse",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 308,
           "result": "endpoint-responded"
         }
@@ -2618,7 +2618,7 @@
         "url": "https://mcp.postman.com/minimal",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2644,7 +2644,7 @@
         "url": "https://api.pre.dev/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2670,7 +2670,7 @@
         "url": "https://mcp.prisma.io/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2696,7 +2696,7 @@
         "url": "https://app.reflag.com/api/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2722,7 +2722,7 @@
         "url": "https://mcp.replicate.com/sse",
         "transport": "sse",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2748,7 +2748,7 @@
         "url": "https://proto.rostro.dev/mcp/",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2774,7 +2774,7 @@
         "url": "https://rotunda.bullpenstrategygroup.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2800,7 +2800,7 @@
         "url": "https://mcp.saleor.app/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -2826,7 +2826,7 @@
         "url": "https://mcp.brokerchooser.com/servers/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -2852,7 +2852,7 @@
         "url": "https://mcp.semgrep.ai/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2878,9 +2878,9 @@
         "url": "https://seolinkmap.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
-          "result": "mcp-initialize"
+          "result": "endpoint-responded"
         }
       }
     ],
@@ -2904,7 +2904,7 @@
         "url": "https://shutter-mcp-b76e270d48c5.herokuapp.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -2930,7 +2930,7 @@
         "url": "https://mcp.simplescraper.io/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2956,7 +2956,7 @@
         "url": "https://mcp.squareup.com/sse",
         "transport": "sse",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -2982,7 +2982,7 @@
         "url": "https://mcp.stytch.dev/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -3008,7 +3008,7 @@
         "url": "https://docs.superhuman.com/apis/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -3034,7 +3034,7 @@
         "url": "https://mcp.mail.superhuman.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -3060,7 +3060,7 @@
         "url": "https://mcp.svelte.dev/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "mcp-initialize"
         }
@@ -3086,7 +3086,7 @@
         "url": "https://svelte-llm.stanislav.garden/mcp/sse",
         "transport": "sse",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
           "result": "endpoint-responded"
         }
@@ -3112,7 +3112,7 @@
         "url": "https://api.tally.so/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -3138,7 +3138,7 @@
         "url": "https://mcp.tavily.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -3164,7 +3164,7 @@
         "url": "https://my-mcp-server.timecamp-s-a.workers.dev/sse",
         "transport": "sse",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -3190,7 +3190,7 @@
         "url": "https://mcp.twelvedata.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -3216,7 +3216,7 @@
         "url": "https://mcp.twelvelabs.io/jockey/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -3242,7 +3242,7 @@
         "url": "https://mcp.vapi.ai/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -3268,7 +3268,7 @@
         "url": "https://www.veed.io/api/v1/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -3294,7 +3294,7 @@
         "url": "https://mcp.vlei.wiki/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -3320,7 +3320,7 @@
         "url": "https://waystation.ai/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 402,
           "result": "payment-required"
         }
@@ -3346,7 +3346,7 @@
         "url": "https://mcp.webflow.com/sse",
         "transport": "sse",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -3372,7 +3372,7 @@
         "url": "https://mcp.windsor.ai",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -3398,7 +3398,7 @@
         "url": "https://mcp.wix.com/sse",
         "transport": "sse",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
@@ -3424,9 +3424,9 @@
         "url": "https://mcp-server-wporg-trac-staging.a8cai.workers.dev/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 200,
-          "result": "mcp-initialize"
+          "result": "endpoint-responded"
         }
       }
     ],
@@ -3450,7 +3450,7 @@
         "url": "https://mcp.zoominfo.com/mcp",
         "transport": "streamable-http",
         "check": {
-          "checked_at": "2026-10-18T04:06:59Z",
+          "checked_at": "2026-10-18T04:18:59Z",
           "http_status": 401,
           "result": "authentication-required"
         }
