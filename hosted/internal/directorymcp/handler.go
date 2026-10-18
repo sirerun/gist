@@ -116,7 +116,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if params.ProtocolVersion == "2025-03-26" {
 			version = params.ProtocolVersion
 		}
-		h.result(w, call.ID, map[string]any{"protocolVersion": version, "capabilities": map[string]any{"tools": map[string]any{"listChanged": false}}, "serverInfo": map[string]string{"name": "gist-public-directory", "version": "1.0.0"}, "instructions": "Discover MCP servers and OpenAPI descriptors. Connection, credentials and execution belong to your client. Entries are unverified unless dated qualification evidence says otherwise."})
+		h.result(w, call.ID, map[string]any{"protocolVersion": version, "capabilities": map[string]any{"tools": map[string]any{"listChanged": false}}, "serverInfo": map[string]string{"name": "gist-public-directory", "version": "1.0.0"}, "instructions": "Find MCP servers and OpenAPI integrations. Connect and authorize through your client; review each provider's requested access before use."})
 	case "ping":
 		h.result(w, call.ID, map[string]any{})
 	case "tools/list":
@@ -165,11 +165,13 @@ func (h *Handler) call(w http.ResponseWriter, call request) {
 			q.Limit = 24
 		}
 		var err error
-		value, err = h.index.Search(directory.Query{Text: q.Query, Kind: q.Kind, Tag: q.Tag, Cursor: q.Cursor, Limit: q.Limit})
+		var result directory.Result
+		result, err = h.index.Search(directory.Query{Text: q.Query, Kind: q.Kind, Tag: q.Tag, Cursor: q.Cursor, Limit: q.Limit})
 		if err != nil {
 			h.fail(w, call.ID, -32602, "Invalid search or expired cursor")
 			return
 		}
+		value = directory.PublicResultOf(result)
 	case "gist_directory_get", "gist_directory_export":
 		var args struct {
 			ID string `json:"id"`
@@ -183,9 +185,9 @@ func (h *Handler) call(w http.ResponseWriter, call request) {
 			h.toolError(w, call.ID, "Directory entry not found")
 			return
 		}
-		value = record
+		value = directory.PublicRecordOf(record)
 		if params.Name == "gist_directory_export" {
-			value = directory.Export{Format: directory.ExportFormat, Record: record}
+			value = directory.PublicExportOf(directory.Export{Format: directory.ExportFormat, Record: record})
 		}
 	default:
 		h.fail(w, call.ID, -32602, "Unknown tool")
@@ -261,8 +263,8 @@ func toolList() []map[string]any {
 	}
 	id := map[string]any{"type": "string", "minLength": 1, "maxLength": 512, "description": "Exact ID returned by gist_directory_search."}
 	return []map[string]any{
-		{"name": "gist_directory_search", "description": "Find public MCP server and OpenAPI discovery descriptors. No connection or execution. Recommended entries are distinct from workflow-qualified featured entries.", "annotations": annotations, "inputSchema": schema(map[string]any{"query": map[string]any{"type": "string", "maxLength": 200}, "kind": map[string]any{"type": "string", "enum": []string{"", "mcp", "openapi"}}, "tag": map[string]any{"type": "string", "maxLength": 64}, "cursor": map[string]any{"type": "string", "maxLength": 2048}, "limit": map[string]any{"type": "integer", "minimum": 1, "maximum": 50}}, []string{})},
-		{"name": "gist_directory_get", "description": "Read a public descriptor, provenance, setup links and dated qualification evidence by exact ID.", "annotations": annotations, "inputSchema": schema(map[string]any{"id": id}, []string{"id"})},
+		{"name": "gist_directory_search", "description": "Find MCP server and OpenAPI integrations by name, use case or connection type. No connection or execution.", "annotations": annotations, "inputSchema": schema(map[string]any{"query": map[string]any{"type": "string", "maxLength": 200}, "kind": map[string]any{"type": "string", "enum": []string{"", "mcp", "openapi"}}, "tag": map[string]any{"type": "string", "maxLength": 64}, "cursor": map[string]any{"type": "string", "maxLength": 2048}, "limit": map[string]any{"type": "integer", "minimum": 1, "maximum": 50}}, []string{})},
+		{"name": "gist_directory_get", "description": "Read a public integration's description, connection details and setup links by exact ID.", "annotations": annotations, "inputSchema": schema(map[string]any{"id": id}, []string{"id"})},
 		{"name": "gist_directory_export", "description": "Export a metadata-only gist.directory.entry/v1 descriptor for review by Zati or another client. Does not connect, authorize or run it.", "annotations": annotations, "inputSchema": schema(map[string]any{"id": id}, []string{"id"})},
 	}
 }

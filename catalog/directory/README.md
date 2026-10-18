@@ -1,5 +1,48 @@
 # Public directory metadata
 
+## Application browsing and connection descriptors
+
+The application inventory (`apps.json`) is separate from the admitted MCP/OpenAPI
+descriptor snapshot (`snapshot.json`). The web library browses applications by
+name and category; an app detail links to a connector only through an exact
+service identity or a reviewed alias. A directory listing never invents a
+connection endpoint. Applications without a connector show that connection
+details are not available yet. Existing connector bookmarks and private data
+retain their identities.
+
+`/api/directory/apps` supports `q`, `category`, `offset` and `limit` (up to 100).
+`/api/directory/app?slug=...` returns one app and its admitted connector IDs.
+The existing directory HTTP/MCP interfaces continue to return connector
+descriptors. Their projection retains fields required by strict clients and
+skill-integrity pins, but keeps upstream intake, endpoint checks and workflow
+evidence out of browsing responses. Public provenance identifies the Gist
+catalog; original intake evidence remains in the operator snapshot.
+
+Brand icons are served locally. Transparent white marks are traced from a
+normalized alpha mask and composed over an explicit six-digit brand background
+color. Opaque or multicolor artwork is retained as a local PNG to preserve its
+appearance. Missing source artwork gets a plain initial on the brand color.
+The website does not request remote icon URLs. To regenerate the inventory:
+
+```sh
+python3 catalog/directory/intake/build_app_directory.py \
+  --cache /path/to/private/intake-cache \
+  --output catalog/directory/apps.json \
+  --icons-dir hosted/internal/webui/assets/apps
+```
+
+To convert a single transparent mark with a chosen brand background:
+
+```sh
+python3 catalog/directory/intake/render_brand_icon.py \
+  --input /tmp/google-email.avif --output /tmp/gmail.svg \
+  --background '#f14336' --foreground '#ffffff' --title Gmail
+```
+
+The background is a separate SVG rectangle. Its color can change without
+re-tracing the foreground geometry. ImageMagick with AVIF support and VTracer
+0.6.5 are required for intake only; production serves the generated assets.
+
 `Default()` loads the committed immutable candidate snapshot without network
 access. `Search`, `Get` and `DefaultSnapshot` return independent copies. Search
 uses term-prefix postings, bounded queries and snapshot/query-bound pagination.

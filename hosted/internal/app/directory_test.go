@@ -145,6 +145,45 @@ func TestPublicDirectoryAdmissionIsSeparate(t *testing.T) {
 	}
 }
 
+func TestPublicDirectoryResponsesHideInternalEvidence(t *testing.T) {
+	now := time.Now().UTC()
+	record := directory.Record{
+		ID: "fixture/example", Kind: "mcp", ServiceID: "example", Title: "Example Files",
+		Description: "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. This reachability check is not an authenticated session or workflow qualification.",
+		Tags:        []string{"files"}, Source: directory.RecordSource{ID: "fixture", EntryID: "private-source", URL: "https://example.com/source"},
+		Remotes: []directory.Remote{{URL: "https://example.com/mcp", Transport: "streamable-http", Check: &directory.EndpointCheck{CheckedAt: now, HTTPStatus: 401, Result: "authentication-required"}}},
+		Auth:    directory.Auth{Type: "none"}, Official: true, OfficialEvidenceURL: "https://example.com/vendor",
+		Verification: []directory.Qualification{{Client: "Zati", Workflow: "Read files", EvidenceURL: "https://example.com/private-evidence", CheckedAt: now, ExpiresAt: now.Add(time.Hour), Result: "passed"}},
+	}
+	idx, err := directory.New(directory.Snapshot{
+		Format: directory.SnapshotFormat, Revision: "test", GeneratedAt: now,
+		Sources: []directory.Source{{ID: "fixture", URL: "https://example.com/source", Revision: "1", SHA256: strings.Repeat("a", 64), RetrievedAt: now, Attribution: "Fixture"}},
+		Entries: []directory.Record{record},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := &directoryAPI{index: idx, origin: "https://gist.example"}
+	for _, path := range []string{"/api/directory?q=Example", "/api/directory/item?id=fixture%2Fexample", "/api/directory/export?id=fixture%2Fexample"} {
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest("GET", path, nil))
+		if w.Code != 200 {
+			t.Fatalf("%s: %d %s", path, w.Code, w.Body)
+		}
+		body := strings.ToLower(w.Body.String())
+		for _, internal := range []string{"make", "private-source", "authentication-required", "checked_at", "verification", "private-evidence", "official_evidence_url", "featured"} {
+			if strings.Contains(body, internal) {
+				t.Fatalf("%s exposed %q: %s", path, internal, body)
+			}
+		}
+		for _, useful := range []string{"example files", "https://example.com/mcp", "streamable-http"} {
+			if !strings.Contains(body, useful) {
+				t.Fatalf("%s omitted %q: %s", path, useful, body)
+			}
+		}
+	}
+}
+
 func TestPrivateDirectoryPagesRespectResponseLimitAndCursorBinding(t *testing.T) {
 	h, _, _ := testWebAPI()
 	store := &privateDirectoryProbe{}
@@ -170,5 +209,72 @@ func TestPrivateDirectoryPagesRespectResponseLimitAndCursorBinding(t *testing.T)
 	h.sessions = webSessionProbe{session: oauth.Session{Subject: "different", Workspaces: []string{"private"}}}
 	if w := webRequest(h, "GET", "/app/api/directory?cursor="+url.QueryEscape(page.Next), ""); w.Code != 400 {
 		t.Fatalf("foreign cursor%d %s", w.Code, w.Body)
+	}
+}
+
+func TestPublicAppDirectoryRoutes(t *testing.T) {
+	apps, err := directory.ParseApps([]byte(`{"format":"gist.app-directory/v1","items":[{"slug":"example","name":"Example","description":"Organize work","categories":[],"icon_path":"example.svg","background_color":"#123456"}]}`), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := &directoryAPI{apps: apps, origin: "https://gist.example"}
+	for _, route := range []string{"/api/directory/apps?limit=1", "/api/directory/app?slug=example"} {
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest("GET", route, nil))
+		if w.Code != 200 || !strings.Contains(w.Body.String(), `"name":"Example"`) || strings.Contains(w.Body.String(), "connector_ids") {
+			t.Fatalf("%s: %d %s", route, w.Code, w.Body)
+		}
+	}
+	for _, route := range []string{"/api/directory/apps?limit=101", "/api/directory/apps?offset=-1", "/api/directory/apps?unknown=x", "/api/directory/app"} {
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest("GET", route, nil))
+		if w.Code != 400 {
+			t.Fatalf("%s: %d", route, w.Code)
+		}
+	}
+	for _, route := range []string{"/api/directory/apps", "/api/directory/app"} {
+		if !publicDirectoryPath(route) {
+			t.Fatalf("private route %s", route)
+		}
+	}
+}
+
+func TestPublicAppLiteralSlugRoundtrip(t *testing.T) {
+	apps, err := directory.ParseApps([]byte(`{"format":"gist.app-directory/v1","items":[{"slug":"h&m-home","name":"H&M Home"},{"slug":"app#world-cup-2022-rkrqsb","name":"World Cup"}]}`), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := &directoryAPI{apps: apps}
+	for _, slug := range []string{"h&m-home", "app#world-cup-2022-rkrqsb"} {
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest("GET", "/api/directory/app?"+url.Values{"slug": {slug}}.Encode(), nil))
+		if w.Code != 200 {
+			t.Fatalf("slug %q status %d body %s", slug, w.Code, w.Body)
+		}
+		var result directory.App
+		if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil || result.Slug != slug {
+			t.Fatalf("slug %q result %+v %v", slug, result, err)
+		}
+	}
+}
+
+func TestPublicHubSpotAppHasAdmittedRoute(t *testing.T) {
+	connectors, err := directory.Default()
+	if err != nil {
+		t.Fatal(err)
+	}
+	apps, err := directory.DefaultApps(connectors)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := &directoryAPI{apps: apps}
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest("GET", "/api/directory/app?slug=hubspotcrm", nil))
+	if w.Code != 200 {
+		t.Fatalf("HubSpot status %d %s", w.Code, w.Body)
+	}
+	var app directory.App
+	if err := json.Unmarshal(w.Body.Bytes(), &app); err != nil || len(app.ConnectorIDs) == 0 {
+		t.Fatalf("HubSpot route %+v %v", app, err)
 	}
 }

@@ -127,7 +127,7 @@ func (h *webAPI) serveBookmarks(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	items := []directory.Record{}
+	items := []directory.PublicRecord{}
 	tagFilter := strings.ToLower(strings.TrimSpace(v.Get("tag")))
 	for _, id := range ids {
 		record, ok := h.publicIndex.Get(id)
@@ -151,7 +151,7 @@ func (h *webAPI) serveBookmarks(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 		}
-		items = append(items, record)
+		items = append(items, directory.PublicRecordOf(record))
 	}
 	total := len(items)
 	if offset > total {

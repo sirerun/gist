@@ -219,7 +219,12 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		pool.Close()
 		return nil, fmt.Errorf("app: public directory: %w", err)
 	}
-	publicDirectory := &directoryAPI{index: publicIndex, origin: cfg.PublicOrigin, maxBytes: min(cfg.MaxResponseBytes, 512<<10), concurrent: make(chan struct{}, cfg.MaxConcurrentRequests)}
+	apps, err := directory.DefaultApps(publicIndex)
+	if err != nil {
+		pool.Close()
+		return nil, fmt.Errorf("app: application directory: %w", err)
+	}
+	publicDirectory := &directoryAPI{index: publicIndex, apps: apps, origin: cfg.PublicOrigin, maxBytes: min(cfg.MaxResponseBytes, 512<<10), concurrent: make(chan struct{}, cfg.MaxConcurrentRequests)}
 	directoryMCP := directorymcp.New(publicIndex, cfg.PublicOrigin, cfg.MaxConcurrentRequests)
 	web := &webAPI{bookmarks: postgresBookmarks{pool: pool}, publicIndex: publicDirectory.index, directory: postgresPrivateDirectory{pool: pool}, csrfKey: deriveKey(cfg.OAuthConsentSecret, "gist web csrf v1"), sessions: sessions, policy: policy, catalog: postgresWebCatalog{pool: pool}, origin: cfg.PublicOrigin, audience: cfg.ResourceAudience, workspace: cfg.GitHubEnrollment.WorkspaceID, workspaceName: cfg.GitHubEnrollment.WorkspaceName, cursorKey: deriveKey(cfg.OAuthConsentSecret, "gist web cursor v1"), timeout: cfg.RequestTimeout, maxBytes: min(cfg.MaxResponseBytes, 256<<10), concurrent: make(chan struct{}, cfg.MaxConcurrentRequests)}
 	handler := requestContext{directory: publicDirectory, directoryMCP: directoryMCP, web: web, ui: webui.Handler(), lifetime: a.requests, admission: a.bootstrapAdmission, rest: oauth.WithChallenge(rh, prm), mcp: oauth.WithChallenge(mcp, prm), oauth: as, enrollment: enrollmentRoutes, ready: func(ctx context.Context) error {
