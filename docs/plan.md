@@ -2515,3 +2515,37 @@ harness. Local PostgreSQL/API/Node evidence is recorded separately. No provider
 workflow, Featured badge or Zati adapter completion is inferred. The
 [release receipt](receipts/2026-10-17-vendor-directory-reset.md) records exact
 image, migration/grants, actual public checks and the outstanding owner check.
+
+### E-SEMHOST -- Hosted public semantic discovery
+
+fidelity: executable
+
+Acceptance: gist.sire.run owns EmbeddingGemma2 inference and public catalog
+indexing; the Library, directory REST and directory MCP use one bounded hybrid
+retrieval service, with lexical fallback and no client model installation.
+
+Owner direction2026-10-18 supersedes the local-only deployment assumption for
+this slice. The owner explicitly requested hosted Gist implementation after
+clarifying server ownership, and the Library query
+`/library?q=find+leads+for+my+startup` must use that same search. This is an
+operational public-discovery trial, not completion of T-PREP.9-13 or a claim of
+whole-task quality, token savings, private semantic search or execution authority.
+
+Execution: current engineering session owns Gist; one inherited helper owns the
+independent Foundation image/resource change, one owns the bounded runtime
+package and a separate non-author reviews exact final producer/infra diffs.
+Selected model/reasoning/settings are inherited without overrides. Existing
+AWS member account/build pipeline and ECS service only; no model/provider API
+spend, new cluster or credential transfer. Gist corpus is the public projection,
+including app descriptions and linked skill titles, not private workspaces or
+live per-provider tool-schema introspection. Existing schema/connection APIs
+remain authoritative. In-memory vectors rebuild for each immutable catalog
+revision; bounded cache and model identity prevent cross-generation reuse.
+
+- [x] T-SEMHOST.1 Freeze server ownership and public retrieval contract  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  acc: [Record owner scope, public-only corpus, exact native/model pins, query and resource bounds, fallback and existing release path before inference or deployment; preserve all prior evaluation records and decisions]
+- [x] T-SEMHOST.2 Implement hosted runtime and shared retrieval  Owner: implementer  Est: TBD  kind: agent  stage: implement  blocked-by: [T-SEMHOST.1]  acc: [Integrity-verified owned loopback process, indexed public descriptions, model-bound query vectors, bounded hybrid ranking, stable filtered pagination and lexical fallback serve Library apps/tools plus directory REST and MCP; no client inference endpoint or private index data exposed]
+- [ ] T-SEMHOST.3 Verify runtime and cross-surface behavior  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-SEMHOST.2]  acc: [Focused lifecycle, identity, semantic-only match, no-match, filter, pagination, fallback and shared HTTP/MCP tests pass with actual source and required conformance; fixture evidence is distinguished from real model retrieval]
+- [ ] T-SEMHOST.4 Independently review producer and infrastructure candidates  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-SEMHOST.3]  acc: [Non-author approves exact final Gist and Foundation base/head diffs including lifecycle, public projection, bounded inference, source/model pins, resources, rollout and rollback; accepted findings receive fixes and re-review]
+- [ ] T-SEMHOST.5 Merge reviewed hosted search changes  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-SEMHOST.4]  acc: [Guarded PR merges preserve branch policy and actual unavailable-CI fallback; fresh mains match approved source trees and affected checks]
+- [ ] T-SEMHOST.6 Build and deploy the hosted search trial  Owner: release-operator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-SEMHOST.5]  acc: [Existing source-pinned ARM64 image build verifies native source/model hashes; reviewed saved IaC preview updates only owned service/build configuration and image, healthy rollout preserves existing data, secrets and exact rollback image]
+- [ ] T-SEMHOST.7 Verify live Library and API semantic discovery  Owner: live-verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-SEMHOST.6]  acc: [Real model startup and index readiness observed on ARM64; owner query URL and shared REST/MCP requests return useful public candidates with measured latency and explicit hybrid mode, fallback and remaining quality/coverage limits recorded separately from broader adoption]

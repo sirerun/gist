@@ -4,6 +4,7 @@ package directorymcp
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"mime"
@@ -15,7 +16,12 @@ import (
 
 const ProtocolVersion = "2025-06-18"
 
+type Searcher interface {
+	Search(context.Context, directory.Query) (directory.Result, error)
+}
+
 type Handler struct {
+	search     Searcher
 	index      *directory.Index
 	origin     string
 	concurrent chan struct{}
@@ -34,6 +40,9 @@ type request struct {
 	Method  string          `json:"method"`
 	Params  json.RawMessage `json:"params,omitempty"`
 }
+
+// WithSearch uses the same hosted retrieval service as the Library HTTP API.
+func (h *Handler) WithSearch(s Searcher) *Handler { h.search = s; return h }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -126,12 +135,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		h.result(w, call.ID, map[string]any{"tools": toolList()})
 	case "tools/call":
-		h.call(w, call)
+		h.call(r.Context(), w, call)
 	default:
 		h.fail(w, call.ID, -32601, "Method not found")
 	}
 }
-func (h *Handler) call(w http.ResponseWriter, call request) {
+func (h *Handler) call(ctx context.Context, w http.ResponseWriter, call request) {
 	var params struct {
 		Name      string          `json:"name"`
 		Arguments json.RawMessage `json:"arguments"`
@@ -166,7 +175,12 @@ func (h *Handler) call(w http.ResponseWriter, call request) {
 		}
 		var err error
 		var result directory.Result
-		result, err = h.index.Search(directory.Query{Text: q.Query, Kind: q.Kind, Tag: q.Tag, Cursor: q.Cursor, Limit: q.Limit})
+		query := directory.Query{Text: q.Query, Kind: q.Kind, Tag: q.Tag, Cursor: q.Cursor, Limit: q.Limit}
+		if h.search != nil {
+			result, err = h.search.Search(ctx, query)
+		} else {
+			result, err = h.index.Search(query)
+		}
 		if err != nil {
 			h.fail(w, call.ID, -32602, "Invalid search or expired cursor")
 			return

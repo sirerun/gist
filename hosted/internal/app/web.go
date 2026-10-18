@@ -20,6 +20,7 @@ import (
 	"github.com/sirerun/gist/hosted/internal/identity"
 	"github.com/sirerun/gist/hosted/internal/oauth"
 	"github.com/sirerun/gist/hosted/internal/ports"
+	"github.com/sirerun/gist/hosted/internal/semantic"
 	"github.com/sirerun/gist/hosted/internal/storage"
 )
 
@@ -58,6 +59,7 @@ type webCursor struct {
 	Expires  int64       `json:"e"`
 }
 type webAPI struct {
+	publicSearch                               *semantic.Service
 	sessions                                   oauth.SessionAuthenticator
 	policy                                     webPolicy
 	catalog                                    webCatalog

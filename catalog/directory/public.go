@@ -95,7 +95,7 @@ func PublicResultOf(result Result) PublicResult {
 	for _, record := range result.Items {
 		items = append(items, PublicRecordOf(record))
 	}
-	return PublicResult{Items: items, NextCursor: result.NextCursor, Total: result.Total, SnapshotRevision: result.SnapshotRevision}
+	return PublicResult{Items: items, NextCursor: result.NextCursor, Total: result.Total, SnapshotRevision: result.SnapshotRevision, SearchMode: result.SearchMode}
 }
 
 func PublicExportOf(export Export) PublicExport {

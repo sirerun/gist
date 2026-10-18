@@ -346,6 +346,20 @@ func (i *Index) Revision() string  { return i.snapshot.Revision }
 func (i *Index) Count() int        { return len(i.ids) }
 func (i *Index) Sources() []Source { return append([]Source(nil), i.snapshot.Sources...) }
 func (i *Index) Search(q Query) (Result, error) {
+	return i.search(q, nil, "")
+}
+
+// SearchRanked pages an explicitly ranked candidate set. The ranking identity
+// binds cursors to the model, corpus and actual order; normal kind/tag filters
+// still apply and unknown IDs cannot create catalog entries.
+func (i *Index) SearchRanked(q Query, ids []string, ranking string) (Result, error) {
+	if ranking == "" || len(ranking) > 200 || len(ids) > MaxEntries {
+		return Result{}, errors.New("invalid ranking")
+	}
+	return i.search(q, ids, ranking)
+}
+
+func (i *Index) search(q Query, ranked []string, ranking string) (Result, error) {
 	q.Text = strings.TrimSpace(q.Text)
 	q.Tag = strings.ToLower(strings.TrimSpace(q.Tag))
 	if len(q.Text) > 200 || len(q.Tag) > 64 || len(q.Cursor) > 1024 || q.Limit < 0 || q.Limit > 100 || (q.Kind != "" && q.Kind != "mcp" && q.Kind != "openapi") {
@@ -359,6 +373,9 @@ func (i *Index) Search(q Query) (Result, error) {
 		return Result{}, errors.New("too many search terms")
 	}
 	sum := sha256.Sum256([]byte(i.Revision() + "\n" + strings.ToLower(q.Text) + "\n" + q.Kind + "\n" + q.Tag))
+	if ranking != "" {
+		sum = sha256.Sum256([]byte(hex.EncodeToString(sum[:]) + "\n" + ranking + "\n" + strings.Join(ranked, "\n")))
+	}
 	key := hex.EncodeToString(sum[:16])
 	offset := 0
 	if q.Cursor != "" {
@@ -395,7 +412,17 @@ func (i *Index) Search(q Query) (Result, error) {
 		}
 	}
 	ids := make([]string, 0)
-	for _, id := range i.ids {
+	ordered := i.ids
+	if ranking != "" {
+		ordered = ranked
+		matches = nil
+	}
+	seen := map[string]bool{}
+	for _, id := range ordered {
+		if _, exists := i.records[id]; !exists || seen[id] {
+			continue
+		}
+		seen[id] = true
 		if matches != nil && !matches[id] || q.Kind != "" && !i.kinds[q.Kind][id] || q.Tag != "" && !i.tags[q.Tag][id] {
 			continue
 		}
