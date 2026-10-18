@@ -1,8 +1,8 @@
 # Vendor-only public directory reset — 2026-10-17
 
-Status: requirements recorded and delivery plan validated; implementation,
-independent source review, merge, migration/grants, deployment and live acceptance
-remain separate gates. This receipt does not declare the reset shipped.
+Status: source implementation and qualified Linux checks pass. Final independent
+evidence review, guarded merge, production migration/grants, image deployment and
+live acceptance remain separate gates. This receipt does not declare the reset deployed.
 
 ## Settled scope
 
@@ -20,8 +20,8 @@ This prospective policy supersedes earlier broad public bulk intake. The dated
 no historical task completion or immutable fixture is erased. The reset admits
 an explicitly evidenced initial subset. It does not claim a complete export of
 either app directory, and does not need a complete inventory to verify known
-individual members. Actual route count and snapshot/source digests will be
-recorded only after implementation and checks.
+individual members. The replacement admits 13 vendor MCP connectors, four recommended and zero
+Featured; count and digests are bound to checked source below.
 
 Private custom descriptors and personal bookmark identities/rows must remain
 intact. Existing merged icon/card changes (PR97) and personal bookmarks (PR99)
@@ -77,7 +77,7 @@ T-DIR.40-54: requirements, design, snapshot implementation, migration012/grants
 qualification, source and API/browser checks, independent aggregate review,
 guarded merge, landed verification, immutable image release, reviewed recovery/
 deployment preflight, SQL/grant apply, image deployment, live acceptance and
-operations handoff. All later delivery gates are open. Requirements T-DIR.40
+operations handoff. At initial planning the later delivery gates were open. Requirements T-DIR.40
 records the actual owner decision; it is not authenticated runtime evidence.
 
 Full Wazi plan conformance passed on the authored reset plan: 568 tasks, actual
@@ -102,10 +102,46 @@ authority ID `github:sirerun/gist` and revision `vendor-directory-reset-r1`.
 Exact expanded commands and machine-readable receipts are retained in the private
 engineering checks; portable source does not expose local machine paths.
 
-Source implementation tests, PostgreSQL migration/grant evidence, exact-head
-non-author approval, guarded PR/source landing, immutable build/image, saved IaC
-preview, database apply/equivalence, healthy completed rollout and actual
-anonymous/authorized browser/API/MCP journeys remain pending in T-DIR.41-54.
-No release, cloud/SQL operation, private preference mutation or live acceptance
-is claimed by this planning edit. Root integrates review and subsequent evidence
-into this same receipt as each actual gate completes.
+## Checked source
+
+Implementation/check source: `9cb0c02354b14bc7d90084e265a51a09ae58dc96`,
+based on `eb1a9f6e5a87b934cab87a19d70add48bde9e827` (merged icons/bookmarks).
+Archive integrity SHA256:
+`5ab92328c477616f2713b4ae1840cb5b95659ea36f9486c526d6d858e1def369`.
+Snapshot: `sha256:8ee6929d7a6af04ecf0d33e9a0a86dd0d61d81ab56f1d495fe196c2eed571822`.
+Curated/membership SHA256 hashes are committed in `catalog/directory/intake/receipt.json`.
+Independent source review checked all 13 exact n8n memberships against the captured
+inventory and vendor route/auth documentation separately. Its Exa identity finding
+was fixed: the existing ID survives. Gmail/GitHub/Linear IDs also survive; the new
+Calendar/Drive transport routes do not reuse old OpenAPI IDs.
+
+Qualified bounded Linux checks pass with no provider/model calls:
+
+- Eleven Python admission, duplicate/unsafe input and deterministic reproduction tests.
+- Directory and CLI race tests; committed snapshot validation.
+- Actual app HTTP/PostgreSQL integration race tests (46.114s), including saved
+  pagination, unavailable records, subject/tenant isolation, current membership,
+  CSRF, durable reads, private entries and restricted-role behavior.
+- Fresh/upgrade migration and restricted-role integration race tests (7.529s).
+- Four shipped JavaScript behavior tests; all hosted vet and build checks.
+- Earlier broad hosted run passed all other internal/command packages; its single
+  bookmark paging failure was corrected and the affected app/migration suite rerun.
+
+The first Linux run exposed a Mac-only temporary path in the new Python test;
+standard tempfile/TMPDIR handling fixed it. The second exposed an old pagination
+test assuming 50 public entries. It now tests 50 saved entries including retired
+IDs, preserving pagination coverage without inflating or weakening the catalog.
+Unchanged icon/card and bookmark browser evidence is reused from the merged
+changes; updated production desktop/mobile checks are still T-DIR.53.
+
+GitHub hosted checks were not executed: the current main check annotation confirms
+the account is locked for billing. The existing authorized qualified-local fallback
+is used; no billing, runner or branch-protection changes were made.
+
+T-DIR.41-45 record design, implementation and source/database checks. Production
+SQL has not been changed by these tests. Read-only production preflight observes
+migration ledger1-11 and no bookmarks relation through the older migrator. Existing
+available recovery snapshot `gist-pre-bookmarks-20261017` predates this release.
+Migration012, minimal grants and actual runtime verification must precede image
+activation. No tables are dropped, no private UUIDs reset and no stored user
+preferences deleted. Later review/merge/deployment/live gates remain explicit.
