@@ -86,7 +86,7 @@
   const localAppIcon = value => /^\/assets\/apps\/[a-zA-Z0-9_-]+\.(svg|png)$/.test(value || "");
   const connectorIcon = record => record.icon_url || globalThis.GIST_APP_ICONS?.[record.service_id];
   function card(record) {
-    const c = link("", "/library/server?" + new URLSearchParams({id:record.id}), "directory-card-content");
+    const c = link("", "/connectors/" + encodeURIComponent(record.id), "directory-card-content");
     const logos = {"brave-search":"brave", github:"github", "google-gmail":"gmail", "google-calendar":"googlecalendar", "google-drive":"googledrive"};
     const icon = el("img", undefined, "directory-logo");
     icon.src = localAppIcon(connectorIcon(record)) ? connectorIcon(record) : "/assets/brand/" + (logos[record.service_id] || (record.kind === "openapi" ? "openapiinitiative" : "modelcontextprotocol")) + ".svg";
@@ -96,10 +96,9 @@
     icon.loading = "lazy";
     const heading = el("div", undefined, "directory-card-heading");
     heading.append(icon, el("h2", record.title || record.id));
-    const description = el("p", record.description || "Connect this service from your MCP client.", "directory-card-description");
-    const useCase = (record.tags || []).slice(0, 2).join(" · ");
+    const useCase = (record.tags || [])[0] || "";
     const b = el("div", undefined, "directory-badges"); badges(record,b);
-    c.append(heading, description);
+    c.append(heading);
     if (useCase) c.append(el("p", useCase, "directory-card-use-case"));
     const wrapper = el("article", undefined, "catalog-card directory-card bookmark-card");
     c.className = "directory-card-content";
@@ -108,13 +107,13 @@
     return wrapper;
   }
   function appCard(record) {
-    const c = link("", "/library/server?" + new URLSearchParams({app:record.slug}), "directory-card-content");
+    const c = link("", "/apps/" + encodeURIComponent(record.slug), "directory-card-content");
     const heading = el("div", undefined, "directory-card-heading");
     const icon = el("img", undefined, "directory-logo app-logo");
     if (localAppIcon(record.icon_url)) icon.src = record.icon_url;
     icon.alt = ""; icon.width = 54; icon.height = 54; icon.loading = "lazy";
     heading.append(icon, el("h2", record.name || record.slug));
-    c.append(heading, el("p", record.description || "Explore this app and its connection options.", "directory-card-description"));
+    c.append(heading);
     const category = (record.categories || []).filter(category => category.slug !== "app-families").map(category => category.name).find(Boolean) || "";
     c.append(el("p", category, "directory-card-use-case"));
     const arrow = el("span", "↗", "directory-card-arrow");
@@ -193,7 +192,7 @@
   function field(target,label,value) { if(value) {const d=el("div"); d.append(el("dt",label),el("dd",String(value)));target.append(d);} }
   function sourceLink(target,label,value) {const url=external(value);if(url)target.append(link(label+" ↗",url,"text-link"));}
   async function detail() {
-    const target=document.getElementById("directory-detail"), params=new URLSearchParams(location.search), id=params.get("id"), app=params.get("app");
+    const target=document.getElementById("directory-detail"), params=new URLSearchParams(location.search), id=params.get("id") || ((location.pathname||"").startsWith("/connectors/") ? decodeURIComponent(location.pathname.slice(12)) : ""), app=params.get("app");
     try {
       if (app) {
         const r = await api("/api/directory/app?" + new URLSearchParams({slug:app}));
@@ -205,7 +204,7 @@
         const setup=el("section");setup.append(el("h2","Connection options"));
         if((r.connector_ids||[]).length) {
           setup.append(el("p","Choose an integration to see its setup details and connect it in your client."));
-          for(const connectorID of r.connector_ids) setup.append(link("View connection details →","/library/server?"+new URLSearchParams({id:connectorID}),"text-link app-connection"));
+          for(const connectorID of r.connector_ids) setup.append(link("View connection details →","/connectors/"+encodeURIComponent(connectorID),"text-link app-connection"));
         } else setup.append(el("p","MCP connection details are not available yet."));
         target.append(setup); return;
       }

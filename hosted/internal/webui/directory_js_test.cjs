@@ -61,7 +61,7 @@ test('saved removal preserves other cards, keyboard focus and loaded-page offset
 test('all apps browse uses local identity icons without app bookmarks or connector claims',async()=>{
  const f=fixture({page:'directory',handle:url=>url.startsWith('/api/directory/apps?')?{data:{items:[{slug:'gmail',name:'Gmail',description:'Read and organize email.',categories:[{slug:'mail',name:'Mail'}],icon_url:'/assets/apps/gmail.svg',connector_ids:[]}],total:3380}}:undefined});
  await flush();assert.ok(f.calls.some(c=>c.url.startsWith('/api/directory/apps?')));assert.equal(f.controls().length,0);
- const nodes=f.ids['directory-results'].walk();assert.ok(nodes.some(n=>n.src==='/assets/apps/gmail.svg'));assert.ok(nodes.some(n=>n.href==='/library/server?app=gmail'));
+ const nodes=f.ids['directory-results'].walk();assert.ok(nodes.some(n=>n.src==='/assets/apps/gmail.svg'));assert.ok(nodes.some(n=>n.href==='/apps/gmail'));
  assert.equal(f.ids['directory-status'].textContent,'3,380 matching apps');assert.ok(!nodes.some(n=>n.textContent==='MCP'));
 });
 test('app icon URL accepts only local generated asset paths',async()=>{
@@ -75,7 +75,7 @@ test('app detail without an admitted route is explicit and has no app bookmark a
 });
 test('app detail links admitted connectors without asserting execution',async()=>{
  const f=fixture({page:'directory-detail',search:'?app=gmail',handle:url=>url==='/api/directory/app?slug=gmail'?{data:{slug:'gmail',name:'Gmail',categories:[],connector_ids:['google/gmail']}}:undefined});
- await flush();assert.ok(f.ids['directory-detail'].walk().some(n=>n.href==='/library/server?id=google%2Fgmail'));
+ await flush();assert.ok(f.ids['directory-detail'].walk().some(n=>n.href==='/connectors/google%2Fgmail'));
 });
 test('app pagination uses an offset and category filters use inventory categories',async()=>{
  const f=fixture({page:'directory',handle:url=>url.startsWith('/api/directory/apps?')?{data:{items:[{slug:'gmail',name:'Gmail'}],total:30,next_offset:24,categories:[{slug:'communication',name:'Communication'}]}}:undefined});
@@ -105,7 +105,7 @@ test('minimal app tiles show one useful category and a decorative navigation arr
  await flush();const nodes=f.ids['directory-results'].walk();
  const category=nodes.find(n=>n.className==='directory-card-use-case');assert.equal(category.textContent,'Communication');
  const arrow=nodes.find(n=>n.className==='directory-card-arrow');assert.equal(arrow.attrs['aria-hidden'],'true');
- assert.ok(nodes.some(n=>n.href==='/library/server?app=gmail'));
+ assert.ok(nodes.some(n=>n.href==='/apps/gmail'));
 });
 
 test('load more keeps its space and existing cards while a page is loading',async()=>{
@@ -116,4 +116,9 @@ test('load more keeps its space and existing cards while a page is loading',asyn
  assert.equal(more.hidden,false);assert.equal(more.disabled,true);assert.equal(f.ids['directory-results'].children[0],first);
  release({data:{items:[{slug:'slack',name:'Slack'}],total:48,next_offset:48}});await pending;await flush();
  assert.equal(more.hidden,false);assert.equal(more.disabled,false);assert.equal(f.ids['directory-results'].children.length,2);assert.equal(f.ids['directory-results'].children[0],first);
+});
+
+test('library cards omit descriptions and expose only one hover category',async()=>{
+ const f=fixture({handle:url=>url==='/api/directory?limit=6'?{data:{items:[{...records[0],description:'Long description stays on the detail page.',tags:['Communication','Productivity']}],total:1}}:undefined});await flush();
+ const nodes=f.ids['home-directory'].walk();assert.ok(!nodes.some(n=>n.className==='directory-card-description'));assert.ok(nodes.some(n=>n.className==='directory-card-use-case'&&n.textContent==='Communication'));assert.ok(nodes.some(n=>n.href==='/connectors/github'));
 });
