@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"net/url"
 	"path"
 	"strings"
 )
@@ -23,7 +24,7 @@ func Handles(p string) bool {
 	case "/", "/library", "/library/item", "/library/server", "/workspace", "/workspace/servers", "/developers", "/docs", "/signin", "/favicon.ico":
 		return true
 	}
-	return strings.HasPrefix(p, "/assets/")
+	return strings.HasPrefix(p, "/assets/") || strings.HasPrefix(p, "/apps/") || strings.HasPrefix(p, "/connectors/") || p == "/sitemap.xml" || p == "/robots.txt"
 }
 
 // Handler returns an independent, immutable static website handler.
@@ -32,6 +33,7 @@ func Handler() http.Handler {
 	if err != nil {
 		panic(err)
 	}
+	apps, connectors := appInventory()
 	static := http.StripPrefix("/assets/", http.FileServer(http.FS(assets)))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
@@ -64,6 +66,54 @@ func Handler() http.Handler {
 			http.Redirect(w, r, "/assets/brand/gist-app-icon-green.svg", http.StatusFound)
 			return
 		}
+
+		if r.URL.Path == "/robots.txt" {
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			if r.Method != http.MethodHead {
+				_, _ = w.Write([]byte("User-agent: *\nAllow: /\nDisallow: /workspace\nDisallow: /app/\nDisallow: /auth/\nDisallow: /api/\nSitemap: " + publicOrigin + "/sitemap.xml\n"))
+			}
+			return
+		}
+		if r.URL.Path == "/sitemap.xml" {
+			serveSitemap(w, r, apps, connectors)
+			return
+		}
+		if strings.HasPrefix(r.URL.Path, "/apps/") {
+			serveAppPage(w, r, apps, connectors)
+			return
+		}
+		if r.URL.Path == "/library/server" {
+			if slug := r.URL.Query().Get("app"); slug != "" {
+				if _, ok := apps.Get(slug); !ok {
+					http.NotFound(w, r)
+					return
+				}
+				http.Redirect(w, r, appPath(slug), http.StatusMovedPermanently)
+				return
+			}
+			if id := r.URL.Query().Get("id"); id != "" {
+				if _, ok := connectors.Get(id); !ok {
+					http.NotFound(w, r)
+					return
+				}
+				http.Redirect(w, r, connectorPath(id), http.StatusMovedPermanently)
+				return
+			}
+		}
+		if strings.HasPrefix(r.URL.Path, "/connectors/") {
+			id, err := url.PathUnescape(strings.TrimPrefix(r.URL.EscapedPath(), "/connectors/"))
+			if err != nil {
+				http.NotFound(w, r)
+				return
+			}
+			c, ok := connectors.Get(id)
+			if !ok {
+				http.NotFound(w, r)
+				return
+			}
+			renderPage(w, r, "connector-preview", c, siteData{Title: c.Title + " connection details · Gist", Page: "directory-detail", Description: c.Description, Canonical: publicOrigin + connectorPath(id)})
+			return
+		}
 		page := "home"
 		title := "Gist — The right context, ready to use"
 		switch r.URL.Path {
@@ -94,10 +144,7 @@ func Handler() http.Handler {
 			return
 		}
 		var out bytes.Buffer
-		data := struct {
-			Title, Page string
-			Body        template.HTML
-		}{title, page, template.HTML(body.String())}
+		data := siteData{Title: title, Page: page, Description: "Discover reusable skills and tools. Bring the right context to Zati and other AI clients with Gist.", Body: template.HTML(body.String())}
 		if err := pages.ExecuteTemplate(&out, "layout", data); err != nil {
 			http.Error(w, "Page unavailable", http.StatusInternalServerError)
 			return
