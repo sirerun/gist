@@ -226,9 +226,9 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		pool.Close()
 		return nil, fmt.Errorf("app: application directory: %w", err)
 	}
-	var publicSearch *semantic.Service
+	// Keep public fallback mode explicit even if native startup was unavailable.
+	publicSearch := semantic.New(publicIndex, apps, cfg.PublicEmbedder, cfg.EmbeddingHealthy)
 	if cfg.PublicEmbedder != nil {
-		publicSearch = semantic.New(publicIndex, apps, cfg.PublicEmbedder, cfg.EmbeddingHealthy)
 		go func() {
 			warmCtx, cancel := context.WithTimeout(ctx, 10*time.Minute)
 			defer cancel()
