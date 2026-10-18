@@ -20,10 +20,45 @@
     target.replaceChildren(box);
   }
   function badges(record, target) {
-    target.append(el("span", record.kind === "openapi" ? "OpenAPI · Mint required" : "MCP server", "pill"));
+    target.append(el("span", record.kind === "unavailable" ? "Unavailable entry" : record.kind === "openapi" ? "OpenAPI · Mint required" : "MCP server", "pill"));
     if (record.featured === true) target.append(el("span", "Featured · tested in Zati", "pill"));
     else if (record.recommended === true) target.append(el("span", "Recommended candidate", "pill"));
     if (record.official === true) target.append(el("span", "Vendor official", "pill"));
+  }
+  let bookmarkIDs = new Set(), bookmarkCSRF = "", bookmarkState = "loading";
+  async function loadBookmarks() {
+    try {
+      const session = await api("/app/api/session");
+      if (!session.authenticated || !session.csrf_token) { bookmarkState = "guest"; return; }
+      const data = await api("/app/api/bookmarks");
+      bookmarkIDs = new Set(data.ids); bookmarkCSRF = session.csrf_token; bookmarkState = "ready";
+    } catch (e) { bookmarkState = e.status === 401 ? "guest" : "error"; }
+  }
+  function bookmarkButton(record) {
+    const control = el("div", undefined, "bookmark-control");
+    const save = button("Bookmark", async () => {
+      if (bookmarkState === "guest") { location.assign("/auth/github/start?return_to=" + encodeURIComponent(location.pathname + location.search)); return; }
+      if (bookmarkState === "error") { save.disabled = true; await loadBookmarks(); save.disabled = false; refresh(); return; }
+      const removing = bookmarkIDs.has(record.id); save.disabled = true; message.textContent = "";
+      try {
+        await api("/app/api/bookmarks?" + new URLSearchParams({id:record.id}), {method:removing ? "DELETE" : "PUT", headers:{"X-Gist-CSRF":bookmarkCSRF}});
+        if (removing) bookmarkIDs.delete(record.id); else bookmarkIDs.add(record.id);
+        refresh(); message.textContent = removing ? "Removed from your bookmarks." : "Saved to your bookmarks.";
+        document.dispatchEvent(new Event("bookmarks-changed"));
+      } catch(e) {
+        message.textContent = e.status === 409 ? "You can save up to 200 bookmarks. Remove one first." : e.status === 401 ? "Your session expired. Sign in again to save." : e.status === 403 ? "Reload the page before trying again." : "Couldn’t update your bookmark. Try again.";
+        if (e.status === 401) { bookmarkState = "guest"; refresh(); }
+      } finally { save.disabled = false; }
+    });
+    const message = el("span", "", "quiet bookmark-message"); message.setAttribute("role", "status");
+    function refresh() {
+      const saved = bookmarkIDs.has(record.id);
+      save.textContent = bookmarkState === "error" ? "Retry bookmarks" : bookmarkState === "guest" ? "Sign in to bookmark" : saved ? "Bookmarked" : "Bookmark";
+      save.setAttribute("aria-pressed", String(bookmarkState === "ready" && saved));
+      const action = bookmarkState === "guest" ? "Sign in to bookmark " : bookmarkState === "error" ? "Retry bookmarks for " : saved ? "Remove bookmark for " : "Bookmark ";
+      save.setAttribute("aria-label", action + (record.title || record.id));
+    }
+    refresh(); control.append(save, message); return control;
   }
   function card(record) {
     const c = link("", "/library/server?" + new URLSearchParams({id:record.id}), "catalog-card directory-card");
@@ -37,7 +72,10 @@
     heading.append(icon, el("h2", record.title || record.id));
     const b = el("div", undefined, "directory-badges"); badges(record,b);
     c.append(heading, el("p", record.description || "Inspect setup and provenance."), el("p", record.featured ? "Dated workflow evidence available" : "Workflow qualification pending", "quiet"), b);
-    return c;
+    const wrapper = el("article", undefined, "catalog-card directory-card bookmark-card");
+    c.className = "bookmark-entry-link";
+    wrapper.append(c, b, bookmarkButton(record));
+    return wrapper;
   }
   async function home() {
     const target = document.getElementById("home-directory");
@@ -47,24 +85,38 @@
   function directory() {
     const form = document.getElementById("directory-search"), query = document.getElementById("directory-query"), tag = document.getElementById("directory-tag"), results = document.getElementById("directory-results"), status = document.getElementById("directory-status"), notice = document.getElementById("directory-notice"), more = document.getElementById("directory-more");
     const params = new URLSearchParams(location.search); query.value = params.get("q") || ""; tag.value = params.get("tag") || "";
+    let savedOnly = params.get("saved") === "1";
+    const savedFilter = document.getElementById("bookmark-filter");
+    savedFilter.setAttribute("aria-pressed", String(savedOnly)); savedFilter.classList.toggle("active", savedOnly);
     let kind = ["mcp","openapi"].includes(params.get("kind")) ? params.get("kind") : "", cursor = "", generation = 0;
     function filters() { document.querySelectorAll("[data-directory-kind]").forEach(b=>{const active=b.dataset.directoryKind===kind; b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));}); }
     async function load(append = false) {
-      const own = ++generation; more.hidden = true; results.setAttribute("aria-busy","true"); notice.replaceChildren();
+      const ownSaved = savedOnly, own = ++generation; more.hidden = true; results.setAttribute("aria-busy","true"); notice.replaceChildren();
       if (!append) results.replaceChildren();
-      const p = new URLSearchParams({limit:"24"}); if(query.value.trim()) p.set("q",query.value.trim()); if(kind)p.set("kind",kind); if(tag.value)p.set("tag",tag.value); if(append&&cursor)p.set("cursor",cursor);
-      const visible = new URLSearchParams(p); visible.delete("limit");visible.delete("cursor"); history.replaceState(null,"","/library"+(visible.size?"?"+visible:""));
+      const p = new URLSearchParams({limit:"24"}); if(query.value.trim()) p.set("q",query.value.trim()); if(kind)p.set("kind",kind); if(tag.value)p.set("tag",tag.value); if(append&&cursor)p.set(ownSaved ? "offset" : "cursor",cursor);
+      const visible = new URLSearchParams(p); visible.delete("limit");visible.delete("cursor");visible.delete("offset");if(ownSaved)visible.set("saved","1"); history.replaceState(null,"","/library"+(visible.size?"?"+visible:""));
       try {
         if(new TextEncoder().encode(query.value.trim()).length>200){const e=new Error();e.status=400;throw e;}
-        const data = await api("/api/directory?"+p); if(own!==generation)return;
+        if (ownSaved && bookmarkState === "error") await loadBookmarks();
+        if (own !== generation) return;
+        if (ownSaved && bookmarkState === "guest") {
+          status.textContent = "Sign in to view your personal bookmarks.";
+          notice.append(link("Sign in with GitHub →", "/auth/github/start?return_to=%2Flibrary%3Fsaved%3D1", "button button-primary")); return;
+        }
+        if (ownSaved && bookmarkState === "error") throw new Error("Bookmarks unavailable");
+        let endpoint = "/api/directory?";
+        if (ownSaved) { p.delete("limit"); p.set("view", "entries"); endpoint = "/app/api/bookmarks?"; }
+        const data = await api(endpoint+p); if(own!==generation)return;
         results.append(...data.items.map(card)); cursor=data.next_cursor||""; more.hidden=!cursor;
-        status.textContent=data.total.toLocaleString()+" matching integrations · public source snapshot";
-        if(!data.items.length&&!append)notice.append(el("p","No matching integrations. Try another term or clear your filters.","notice"));
-      } catch(e) {if(own===generation){status.textContent="Search unavailable";failure(notice,e,()=>load(append));}}
+        status.textContent=data.total.toLocaleString()+(ownSaved ? " matching bookmarks · only visible to you" : " matching integrations · public source snapshot");
+        if(!data.items.length&&!append)notice.append(el("p",(ownSaved ? "No matching bookmarks. Bookmark entries from the library to find them here." : "No matching integrations. Try another term or clear your filters."),"notice"));
+      } catch(e) {if(own===generation){status.textContent="Search unavailable";if(ownSaved){const box=el("div",undefined,"notice error");box.append(el("p","Couldn’t load your bookmarks."),button("Try again",async()=>{await loadBookmarks();load(append);}));notice.replaceChildren(box);}else failure(notice,e,()=>load(append));}}
       finally {if(own===generation)results.setAttribute("aria-busy","false");}
     }
     form.addEventListener("submit",e=>{e.preventDefault();load();}); tag.addEventListener("change",()=>load());
     document.querySelectorAll("[data-directory-kind]").forEach(b=>b.addEventListener("click",()=>{kind=b.dataset.directoryKind;filters();load();}));
+    savedFilter.addEventListener("click", () => { savedOnly = !savedOnly; savedFilter.setAttribute("aria-pressed", String(savedOnly)); savedFilter.classList.toggle("active", savedOnly); load(); });
+    document.addEventListener("bookmarks-changed", () => { if (savedOnly) load(); });
     more.addEventListener("click",()=>load(true)); filters();load();
   }
   function field(target,label,value) { if(value) {const d=el("div"); d.append(el("dt",label),el("dd",String(value)));target.append(d);} }
@@ -75,7 +127,7 @@
       if(!id){const e=new Error();e.status=400;throw e;}
       const r=await api("/api/directory/item?"+new URLSearchParams({id}));target.replaceChildren();
       const badgesEl=el("div",undefined,"directory-badges");badges(r,badgesEl);
-      target.append(badgesEl,el("h1",r.title),el("p",r.description,"artifact-description"));
+      target.append(badgesEl,el("h1",r.title),bookmarkButton(r),el("p",r.description,"artifact-description"));
       const info=el("dl",undefined,"definition-list");field(info,"Descriptor version",r.version||"Not specified");field(info,"Authentication",r.auth?.type||"Check provider documentation");field(info,"Credential names",r.auth?.credential_names?.join(", "));field(info,"Source entry",r.source?.entry_id);target.append(info);
       const setup=el("section");setup.append(el("h2","Connect in your client"),el("p","Inspect and admit this descriptor in Zati or your MCP client. Connect your provider account there. Exporting a descriptor does not install, authorize or execute it."));
       for(const remote of r.remotes||[]) {setup.append(el("h3",remote.transport==="streamable-http"?"Streamable HTTP endpoint":"SSE endpoint"),el("pre",remote.url));}
@@ -117,5 +169,9 @@
       }catch(err){failure(saveStatus,err);}finally{submit.disabled=false;}
     });
   }
-  if(page==="home")home();if(page==="directory")directory();if(page==="directory-detail")detail();if(page==="private-directory")privateDirectory();
+  async function start() {
+    if (page !== "private-directory") await loadBookmarks();
+    if(page==="home")home();if(page==="directory")directory();if(page==="directory-detail")detail();if(page==="private-directory")privateDirectory();
+  }
+  start();
 })();

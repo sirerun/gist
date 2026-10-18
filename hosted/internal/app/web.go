@@ -16,6 +16,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/sirerun/gist/catalog/directory"
 	"github.com/sirerun/gist/hosted/internal/identity"
 	"github.com/sirerun/gist/hosted/internal/oauth"
 	"github.com/sirerun/gist/hosted/internal/ports"
@@ -60,6 +61,8 @@ type webAPI struct {
 	sessions                                   oauth.SessionAuthenticator
 	policy                                     webPolicy
 	catalog                                    webCatalog
+	bookmarks                                  bookmarkStore
+	publicIndex                                *directory.Index
 	directory                                  privateDirectoryStore
 	origin, audience, workspace, workspaceName string
 	cursorKey                                  []byte
@@ -100,6 +103,10 @@ func (h *webAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		http.SetCookie(w, &http.Cookie{Name: oauth.SessionCookieName, Value: "", Path: "/", MaxAge: -1, Expires: time.Unix(1, 0), Secure: true, HttpOnly: true, SameSite: http.SameSiteLaxMode})
 		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	if r.URL.Path == "/app/api/bookmarks" {
+		h.serveBookmarks(w, r)
 		return
 	}
 	if r.URL.Path == "/app/api/directory" {
