@@ -1,7 +1,7 @@
 # ADR024: Vendor-only app directory admission
 
-Status: Accepted owner direction, 2026-10-17. Supersedes ADR023's bulk public
-population and alternate-implementation policy; other boundaries remain.
+Status: Superseded by ADR-025 (2026-10-18). This records the owner direction
+from 2026-10-17; ADR-025 replaces its vendor-only endpoint admission rule.
 
 Public entries must represent apps listed in **either n8n or Make**, deduplicated
 by reviewed app identity, with a separately verified **vendor-official HTTPS MCP

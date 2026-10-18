@@ -1,14 +1,41 @@
 {
   "format": "gist.directory.admission/v1",
-  "policy": "n8n-or-make/vendor-official",
-  "retrieved_at": "2026-10-18T02:54:36Z",
+  "policy": "n8n-or-make-verified/reachable-remote-mcp",
+  "retrieved_at": "2026-10-18T04:03:13Z",
   "apps": [
     {
-      "service_id": "linear",
+      "service_id": "airtable",
       "listings": [
         {
           "directory": "n8n",
-          "url": "https://n8n.io/integrations/linear/"
+          "url": "https://n8n.io/integrations/airtable/"
+        },
+        {
+          "directory": "make",
+          "url": "https://www.make.com/integrations/airtable"
+        }
+      ]
+    },
+    {
+      "service_id": "asana",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/asana/"
+        },
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Asana"
+        }
+      ]
+    },
+    {
+      "service_id": "box",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/box/"
         }
       ]
     },
@@ -27,6 +54,20 @@
         {
           "directory": "n8n",
           "url": "https://n8n.io/integrations/confluence/"
+        },
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Atlassian"
+        }
+      ]
+    },
+    {
+      "service_id": "dropbox",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/dropbox/"
         }
       ]
     },
@@ -40,11 +81,39 @@
       ]
     },
     {
+      "service_id": "github",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/github/"
+        },
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "GitHub"
+        }
+      ]
+    },
+    {
+      "service_id": "gitlab",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/gitlab/"
+        }
+      ]
+    },
+    {
       "service_id": "google-calendar",
       "listings": [
         {
           "directory": "n8n",
           "url": "https://n8n.io/integrations/google-calendar/"
+        },
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Google Calendar"
         }
       ]
     },
@@ -54,6 +123,11 @@
         {
           "directory": "n8n",
           "url": "https://n8n.io/integrations/google-drive/"
+        },
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Google Drive"
         }
       ]
     },
@@ -63,15 +137,29 @@
         {
           "directory": "n8n",
           "url": "https://n8n.io/integrations/gmail/"
+        },
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Gmail"
         }
       ]
     },
     {
-      "service_id": "github",
+      "service_id": "hubspot",
       "listings": [
         {
           "directory": "n8n",
-          "url": "https://n8n.io/integrations/github/"
+          "url": "https://n8n.io/integrations/hubspot/"
+        },
+        {
+          "directory": "make",
+          "url": "https://www.make.com/integrations/hubspotcrm"
+        },
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "HubSpot"
         }
       ]
     },
@@ -81,6 +169,52 @@
         {
           "directory": "n8n",
           "url": "https://n8n.io/integrations/jira-software/"
+        },
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Atlassian"
+        }
+      ]
+    },
+    {
+      "service_id": "linear",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/linear/"
+        },
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Linear"
+        }
+      ]
+    },
+    {
+      "service_id": "linkedin-ads-library",
+      "listings": [
+        {
+          "directory": "make",
+          "url": "https://www.make.com/integrations/linkedin"
+        }
+      ]
+    },
+    {
+      "service_id": "monday",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/mondaycom/"
+        },
+        {
+          "directory": "make",
+          "url": "https://www.make.com/integrations/monday"
+        },
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "monday.com"
         }
       ]
     },
@@ -90,6 +224,20 @@
         {
           "directory": "n8n",
           "url": "https://n8n.io/integrations/notion/"
+        },
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Notion"
+        }
+      ]
+    },
+    {
+      "service_id": "salesforce",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/salesforce/"
         }
       ]
     },
@@ -99,6 +247,11 @@
         {
           "directory": "n8n",
           "url": "https://n8n.io/integrations/sentryio/"
+        },
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Sentry"
         }
       ]
     },
@@ -108,6 +261,11 @@
         {
           "directory": "n8n",
           "url": "https://n8n.io/integrations/slack/"
+        },
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Slack"
         }
       ]
     },
@@ -117,8 +275,1072 @@
         {
           "directory": "n8n",
           "url": "https://n8n.io/integrations/stripe/"
+        },
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Stripe"
+        }
+      ]
+    },
+    {
+      "service_id": "supabase",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/supabase/"
+        },
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Supabase"
+        }
+      ]
+    },
+    {
+      "service_id": "zoom",
+      "listings": [
+        {
+          "directory": "n8n",
+          "url": "https://n8n.io/integrations/zoom/"
+        }
+      ]
+    },
+    {
+      "service_id": "make",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Make"
+        }
+      ]
+    },
+    {
+      "service_id": "agentic-commerce",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Agentic Commerce"
+        }
+      ]
+    },
+    {
+      "service_id": "alkemi",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Alkemi"
+        }
+      ]
+    },
+    {
+      "service_id": "amplitude",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Amplitude"
+        }
+      ]
+    },
+    {
+      "service_id": "apify",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Apify"
+        }
+      ]
+    },
+    {
+      "service_id": "apple-developer-documentation-rag",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Apple Developer Documentation (RAG)"
+        }
+      ]
+    },
+    {
+      "service_id": "appwrite-docs",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Appwrite Docs"
+        }
+      ]
+    },
+    {
+      "service_id": "astro-docs",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Astro Docs"
+        }
+      ]
+    },
+    {
+      "service_id": "beat-and-raise-sec-filings",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Beat and Raise (SEC Filings)"
+        }
+      ]
+    },
+    {
+      "service_id": "behavioral-prediction",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Behavioral Prediction"
+        }
+      ]
+    },
+    {
+      "service_id": "biocontext-knowledgebase",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "BioContext Knowledgebase"
+        }
+      ]
+    },
+    {
+      "service_id": "blooio-imessages",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Blooio iMessages"
+        }
+      ]
+    },
+    {
+      "service_id": "bright-data",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Bright Data"
+        }
+      ]
+    },
+    {
+      "service_id": "browserless",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Browserless"
+        }
+      ]
+    },
+    {
+      "service_id": "canva",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Canva"
+        }
+      ]
+    },
+    {
+      "service_id": "clickup",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "ClickUp"
+        }
+      ]
+    },
+    {
+      "service_id": "close",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Close"
+        }
+      ]
+    },
+    {
+      "service_id": "coingecko",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "CoinGecko"
+        }
+      ]
+    },
+    {
+      "service_id": "company-ethics-information-boikot",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Company Ethics Information (Boikot)"
+        }
+      ]
+    },
+    {
+      "service_id": "contextual-ai",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Contextual AI"
+        }
+      ]
+    },
+    {
+      "service_id": "coresignal",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Coresignal"
+        }
+      ]
+    },
+    {
+      "service_id": "crossbeam",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Crossbeam"
+        }
+      ]
+    },
+    {
+      "service_id": "currency-conversion",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Currency Conversion"
+        }
+      ]
+    },
+    {
+      "service_id": "currenttimeutc",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "CurrentTimeUTC"
+        }
+      ]
+    },
+    {
+      "service_id": "deepwiki",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "DeepWiki"
+        }
+      ]
+    },
+    {
+      "service_id": "devcycle",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "DevCycle"
+        }
+      ]
+    },
+    {
+      "service_id": "dice-rolling",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Dice Rolling"
+        }
+      ]
+    },
+    {
+      "service_id": "excel-to-json",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Excel to JSON"
+        }
+      ]
+    },
+    {
+      "service_id": "flight-search",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Flight Search"
+        }
+      ]
+    },
+    {
+      "service_id": "fulcra-context",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Fulcra Context"
+        }
+      ]
+    },
+    {
+      "service_id": "galileo",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Galileo"
+        }
+      ]
+    },
+    {
+      "service_id": "gitmcp",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "GitMCP"
+        }
+      ]
+    },
+    {
+      "service_id": "gohighlevel",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "GoHighLevel"
+        }
+      ]
+    },
+    {
+      "service_id": "googleads",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "GoogleAds"
+        }
+      ]
+    },
+    {
+      "service_id": "goweb3",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "GoWeb3"
+        }
+      ]
+    },
+    {
+      "service_id": "gralio",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Gralio"
+        }
+      ]
+    },
+    {
+      "service_id": "grep",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Grep"
+        }
+      ]
+    },
+    {
+      "service_id": "gumlet",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Gumlet"
+        }
+      ]
+    },
+    {
+      "service_id": "higgsfield",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Higgsfield"
+        }
+      ]
+    },
+    {
+      "service_id": "himalayas-remote-jobs",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Himalayas Remote Jobs"
+        }
+      ]
+    },
+    {
+      "service_id": "hmr-docs",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "HMR Docs"
+        }
+      ]
+    },
+    {
+      "service_id": "hugging-face",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Hugging Face"
+        }
+      ]
+    },
+    {
+      "service_id": "ilert",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "ilert"
+        }
+      ]
+    },
+    {
+      "service_id": "imagineart",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "ImagineArt"
+        }
+      ]
+    },
+    {
+      "service_id": "intercom",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Intercom"
+        }
+      ]
+    },
+    {
+      "service_id": "io-aerospace",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "IO Aerospace"
+        }
+      ]
+    },
+    {
+      "service_id": "justcall",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "JustCall"
+        }
+      ]
+    },
+    {
+      "service_id": "kismet-travel",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Kismet Travel"
+        }
+      ]
+    },
+    {
+      "service_id": "kiwi-flight-search",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Kiwi Flight Search"
+        }
+      ]
+    },
+    {
+      "service_id": "laei-ro",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "LaEi.ro"
+        }
+      ]
+    },
+    {
+      "service_id": "langchain-hub",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "LangChain Hub"
+        }
+      ]
+    },
+    {
+      "service_id": "linear-read-only",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Linear (read-only)"
+        }
+      ]
+    },
+    {
+      "service_id": "listenetic",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Listenetic"
+        }
+      ]
+    },
+    {
+      "service_id": "lunarcrush",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "LunarCrush"
+        }
+      ]
+    },
+    {
+      "service_id": "mailerlite",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "MailerLite"
+        }
+      ]
+    },
+    {
+      "service_id": "mailersend",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "MailerSend"
+        }
+      ]
+    },
+    {
+      "service_id": "marketo-engage",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Marketo Engage"
+        }
+      ]
+    },
+    {
+      "service_id": "microsoft-entra-microsoft-365",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Microsoft Entra (Microsoft 365)"
+        }
+      ]
+    },
+    {
+      "service_id": "microsoft-learn",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Microsoft Learn"
+        }
+      ]
+    },
+    {
+      "service_id": "mobile-text-alerts",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Mobile Text Alerts"
+        }
+      ]
+    },
+    {
+      "service_id": "neon",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Neon"
+        }
+      ]
+    },
+    {
+      "service_id": "opalstack",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Opalstack"
+        }
+      ]
+    },
+    {
+      "service_id": "parallel-search",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Parallel Search"
+        }
+      ]
+    },
+    {
+      "service_id": "parallel-ai-task-management",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Parallel.ai Task Management"
+        }
+      ]
+    },
+    {
+      "service_id": "paypal",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "PayPal"
+        }
+      ]
+    },
+    {
+      "service_id": "pdf4me",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "PDF4me"
+        }
+      ]
+    },
+    {
+      "service_id": "pearl",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Pearl"
+        }
+      ]
+    },
+    {
+      "service_id": "peek",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Peek"
+        }
+      ]
+    },
+    {
+      "service_id": "poku-labs-human-in-the-loop",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Poku Labs (Human-in-the-loop)"
+        }
+      ]
+    },
+    {
+      "service_id": "posthog",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "PostHog"
+        }
+      ]
+    },
+    {
+      "service_id": "postman",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Postman"
+        }
+      ]
+    },
+    {
+      "service_id": "pre-dev-architect",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "pre.dev Architect"
+        }
+      ]
+    },
+    {
+      "service_id": "prisma-postgres-mcp-server",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Prisma Postgres MCP Server"
+        }
+      ]
+    },
+    {
+      "service_id": "reflag",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Reflag"
+        }
+      ]
+    },
+    {
+      "service_id": "replicate",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Replicate"
+        }
+      ]
+    },
+    {
+      "service_id": "rostro",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Rostro"
+        }
+      ]
+    },
+    {
+      "service_id": "rotunda",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Rotunda"
+        }
+      ]
+    },
+    {
+      "service_id": "saleor-commerce",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Saleor Commerce"
+        }
+      ]
+    },
+    {
+      "service_id": "scamshield",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "ScamShield"
+        }
+      ]
+    },
+    {
+      "service_id": "semgrep",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Semgrep"
+        }
+      ]
+    },
+    {
+      "service_id": "seo-linkmap",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "SEO LinkMap"
+        }
+      ]
+    },
+    {
+      "service_id": "shutter-network",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Shutter Network"
+        }
+      ]
+    },
+    {
+      "service_id": "simplescraper",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Simplescraper"
+        }
+      ]
+    },
+    {
+      "service_id": "square",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Square"
+        }
+      ]
+    },
+    {
+      "service_id": "stytch",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Stytch"
+        }
+      ]
+    },
+    {
+      "service_id": "superhuman-docs",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Superhuman Docs"
+        }
+      ]
+    },
+    {
+      "service_id": "superhuman-mail",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Superhuman Mail"
+        }
+      ]
+    },
+    {
+      "service_id": "svelte",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Svelte"
+        }
+      ]
+    },
+    {
+      "service_id": "svelte-documentation",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Svelte Documentation"
+        }
+      ]
+    },
+    {
+      "service_id": "tally",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Tally"
+        }
+      ]
+    },
+    {
+      "service_id": "tavily-search",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Tavily Search"
+        }
+      ]
+    },
+    {
+      "service_id": "timecamp",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "TimeCamp"
+        }
+      ]
+    },
+    {
+      "service_id": "twelve-data",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Twelve Data"
+        }
+      ]
+    },
+    {
+      "service_id": "twelvelabs",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "TwelveLabs"
+        }
+      ]
+    },
+    {
+      "service_id": "vapi",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Vapi"
+        }
+      ]
+    },
+    {
+      "service_id": "veed",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Veed"
+        }
+      ]
+    },
+    {
+      "service_id": "vlei-wiki",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "vLEI.wiki"
+        }
+      ]
+    },
+    {
+      "service_id": "waystation",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "WayStation"
+        }
+      ]
+    },
+    {
+      "service_id": "webflow",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Webflow"
+        }
+      ]
+    },
+    {
+      "service_id": "windsor",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Windsor"
+        }
+      ]
+    },
+    {
+      "service_id": "wix",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "Wix"
+        }
+      ]
+    },
+    {
+      "service_id": "wordpress-trac",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "WordPress Trac"
+        }
+      ]
+    },
+    {
+      "service_id": "zoominfo",
+      "listings": [
+        {
+          "directory": "make-verified-mcp",
+          "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+          "server_name": "ZoomInfo"
         }
       ]
     }
-  ]
+  ],
+  "make_verified_source": {
+    "url": "https://apps.make.com/c5ZhYquO55e90hoCJ0rzt",
+    "retrieved_at": "2026-10-18T04:03:13Z",
+    "source_html_sha256": "b8daac2be0f5d0729634d028d19b9232f80127a64d6b23988e6972ac203804d2",
+    "inventory_sha256": "c5d8945cac0c654142979e2a99d9314492e4392cc546d5f7b0e9a325ad1cfcf0"
+  }
 }

@@ -24,6 +24,9 @@
     if (record.featured === true) target.append(el("span", "Featured · tested in Zati", "pill"));
     else if (record.recommended === true) target.append(el("span", "Recommended candidate", "pill"));
     if (record.official === true) target.append(el("span", "Vendor official", "pill"));
+    else if (record.kind === "mcp") target.append(el("span", "Operator not verified by Gist", "pill"));
+    const checked = (record.remotes || []).map(r=>r.check).filter(c=>c && c.checked_at).sort((a,b)=>String(b.checked_at).localeCompare(String(a.checked_at)))[0];
+    if (checked) target.append(el("span", "Endpoint responded · " + new Date(checked.checked_at).toLocaleDateString(), "pill"));
   }
   // Login accepts fixed destinations only; never forward the current search URL.
   const bookmarkSignIn = "/auth/github/start?return_to=%2Flibrary";
@@ -171,8 +174,9 @@
       const badgesEl=el("div",undefined,"directory-badges");badges(r,badgesEl);
       target.append(badgesEl,el("h1",r.title),bookmarkButton(r),el("p",r.description,"artifact-description"));
       const info=el("dl",undefined,"definition-list");field(info,"Descriptor version",r.version||"Not specified");field(info,"Authentication",r.auth?.type||"Check provider documentation");field(info,"Credential names",r.auth?.credential_names?.join(", "));field(info,"Source entry",r.source?.entry_id);target.append(info);
-      const setup=el("section");setup.append(el("h2","Connect in your client"),el("p","Inspect and admit this descriptor in Zati or your MCP client. Connect your provider account there. Exporting a descriptor does not install, authorize or execute it."));
+      const setup=el("section");setup.append(el("h2","Connect in your client"),el("p","Inspect and admit this descriptor in an MCP client that supports the listed transport. Authorize your provider account in that client. Zati currently supports Streamable HTTP; SSE entries require an SSE-capable client. Exporting a descriptor does not install, authorize or execute it."));
       for(const remote of r.remotes||[]) {setup.append(el("h3",remote.transport==="streamable-http"?"Streamable HTTP endpoint":"SSE endpoint"),el("pre",remote.url));}
+      for(const remote of r.remotes||[]){const check=remote.check;if(!check)continue;const detail=check.result==="mcp-initialize"?"completed the MCP initialize handshake":check.result==="authentication-required"?"responded with an authentication challenge":check.result==="payment-required"?"responded that payment is required":"responded to the configured "+remote.transport+" reachability check";setup.append(el("p","Unauthenticated endpoint check: "+detail+" (HTTP "+check.http_status+") on "+new Date(check.checked_at).toLocaleString()+". This check did not list tools or make a provider call."));}
       for(const pkg of r.packages||[]) {setup.append(el("h3","Package · "+pkg.registry),el("pre",pkg.identifier+(pkg.version?" @ "+pkg.version:"")),el("p","Requires a client with local package support. Zati currently supports admitted Streamable HTTP connections; this listing does not imply local package compatibility.","quiet"));}
       if(r.openapi) {setup.append(el("p","An OpenAPI descriptor requires generation and hosting or a compatible adapter. Mint supports OpenAPI 3.x; specification validity and generated tool behavior still need verification. Mint’s stdio/SSE output is not directly compatible with Zati’s current Streamable HTTP admission."));sourceLink(setup,"OpenAPI specification",r.openapi.spec_url);sourceLink(setup,"Mint generation guide",r.openapi.mint_guide_url);}
       sourceLink(setup,"Authentication setup",r.auth?.setup_url);sourceLink(setup,"Project",r.homepage);sourceLink(setup,"Repository",r.repository);target.append(setup);
@@ -181,7 +185,7 @@
       for(const s of r.skills||[]) {skillSection.append(el("h3",s.title||s.id),el("p","Status: "+s.status));sourceLink(skillSection,"Skill source",s.url);}
       for(const v of r.verification||[]) {skillSection.append(el("p",[v.client,v.workflow,v.result,v.checked_at,v.expires_at?"Expires "+v.expires_at:""].filter(Boolean).join(" · ")));sourceLink(skillSection,"Dated evidence",v.evidence_url);}
       target.append(skillSection);
-      const provenance=el("section");provenance.append(el("h2","Provenance"));sourceLink(provenance,"Original source",r.source?.url);sourceLink(provenance,"Vendor ownership evidence",r.official_evidence_url);target.append(provenance);
+      const provenance=el("section");provenance.append(el("h2","Provenance"));sourceLink(provenance,"Original source",r.source?.url);sourceLink(provenance,"Vendor ownership evidence",r.official_evidence_url);sourceLink(provenance,r.server_listing_url?.includes("apps.make.com/")?"Make verified MCP server list":"Independent MCP server listing",r.server_listing_url);target.append(provenance);
       const status=el("p",undefined,"quiet"); target.append(button("Export setup descriptor",async()=>{try {const data=await api("/api/directory/export?"+new URLSearchParams({id}));const u=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)+"\n"],{type:"application/json"}));const a=link("",u);a.download="gist-integration.json";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);status.textContent="Descriptor downloaded. Review it in your client before use.";}catch(e){failure(status,e);}}),status);
     }catch(e){failure(target,e,detail);}finally{target.setAttribute("aria-busy","false");}
   }

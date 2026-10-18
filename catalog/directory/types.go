@@ -22,8 +22,18 @@ type RecordSource struct {
 	URL     string `json:"url"`
 }
 type Remote struct {
-	URL       string `json:"url"`
-	Transport string `json:"transport"`
+	URL       string         `json:"url"`
+	Transport string         `json:"transport"`
+	Check     *EndpointCheck `json:"check,omitempty"`
+}
+
+// EndpointCheck records an unauthenticated endpoint reachability probe. It is
+// intentionally separate from Qualification, which requires an actual client
+// workflow and pinned tool/schema evidence.
+type EndpointCheck struct {
+	CheckedAt  time.Time `json:"checked_at"`
+	HTTPStatus int       `json:"http_status"`
+	Result     string    `json:"result"` // mcp-initialize, endpoint-responded, authentication-required or payment-required
 }
 type Package struct {
 	Registry   string `json:"registry"`
@@ -81,6 +91,7 @@ type Record struct {
 	Recommended         bool            `json:"recommended"`
 	Official            bool            `json:"official"` // vendor evidence, never registry membership
 	OfficialEvidenceURL string          `json:"official_evidence_url,omitempty"`
+	ServerListingURL    string          `json:"server_listing_url,omitempty"`
 	FeaturedSelection   bool            `json:"featured_selection,omitempty"` // operator-curated only
 	Featured            bool            `json:"featured"`                     // computed by Index using current time
 }
