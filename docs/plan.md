@@ -2148,12 +2148,12 @@ source, browser, review, landed and deployment evidence remain distinct.
 - [x] T-WEB.2 Implement responsive website and catalog experience  Owner: web-frontend  Est: TBD  kind: agent  stage: implement  blocked-by: [T-WEB.1]  acc: [Embedded accessible pages implement approved visual identity, search and actual kind filters, bounded paging, exact detail, client guidance, sign-in and sign-out with loading, no-result, empty and error states]
 - [x] T-WEB.3 Implement current-policy browser catalog access and route wiring  Owner: web-backend  Est: TBD  kind: agent  stage: implement  blocked-by: [T-WEB.1]  acc: [Every private read checks current cookie identity, membership and read policy in configured tenant; public pages work during enrollment while existing API admission and OAuth contracts remain enforced]
 - [x] T-WEB.4 Verify the complete changed source and browser journeys  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-WEB.2, T-WEB.3]  acc: [Race integration and browser checks pass real HTTP status/body, authorization revocation/isolation, bootstrap routes, sign-in return target, search, details, empty/errors and desktop/mobile layouts without private-token storage or injected metadata execution]
-- [ ] T-WEB.5 Independently review final web app candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-WEB.4]  acc: [Non-author reviews exact base/head and complete frontend/backend/docs diff; reachable security, correctness and usability findings have verified dispositions and required re-review]
-- [ ] T-WEB.6 Merge reviewed website source  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-WEB.5]  acc: [Guarded GitHub rebase merges only the reviewed head after current base and required branch checks are reconciled]
-- [ ] T-WEB.7 Verify fresh landed source and build immutable release image  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-WEB.6]  acc: [Fresh main is reachable and tree-equivalent to reviewed source, affected checks pass and CodeBuild produces a source-pinned immutable ECR image]
-- [ ] T-WEB.8 Review and deploy the website image through existing IaC  Owner: deployment-operator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-WEB.7]  acc: [Independently reviewed Foundation image-pin PR merges, actual preview changes only the expected app task/service, and apply converges without data or secret mutation]
-- [ ] T-WEB.9 Verify production website and retain authentication limits  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-WEB.8]  acc: [Live TLS pages/assets render approved identity at desktop/mobile sizes, GitHub authorization redirects correctly and unauthenticated private APIs deny access; actual founder enrollment is observed or explicitly left pending]
-- [ ] T-WEB.10 Record reviewed production handoff  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-WEB.9]  acc: [Canonical receipt names source/image/config, actual source and browser checks, independent review, operational rollback and any remaining owner sign-in or content-publication prerequisites]
+- [x] T-WEB.5 Independently review final web app candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-WEB.4]  acc: [Non-author reviews exact base/head and complete frontend/backend/docs diff; reachable security, correctness and usability findings have verified dispositions and required re-review]
+- [x] T-WEB.6 Merge reviewed website source  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-WEB.5]  acc: [Guarded GitHub rebase merges only the reviewed head after current base and required branch checks are reconciled]
+- [x] T-WEB.7 Verify fresh landed source and build immutable release image  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-WEB.6]  acc: [Fresh main is reachable and tree-equivalent to reviewed source, affected checks pass and CodeBuild produces a source-pinned immutable ECR image]
+- [x] T-WEB.8 Review and deploy the website image through existing IaC  Owner: deployment-operator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-WEB.7]  acc: [Independently reviewed Foundation image-pin PR merges, actual preview changes only the expected app task/service, and apply converges without data or secret mutation]
+- [x] T-WEB.9 Verify production website and retain authentication limits  Owner: verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-WEB.8]  acc: [Live TLS pages/assets render approved identity at desktop/mobile sizes, GitHub authorization redirects correctly and unauthenticated private APIs deny access; actual founder enrollment is observed or explicitly left pending]
+- [x] T-WEB.10 Record reviewed production handoff  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-WEB.9]  acc: [Canonical receipt names source/image/config, actual source and browser checks, independent review, operational rollback and any remaining owner sign-in or content-publication prerequisites]
 
 #### Website execution notes
 
@@ -2163,3 +2163,26 @@ or effort override. Bounded Linux checks reuse existing capacity while Mac load
 is above the build threshold. No new cloud infrastructure or model/provider
 calls are part of this slice. The existing E-HOSTED authenticated acceptance
 and full operational handoff remain open until their own predicates are met.
+
+
+#### Website landed and production evidence
+
+Gist PR91 merged as bd997ddecf1cceb476d446e0406cfbdc00748170 after independent
+review and passing bounded source/browser checks. Fresh landed checks passed;
+CodeBuild succeeded and produced an immutable source-tagged image. Foundation
+PR284 merged as deb84b0067b70fbfa4ce90409230b9e2db86b5c3 after exact config and
+actual preview review. Plan-constrained apply replaced only the application task
+and updated the service, preserving 58 resources. Task gist-registry:4 reached
+COMPLETED rollout with one desired/running task and zero pending. The runtime
+image is sha256:02b2de5ca46bc3f7104b7d80afa84fa9f827942b8f42f2570bb0170bc4968b05.
+
+Production browser checks passed desktop/mobile public pages, identity assets,
+layout, anonymous private-API denial, health/readiness and canonical GitHub
+sign-in redirect. First-enrollment mode is disabled after current founder
+maintenance authority and readiness qualified normal startup. Actual human
+browser catalog reads, named external MCP clients, provider calls and restore
+qualification retain their separate gates. E-HOSTED.11-13 remain open for their
+broader authenticated/operational acceptance; the website slice does not close
+the entire hosted RFC. The [web receipt](receipts/2026-10-17-web-app.md) records
+source, review, checks, image, configuration, production observations and rollback.
+No persistent agent watcher remains after the bounded deployment checks finish.
