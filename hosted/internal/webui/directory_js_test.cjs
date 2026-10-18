@@ -146,3 +146,10 @@ test('personalized catalog pagination appends saved-first results without duplic
   if(url.startsWith('/app/api/bookmarks?')){const q=new URL(url,'https://gist.example').searchParams,o=Number(q.get('offset')||0),end=Math.min(30,o+Number(q.get('limit')||24));return {data:{items:ranked.slice(o,end),total:30,next_cursor:end<30?String(end):''}};}
  }});await flush();await flush();assert.equal(f.ids['directory-results'].children[0].dataset.entryId,'tool-29');assert.equal(f.ids['directory-results'].children.length,24);await f.click(f.ids['directory-more']);const ids=f.ids['directory-results'].children.map(n=>n.dataset.entryId);assert.equal(ids.length,30);assert.equal(new Set(ids).size,30);assert.ok(f.calls.some(c=>c.url.includes('offset=24')));
 });
+
+test('home and library connector tiles expose the same content and accessible controls',async()=>{
+ const home=fixture({page:'home'}),library=fixture({page:'directory',pathname:'/library/mcp'});
+ await flush();await flush();
+ const shape=n=>({tag:n.tag,cls:n.className,text:n.textContent,href:n.href,src:n.src,style:n.style,attrs:n.attrs,children:n.children.map(shape)});
+ assert.deepEqual(shape(home.ids['home-directory'].children[0]),shape(library.ids['directory-results'].children[0]));
+});

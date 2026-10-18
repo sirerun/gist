@@ -85,49 +85,35 @@
   }
   const localAppIcon = value => /^\/assets\/apps\/[a-zA-Z0-9_-]+\.(svg|png)$/.test(value || "");
   const connectorIcon = record => record.icon_url || globalThis.GIST_APP_ICONS?.[record.service_id];
-  function card(record) {
-    const c = link("", "/connectors/" + encodeURIComponent(record.id), "directory-card-content");
-    const logos = {"brave-search":"brave", github:"github", "google-gmail":"gmail", "google-calendar":"googlecalendar", "google-drive":"googledrive"};
-    const icon = el("img", undefined, "directory-logo");
-    icon.src = localAppIcon(connectorIcon(record)) ? connectorIcon(record) : "/assets/brand/" + (logos[record.service_id] || (record.kind === "openapi" ? "openapiinitiative" : "modelcontextprotocol")) + ".svg";
-    if (localAppIcon(connectorIcon(record))) icon.className += " app-logo";
-    icon.alt = "";
-    icon.width = 48; icon.height = 48;
-    icon.loading = "lazy";
-    const heading = el("div", undefined, "directory-card-heading");
-    const frame = el("span", undefined, "directory-logo-frame");
-    const color = globalThis.GIST_APP_ICON_COLORS?.[connectorIcon(record)];
-    if (/^#[0-9a-f]{6}$/i.test(color || "")) frame.style.backgroundColor = color;
-    frame.append(icon);
-    heading.append(frame, el("h2", record.title || record.id));
-    const useCase = record.kind === "unavailable" ? "Unavailable" : (record.tags || [])[0] || "";
-    c.append(heading);
-    c.append(el("p", useCase, "directory-card-use-case"));
-    const wrapper = el("article", undefined, "catalog-card directory-card app-card bookmark-card");
-    c.className = "directory-card-content";
-    wrapper.dataset.entryId = record.id;
-    wrapper.append(c, bookmarkButton(record));
-    return wrapper;
-  }
-  function appCard(record) {
-    const c = link("", "/apps/" + encodeURIComponent(record.slug), "directory-card-content");
+  // One renderer owns the geometry and contents of public app/connector tiles.
+  function integrationTile({href, title, iconURL, color, category, arrow = false}) {
+    const content = link("", href, "directory-card-content");
     const heading = el("div", undefined, "directory-card-heading");
     const icon = el("img", undefined, "directory-logo app-logo");
-    if (localAppIcon(record.icon_url)) icon.src = record.icon_url;
-    icon.alt = ""; icon.width = 54; icon.height = 54; icon.loading = "lazy";
+    if (iconURL) icon.src = iconURL;
+    icon.alt = ""; icon.width = 48; icon.height = 48; icon.loading = "lazy";
     const frame = el("span", undefined, "directory-logo-frame");
-    if (/^#[0-9a-f]{6}$/i.test(record.background_color || "")) frame.style.backgroundColor = record.background_color;
-    frame.append(icon);
-    heading.append(frame, el("h2", record.name || record.slug));
-    c.append(heading);
-    const category = (record.categories || []).filter(category => category.slug !== "app-families").map(category => category.name).find(Boolean) || "";
-    c.append(el("p", category, "directory-card-use-case"));
-    const arrow = el("span", "↗", "directory-card-arrow");
-    arrow.setAttribute("aria-hidden", "true");
-    c.append(arrow);
+    if (/^#[0-9a-f]{6}$/i.test(color || "")) frame.style.backgroundColor = color;
+    frame.append(icon); heading.append(frame, el("h2", title));
+    content.append(heading, el("p", category, "directory-card-use-case"));
+    if (arrow) { const hint = el("span", "↗", "directory-card-arrow"); hint.setAttribute("aria-hidden", "true"); content.append(hint); }
     const wrapper = el("article", undefined, "catalog-card directory-card app-card");
-    wrapper.dataset.appSlug = record.slug;
-    wrapper.append(c); return wrapper;
+    wrapper.append(content); return wrapper;
+  }
+  function card(record) {
+    const logos = {"brave-search":"brave", github:"github", "google-gmail":"gmail", "google-calendar":"googlecalendar", "google-drive":"googledrive"};
+    const selectedIcon = connectorIcon(record);
+    const tile = integrationTile({href:"/connectors/" + encodeURIComponent(record.id), title:record.title || record.id,
+      iconURL:localAppIcon(selectedIcon) ? selectedIcon : "/assets/brand/" + (logos[record.service_id] || (record.kind === "openapi" ? "openapiinitiative" : "modelcontextprotocol")) + ".svg",
+      color:globalThis.GIST_APP_ICON_COLORS?.[selectedIcon], category:record.kind === "unavailable" ? "Unavailable" : (record.tags || [])[0] || ""});
+    tile.className += " bookmark-card"; tile.dataset.entryId = record.id;
+    tile.append(bookmarkButton(record)); return tile;
+  }
+  function appCard(record) {
+    const category = (record.categories || []).filter(category => category.slug !== "app-families").map(category => category.name).find(Boolean) || "";
+    const tile = integrationTile({href:"/apps/" + encodeURIComponent(record.slug), title:record.name || record.slug,
+      iconURL:localAppIcon(record.icon_url) ? record.icon_url : null, color:record.background_color, category, arrow:true});
+    tile.dataset.appSlug = record.slug; return tile;
   }
   async function home() {
     const target = document.getElementById("home-directory");
