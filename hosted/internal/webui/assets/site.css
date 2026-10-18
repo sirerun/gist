@@ -415,10 +415,10 @@ h1{font-size:65px}
 
 /* Compact app tiles reserve their hover detail slot, keeping the grid steady. */
 #directory-results.catalog-grid{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:12px}
-#directory-results .app-card{height:156px;min-height:156px;padding:14px 10px 12px}
+#directory-results .app-card{height:156px;min-height:156px;padding:14px 10px 12px;border:0}
 #directory-results .app-card .directory-card-content{justify-content:center}
 #directory-results .app-card .directory-card-heading{gap:8px}
-#directory-results .app-card .directory-logo{width:48px;height:48px;border-radius:14px}
+#directory-results .app-card .directory-logo{width:48px;height:48px;border:0;border-radius:50%}
 #directory-results .app-card .directory-card-heading h2{font-size:15px;line-height:1.2;min-height:36px;letter-spacing:-.2px}
 #directory-results .app-card .directory-card-description{display:none}
 #directory-results .app-card .directory-card-use-case,
