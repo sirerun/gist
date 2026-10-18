@@ -204,9 +204,14 @@ func TestWebPublicShellDoesNotBypassBootstrapAPIs(t *testing.T) {
 		}
 	}
 	before := reached
-	for _, path := range []string{"/app/api/session", "/app/api/catalog", "/app/api/artifact", "/v1/skills", "/not-a-page", "/library/secret"} {
+	for _, path := range []string{"/app/api/session", "/app/api/catalog", "/app/api/artifact", "/v1/skills"} {
 		if w := webRequest(h, "GET", path, ""); w.Code != 503 {
 			t.Fatalf("private %s status=%d", path, w.Code)
+		}
+	}
+	for _, path := range []string{"/not-a-page", "/library/secret"} {
+		if w := webRequest(h, "GET", path, ""); w.Code != 404 {
+			t.Fatalf("unknown public path %s status=%d", path, w.Code)
 		}
 	}
 	if reached != before {

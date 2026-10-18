@@ -420,6 +420,10 @@ func (h requestContext) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			r.Header.Set("X-Request-ID", fmt.Sprintf("req_%x", b))
 		}
 	}
+	if h.ui != nil && webui.PublicFallback(r.URL.Path) {
+		webui.NotFound(w, r)
+		return
+	}
 	// Enrollment cannot require a pre-existing maintainer. All other APIs,
 	// including OAuth issuance, remain unavailable until normal maintenance
 	// has verified the enrolled identity against current durable policy.

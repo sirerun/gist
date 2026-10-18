@@ -2,7 +2,6 @@
 package webui
 
 import (
-	"bytes"
 	"embed"
 	"html/template"
 	"io/fs"
@@ -12,7 +11,7 @@ import (
 	"strings"
 )
 
-//go:embed templates/*.html assets
+//go:embed templates/*.html assets agentdocs
 var files embed.FS
 
 var pages = template.Must(template.ParseFS(files, "templates/*.html"))
@@ -20,6 +19,25 @@ var pages = template.Must(template.ParseFS(files, "templates/*.html"))
 // Handles reports whether path belongs to the public website. It deliberately
 // leaves authentication, API, OAuth, and MCP routes to the application router.
 func Handles(p string) bool {
+	if _, ok := machineFiles[p]; ok {
+		return true
+	}
+	if _, ok := publicDocuments[p]; ok {
+		return true
+	}
+	if p == "/api" || p == "/index.md" {
+		return true
+	}
+	if strings.HasSuffix(p, ".md") {
+		name := strings.TrimSuffix(p, ".md")
+		if _, ok := publicDocuments[name]; ok {
+			return true
+		}
+		if name == "/developers" || name == "/docs" || name == "/library" {
+			return true
+		}
+	}
+
 	switch p {
 	case "/", "/library", "/library/mcp", "/library/openapi", "/library/item", "/library/server", "/workspace", "/workspace/servers", "/developers", "/docs", "/signin", "/favicon.ico":
 		return true
@@ -36,27 +54,29 @@ func Handler() http.Handler {
 	apps, connectors := appInventory()
 	static := http.StripPrefix("/assets/", http.FileServer(http.FS(assets)))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
-		w.Header().Set("X-Frame-Options", "DENY")
-		w.Header().Set("Content-Security-Policy", "default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self'; connect-src 'self'; font-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'")
-		w.Header().Set("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
-		w.Header().Set("Cache-Control", "no-cache")
+		websiteHeaders(w)
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
 			w.Header().Set("Allow", "GET, HEAD")
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		if machineRoute(w, r) {
+			return
+		}
+		if doc, ok := documentFor(r.URL.Path); ok {
+			renderPage(w, r, "public-document", doc, siteData{Title: doc.Title, Page: "public-document", Description: doc.Description, Canonical: publicOrigin + r.URL.Path})
 			return
 		}
 		if strings.HasPrefix(r.URL.Path, "/assets/") {
 			// Do not permit directory listings or path aliases.
 			p := strings.TrimPrefix(r.URL.Path, "/assets/")
 			if p == "" || path.Clean(p) != p || strings.HasPrefix(p, ".") {
-				http.NotFound(w, r)
+				NotFound(w, r)
 				return
 			}
 			info, e := fs.Stat(assets, p)
 			if e != nil || info.IsDir() {
-				http.NotFound(w, r)
+				NotFound(w, r)
 				return
 			}
 			static.ServeHTTP(w, r)
@@ -91,7 +111,7 @@ func Handler() http.Handler {
 		if r.URL.Path == "/robots.txt" {
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			if r.Method != http.MethodHead {
-				_, _ = w.Write([]byte("User-agent: *\nAllow: /\nDisallow: /workspace\nDisallow: /app/\nDisallow: /auth/\nDisallow: /api/\nSitemap: " + publicOrigin + "/sitemap.xml\n"))
+				_, _ = w.Write([]byte("User-agent: *\nAllow: /\nDisallow: /workspace\nDisallow: /app/\nDisallow: /auth/\nDisallow: /oauth/\nDisallow: /v1/\nDisallow: /v2/\nSitemap: " + publicOrigin + "/sitemap.xml\n"))
 			}
 			return
 		}
@@ -106,7 +126,7 @@ func Handler() http.Handler {
 		if r.URL.Path == "/library/server" {
 			if slug := r.URL.Query().Get("app"); slug != "" {
 				if _, ok := apps.Get(slug); !ok {
-					http.NotFound(w, r)
+					NotFound(w, r)
 					return
 				}
 				http.Redirect(w, r, appPath(slug), http.StatusMovedPermanently)
@@ -114,7 +134,7 @@ func Handler() http.Handler {
 			}
 			if id := r.URL.Query().Get("id"); id != "" {
 				if _, ok := connectors.Get(id); !ok {
-					http.NotFound(w, r)
+					NotFound(w, r)
 					return
 				}
 				http.Redirect(w, r, connectorPath(id), http.StatusMovedPermanently)
@@ -124,19 +144,19 @@ func Handler() http.Handler {
 		if strings.HasPrefix(r.URL.Path, "/connectors/") {
 			id, err := url.PathUnescape(strings.TrimPrefix(r.URL.EscapedPath(), "/connectors/"))
 			if err != nil {
-				http.NotFound(w, r)
+				NotFound(w, r)
 				return
 			}
 			c, ok := connectors.Get(id)
 			if !ok {
-				http.NotFound(w, r)
+				NotFound(w, r)
 				return
 			}
 			renderPage(w, r, "connector-preview", c, siteData{Title: c.Title + " connection details · Gist", Page: "directory-detail", Description: c.Description, Canonical: publicOrigin + connectorPath(id)})
 			return
 		}
 		page := "home"
-		title := "Gist — The right context, ready to use"
+		title := "Gist AI integrations and skills · MCP discovery by Sire Run"
 		switch r.URL.Path {
 		case "/":
 		case "/library", "/library/mcp", "/library/openapi":
@@ -155,32 +175,23 @@ func Handler() http.Handler {
 		case "/library/item":
 			page, title = "artifact", "Artifact details · Gist"
 		case "/developers":
-			page, title = "developers", "Build with Gist · Gist"
+			page, title = "developers", "Gist developer documentation · Sire Run"
 		case "/docs":
-			page, title = "docs", "Getting started · Gist"
+			page, title = "docs", "Gist setup guide · Sire Run"
 		case "/signin":
 			page, title = "signin", "Sign in · Gist"
 		default:
-			http.NotFound(w, r)
+			NotFound(w, r)
 			return
 		}
-		var body bytes.Buffer
-		if err := pages.ExecuteTemplate(&body, page, struct{ Kind string }{libraryKind}); err != nil {
-			http.Error(w, "Page unavailable", http.StatusInternalServerError)
-			return
-		}
-		var out bytes.Buffer
-		data := siteData{Title: title, Page: page, Description: "Discover reusable skills and tools. Bring the right context to Zati and other AI clients with Gist.", Body: template.HTML(body.String())}
-		if page == "directory" {
+		data := siteData{Title: title, Page: page, Description: "Gist by Sire Run: discover AI skills, MCP servers and OpenAPI integrations for Zati and other compatible clients."}
+		switch page {
+		case "home", "directory", "developers", "docs":
 			data.Canonical = publicOrigin + r.URL.Path
 		}
-		if err := pages.ExecuteTemplate(&out, "layout", data); err != nil {
-			http.Error(w, "Page unavailable", http.StatusInternalServerError)
-			return
+		if page == "home" {
+			data.StructuredData = identityScript()
 		}
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		if r.Method != http.MethodHead {
-			_, _ = w.Write(out.Bytes())
-		}
+		renderPage(w, r, page, struct{ Kind string }{libraryKind}, data)
 	})
 }

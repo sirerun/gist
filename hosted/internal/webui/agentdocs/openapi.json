@@ -1,0 +1,1067 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Gist AI integrations public catalog API",
+    "version": "1.0.0",
+    "description": "Discover apps, MCP servers and OpenAPI integrations with Gist by Sire Run, Inc. Public discovery is read-only and free, with no sign-in or API key. Provider account authorization and execution belong to Zati or another consuming client. Private workspace artifacts use the separately authenticated registry contract. Capacity is bounded: use small pages, retain cursors, and back off on HTTP 429 or 503.",
+    "license": {
+      "name": "Apache-2.0",
+      "url": "https://github.com/sirerun/gist/blob/main/LICENSE"
+    },
+    "contact": {
+      "name": "Sire Run, Inc.",
+      "url": "https://gist.sire.run/contact"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://gist.sire.run",
+      "description": "Public production catalog"
+    }
+  ],
+  "security": [],
+  "tags": [
+    {
+      "name": "Public catalog",
+      "description": "Anonymous, read-only discovery and setup metadata."
+    }
+  ],
+  "paths": {
+    "/api": {
+      "get": {
+        "operationId": "getGistAPIIndex",
+        "summary": "Discover the Gist public API",
+        "description": "Read the public API entry point. No API key, signup or payment is required.",
+        "tags": [
+          "Public catalog"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful public metadata response. No provider connection or execution is performed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIIndex"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query; correct the parameters before retrying.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Cross-origin browser request denied; use the site origin or a server-side client.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested catalog entry was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not allowed; use GET.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Concurrent capacity is full; back off before retrying.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service temporarily unavailable; retry with backoff.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/directory": {
+      "get": {
+        "operationId": "searchGistIntegrations",
+        "summary": "Find MCP servers and OpenAPI integrations",
+        "description": "Search admitted public connection descriptors using word-prefix AND matching. Follow next_cursor unchanged for the same query. Returned metadata does not grant provider access.",
+        "tags": [
+          "Public catalog"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search text, at most 200 UTF-8 bytes. Start with a small result limit.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "description": "Restrict to MCP servers or OpenAPI integrations.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "mcp",
+                "openapi"
+              ]
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "description": "Filter by an exact catalog tag.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 64
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Opaque next_cursor returned by the preceding matching search.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 2048
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum result count; responses may contain fewer entries to respect the response budget.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 24
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful public metadata response. No provider connection or execution is performed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationResults"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query; correct the parameters before retrying.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Cross-origin browser request denied; use the site origin or a server-side client.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested catalog entry was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not allowed; use GET.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Concurrent capacity is full; back off before retrying.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service temporarily unavailable; retry with backoff.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/directory/item": {
+      "get": {
+        "operationId": "getGistIntegration",
+        "summary": "Inspect an integration",
+        "description": "Retrieve the exact public connection descriptor and its setup references. Your MCP client owns authorization and execution.",
+        "tags": [
+          "Public catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Exact integration ID returned by search; do not invent an ID.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful public metadata response. No provider connection or execution is performed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Integration"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query; correct the parameters before retrying.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Cross-origin browser request denied; use the site origin or a server-side client.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested catalog entry was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not allowed; use GET.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Concurrent capacity is full; back off before retrying.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service temporarily unavailable; retry with backoff.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/directory/export": {
+      "get": {
+        "operationId": "exportGistIntegration",
+        "summary": "Export a setup descriptor",
+        "description": "Export a metadata-only gist.directory.entry/v1 descriptor for review and import by a compatible client.",
+        "tags": [
+          "Public catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Exact integration ID returned by search; do not invent an ID.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful public metadata response. No provider connection or execution is performed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Export"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query; correct the parameters before retrying.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Cross-origin browser request denied; use the site origin or a server-side client.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested catalog entry was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not allowed; use GET.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Concurrent capacity is full; back off before retrying.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service temporarily unavailable; retry with backoff.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/directory/apps": {
+      "get": {
+        "operationId": "searchGistApps",
+        "summary": "Browse app inventory",
+        "description": "Search discoverable apps by name, slug or description and optionally category. An app listing is not a promise of a working connection; connector_ids name the available descriptors.",
+        "tags": [
+          "Public catalog"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search text, at most 200 UTF-8 bytes. Start with a small result limit.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Exact category slug from a prior response.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Zero-based next_offset returned by the preceding page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of app listings to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 24
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful public metadata response. No provider connection or execution is performed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppResults"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query; correct the parameters before retrying.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Cross-origin browser request denied; use the site origin or a server-side client.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested catalog entry was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not allowed; use GET.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Concurrent capacity is full; back off before retrying.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service temporarily unavailable; retry with backoff.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/directory/app": {
+      "get": {
+        "operationId": "getGistApp",
+        "summary": "Inspect an app",
+        "description": "Read one app and any explicitly matched connector IDs. Use an ID with getGistIntegration to inspect setup.",
+        "tags": [
+          "Public catalog"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "query",
+            "description": "Exact slug returned by searchGistApps.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful public metadata response. No provider connection or execution is performed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/App"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query; correct the parameters before retrying.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Cross-origin browser request denied; use the site origin or a server-side client.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested catalog entry was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not allowed; use GET.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Concurrent capacity is full; back off before retrying.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service temporarily unavailable; retry with backoff.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "Source": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "entry_id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "entry_id",
+          "url"
+        ]
+      },
+      "Remote": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Provider MCP endpoint. Authorize and execute through your client."
+          },
+          "transport": {
+            "type": "string",
+            "enum": [
+              "streamable-http",
+              "sse"
+            ]
+          }
+        },
+        "required": [
+          "url",
+          "transport"
+        ]
+      },
+      "Package": {
+        "type": "object",
+        "properties": {
+          "registry": {
+            "type": "string"
+          },
+          "identifier": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "runtime": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "registry",
+          "identifier"
+        ]
+      },
+      "Auth": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Provider authentication hint, not Gist API authentication."
+          },
+          "credential_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "setup_url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "OpenAPIConnection": {
+        "type": "object",
+        "properties": {
+          "spec_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "mint_guide_url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "spec_url",
+          "mint_guide_url"
+        ]
+      },
+      "Skill": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "source_digest": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "id",
+          "title"
+        ]
+      },
+      "Integration": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/Source"
+          },
+          "official": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "mcp",
+              "openapi"
+            ]
+          },
+          "service_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "homepage": {
+            "type": "string"
+          },
+          "repository": {
+            "type": "string"
+          },
+          "remotes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Remote"
+            }
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Package"
+            }
+          },
+          "openapi": {
+            "$ref": "#/components/schemas/OpenAPIConnection"
+          },
+          "auth": {
+            "$ref": "#/components/schemas/Auth"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Skill"
+            }
+          },
+          "server_listing_url": {
+            "type": "string"
+          },
+          "official_evidence_url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "official",
+          "id",
+          "kind",
+          "service_id",
+          "title",
+          "description",
+          "tags",
+          "auth"
+        ]
+      },
+      "IntegrationResults": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Integration"
+            }
+          },
+          "next_cursor": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "snapshot_revision": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "snapshot_revision"
+        ]
+      },
+      "Export": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "gist.directory.entry/v1"
+            ]
+          },
+          "record": {
+            "$ref": "#/components/schemas/Integration"
+          }
+        },
+        "required": [
+          "format",
+          "record"
+        ]
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name"
+        ]
+      },
+      "App": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          },
+          "icon_url": {
+            "type": "string",
+            "description": "Same-origin icon path."
+          },
+          "background_color": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          },
+          "connector_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "description",
+          "categories"
+        ]
+      },
+      "AppResults": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/App"
+            }
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "next_offset": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "items",
+          "categories",
+          "total"
+        ]
+      },
+      "APIIndex": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "authentication": {
+            "type": "string"
+          },
+          "openapi_url": {
+            "type": "string"
+          },
+          "docs_url": {
+            "type": "string"
+          },
+          "mcp_url": {
+            "type": "string"
+          },
+          "endpoints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "authentication",
+          "openapi_url",
+          "docs_url",
+          "mcp_url",
+          "endpoints"
+        ]
+      }
+    }
+  },
+  "externalDocs": {
+    "url": "https://gist.sire.run/developers",
+    "description": "Gist developer guide, MCP setup and private workspace authentication"
+  }
+}

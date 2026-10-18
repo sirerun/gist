@@ -63,7 +63,7 @@ h1 em{color:var(--green);font-style:normal}
 .side-card{position:absolute;right:-98px;top:46px;width:176px;min-height:295px;border-radius:16px;background:#faf9efeb;border:1px solid #fff;box-shadow:0 15px 25px #5d634b0c;transform:rotate(10deg);padding:24px 19px}
 .side-card .icon-box{height:44px;width:44px;margin-bottom:16px}
 .side-card .eyebrow{font-size:8px;letter-spacing:2px}
-.side-card h3{font-size:27px;letter-spacing:-1.1px}
+.side-card h2{margin-block:1em;font-size:27px;letter-spacing:-1.1px}
 .side-card p:not(.eyebrow){font-size:11px;line-height:1.5;color:#697061}
 .side-line{border-bottom:1px solid #d1d2c5;margin-top:19px}
 .discover-section{border-top:1px solid #bcc6b5;padding:31px 0 34px}
@@ -218,7 +218,7 @@ h1{font-size:65px}
 .setup-panel h3{font-size:19px}
 .setup-panel p,.setup-panel strong{font-size:10px}
 .side-card{right:-68px;width:133px;padding:22px 15px}
-.side-card h3{font-size:23px}
+.side-card h2{font-size:23px}
 .back-card{right:-25px}
 .section-heading h2{font-size:34px}
 .example-card{padding:17px}
@@ -260,7 +260,7 @@ h1{font-size:65px}
 .setup-panel h3{font-size:23px}
 .setup-panel p,.setup-panel strong{font-size:12px}
 .side-card{width:165px;right:-77px;top:50px;padding:23px 18px}
-.side-card h3{font-size:25px}
+.side-card h2{font-size:25px}
 .section-heading{align-items:stretch;flex-direction:column;gap:20px}
 .search-form{width:100%}
 .section-heading h2{font-size:38px}
@@ -321,7 +321,7 @@ h1{font-size:65px}
 .setup-panel h3{font-size:21px}
 .setup-panel p,.setup-panel strong{font-size:10px}
 .side-card{right:-38px;width:105px;top:40px;min-height:275px;padding:21px 12px}
-.side-card h3{font-size:19px}
+.side-card h2{font-size:19px}
 .side-card p:not(.eyebrow){font-size:9px}
 .side-card .eyebrow{font-size:6px}
 .back-card{right:-18px}

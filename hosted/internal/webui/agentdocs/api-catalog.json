@@ -1,0 +1,19 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://gist.sire.run/api",
+      "service-desc": [
+        {
+          "href": "https://gist.sire.run/openapi.json",
+          "type": "application/vnd.oai.openapi+json"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://gist.sire.run/developers",
+          "type": "text/html"
+        }
+      ]
+    }
+  ]
+}

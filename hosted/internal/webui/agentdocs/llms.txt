@@ -1,0 +1,32 @@
+# Gist
+
+> Gist by Sire Run, Inc. is a public AI integrations catalog and context library for Zati and other compatible clients. Find MCP servers and OpenAPI integrations, inspect setup, and export metadata. Public discovery is free and requires no sign-in or API key.
+
+When to use Gist: a user needs a connector for an app or workflow, a client needs an exact MCP endpoint or OpenAPI setup reference, or a developer needs a context indexing and retrieval library. Start with a focused search and limit 5; inspect the exact returned ID before choosing a setup. App inventory is broader than admitted connectors: check connector_ids rather than assuming every listed app is callable.
+
+Call the public REST API or the Streamable HTTP MCP endpoint https://gist.sire.run/directory/mcp. Its tools are gist_directory_search, gist_directory_get and gist_directory_export. These read metadata. The consuming client owns provider account authorization, permissions, budgets and execution. Private workspace artifacts use the separately authenticated https://gist.sire.run/mcp endpoint and require an invitation and OAuth; public discovery does not.
+
+## Use Gist
+
+- [When to use Gist](https://gist.sire.run/agent-instructions.md): Best-fit tasks, tool calls and authority boundaries.
+
+- [Gist overview](https://gist.sire.run/index.md): Product purpose and interface selection.
+- [Developer and MCP guide](https://gist.sire.run/developers.md): Exact public endpoints, a working REST example, authentication boundaries and error handling.
+- [Getting started](https://gist.sire.run/docs.md): Discovery workflow and safe setup in your client.
+- [OpenAPI](https://gist.sire.run/openapi.json): Typed public REST operations with unique operation IDs and response schemas.
+- [API catalog](https://gist.sire.run/.well-known/api-catalog): RFC 9727 discovery links.
+- [MCP Registry manifest](https://gist.sire.run/server.json): Streamable HTTP connection metadata.
+- [CLI and SDK](https://gist.sire.run/cli.md): Official Homebrew installation, releases and local-versus-hosted scope.
+
+## Access and operator
+
+- [Free public access](https://gist.sire.run/pricing.md): Public discovery needs no signup, payment or API key; providers have separate requirements.
+- [About Gist](https://gist.sire.run/about.md): Product ownership and responsibilities.
+- [Contact](https://gist.sire.run/contact.md): Public support and private workspace questions.
+- [Privacy and data handling](https://gist.sire.run/privacy.md): Data flows and account controls.
+
+## Optional
+
+- [App inventory](https://gist.sire.run/api/directory/apps?limit=24): Searchable public app metadata.
+- [Integration search](https://gist.sire.run/api/directory?limit=5): Available MCP/OpenAPI connection descriptors.
+- [Sitemap](https://gist.sire.run/sitemap.xml): Public page discovery.

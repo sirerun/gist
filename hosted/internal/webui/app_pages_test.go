@@ -87,7 +87,7 @@ func TestSitemapContainsCanonicalPublicInventory(t *testing.T) {
 			t.Fatal("noncanonical URL", u.Loc)
 		}
 	}
-	if len(doc.URLs) != 3380+127+4 || !seen[publicOrigin+"/apps/google-email"] {
+	if len(doc.URLs) != 3380+127+11 || !seen[publicOrigin+"/apps/google-email"] {
 		t.Fatalf("unexpected sitemap size%d", len(doc.URLs))
 	}
 }
