@@ -2377,3 +2377,8 @@ artifacts and final-context subset/partial disclosure are mandatory. T-DIR.31-34
 preserve first-class implementation, verification, independent review and landed
 client delivery before normal live profile/workflow qualification. Source work
 may outlive the current one-hour test envelope; real calls may not.
+
+See the [sanitized Gmail preflight receipt](receipts/2026-10-17-gmail-mcp-preflight.md)
+for the actual metadata-only provider read. The shared ledger now records one
+read-only tool call, zero body reads, zero model requests and zero paid model
+spending. No raw mailbox values were retained or published.
