@@ -2226,12 +2226,12 @@ Zati workflow evidence and guides. Discovery never grants execution authority.
 - [x] T-DIR.21 Merge and verify landed essentials screening sources  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.20]  acc: [Guarded rebase merge preserves reviewed head and current base, fresh landed tree matches validated candidate, evidence distinguishes screening sources from admitted runnable skills]
 - [x] T-DIR.22 Correct official Gmail discovery and link real screening sources  Owner: coordinator  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.21]  acc: [Current primary Google docs establish official preview HTTPS endpoint and readonly search/thread scopes; deterministic sanitized metadata keeps OpenAPI fallback, exactly five recommendations and zero Featured claims, and links all five actual pinned complete screening sources; offline and Go validation pass]
 - [x] T-DIR.23 Independently review official Gmail metadata repair  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.22]  acc: [Non-author approves exact source and plan, vendor evidence, candidate setup restrictions and source pins after changed-behavior checks, with no fabricated runtime or quality evidence]
-- [ ] T-DIR.24 Merge and deploy reviewed metadata repair  Owner: coordinator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.23, T-DIR.28]  acc: [Guarded source landing and exact immutable build precede independently reviewed saved IaC preview and activation; SQL and permissions equivalence reuses valid migration evidence without database mutations; expected image rollout completes]
-- [ ] T-DIR.25 Verify live catalog refresh through existing Zati consumer  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.24, T-DIR.15]  acc: [Live public API/browser and unchanged isolated consumer binary observe the new pinned official Gmail descriptor and five screening references, without reinstall, account admission or Featured claims; source and runtime receipts identify actual versions]
+- [x] T-DIR.24 Merge and deploy reviewed metadata repair  Owner: coordinator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.23, T-DIR.28]  acc: [Guarded source landing and exact immutable build precede independently reviewed saved IaC preview and activation; SQL and permissions equivalence reuses valid migration evidence without database mutations; expected image rollout completes]
+- [x] T-DIR.25 Verify live catalog refresh through existing Zati consumer  Owner: verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.24, T-DIR.15]  acc: [Live public API/browser and unchanged isolated consumer binary observe the new pinned official Gmail descriptor and five screening references, without reinstall, account admission or Featured claims; source and runtime receipts identify actual versions]
 
-- [ ] T-DIR.26 Pin a verified official builder publication  Owner: infrastructure-owner  Est: TBD  kind: agent  stage: implement  acc: [Verify exact Go 1.26 patch, official publisher provenance and multiarchitecture manifest digest through a bounded public-registry check; update only the builder source and required recipe assertions, preserve runtime/IAM/resources and pass focused recipe checks; do not evade quotas or retry-loop a throttled registry]
-- [ ] T-DIR.27 Independently review builder source repair  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.26]  acc: [Non-author approves exact builder provenance, digest/platform compatibility and focused checks, with no unreviewed runtime or resource changes]
-- [ ] T-DIR.28 Merge and apply reviewed buildspec-only repair  Owner: coordinator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.27]  acc: [Guarded Foundation merge and exact tree parity precede independently reviewed actual saved IaC preview and buildspec-only apply; no data, runtime image or permissions change; rebuild of the exact landed Gist source proceeds only after this gate]
+- [x] T-DIR.26 Pin a verified official builder publication  Owner: infrastructure-owner  Est: TBD  kind: agent  stage: implement  acc: [Verify exact Go 1.26 patch, official publisher provenance and multiarchitecture manifest digest through a bounded public-registry check; update only the builder source and required recipe assertions, preserve runtime/IAM/resources and pass focused recipe checks; do not evade quotas or retry-loop a throttled registry]
+- [x] T-DIR.27 Independently review builder source repair  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.26]  acc: [Non-author approves exact builder provenance, digest/platform compatibility and focused checks, with no unreviewed runtime or resource changes]
+- [x] T-DIR.28 Merge and apply reviewed buildspec-only repair  Owner: coordinator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.27]  acc: [Guarded Foundation merge and exact tree parity precede independently reviewed actual saved IaC preview and buildspec-only apply; no data, runtime image or permissions change; rebuild of the exact landed Gist source proceeds only after this gate]
 
 
 - [x] T-DIR.29 Freeze explicit Zati-owned Gmail read-only adapter design  Owner: zati-owner  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-DIR.15, T-DIR.22]  acc: [Actual official tool schemas and current client seams establish an explicit qualified virtual adapter using the same MCP profile/session/custody; maintain canonical identity contracts and raw-tool effects, define metadata-only search, strict UTC message-date subset, exact identity/config pins, dual physical/canonical provenance, partial-result disclosure and bounded source/test scope]
@@ -2382,3 +2382,17 @@ See the [sanitized Gmail preflight receipt](receipts/2026-10-17-gmail-mcp-prefli
 for the actual metadata-only provider read. The shared ledger now records one
 read-only tool call, zero body reads, zero model requests and zero paid model
 spending. No raw mailbox values were retained or published.
+
+
+### Official Gmail catalog refresh in production (2026-10-17)
+
+T-DIR.24-28 are complete under the
+[version-bound refresh receipt](receipts/2026-10-17-google-directory-refresh.md).
+Reviewed Foundation builder repair PR287 and image activation PR288 landed with
+exact-tree parity; successful immutable Gist d4de98cc image 89d28725 is running
+as the sole completed ECS revision6. Live public API/browser checks and the
+unchanged isolated Zati consumer observe snapshot933e80e8 and all five exact
+screening source links, with no account activation or reinstall. No new SQL,
+role/secret/IAM change or Featured qualification is claimed. Earlier build failure
+and original6494-entry receipt remain recorded; no failed attempt is erased.
+Caller-owned adapter source T-DIR.31-34 remains separate work.
