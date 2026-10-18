@@ -8,4 +8,4 @@ Verification: hosted webui and app tests pass, including response-schema checks 
 
 The official Homebrew CLI and release downloads already exist. Its local index/search/MCP scope is documented; it is not presented as a hosted-provider execution proxy. Public discovery has no signup, key or payment requirement. Invitations remain necessary for private workspaces.
 
-The initial cached Is Agentic report is 67/100, scanned at 2026-10-18T08:01:08.283Z. A fresh scan must precede the requested post-deployment CLI measurement. Search ranking depends on external indexing. Organization contact email/phone and a full public mailing address await approved facts; no details are invented to satisfy scoring.
+The initial cached Is Agentic report is 67/100, scanned at 2026-10-18T08:01:08.283Z. A fresh scan must precede the requested post-deployment CLI measurement. Search ranking depends on external indexing. The owner approved privacy@sire.run for public contact and privacy questions. A full public mailing address remains unspecified; no details are invented to satisfy scoring.

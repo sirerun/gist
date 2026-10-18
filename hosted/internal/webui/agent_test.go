@@ -47,6 +47,9 @@ func TestAgentPublicDocuments(t *testing.T) {
 			r := httptest.NewRequest("GET", p, nil)
 			r.Header.Set("Accept", accept)
 			h.ServeHTTP(w, r)
+			if (p == "/contact" || p == "/privacy") && !strings.Contains(w.Body.String(), "privacy@sire.run") {
+				t.Fatal("missing approved email", p)
+			}
 			if w.Code != 200 || w.Body.Len() < 500 {
 				t.Fatalf("%s %s %d %d", p, accept, w.Code, w.Body.Len())
 			}
