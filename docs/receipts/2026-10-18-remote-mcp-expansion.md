@@ -89,3 +89,80 @@ stable string IDs, not an auto-increment registry table.
 
 Source tests, code review, merge, image publication, deployment and live-site
 acceptance are separate stages and are recorded as they occur.
+
+## Review, merge, deployment and live acceptance
+
+The owner clarified the admission threshold before release: a candidate need not
+be qualified through a Zati workflow; a bounded scripted check that its listed
+MCP endpoint responds is sufficient for directory inclusion. The 126 unique
+URL/transport checks above satisfy that reachability threshold. This is not a
+claim that every entry can authenticate, list tools, execute safely, or work
+with every client. Transport remains explicit, and nonresponding candidates
+remain excluded.
+
+Independent review approved Gist PR [#104](https://github.com/sirerun/gist/pull/104)
+at head `8775abe22a535b521077c02e983275a754dcaf58`, against base
+`e93563051bc2865a0a082f8b28bba7a15c020a12`, with no blocking findings. The PR
+rebased into `main` as `6bea28f56454a9909af9f6e14f284a868338c6e0`. GitHub Actions
+did not start the jobs associated with the PR; the run annotations say the
+account is locked due to a billing issue. The locally executed catalog, hosted,
+browser and race checks, lint-baseline comparison, and plan gate listed in the
+source receipt remain local evidence; CI is not claimed as passing.
+
+The exact merged Gist source produced image
+`939005125975.dkr.ecr.us-west-1.amazonaws.com/gist-registry@sha256:320c2f7b4fc51a97eb2939127292d371378c9d4311dc40b1b00b356ef99ef8ed` in CodeBuild
+`gist-registry-image:8f5422dd-1487-49ec-b809-e98aeb02b757`. Foundation PR
+[#295](https://github.com/sirerun/foundation/pull/295), independently reviewed
+at head `fd0c6e3525e9948cc858dc19e15452516bebb1b2` against base
+`69352247f4aa11e4f0071edb9f2e24d0672e459b`, merged by rebase as
+`a0207516af73a7af6c5b08ab7f16a0e96d498930`. The post-merge Pulumi preview
+`a8bbbd61-90d6-4e50-9292-6ee612d74745` exited 0 with one task-definition
+replacement, one ECS service update, and 58 unchanged resources. Pulumi update
+17 exited 0. It retained the existing database, object bucket, secret
+references, IAM and DNS. The task definition's environment and secret arrays
+were reordered in the preview; the values and ARN set remained the same.
+
+Production observations on 2026-10-18 (AWS account `939005125975`, `us-west-1`):
+ECS service `gist-registry` reached stable state with desired/running/pending
+counts `1/1/0`, only task revision 9 active, and one healthy load-balancer
+target. Revision 9 runs the image digest above. Revision 8 with image digest
+`b99f47dfbd5719e72d27ddd24b7bea267717d4630fc6510392c3d3135a2b9555` is the
+recorded rollback target. No database migration or table reset ran; the catalog
+is served from the merged immutable JSON asset.
+
+The live acceptance checks passed:
+
+- `https://gist.sire.run/healthz` and `/readyz` returned HTTP 200 with TLS
+  verification result 0.
+- `/api/directory?limit=1` reported 127 entries and snapshot revision
+  `sha256:e643548c869fb8390de7b4c7d4caf97f4768e520ad76f3b20a4406449271790c`.
+- The public Streamable HTTP MCP endpoint `/directory/mcp` completed an
+  initialize handshake, listed `gist_directory_search`, `gist_directory_get`,
+  and `gist_directory_export`, and returned a successful search result for
+  `Agentic Commerce`. This exercised Gist's directory MCP tools only; no
+  provider server tools or accounts were called.
+- A fresh production browser page showed “127 matching integrations” and
+  visible `Vendor official` or `Operator not verified by Gist` provenance,
+  transport, and `Endpoint responded` labels on listed entries.
+- The public detail page for `mcp:agentic-commerce` rendered its Streamable HTTP
+  endpoint, Make source links, `Operator not verified by Gist` label and
+  successful unauthenticated initialize check; it clearly says the check did
+  not list tools or call the provider.
+
+This deployment does not complete n8n/Make directory coverage: it includes a
+reviewed n8n subset, four Make integration-directory listings, and Make's
+captured verified remote-MCP listings. The full app directories were not
+exhaustively searched. The 14 Make candidate routes that returned HTTP 410 or
+failed DNS resolution were excluded. The catalog has four Zati setup
+recommendations and zero workflow-qualified Featured entries. No provider
+workflow, authentication, security review, tool behavior, or compatibility with
+every MCP client is implied by an endpoint response.
+
+The final 577-task plan after T-DIR.60–63 completion revalidated successfully
+with the pinned Wazi reader/schema/semantic gate: source digest
+`sha256:194ca5ff2aa746cea9848830ed5a81f0eaf8b9ff8f255463c04b6680558d6219`,
+reader digest
+`sha256:0b1292cbe93af31531647f3e2ae28c37f12decbe89023192729e010d6d7e6d67`,
+and verifier digest
+`sha256:b8af84a5ba16610d48fa38c12365ddf639ed7fd72e828d059e58811c2fef870c`.
+All 60 pinned contract fixtures passed (21 valid and 39 invalid).
