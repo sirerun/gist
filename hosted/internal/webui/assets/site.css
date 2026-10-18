@@ -373,18 +373,9 @@ h1{font-size:65px}
 .directory-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.directory-badges .pill{font-size:.68rem;white-space:normal}.catalog-card pre,.artifact-page pre{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}.artifact-page section{margin:36px 0}.artifact-page .text-link{display:inline-block;margin:8px 20px 8px 0}.private-form{padding:28px;border:1px solid var(--line,#d9dfd3);border-radius:16px;margin-bottom:40px;background:rgba(255,255,255,.55)}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.private-form label{display:block;font-size:.86rem;margin-bottom:18px}.private-form input,.private-form select,.private-form textarea{display:block;width:100%;max-width:100%;margin-top:8px;padding:12px;border:1px solid #bcc8ba;border-radius:8px;background:#fffef9;font:inherit;color:#173b2b;box-sizing:border-box}.private-form textarea{resize:vertical}.private-form .quiet{margin:12px 0 24px}#private-results .catalog-card{min-width:0}#private-results pre{font-size:.7rem;max-height:240px;overflow:auto}#directory-detail h1{overflow-wrap:anywhere}#directory-status{margin:20px 0}#home-directory{margin-top:20px}.library-panel .callout{margin-top:32px}
 @media(max-width:600px){.form-grid{grid-template-columns:minmax(0,1fr)}.private-form{padding:18px}.directory-badges{gap:5px}.library-toolbar{align-items:flex-start}.directory-badges .pill{font-size:.62rem}}
 
-/* Shared public directory cards on the homepage and library. */
-.directory-card{display:flex;flex-direction:column;gap:20px;background:#fff;border:1px solid #e3e6e3;border-radius:18px;padding:24px;text-decoration:none;min-width:0}
-.directory-identity{display:flex;align-items:center;gap:16px;min-width:0}
-.directory-icon{display:flex;align-items:center;justify-content:center;flex:none;width:64px;height:64px;border:1.5px solid #e3e7e5;border-radius:20px;background:#f6f8f6;color:#23563a;font:600 23px/1 var(--sans);letter-spacing:-1px}
-.directory-heading{min-width:0;flex:1}
-.directory-title-row{display:flex;align-items:baseline;gap:8px}
-.directory-card h2{font:650 20px/1.3 var(--sans);letter-spacing:-.45px;color:#172033;margin:0;overflow-wrap:anywhere}
-.directory-byline{font:400 15px/1.5 var(--sans);color:#727987;margin:4px 0 0;overflow-wrap:anywhere}
-.directory-publisher{color:#273142;font-weight:500}
-.directory-official{display:inline-flex;align-self:flex-start;flex:none;width:20px;height:24px;margin-top:1px;background:url('/assets/brand/vendor-official.svg') center/contain no-repeat}
-.directory-card>.directory-description{font:400 13px/1.7 var(--sans);color:#68705f;margin:0;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
-.directory-card .directory-badges{margin:auto 0 0;gap:6px;padding-top:0}
-.directory-card:focus-visible{outline:3px solid #23563a;outline-offset:4px}
-@media(max-width:1120px) and (min-width:801px){.directory-identity{gap:12px}.directory-icon{width:52px;height:52px;border-radius:16px}.directory-card{padding:20px}.directory-card h2{font-size:18px}}
-@media(max-width:600px){.directory-card{padding:20px}.directory-icon{width:56px;height:56px;border-radius:18px}.directory-card h2{font-size:19px}}
+/* Public directory logos and bottom-aligned tags. */
+.directory-card{display:flex;flex-direction:column}
+.directory-card-heading{display:flex;align-items:center;gap:14px;min-width:0}
+.directory-card-heading h2{min-width:0}
+.directory-logo{width:48px;height:48px;flex:none;object-fit:contain;padding:8px;border:1px solid var(--line);border-radius:14px;background:#fff;box-sizing:border-box}
+.directory-card>.directory-badges{margin-top:auto;margin-bottom:0;padding-top:16px}

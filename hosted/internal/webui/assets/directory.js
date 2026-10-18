@@ -25,46 +25,18 @@
     else if (record.recommended === true) target.append(el("span", "Recommended candidate", "pill"));
     if (record.official === true) target.append(el("span", "Vendor official", "pill"));
   }
-  // Repository ownership is attribution, not a claim of workflow verification.
-  function publisher(record) {
-    const repository = external(record.repository);
-    if (repository) {
-      const url = new URL(repository);
-      if (["github.com", "gitlab.com", "bitbucket.org"].includes(url.hostname)) {
-        const owner = url.pathname.split("/").filter(Boolean)[0];
-        if (owner) return {name: owner, prefix: "by "};
-      }
-    }
-    const homepage = external(record.homepage);
-    if (homepage) return {name: new URL(homepage).hostname.replace(/^www\./, ""), prefix: "from "};
-    return {name: record.source?.id || "Public directory", prefix: "via "};
-  }
   function card(record) {
     const c = link("", "/library/server?" + new URLSearchParams({id:record.id}), "catalog-card directory-card");
-    const title = record.title || record.id;
-    const identity = el("div", undefined, "directory-identity");
-    const initials = title.replace(/[^\p{L}\p{N} ]/gu, " ").trim().split(/\s+/).slice(0, 2).map(word => Array.from(word)[0] || "").join("").toLocaleUpperCase();
-    const icon = el("span", initials || "M", "directory-icon");
-    icon.setAttribute("aria-hidden", "true");
-    const heading = el("div", undefined, "directory-heading");
-    const titleRow = el("div", undefined, "directory-title-row");
-    titleRow.append(el("h2", title));
-    if (record.official === true) {
-      const shield = el("span", undefined, "directory-official");
-      shield.title = "Vendor official · ownership evidence available";
-      shield.append(el("span", "Vendor official", "sr-only"));
-      titleRow.append(shield);
-    }
-    const attribution = publisher(record);
-    const byline = el("p", undefined, "directory-byline");
-    byline.append(el("span", attribution.prefix), el("span", attribution.name, "directory-publisher"));
-    heading.append(titleRow, byline);
-    identity.append(icon, heading);
-    const b = el("div", undefined, "directory-badges");
-    b.append(el("span", record.kind === "openapi" ? "OpenAPI · Mint required" : "MCP server", "pill"));
-    if (record.featured === true) b.append(el("span", "Featured · tested in Zati", "pill"));
-    else if (record.recommended === true) b.append(el("span", "Recommended candidate", "pill"));
-    c.append(identity, el("p", record.description || "Inspect setup and provenance.", "directory-description"), b);
+    const logos = {"brave-search":"brave", github:"github", "google-gmail":"gmail", "google-calendar":"googlecalendar", "google-drive":"googledrive"};
+    const icon = el("img", undefined, "directory-logo");
+    icon.src = "/assets/brand/" + (logos[record.service_id] || (record.kind === "openapi" ? "openapiinitiative" : "modelcontextprotocol")) + ".svg";
+    icon.alt = "";
+    icon.width = 48; icon.height = 48;
+    icon.loading = "lazy";
+    const heading = el("div", undefined, "directory-card-heading");
+    heading.append(icon, el("h2", record.title || record.id));
+    const b = el("div", undefined, "directory-badges"); badges(record,b);
+    c.append(heading, el("p", record.description || "Inspect setup and provenance."), el("p", record.featured ? "Dated workflow evidence available" : "Workflow qualification pending", "quiet"), b);
     return c;
   }
   async function home() {
