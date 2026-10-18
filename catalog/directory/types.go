@@ -110,7 +110,7 @@ type Query struct {
 	Limit  int
 }
 type Result struct {
-	SearchMode       string   `json:"search_mode,omitempty"`
+	SearchMode       string   `json:"-"`
 	Items            []Record `json:"items"`
 	NextCursor       string   `json:"next_cursor,omitempty"`
 	Total            int      `json:"total"`
@@ -159,7 +159,7 @@ type PublicSkill struct {
 }
 
 type PublicResult struct {
-	SearchMode       string         `json:"search_mode,omitempty"`
+	SearchMode       string         `json:"-"`
 	Items            []PublicRecord `json:"items"`
 	NextCursor       string         `json:"next_cursor,omitempty"`
 	Total            int            `json:"total"`

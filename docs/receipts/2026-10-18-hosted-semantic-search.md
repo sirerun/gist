@@ -36,8 +36,9 @@ ten-minute ceiling. A failed runtime requires a normal service restart to recove
 it does not trigger an unbounded restart or model-download loop.
 
 The Library app view, typed MCP/OpenAPI pages, signed-in bookmarked public browse,
-directory REST and directory MCP share the service. Public responses report
-`search_mode: hybrid` or `lexical_fallback` for nonempty queries. Empty browsing
+directory REST and directory MCP share the service. Public HTTP responses report
+`X-Gist-Search-Mode: hybrid` or `lexical_fallback` for nonempty queries, preserving
+the existing JSON body for strict older clients. Empty browsing
 retains ordinary catalog ordering. Exact get/export operations are unchanged.
 
 ## Checks so far
@@ -61,3 +62,9 @@ reviewed infrastructure apply and real hosted/browser query acceptance are
 pending. Mac load and internal-disk pressure constrain heavy local checks;
 new task artifacts and temporary build files use external storage. Existing
 CodeBuild will run focused source tests/vet before publishing the image.
+
+Compatibility correction before deployment: the existing Zati directory reader
+strictly rejects unknown JSON fields. Retrieval mode therefore stays internal
+and is exposed through an HTTP header rather than an added response-body field.
+The real REST/MCP handler regression checks both header parity and unchanged
+JSON shape; no client dependency update is required to receive semantic results.
