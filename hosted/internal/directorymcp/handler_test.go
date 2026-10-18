@@ -11,7 +11,7 @@ import (
 
 func fixture(t *testing.T) *Handler {
 	t.Helper()
-	idx, err := directory.New(directory.Snapshot{Format: directory.SnapshotFormat, Revision: "test", GeneratedAt: time.Now(), Sources: []directory.Source{{ID: "fixture", URL: "https://example.com", Revision: "1", SHA256: strings.Repeat("a", 64), RetrievedAt: time.Now(), Attribution: "Fixture"}}, Entries: []directory.Record{{ID: "fixture/example", Kind: "mcp", ServiceID: "example", Title: "Example", Description: "Example public descriptor", Tags: []string{"files"}, Source: directory.RecordSource{ID: "fixture", EntryID: "example", URL: "https://example.com"}, Remotes: []directory.Remote{{URL: "https://example.com/mcp", Transport: "streamable-http"}}, Auth: directory.Auth{Type: "none"}, Official: true, OfficialEvidenceURL: "https://example.com/vendor"}}})
+	idx, err := directory.New(directory.Snapshot{Format: directory.SnapshotFormat, Revision: "test", GeneratedAt: time.Now(), Sources: []directory.Source{{ID: "fixture", URL: "https://example.com", Revision: "1", SHA256: strings.Repeat("a", 64), RetrievedAt: time.Now(), Attribution: "Fixture"}}, Entries: []directory.Record{{ID: "fixture/example", Kind: "mcp", ServiceID: "example", Title: "Example", Description: "Remote MCP endpoint listed by Make as a verified server. The operator is not verified by Gist. This reachability check is not an authenticated session or workflow qualification.", Tags: []string{"files"}, Source: directory.RecordSource{ID: "fixture", EntryID: "example", URL: "https://example.com"}, Remotes: []directory.Remote{{URL: "https://example.com/mcp", Transport: "streamable-http", Check: &directory.EndpointCheck{CheckedAt: time.Now(), HTTPStatus: 401, Result: "authentication-required"}}}, Auth: directory.Auth{Type: "none"}, Official: true, OfficialEvidenceURL: "https://example.com/vendor", Verification: []directory.Qualification{{Client: "Zati", Workflow: "Read files", EvidenceURL: "https://example.com/private-evidence", CheckedAt: time.Now(), ExpiresAt: time.Now().Add(time.Hour), Result: "passed"}}}}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,6 +51,32 @@ func TestDiscoveryMCPProtocol(t *testing.T) {
 	var out map[string]any
 	if json.Unmarshal(w.Body.Bytes(), &out) != nil {
 		t.Fatal(w.Body.String())
+	}
+}
+
+func TestDiscoveryMCPHidesInternalDirectoryEvidence(t *testing.T) {
+	h := fixture(t)
+	requests := []string{
+		`{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"gist_directory_search","arguments":{"query":"Example"}}}`,
+		`{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"gist_directory_get","arguments":{"id":"fixture/example"}}}`,
+		`{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"gist_directory_export","arguments":{"id":"fixture/example"}}}`,
+	}
+	for _, request := range requests {
+		w := invoke(h, request)
+		if w.Code != 200 {
+			t.Fatalf("status=%d %s", w.Code, w.Body)
+		}
+		body := strings.ToLower(w.Body.String())
+		for _, secret := range []string{"make", "operator is not verified", "endpoint responded", "authentication-required", "workflow qualification", "private-evidence", "official_evidence_url", "verification", "featured"} {
+			if strings.Contains(body, secret) {
+				t.Fatalf("public MCP response exposed %q: %s", secret, body)
+			}
+		}
+		for _, useful := range []string{"fixture/example", "example", "https://example.com/mcp", "streamable-http"} {
+			if !strings.Contains(body, useful) {
+				t.Fatalf("public MCP response omitted %q: %s", useful, body)
+			}
+		}
 	}
 }
 func TestDiscoveryMCPTransportGuards(t *testing.T) {

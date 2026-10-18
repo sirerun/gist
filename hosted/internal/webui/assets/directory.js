@@ -20,13 +20,7 @@
     target.replaceChildren(box);
   }
   function badges(record, target) {
-    target.append(el("span", record.kind === "unavailable" ? "Unavailable entry" : record.kind === "openapi" ? "OpenAPI · Mint required" : "MCP server", "pill"));
-    if (record.featured === true) target.append(el("span", "Featured · tested in Zati", "pill"));
-    else if (record.recommended === true) target.append(el("span", "Recommended candidate", "pill"));
-    if (record.official === true) target.append(el("span", "Vendor official", "pill"));
-    else if (record.kind === "mcp") target.append(el("span", "Operator not verified by Gist", "pill"));
-    const checked = (record.remotes || []).map(r=>r.check).filter(c=>c && c.checked_at).sort((a,b)=>String(b.checked_at).localeCompare(String(a.checked_at)))[0];
-    if (checked) target.append(el("span", "Endpoint responded · " + new Date(checked.checked_at).toLocaleDateString(), "pill"));
+    target.append(el("span", record.kind === "openapi" ? "OpenAPI" : record.kind === "mcp" ? "MCP" : "Unavailable", "pill"));
   }
   // Login accepts fixed destinations only; never forward the current search URL.
   const bookmarkSignIn = "/auth/github/start?return_to=%2Flibrary";
@@ -89,41 +83,60 @@
     bookmarkRefreshers.set(control, refresh);
     control.append(save, signIn, message); refresh(); return control;
   }
+  const localAppIcon = value => /^\/assets\/apps\/[a-zA-Z0-9_-]+\.(svg|png)$/.test(value || "");
+  const connectorIcon = record => record.icon_url || globalThis.GIST_APP_ICONS?.[record.service_id];
   function card(record) {
-    const c = link("", "/library/server?" + new URLSearchParams({id:record.id}), "catalog-card directory-card");
+    const c = link("", "/library/server?" + new URLSearchParams({id:record.id}), "directory-card-content");
     const logos = {"brave-search":"brave", github:"github", "google-gmail":"gmail", "google-calendar":"googlecalendar", "google-drive":"googledrive"};
     const icon = el("img", undefined, "directory-logo");
-    icon.src = "/assets/brand/" + (logos[record.service_id] || (record.kind === "openapi" ? "openapiinitiative" : "modelcontextprotocol")) + ".svg";
+    icon.src = localAppIcon(connectorIcon(record)) ? connectorIcon(record) : "/assets/brand/" + (logos[record.service_id] || (record.kind === "openapi" ? "openapiinitiative" : "modelcontextprotocol")) + ".svg";
+    if (localAppIcon(connectorIcon(record))) icon.className += " app-logo";
     icon.alt = "";
     icon.width = 48; icon.height = 48;
     icon.loading = "lazy";
     const heading = el("div", undefined, "directory-card-heading");
     heading.append(icon, el("h2", record.title || record.id));
+    const description = el("p", record.description || "Connect this service from your MCP client.", "directory-card-description");
+    const useCase = (record.tags || []).slice(0, 2).join(" · ");
     const b = el("div", undefined, "directory-badges"); badges(record,b);
-    c.append(heading, el("p", record.description || "Inspect setup and provenance."), el("p", record.featured ? "Dated workflow evidence available" : "Workflow qualification pending", "quiet"));
+    c.append(heading, description);
+    if (useCase) c.append(el("p", useCase, "directory-card-use-case"));
     const wrapper = el("article", undefined, "catalog-card directory-card bookmark-card");
-    c.className = "bookmark-entry-link";
+    c.className = "directory-card-content";
     wrapper.dataset.entryId = record.id;
     wrapper.append(c, b, bookmarkButton(record));
     return wrapper;
   }
+  function appCard(record) {
+    const c = link("", "/library/server?" + new URLSearchParams({app:record.slug}), "directory-card-content");
+    const heading = el("div", undefined, "directory-card-heading");
+    const icon = el("img", undefined, "directory-logo app-logo");
+    if (localAppIcon(record.icon_url)) icon.src = record.icon_url;
+    icon.alt = ""; icon.width = 54; icon.height = 54; icon.loading = "lazy";
+    heading.append(icon, el("h2", record.name || record.slug));
+    c.append(heading, el("p", record.description || "Explore this app and its connection options.", "directory-card-description"));
+    const categories = (record.categories || []).map(category => category.name).filter(Boolean).slice(0, 2).join(" · ");
+    if (categories) c.append(el("p", categories, "directory-card-use-case"));
+    const wrapper = el("article", undefined, "catalog-card directory-card app-card");
+    wrapper.append(c); return wrapper;
+  }
   async function home() {
     const target = document.getElementById("home-directory");
-    try { const result = await api("/api/directory?limit=6"); target.replaceChildren(...result.items.filter(r=>r.recommended).map(card)); if (!target.children.length) target.append(link("Browse integrations →", "/library", "text-link")); }
+    try { const result = await api("/api/directory?limit=6"); target.replaceChildren(...result.items.slice(0,6).map(card)); if (!target.children.length) target.append(link("Browse integrations →", "/library", "text-link")); }
     catch (_) { target.replaceChildren(link("Browse the public library →", "/library", "text-link")); }
   }
   function directory() {
     const form = document.getElementById("directory-search"), query = document.getElementById("directory-query"), tag = document.getElementById("directory-tag"), results = document.getElementById("directory-results"), status = document.getElementById("directory-status"), notice = document.getElementById("directory-notice"), more = document.getElementById("directory-more");
-    const params = new URLSearchParams(location.search); query.value = params.get("q") || ""; tag.value = params.get("tag") || "";
+    const params = new URLSearchParams(location.search); query.value = params.get("q") || ""; tag.value = params.get("category") || params.get("tag") || "";
     let savedOnly = params.get("saved") === "1";
     const savedFilter = document.getElementById("bookmark-filter");
     savedFilter.setAttribute("aria-pressed", String(savedOnly)); savedFilter.classList.toggle("active", savedOnly);
     let kind = ["mcp","openapi"].includes(params.get("kind")) ? params.get("kind") : "", cursor = "", generation = 0, total = 0;
-    function filters() { document.querySelectorAll("[data-directory-kind]").forEach(b=>{const active=b.dataset.directoryKind===kind; b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));}); }
+    function filters() { tag.disabled = Boolean(kind || savedOnly); document.querySelectorAll("[data-directory-kind]").forEach(b=>{const active=b.dataset.directoryKind===kind; b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));}); }
     async function load(append = false) {
       const ownSaved = savedOnly, own = ++generation; more.hidden = true; results.setAttribute("aria-busy","true"); notice.replaceChildren();
       if (!append) results.replaceChildren();
-      const p = new URLSearchParams({limit:"24"}); if(query.value.trim()) p.set("q",query.value.trim()); if(kind)p.set("kind",kind); if(tag.value)p.set("tag",tag.value); if(append&&cursor)p.set(ownSaved ? "offset" : "cursor",cursor);
+      const p = new URLSearchParams({limit:"24"}); if(query.value.trim()) p.set("q",query.value.trim()); if(kind)p.set("kind",kind); if(tag.value)p.set(!ownSaved && !kind ? "category" : "tag",tag.value); if(append&&cursor)p.set(ownSaved || !kind ? "offset" : "cursor",cursor);
       const visible = new URLSearchParams(p); visible.delete("limit");visible.delete("cursor");visible.delete("offset");if(ownSaved)visible.set("saved","1"); history.replaceState(null,"","/library"+(visible.size?"?"+visible:""));
       try {
         if(new TextEncoder().encode(query.value.trim()).length>200){const e=new Error();e.status=400;throw e;}
@@ -135,18 +148,28 @@
           notice.append(link("Sign in with GitHub →", bookmarkSignIn, "button button-primary")); return;
         }
         if (ownSaved && bookmarkState === "error") throw new Error("Bookmarks unavailable");
-        let endpoint = "/api/directory?";
+        const appView = !ownSaved && !kind;
+        let endpoint = appView ? "/api/directory/apps?" : "/api/directory?";
         if (ownSaved) { p.delete("limit"); p.set("view", "entries"); endpoint = "/app/api/bookmarks?"; }
         const data = await api(endpoint+p); if(own!==generation)return;
-        results.append(...data.items.map(card)); total=data.total; cursor=data.next_cursor||""; more.hidden=!cursor;
-        status.textContent=data.total.toLocaleString()+(ownSaved ? " matching bookmarks · only visible to you" : " matching integrations · public source snapshot");
+        if(appView) {
+          const categories=new Map();
+          for(const option of tag.children) if(option.value)categories.set(option.value,option.textContent);
+          for(const category of data.categories || data.items.flatMap(item=>item.categories||[]))categories.set(category.slug,category.name);
+          const selected=tag.value;
+          tag.replaceChildren(el("option","All categories"));tag.children[0].value="";
+          for(const [slug,name] of [...categories].sort((a,b)=>a[1].localeCompare(b[1]))) {const option=el("option",name);option.value=slug;tag.append(option);}
+          tag.value=selected;
+        }
+        results.append(...data.items.map(appView ? appCard : card)); total=data.total; cursor=appView ? String(data.next_offset || "") : data.next_cursor||""; more.hidden=!cursor;
+        status.textContent=data.total.toLocaleString()+(ownSaved ? " matching bookmarks · only visible to you" : (appView ? " matching apps" : " matching integrations"));
         if(!data.items.length&&!append)notice.append(el("p",(ownSaved ? "No matching bookmarks. Bookmark entries from the library to find them here." : "No matching integrations. Try another term or clear your filters."),"notice"));
       } catch(e) {if(own===generation){status.textContent="Search unavailable";if(ownSaved){const box=el("div",undefined,"notice error");box.append(el("p","Couldn’t load your bookmarks."),button("Try again",async()=>{await loadBookmarks();load(append);}));notice.replaceChildren(box);}else failure(notice,e,()=>load(append));}}
       finally {if(own===generation)results.setAttribute("aria-busy","false");}
     }
     form.addEventListener("submit",e=>{e.preventDefault();load();}); tag.addEventListener("change",()=>load());
-    document.querySelectorAll("[data-directory-kind]").forEach(b=>b.addEventListener("click",()=>{kind=b.dataset.directoryKind;filters();load();}));
-    savedFilter.addEventListener("click", () => { savedOnly = !savedOnly; savedFilter.setAttribute("aria-pressed", String(savedOnly)); savedFilter.classList.toggle("active", savedOnly); load(); });
+    document.querySelectorAll("[data-directory-kind]").forEach(b=>b.addEventListener("click",()=>{kind=b.dataset.directoryKind;tag.value="";filters();load();}));
+    savedFilter.addEventListener("click", () => { savedOnly = !savedOnly; tag.value=""; filters(); savedFilter.setAttribute("aria-pressed", String(savedOnly)); savedFilter.classList.toggle("active", savedOnly); load(); });
     document.addEventListener("bookmarks-changed", event => {
       if (!savedOnly || !event.detail.removed) return;
       const cards = [...results.children], index = cards.findIndex(card => card.dataset.entryId === event.detail.id);
@@ -167,25 +190,34 @@
   function field(target,label,value) { if(value) {const d=el("div"); d.append(el("dt",label),el("dd",String(value)));target.append(d);} }
   function sourceLink(target,label,value) {const url=external(value);if(url)target.append(link(label+" ↗",url,"text-link"));}
   async function detail() {
-    const target=document.getElementById("directory-detail"), id=new URLSearchParams(location.search).get("id");
+    const target=document.getElementById("directory-detail"), params=new URLSearchParams(location.search), id=params.get("id"), app=params.get("app");
     try {
+      if (app) {
+        const r = await api("/api/directory/app?" + new URLSearchParams({slug:app}));
+        target.replaceChildren();
+        if(localAppIcon(r.icon_url)) {const icon=el("img",undefined,"directory-logo app-logo");icon.src=r.icon_url;icon.alt="";icon.width=64;icon.height=64;target.append(icon);}
+        target.append(el("h1",r.name),el("p",r.description,"artifact-description"));
+        const categories=(r.categories||[]).map(category=>category.name).filter(Boolean).join(" · ");
+        if(categories)target.append(el("p",categories,"quiet"));
+        const setup=el("section");setup.append(el("h2","Connection options"));
+        if((r.connector_ids||[]).length) {
+          setup.append(el("p","Choose an integration to see its setup details and connect it in your client."));
+          for(const connectorID of r.connector_ids) setup.append(link("View connection details →","/library/server?"+new URLSearchParams({id:connectorID}),"text-link app-connection"));
+        } else setup.append(el("p","MCP connection details are not available yet."));
+        target.append(setup); return;
+      }
       if(!id){const e=new Error();e.status=400;throw e;}
       const r=await api("/api/directory/item?"+new URLSearchParams({id}));target.replaceChildren();
       const badgesEl=el("div",undefined,"directory-badges");badges(r,badgesEl);
+      if(localAppIcon(connectorIcon(r))) {const icon=el("img",undefined,"directory-logo app-logo");icon.src=connectorIcon(r);icon.alt="";icon.width=64;icon.height=64;target.append(icon);}
       target.append(badgesEl,el("h1",r.title),bookmarkButton(r),el("p",r.description,"artifact-description"));
-      const info=el("dl",undefined,"definition-list");field(info,"Descriptor version",r.version||"Not specified");field(info,"Authentication",r.auth?.type||"Check provider documentation");field(info,"Credential names",r.auth?.credential_names?.join(", "));field(info,"Source entry",r.source?.entry_id);target.append(info);
-      const setup=el("section");setup.append(el("h2","Connect in your client"),el("p","Inspect and admit this descriptor in an MCP client that supports the listed transport. Authorize your provider account in that client. Zati currently supports Streamable HTTP; SSE entries require an SSE-capable client. Exporting a descriptor does not install, authorize or execute it."));
+      const info=el("dl",undefined,"definition-list");field(info,"Descriptor version",r.version||"Not specified");field(info,"Authentication",r.auth?.type||"Check provider documentation");field(info,"Credential names",r.auth?.credential_names?.join(", "));target.append(info);
+      const setup=el("section");setup.append(el("h2","Connect in your client"),el("p","Add this server to an MCP client that supports the listed transport, then authorize your provider account in that client. Review the requested access before connecting."));
       for(const remote of r.remotes||[]) {setup.append(el("h3",remote.transport==="streamable-http"?"Streamable HTTP endpoint":"SSE endpoint"),el("pre",remote.url));}
-      for(const remote of r.remotes||[]){const check=remote.check;if(!check)continue;const detail=check.result==="mcp-initialize"?"completed the MCP initialize handshake":check.result==="authentication-required"?"responded with an authentication challenge":check.result==="payment-required"?"responded that payment is required":"responded to the configured "+remote.transport+" reachability check";setup.append(el("p","Unauthenticated endpoint check: "+detail+" (HTTP "+check.http_status+") on "+new Date(check.checked_at).toLocaleString()+". This check did not list tools or make a provider call."));}
-      for(const pkg of r.packages||[]) {setup.append(el("h3","Package · "+pkg.registry),el("pre",pkg.identifier+(pkg.version?" @ "+pkg.version:"")),el("p","Requires a client with local package support. Zati currently supports admitted Streamable HTTP connections; this listing does not imply local package compatibility.","quiet"));}
-      if(r.openapi) {setup.append(el("p","An OpenAPI descriptor requires generation and hosting or a compatible adapter. Mint supports OpenAPI 3.x; specification validity and generated tool behavior still need verification. Mint’s stdio/SSE output is not directly compatible with Zati’s current Streamable HTTP admission."));sourceLink(setup,"OpenAPI specification",r.openapi.spec_url);sourceLink(setup,"Mint generation guide",r.openapi.mint_guide_url);}
+      for(const pkg of r.packages||[]) {setup.append(el("h3","Package · "+pkg.registry),el("pre",pkg.identifier+(pkg.version?" @ "+pkg.version:"")));}
+      if(r.openapi) {setup.append(el("p","Use the OpenAPI specification with a compatible client or adapter."));sourceLink(setup,"OpenAPI specification",r.openapi.spec_url);sourceLink(setup,"Mint generation guide",r.openapi.mint_guide_url);}
       sourceLink(setup,"Authentication setup",r.auth?.setup_url);sourceLink(setup,"Project",r.homepage);sourceLink(setup,"Repository",r.repository);target.append(setup);
-      const skillSection=el("section");skillSection.append(el("h2","Skills and workflow evidence"));
-      if(!r.featured)skillSection.append(el("p","This candidate has not been qualified as a featured Zati workflow. Source listing, vendor status and recommendation do not establish successful execution."));
-      for(const s of r.skills||[]) {skillSection.append(el("h3",s.title||s.id),el("p","Status: "+s.status));sourceLink(skillSection,"Skill source",s.url);}
-      for(const v of r.verification||[]) {skillSection.append(el("p",[v.client,v.workflow,v.result,v.checked_at,v.expires_at?"Expires "+v.expires_at:""].filter(Boolean).join(" · ")));sourceLink(skillSection,"Dated evidence",v.evidence_url);}
-      target.append(skillSection);
-      const provenance=el("section");provenance.append(el("h2","Provenance"));sourceLink(provenance,"Original source",r.source?.url);sourceLink(provenance,"Vendor ownership evidence",r.official_evidence_url);sourceLink(provenance,r.server_listing_url?.includes("apps.make.com/")?"Make verified MCP server list":"Independent MCP server listing",r.server_listing_url);target.append(provenance);
+      if((r.skills||[]).length){const skillSection=el("section");skillSection.append(el("h2","Related skills"));for(const s of r.skills){skillSection.append(el("h3",s.title||s.id));sourceLink(skillSection,"Skill guide",s.url);}target.append(skillSection);}
       const status=el("p",undefined,"quiet"); target.append(button("Export setup descriptor",async()=>{try {const data=await api("/api/directory/export?"+new URLSearchParams({id}));const u=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)+"\n"],{type:"application/json"}));const a=link("",u);a.download="gist-integration.json";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);status.textContent="Descriptor downloaded. Review it in your client before use.";}catch(e){failure(status,e);}}),status);
     }catch(e){failure(target,e,detail);}finally{target.setAttribute("aria-busy","false");}
   }

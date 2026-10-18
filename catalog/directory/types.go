@@ -119,3 +119,52 @@ type Export struct {
 	Format string `json:"format"`
 	Record Record `json:"record"`
 }
+
+// PublicRecord contains connection metadata suitable for hosted catalog APIs.
+// Intake provenance, reachability probes and qualification evidence stay in
+// the operator-owned snapshot and are not part of public discovery responses.
+type PublicRecord struct {
+	Source              RecordSource   `json:"source"`
+	ServerListingURL    string         `json:"server_listing_url,omitempty"`
+	Official            bool           `json:"official"`
+	OfficialEvidenceURL string         `json:"official_evidence_url,omitempty"`
+	ID                  string         `json:"id"`
+	Kind                string         `json:"kind"`
+	ServiceID           string         `json:"service_id"`
+	Title               string         `json:"title"`
+	Description         string         `json:"description"`
+	Version             string         `json:"version,omitempty"`
+	Tags                []string       `json:"tags"`
+	Homepage            string         `json:"homepage,omitempty"`
+	Repository          string         `json:"repository,omitempty"`
+	Remotes             []PublicRemote `json:"remotes,omitempty"`
+	Packages            []Package      `json:"packages,omitempty"`
+	OpenAPI             *OpenAPI       `json:"openapi,omitempty"`
+	Auth                Auth           `json:"auth"`
+	Skills              []PublicSkill  `json:"skills,omitempty"`
+}
+
+type PublicRemote struct {
+	URL       string `json:"url"`
+	Transport string `json:"transport"`
+}
+
+type PublicSkill struct {
+	Status       string `json:"status"`
+	SourceDigest string `json:"source_digest,omitempty"`
+	ID           string `json:"id"`
+	Title        string `json:"title"`
+	URL          string `json:"url,omitempty"`
+}
+
+type PublicResult struct {
+	Items            []PublicRecord `json:"items"`
+	NextCursor       string         `json:"next_cursor,omitempty"`
+	Total            int            `json:"total"`
+	SnapshotRevision string         `json:"snapshot_revision"`
+}
+
+type PublicExport struct {
+	Format string       `json:"format"`
+	Record PublicRecord `json:"record"`
+}

@@ -391,3 +391,24 @@ h1{font-size:65px}
 .bookmark-control [aria-pressed="true"]{background:var(--green);color:white}
 .bookmark-control button:disabled{opacity:.65;cursor:wait}
 .bookmark-message{font-size:11px}
+
+/* Dense, centered directory cards; existing palette and icon artwork stay intact. */
+#directory-results.catalog-grid{grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:14px}
+#directory-results .directory-card{position:relative;min-width:0;min-height:190px;padding:15px 12px 11px;box-sizing:border-box;align-items:stretch}
+#directory-results .directory-card-content{display:flex;flex:1;min-width:0;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;color:inherit;text-decoration:none}
+#directory-results .directory-card-heading{width:100%;flex-direction:column;justify-content:flex-start;gap:9px}
+#directory-results .directory-card-heading h2{width:100%;margin:0;font-size:17px;line-height:1.2;letter-spacing:-.25px;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-height:41px}
+#directory-results .directory-logo{width:54px;height:54px;padding:7px;border-radius:16px}
+#directory-results .directory-card-description,#directory-results .directory-card-use-case{width:100%;max-height:0;margin:0;overflow:hidden;opacity:0;transition:max-height .18s ease,opacity .16s ease,margin .18s ease;font-size:11px;line-height:1.45}
+#directory-results .directory-card-description{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+#directory-results .directory-card-use-case{font-size:10px}
+#directory-results .directory-card:hover .directory-card-description,#directory-results .directory-card:focus-within .directory-card-description,#directory-results .directory-card:hover .directory-card-use-case,#directory-results .directory-card:focus-within .directory-card-use-case{max-height:60px;margin-top:7px;opacity:1}
+#directory-results .directory-badges{justify-content:center;margin:10px 0 0;padding:0}
+#directory-results .directory-badges .pill{font-size:.62rem}
+#directory-results .bookmark-control{position:absolute;top:7px;right:7px;z-index:1;margin:0}
+#directory-results .bookmark-control .bookmark-icon-button{width:30px;height:30px;padding:6px}
+@media(max-width:700px){#directory-results.catalog-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}}
+@media(max-width:450px){#directory-results.catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#directory-results .directory-card{min-height:174px;padding:13px 9px 10px}#directory-results .directory-card-heading h2{font-size:15px;min-height:36px}#directory-results .directory-logo{width:48px;height:48px}}
+
+.directory-logo.app-logo,#directory-results .directory-logo.app-logo{padding:0;border:0;background:transparent;object-fit:contain}
+.app-connection{display:block;margin-top:12px}

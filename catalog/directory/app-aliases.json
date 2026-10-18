@@ -1,0 +1,17 @@
+{
+  "brightdata": "bright-data",
+  "close-crm": "close",
+  "exa-ai": "exa",
+  "google-calendar": "google-calendar",
+  "google-email": "google-gmail",
+  "highlevel": "gohighlevel",
+  "hubspotcrm": "hubspot",
+  "huggingface": "hugging-face",
+  "linear": "linear-read-only",
+  "marketo": "marketo-engage",
+  "openai-gpt-3": "openai",
+  "posthog-community": "posthog",
+  "replicate-community": "replicate",
+  "tavily": "tavily-search",
+  "tavily-community": "tavily-search"
+}

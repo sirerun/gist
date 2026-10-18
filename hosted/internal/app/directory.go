@@ -23,11 +23,12 @@ import (
 )
 
 func publicDirectoryPath(path string) bool {
-	return path == "/api/directory" || path == "/api/directory/item" || path == "/api/directory/export"
+	return path == "/api/directory" || path == "/api/directory/item" || path == "/api/directory/export" || path == "/api/directory/apps" || path == "/api/directory/app"
 }
 
 type directoryAPI struct {
 	index      *directory.Index
+	apps       *directory.AppIndex
 	origin     string
 	maxBytes   int
 	concurrent chan struct{}
@@ -68,6 +69,50 @@ func (h *directoryAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	var result any
 	switch r.URL.Path {
+	case "/api/directory/apps":
+		if !webQueryKeys(v, "q", "category", "offset", "limit") {
+			webError(w, 400, "invalid_query", "Unsupported query parameters.")
+			return
+		}
+		limit, offset := 24, 0
+		if v.Has("limit") {
+			limit, err = strconv.Atoi(v.Get("limit"))
+			if err != nil || limit < 1 || limit > 100 {
+				webError(w, 400, "invalid_query", "Limit must be 1 to 100.")
+				return
+			}
+		}
+		if v.Has("offset") {
+			offset, err = strconv.Atoi(v.Get("offset"))
+			if err != nil || offset < 0 || offset > directory.MaxEntries {
+				webError(w, 400, "invalid_query", "Invalid offset.")
+				return
+			}
+		}
+		if h.apps == nil {
+			webError(w, 503, "service_unavailable", "App directory unavailable.")
+			return
+		}
+		result, err = h.apps.Search(directory.AppQuery{Text: v.Get("q"), Category: v.Get("category"), Offset: offset, Limit: limit})
+		if err != nil {
+			webError(w, 400, "invalid_query", "Invalid app query.")
+			return
+		}
+	case "/api/directory/app":
+		if h.apps == nil {
+			webError(w, 503, "service_unavailable", "App directory unavailable.")
+			return
+		}
+		if !webQueryKeys(v, "slug") || !webRefValue(v.Get("slug"), 256) {
+			webError(w, 400, "invalid_query", "Choose an app slug.")
+			return
+		}
+		item, ok := h.apps.Get(v.Get("slug"))
+		if !ok {
+			webError(w, 404, "not_found", "App not found.")
+			return
+		}
+		result = item
 	case "/api/directory":
 		if !webQueryKeys(v, "q", "kind", "tag", "cursor", "limit") {
 			webError(w, 400, "invalid_query", "Unsupported query parameters.")
@@ -81,11 +126,13 @@ func (h *directoryAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		result, err = h.index.Search(directory.Query{Text: v.Get("q"), Kind: v.Get("kind"), Tag: v.Get("tag"), Cursor: v.Get("cursor"), Limit: limit})
+		var search directory.Result
+		search, err = h.index.Search(directory.Query{Text: v.Get("q"), Kind: v.Get("kind"), Tag: v.Get("tag"), Cursor: v.Get("cursor"), Limit: limit})
 		if err != nil {
 			webError(w, 400, "invalid_query", "Invalid directory query or expired cursor.")
 			return
 		}
+		result = directory.PublicResultOf(search)
 	case "/api/directory/item", "/api/directory/export":
 		if !webQueryKeys(v, "id") || !webRefValue(v.Get("id"), 512) {
 			webError(w, 400, "invalid_query", "Choose an entry ID.")
@@ -96,9 +143,9 @@ func (h *directoryAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			webError(w, 404, "not_found", "Directory entry not found.")
 			return
 		}
-		result = record
+		result = directory.PublicRecordOf(record)
 		if r.URL.Path == "/api/directory/export" {
-			result = directory.Export{Format: directory.ExportFormat, Record: record}
+			result = directory.PublicExportOf(directory.Export{Format: directory.ExportFormat, Record: record})
 		}
 	default:
 		webError(w, 404, "not_found", "Directory route not found.")
