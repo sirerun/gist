@@ -54,10 +54,13 @@ Mint generation and schema verification remain client-side qualification work.
 ## Recommendations and featured qualification
 
 Five Zati essentials are operator-selected setup candidates: Gmail, Calendar,
-Drive, GitHub and Brave Search. The Google candidates explicitly use community
-OpenAPI descriptions and Mint, not an invented Google MCP endpoint. GitHub and
-Brave link their vendor-owned MCP projects. These are recommended, **not
-featured**. Skill references are candidates until real source/evidence exists.
+Drive, GitHub and Brave Search. Gmail points to Google’s official Developer
+Preview MCP server; its documentation revision is a descriptor version, not a
+measured server version. Calendar and Drive use community OpenAPI descriptions
+and Mint. Gmail also retains that route as an alternative. GitHub and Brave
+link their vendor-owned MCP projects. These are recommended, **not featured**.
+Skill links pin the five screening packages to immutable source and package
+digests; their draft bindings and provider workflows remain unqualified.
 
 `IsFeatured` requires operator selection, an exact server version, an actual
 versioned Zati client, a useful passed workflow, matching SHA-256 tool/schema/skill

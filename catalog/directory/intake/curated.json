@@ -1,15 +1,54 @@
 [
   {
-    "id": "openapi:google-gmail",
-    "kind": "openapi",
+    "id": "mcp:google-gmail",
+    "kind": "mcp",
     "service_id": "google-gmail",
     "title": "Gmail",
-    "description": "Recommended setup candidate for read-only inbox briefing. Google API exposed through Mint using a community OpenAPI description; client-owned OAuth and read-only scope review required. Not yet qualified in Zati.",
-    "version": "v1",
+    "description": "Official Google Gmail MCP server in Developer Preview. Requires program enrollment, enabled Gmail APIs and an OAuth client marked for an AI-powered agent. Clients must admit the read-only thread tools and supply mailbox authorization. Not yet qualified in Zati.",
+    "version": "preview-docs-2026-10-12",
     "tags": [
       "mail",
       "google",
       "zati-essentials"
+    ],
+    "official": true,
+    "official_evidence_url": "https://developers.google.com/workspace/gmail/api/guides/configure-mcp-server",
+    "homepage": "https://developers.google.com/workspace/gmail/api/guides/configure-mcp-server",
+    "remotes": [
+      {
+        "url": "https://gmailmcp.googleapis.com/mcp/v1",
+        "transport": "streamable-http"
+      }
+    ],
+    "auth": {
+      "type": "oauth2",
+      "credential_names": [
+        "GOOGLE_ACCESS_TOKEN"
+      ],
+      "setup_url": "https://developers.google.com/workspace/gmail/api/guides/configure-mcp-server"
+    },
+    "skills": [
+      {
+        "id": "gist/essentials/inbox-briefing@0.1.0",
+        "title": "Read-only inbox briefing",
+        "url": "https://github.com/sirerun/gist/tree/94ef81edc7eaf191a9d3606b6f34c52d2098816e/catalog/skills/essentials/sources/inbox-briefing",
+        "status": "candidate",
+        "source_digest": "sha256:7d3a926131fdb8b517fc67beec7e8ff253139778b1ca29ed47095a8f2fff8875"
+      }
+    ],
+    "recommended": true,
+    "featured": false
+  },
+  {
+    "id": "openapi:google-gmail",
+    "kind": "openapi",
+    "service_id": "google-gmail",
+    "title": "Gmail",
+    "description": "Alternative Gmail setup through Mint using a community OpenAPI description, including for clients outside the Google MCP Developer Preview. Caller-owned OAuth, schema inspection and explicit read-only admission required. Not yet qualified in Zati.",
+    "version": "v1",
+    "tags": [
+      "mail",
+      "google"
     ],
     "official": false,
     "official_evidence_url": "https://developers.google.com/workspace/gmail/api/guides/overview",
@@ -28,12 +67,14 @@
     },
     "skills": [
       {
-        "id": "zati-gmail-workflow",
+        "id": "gist/essentials/inbox-briefing@0.1.0",
         "title": "Read-only inbox briefing",
-        "status": "candidate"
+        "url": "https://github.com/sirerun/gist/tree/94ef81edc7eaf191a9d3606b6f34c52d2098816e/catalog/skills/essentials/sources/inbox-briefing",
+        "status": "candidate",
+        "source_digest": "sha256:7d3a926131fdb8b517fc67beec7e8ff253139778b1ca29ed47095a8f2fff8875"
       }
     ],
-    "recommended": true,
+    "recommended": false,
     "featured": false
   },
   {
@@ -65,9 +106,11 @@
     },
     "skills": [
       {
-        "id": "zati-calendar-workflow",
-        "title": "Daily calendar briefing",
-        "status": "candidate"
+        "id": "gist/essentials/calendar-briefing@0.1.0",
+        "title": "Read-only calendar briefing",
+        "url": "https://github.com/sirerun/gist/tree/94ef81edc7eaf191a9d3606b6f34c52d2098816e/catalog/skills/essentials/sources/calendar-briefing",
+        "status": "candidate",
+        "source_digest": "sha256:c45f1e70a74a3d6bfea8ed03bab2e52dde1e49decf7e1bd403350bac56755c8f"
       }
     ],
     "recommended": true,
@@ -102,9 +145,11 @@
     },
     "skills": [
       {
-        "id": "zati-drive-workflow",
-        "title": "Find and summarize a file",
-        "status": "candidate"
+        "id": "gist/essentials/file-discovery@0.1.0",
+        "title": "Read-only file discovery",
+        "url": "https://github.com/sirerun/gist/tree/94ef81edc7eaf191a9d3606b6f34c52d2098816e/catalog/skills/essentials/sources/file-discovery",
+        "status": "candidate",
+        "source_digest": "sha256:800ed09a5c6827e806debbafe63c4b90d5feacfa6d10bc23083a2022af5c1b14"
       }
     ],
     "recommended": true,
@@ -136,9 +181,11 @@
     },
     "skills": [
       {
-        "id": "zati-github-review-workflow",
-        "title": "Read-only pull request briefing",
-        "status": "candidate"
+        "id": "gist/essentials/github-pr-review@0.1.0",
+        "title": "Read-only public GitHub pull request review",
+        "url": "https://github.com/sirerun/gist/tree/94ef81edc7eaf191a9d3606b6f34c52d2098816e/catalog/skills/essentials/sources/github-pr-review",
+        "status": "candidate",
+        "source_digest": "sha256:18308f3f960394cf5997342b96814354836f4e09354bdcc8f62a15f64e1fab32"
       }
     ],
     "recommended": true,
@@ -174,9 +221,11 @@
     },
     "skills": [
       {
-        "id": "zati-web-research-workflow",
-        "title": "Research a topic with sources",
-        "status": "candidate"
+        "id": "gist/essentials/web-research@0.1.0",
+        "title": "Read-only web research",
+        "url": "https://github.com/sirerun/gist/tree/94ef81edc7eaf191a9d3606b6f34c52d2098816e/catalog/skills/essentials/sources/web-research",
+        "status": "candidate",
+        "source_digest": "sha256:ee84cda90111416dd63b45ecff7a11db8fb047db18450da9fce85cacf69b2732"
       }
     ],
     "recommended": true,
