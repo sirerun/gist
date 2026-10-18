@@ -107,3 +107,13 @@ test('minimal app tiles show one useful category and a decorative navigation arr
  const arrow=nodes.find(n=>n.className==='directory-card-arrow');assert.equal(arrow.attrs['aria-hidden'],'true');
  assert.ok(nodes.some(n=>n.href==='/library/server?app=gmail'));
 });
+
+test('load more keeps its space and existing cards while a page is loading',async()=>{
+ let release;
+ const f=fixture({page:'directory',handle:url=>url.startsWith('/api/directory/apps?')?(url.includes('offset=24')?new Promise(resolve=>release=resolve):{data:{items:[{slug:'gmail',name:'Gmail'}],total:48,next_offset:24}}):undefined});
+ await flush();const more=f.ids['directory-more'],first=f.ids['directory-results'].children[0];
+ const pending=more.handlers.click({preventDefault(){}});await flush();
+ assert.equal(more.hidden,false);assert.equal(more.disabled,true);assert.equal(f.ids['directory-results'].children[0],first);
+ release({data:{items:[{slug:'slack',name:'Slack'}],total:48,next_offset:48}});await pending;await flush();
+ assert.equal(more.hidden,false);assert.equal(more.disabled,false);assert.equal(f.ids['directory-results'].children.length,2);assert.equal(f.ids['directory-results'].children[0],first);
+});
