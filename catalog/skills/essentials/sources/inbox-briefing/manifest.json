@@ -1,0 +1,54 @@
+{
+  "id": "gist/essentials/inbox-briefing",
+  "version": "0.1.0",
+  "name": "Read-only inbox briefing",
+  "summary": "Summarize recent unread mail without changing the mailbox.",
+  "trust": "operator_asserted",
+  "publication": {
+    "status": "screening",
+    "provenance": "publisher_asserted; authored draft, not provenance-verified or workflow-qualified"
+  },
+  "required_capabilities": [
+    {
+      "id": "draft/mail/messages/list",
+      "contract_version": "0.1.0"
+    },
+    {
+      "id": "draft/mail/message/read",
+      "contract_version": "0.1.0"
+    }
+  ],
+  "runtime_requirements": {
+    "local_execution": false,
+    "filesystem": []
+  },
+  "package_digest": {
+    "algorithm": "sha256",
+    "value": "7d3a926131fdb8b517fc67beec7e8ff253139778b1ca29ed47095a8f2fff8875"
+  },
+  "inventory": [
+    {
+      "path": "SKILL.md",
+      "size": 2141,
+      "sha256": "5504a6a168fe1f5e8344d17eef1668125903cc552f8da6efea61ab2b190d465b",
+      "media_type": "text/markdown"
+    },
+    {
+      "path": "assets/outcome-template.md",
+      "size": 348,
+      "sha256": "6752f5daeabb5e085185ffe29258a0becf0b5dab32aaa56e0b6e009d4c2967f1",
+      "media_type": "text/markdown"
+    },
+    {
+      "path": "assets/requirements.json",
+      "size": 1213,
+      "sha256": "164eb58ee161cc70a5a44bae27fae421f8bbe3e17a60d63b427b0753b7364747",
+      "media_type": "application/json"
+    }
+  ],
+  "manifest_version": "1",
+  "entrypoint": "SKILL.md",
+  "effects": [
+    "mail.read"
+  ]
+}

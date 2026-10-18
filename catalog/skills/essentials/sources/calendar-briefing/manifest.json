@@ -1,0 +1,50 @@
+{
+  "id": "gist/essentials/calendar-briefing",
+  "version": "0.1.0",
+  "name": "Read-only calendar briefing",
+  "summary": "Prepare an agenda from a bounded selected calendar window.",
+  "trust": "operator_asserted",
+  "publication": {
+    "status": "screening",
+    "provenance": "publisher_asserted; authored draft, not provenance-verified or workflow-qualified"
+  },
+  "required_capabilities": [
+    {
+      "id": "draft/calendar/events/list",
+      "contract_version": "0.1.0"
+    }
+  ],
+  "runtime_requirements": {
+    "local_execution": false,
+    "filesystem": []
+  },
+  "package_digest": {
+    "algorithm": "sha256",
+    "value": "c45f1e70a74a3d6bfea8ed03bab2e52dde1e49decf7e1bd403350bac56755c8f"
+  },
+  "inventory": [
+    {
+      "path": "SKILL.md",
+      "size": 2198,
+      "sha256": "199b5c4f6f5e6ba497b7103da12670ce195ffa0f060e04ed1d3da771d80926b5",
+      "media_type": "text/markdown"
+    },
+    {
+      "path": "assets/outcome-template.md",
+      "size": 342,
+      "sha256": "4552e5cd26106e4279d3bb9bd5efc96755602fc0847593a1d2f720d9da6bc6bb",
+      "media_type": "text/markdown"
+    },
+    {
+      "path": "assets/requirements.json",
+      "size": 1003,
+      "sha256": "a9336781970380f718e2e83d712af48149add183c5e95e6419dd9e05ddfa9379",
+      "media_type": "application/json"
+    }
+  ],
+  "manifest_version": "1",
+  "entrypoint": "SKILL.md",
+  "effects": [
+    "calendar.read"
+  ]
+}

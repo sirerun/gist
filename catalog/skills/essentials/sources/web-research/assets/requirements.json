@@ -1,0 +1,41 @@
+{
+  "format": "gist.workflow-requirements.draft/v1",
+  "status": "draft",
+  "binding_status": "not_implemented",
+  "warning": "Semantic design requirements only; no provider tool schemas, executable recipe, connection or admission is supplied.",
+  "skill_id": "gist/essentials/web-research",
+  "skill_version": "0.1.0",
+  "requirements": [
+    {
+      "id": "draft/web/search",
+      "contract_version": "0.1.0",
+      "status": "draft",
+      "binding_status": "not_implemented",
+      "effect_class": "read_only",
+      "effect": "web.read"
+    },
+    {
+      "id": "draft/web/page/read",
+      "contract_version": "0.1.0",
+      "status": "draft",
+      "binding_status": "not_implemented",
+      "effect_class": "read_only",
+      "effect": "web.read"
+    }
+  ],
+  "limits": {
+    "max_calls": 7,
+    "max_selected_items": 5,
+    "max_output_bytes": 131072,
+    "max_duration_seconds": 120,
+    "automatic_retries": 0,
+    "provider_cost_upper_bound": null
+  },
+  "client_requirements": [
+    "exact_package_review",
+    "current_connection_and_authorization",
+    "explicit_read_only_mapping",
+    "validated_tool_input_and_output_schemas",
+    "client_owned_cost_and_network_policy"
+  ]
+}
