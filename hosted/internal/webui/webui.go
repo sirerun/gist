@@ -67,6 +67,13 @@ func Handler() http.Handler {
 			renderPage(w, r, "public-document", doc, siteData{Title: doc.Title, Page: "public-document", Description: doc.Description, Canonical: publicOrigin + r.URL.Path})
 			return
 		}
+		if r.URL.Path == "/assets/app-brand-colors.css" {
+			w.Header().Set("Content-Type", "text/css; charset=utf-8")
+			if r.Method != http.MethodHead {
+				_, _ = w.Write([]byte(appBrandColors()))
+			}
+			return
+		}
 		if strings.HasPrefix(r.URL.Path, "/assets/") {
 			// Do not permit directory listings or path aliases.
 			p := strings.TrimPrefix(r.URL.Path, "/assets/")
