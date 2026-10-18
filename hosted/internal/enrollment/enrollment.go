@@ -229,6 +229,11 @@ func (h *Handler) readReturnTo(values url.Values) (string, error) {
 }
 
 func (h *Handler) validateReturnTo(raw string) (string, error) {
+	// The website gets exactly one fixed local destination. Queries, fragments,
+	// escaped paths and other relative URLs remain invalid redirect targets.
+	if raw == "/library" {
+		return raw, nil
+	}
 	if raw == "" || len(raw) > maxRequestBytes || strings.Contains(raw, "#") {
 		return "", errors.New("enrollment: invalid return target")
 	}
@@ -270,13 +275,13 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, ErrReplay) {
 			http.Error(w, "login denied", http.StatusBadRequest)
 		} else {
-			http.Error(w, "login unavailable", http.StatusInternalServerError)
+			loginFailure(w, r, returnTo, http.StatusInternalServerError, "login unavailable", "service_unavailable")
 		}
 		return
 	}
 	account, err := h.githubAccount(r.Context(), q.Get("code"), verifier)
 	if err != nil {
-		http.Error(w, "login denied", http.StatusUnauthorized)
+		loginFailure(w, r, returnTo, http.StatusUnauthorized, "login denied", "github_failed")
 		return
 	}
 	inviteHash := []byte(nil)
@@ -285,15 +290,15 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 	}
 	if err = h.store.CompleteLogin(r.Context(), h.cfg.WorkspaceID, account, inviteHash, h.cfg.FounderAccount, h.cfg.WorkspaceName, h.cfg.BootstrapScopes, h.now().UTC()); err != nil {
 		if errors.Is(err, ErrDenied) {
-			http.Error(w, "workspace access denied", http.StatusForbidden)
+			loginFailure(w, r, returnTo, http.StatusForbidden, "workspace access denied", "access_denied")
 		} else {
-			http.Error(w, "login unavailable", http.StatusInternalServerError)
+			loginFailure(w, r, returnTo, http.StatusInternalServerError, "login unavailable", "service_unavailable")
 		}
 		return
 	}
 	sessionCookie, err := h.sessions.Issue(account, []string{h.cfg.WorkspaceID}, h.cfg.SessionTTL)
 	if err != nil {
-		http.Error(w, "login unavailable", http.StatusInternalServerError)
+		loginFailure(w, r, returnTo, http.StatusInternalServerError, "login unavailable", "service_unavailable")
 		return
 	}
 	http.SetCookie(w, sessionCookie)
@@ -303,6 +308,17 @@ func (h *Handler) callback(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"authenticated": true, "csrf_token": h.csrf(account)})
 }
+
+// Only a verified encrypted website flow can select this fixed error page.
+// OAuth callers and existing API enrollment flows keep their HTTP contract.
+func loginFailure(w http.ResponseWriter, r *http.Request, returnTo string, status int, message, code string) {
+	if returnTo == "/library" {
+		http.Redirect(w, r, "/signin?error="+code, http.StatusSeeOther)
+		return
+	}
+	http.Error(w, message, status)
+}
+
 func (h *Handler) githubAccount(ctx context.Context, code, verifier string) (string, error) {
 	form := url.Values{}
 	form.Set("client_id", h.cfg.ClientID)

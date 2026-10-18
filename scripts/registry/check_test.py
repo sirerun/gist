@@ -137,11 +137,48 @@ class RegistryCheckTests(unittest.TestCase):
             path = Path(directory) / "hosted/go.mod"
             path.parent.mkdir(parents=True)
             path.write_bytes(current)
+            amendment = Path(directory) / "contracts/registry/hosted-dependencies.json"
+            amendment.parent.mkdir(parents=True)
+            amendment.write_bytes((root / "contracts/registry/hosted-dependencies.json").read_bytes())
             check.check_library_module(entry, change)
             for bad in (current.replace(b"go 1.26.1", b"go 1.25.0"), current.replace(b"=> ..", b"=> /tmp/evil"), current + b"\n"):
                 path.write_bytes(bad)
                 with self.assertRaises(check.CheckError):
                     check.check_library_module(entry, change)
+
+    def test_runtime_dependency_amendment_preserves_original_baseline(self):
+        root = check.ROOT
+        entry = next(e for e in check.read_json(root / "contracts/registry/v1/lock.json")["files"] if e["path"] == "hosted/go.mod")
+        change = check.read_json(root / "contracts/registry/library-relocation.json")["hosted_module"]
+        document = check.read_json(root / "contracts/registry/hosted-dependencies.json")
+        with tempfile.TemporaryDirectory() as directory, mock.patch.object(check, "ROOT", Path(directory)):
+            module = Path(directory) / "hosted/go.mod"
+            module.parent.mkdir(parents=True)
+            module.write_bytes((root / "hosted/go.mod").read_bytes())
+            amendment = Path(directory) / "contracts/registry/hosted-dependencies.json"
+            amendment.parent.mkdir(parents=True)
+            for bad in (dict(document, prior_module=document["prior_module"].replace("go 1.26.1", "go 1.25.0")), dict(document, sha256="0" * 64), dict(document, path="go.mod")):
+                amendment.write_text(json.dumps(bad))
+                with self.assertRaises(check.CheckError):
+                    check.check_library_module(entry, change)
+
+    def test_runtime_checksum_amendment_rejects_drift(self):
+        root = check.ROOT
+        entry = next(e for e in check.read_json(root / "contracts/registry/v1/lock.json")["files"] if e["path"] == "hosted/go.sum")
+        document = check.read_json(root / "contracts/registry/hosted-dependencies.json")
+        with tempfile.TemporaryDirectory() as directory, mock.patch.object(check, "ROOT", Path(directory)):
+            sums = Path(directory) / "hosted/go.sum"
+            sums.parent.mkdir(parents=True)
+            sums.write_bytes((root / "hosted/go.sum").read_bytes())
+            amendment = Path(directory) / "contracts/registry/hosted-dependencies.json"
+            amendment.parent.mkdir(parents=True)
+            amendment.write_text(json.dumps(document))
+            check.check_runtime_dependency_sum(entry)
+            sums.write_bytes(sums.read_bytes() + b"drift")
+            with self.assertRaises(check.CheckError):
+                check.check_runtime_dependency_sum(entry)
+            with self.assertRaises(check.CheckError):
+                check.check_runtime_dependency_sum(dict(entry, sha256="0" * 64))
 
     def test_cli_reports_failure(self):
         output = io.StringIO()

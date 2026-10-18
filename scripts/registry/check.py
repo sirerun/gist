@@ -131,10 +131,35 @@ def check_library_module(entry: dict[str, Any], change: dict[str, Any]) -> None:
     if entry["path"] != "hosted/go.mod" or change.get("path") != entry["path"] or change.get("baseline_sha256") != entry["sha256"] or change.get("addition") != addition:
         fail("unsupported hosted library dependency amendment")
     current = (ROOT / entry["path"]).read_bytes()
+    # Runtime dependency evolution is separate from frozen wire contracts.
+    # Admit only the exact reviewed module hash, with the original pre-OTLP
+    # module still reconstructing the frozen baseline byte for byte.
+    dependency_path = ROOT / "contracts/registry/hosted-dependencies.json"
+    if dependency_path.is_file():
+        amendment = read_json(dependency_path)
+        if amendment.get("amendment_version") != "1" or amendment.get("path") != entry["path"]:
+            fail("unsupported runtime dependency amendment")
+        prior = amendment.get("prior_module")
+        if not isinstance(prior, str) or not prior.endswith(addition):
+            fail("runtime dependency amendment lacks the exact prior library module")
+        if hashlib.sha256(prior[:-len(addition)].encode()).hexdigest() != entry["sha256"]:
+            fail("runtime dependency amendment changes the frozen baseline")
+        if hashlib.sha256(current).hexdigest() != amendment.get("sha256"):
+            fail("runtime dependencies differ from the exact reviewed amendment")
+        return
     if not current.endswith(addition.encode()):
         fail("missing exact additive hosted library dependency")
     if hashlib.sha256(current[:-len(addition.encode())]).hexdigest() != entry["sha256"]:
         fail("hosted module amendment alters frozen dependencies")
+
+def check_runtime_dependency_sum(entry: dict[str, Any]) -> None:
+    amendment = read_json(ROOT / "contracts/registry/hosted-dependencies.json")
+    change = amendment.get("sum", {})
+    if amendment.get("amendment_version") != "1" or amendment.get("path") != "hosted/go.mod" or entry["path"] != "hosted/go.sum" or change.get("path") != entry["path"] or change.get("baseline_sha256") != entry["sha256"]:
+        fail("unsupported runtime checksum amendment")
+    if file_hash(ROOT / entry["path"]) != change.get("sha256"):
+        fail("runtime checksums differ from the exact reviewed amendment")
+
 
 def check_contracts(freeze_check: bool) -> None:
     directory = ROOT / "contracts" / "registry" / "v1"
@@ -247,6 +272,8 @@ def check_contracts(freeze_check: bool) -> None:
             elif entry["path"] == "hosted/go.mod" and module_change is not None:
                 check_library_module(entry, module_change)
                 module_consumed = True
+            elif entry["path"] == "hosted/go.sum" and (ROOT / "contracts/registry/hosted-dependencies.json").is_file():
+                check_runtime_dependency_sum(entry)
             elif amendment is not None:
                 if not path.is_file():
                     fail("missing amended source file")
