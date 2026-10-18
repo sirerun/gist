@@ -367,3 +367,4 @@ h1{font-size:65px}
 
 .icon-box svg{width:32px;height:32px;display:block;flex:none}.code-icon{padding-right:0;letter-spacing:normal}.side-card .icon-box svg{width:27px;height:27px}@media(max-width:450px){.card-top .icon-box svg{width:29px;height:29px}}
 @media(max-width:450px){.side-card{display:none}}
+.docs-layout>.doc-toc,.docs-layout>.doc-content{min-width:0}.doc-content section,.artifact-page{min-width:0}.doc-content pre,.artifact-page pre{min-width:0;max-width:100%;overflow:auto}.doc-content p code,.doc-content li code{overflow-wrap:anywhere}@media(max-width:800px){.docs-layout{grid-template-columns:minmax(0,1fr)}}
