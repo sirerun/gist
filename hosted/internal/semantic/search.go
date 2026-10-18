@@ -5,7 +5,6 @@ package semantic
 import (
 	"context"
 	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"math"
@@ -77,7 +76,7 @@ func (s *Service) Warm(ctx context.Context) error {
 		}
 		result, err := s.embedder.Embed(ctx, preparation.EmbeddingRequest{Purpose: "document", Texts: texts, ModelVersion: s.embedder.ModelVersion()})
 		if err != nil {
-			return errors.New("semantic: document embedding failed")
+			return fmt.Errorf("semantic: document batch %d failed: %w", start/8, err)
 		}
 		if result.ModelVersion != s.embedder.ModelVersion() || len(result.Vectors) != len(texts) {
 			return errors.New("semantic: invalid document identity/count")
@@ -89,12 +88,7 @@ func (s *Service) Warm(ctx context.Context) error {
 			snap.vectors = append(snap.vectors, append([]float64(nil), v...))
 		}
 	}
-	hash := sha256.New()
-	fmt.Fprintf(hash, "public-hybrid-v1:floor0.30:rrf60:cap32:%s", snap.version)
-	for _, d := range docs {
-		fmt.Fprintf(hash, "%d:%s%d:%s", len(d.id), d.id, len(d.text), d.text)
-	}
-	snap.version = hex.EncodeToString(hash.Sum(nil))
+	snap.version = snapshotGeneration(s.embedder.ModelVersion(), s.index.Revision(), docs)
 	s.ready.Store(snap)
 	return nil
 }

@@ -19,24 +19,25 @@ import (
 // deployment configuration, rather than source defaults, owns the limits.
 type Config struct {
 	// Hosted embeddings operate only on public directory projections.
-	PublicEmbedder        semantic.Embedder
-	EmbeddingHealthy      func() bool
-	ListenAddress         string
-	PublicOrigin          string
-	ResourceAudience      string
-	DatabaseURL           string
-	ObjectStoreRoot       string
-	BrokerURL             string
-	BrokerClient          *http.Client
-	RequestTimeout        time.Duration
-	MaxPackageBytes       int64
-	MaxExpandedBytes      int64
-	MaxRequestBytes       int64
-	MaxResponseBytes      int
-	MaxCatalogEntries     int
-	MaxConcurrentRequests int
-	MaxDiscoveryResults   int
-	RetryAfter            int
+	PublicEmbedder              semantic.Embedder
+	EmbeddingHealthy            func() bool
+	PublicEmbeddingSnapshotPath string
+	ListenAddress               string
+	PublicOrigin                string
+	ResourceAudience            string
+	DatabaseURL                 string
+	ObjectStoreRoot             string
+	BrokerURL                   string
+	BrokerClient                *http.Client
+	RequestTimeout              time.Duration
+	MaxPackageBytes             int64
+	MaxExpandedBytes            int64
+	MaxRequestBytes             int64
+	MaxResponseBytes            int
+	MaxCatalogEntries           int
+	MaxConcurrentRequests       int
+	MaxDiscoveryResults         int
+	RetryAfter                  int
 	// OAuthLoginURL is the permissionless GitHub sign-in route used by the
 	// reference authorization server. New derives it from PublicOrigin when
 	// omitted; an explicit value must match the configured enrollment route.
