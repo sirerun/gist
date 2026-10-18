@@ -20,7 +20,7 @@ import (
 
 const floor = 0.30
 const maxDocuments = 10000
-const queryTimeout = 3 * time.Second
+const queryTimeout = 8 * time.Second
 
 type Embedder interface {
 	preparation.Embedder
