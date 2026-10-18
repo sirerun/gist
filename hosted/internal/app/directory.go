@@ -163,6 +163,16 @@ func (h *directoryAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		webError(w, 404, "not_found", "Directory route not found.")
 		return
 	}
+	switch value := result.(type) {
+	case directory.PublicResult:
+		if value.SearchMode != "" {
+			w.Header().Set("X-Gist-Search-Mode", value.SearchMode)
+		}
+	case directory.AppResult:
+		if value.SearchMode != "" {
+			w.Header().Set("X-Gist-Search-Mode", value.SearchMode)
+		}
+	}
 	raw, err := json.Marshal(result)
 	max := h.maxBytes
 	if max <= 0 {

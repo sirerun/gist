@@ -43,8 +43,11 @@ func TestHostedDirectoryAndMCPShareSemanticSearch(t *testing.T) {
 	response := httptest.NewRecorder()
 	handler.ServeHTTP(response, httptest.NewRequest("GET", "/api/directory?q=find+leads+for+my+startup&limit=5", nil))
 	var result directory.PublicResult
-	if response.Code != 200 || json.Unmarshal(response.Body.Bytes(), &result) != nil || result.SearchMode != "hybrid" || len(result.Items) == 0 {
+	if response.Code != 200 || json.Unmarshal(response.Body.Bytes(), &result) != nil || response.Header().Get("X-Gist-Search-Mode") != "hybrid" || len(result.Items) == 0 {
 		t.Fatalf("REST %d %s", response.Code, response.Body.String())
+	}
+	if strings.Contains(response.Body.String(), `"search_mode"`) {
+		t.Fatal("broke strict existing JSON readers")
 	}
 	// Exact same service and query, through the actual MCP boundary.
 	mcp := directorymcp.New(index, "https://gist.sire.run", 2).WithSearch(search)
@@ -54,13 +57,13 @@ func TestHostedDirectoryAndMCPShareSemanticSearch(t *testing.T) {
 	request.Header.Set("Accept", "application/json, text/event-stream")
 	response = httptest.NewRecorder()
 	mcp.ServeHTTP(response, request)
-	if response.Code != 200 || !strings.Contains(response.Body.String(), `"search_mode":"hybrid"`) || !strings.Contains(response.Body.String(), result.Items[0].ID) {
+	if response.Code != 200 || response.Header().Get("X-Gist-Search-Mode") != "hybrid" || !strings.Contains(response.Body.String(), result.Items[0].ID) {
 		t.Fatalf("MCP %d %s", response.Code, response.Body.String())
 	}
 	response = httptest.NewRecorder()
 	handler.ServeHTTP(response, httptest.NewRequest("GET", "/api/directory/apps?q=find+leads+for+my+startup", nil))
 	var appResult directory.AppResult
-	if response.Code != 200 || json.Unmarshal(response.Body.Bytes(), &appResult) != nil || appResult.SearchMode != "hybrid" || len(appResult.Items) == 0 {
+	if response.Code != 200 || json.Unmarshal(response.Body.Bytes(), &appResult) != nil || response.Header().Get("X-Gist-Search-Mode") != "hybrid" || len(appResult.Items) == 0 {
 		t.Fatalf("Library apps %d %s", response.Code, response.Body.String())
 	}
 }

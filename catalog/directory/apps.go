@@ -36,7 +36,7 @@ type AppQuery struct {
 	Offset, Limit        int
 }
 type AppResult struct {
-	SearchMode string        `json:"search_mode,omitempty"`
+	SearchMode string        `json:"-"`
 	Categories []AppCategory `json:"categories"`
 	Items      []App         `json:"items"`
 	Total      int           `json:"total"`

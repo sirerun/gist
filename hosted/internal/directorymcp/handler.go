@@ -185,6 +185,9 @@ func (h *Handler) call(ctx context.Context, w http.ResponseWriter, call request)
 			h.fail(w, call.ID, -32602, "Invalid search or expired cursor")
 			return
 		}
+		if result.SearchMode != "" {
+			w.Header().Set("X-Gist-Search-Mode", result.SearchMode)
+		}
 		value = directory.PublicResultOf(result)
 	case "gist_directory_get", "gist_directory_export":
 		var args struct {
