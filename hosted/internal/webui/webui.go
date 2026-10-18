@@ -21,7 +21,7 @@ var pages = template.Must(template.ParseFS(files, "templates/*.html"))
 // leaves authentication, API, OAuth, and MCP routes to the application router.
 func Handles(p string) bool {
 	switch p {
-	case "/", "/library", "/library/item", "/library/server", "/workspace", "/workspace/servers", "/developers", "/docs", "/signin", "/favicon.ico":
+	case "/", "/library", "/library/mcp", "/library/openapi", "/library/item", "/library/server", "/workspace", "/workspace/servers", "/developers", "/docs", "/signin", "/favicon.ico":
 		return true
 	}
 	return strings.HasPrefix(p, "/assets/") || strings.HasPrefix(p, "/apps/") || strings.HasPrefix(p, "/connectors/") || p == "/sitemap.xml" || p == "/robots.txt"
@@ -67,6 +67,27 @@ func Handler() http.Handler {
 			return
 		}
 
+		libraryKind := ""
+		if r.URL.Path == "/library/mcp" {
+			libraryKind = "mcp"
+		} else if r.URL.Path == "/library/openapi" {
+			libraryKind = "openapi"
+		}
+		if r.URL.Path == "/library" || libraryKind != "" {
+			q := r.URL.Query()
+			if (q.Get("kind") == "mcp" || q.Get("kind") == "openapi") && libraryKind == "" {
+				libraryKind = q.Get("kind")
+			}
+			if _, exists := q["kind"]; exists && libraryKind != "" {
+				q.Del("kind")
+				target := "/library/" + libraryKind
+				if len(q) > 0 {
+					target += "?" + q.Encode()
+				}
+				http.Redirect(w, r, target, http.StatusMovedPermanently)
+				return
+			}
+		}
 		if r.URL.Path == "/robots.txt" {
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			if r.Method != http.MethodHead {
@@ -118,8 +139,13 @@ func Handler() http.Handler {
 		title := "Gist — The right context, ready to use"
 		switch r.URL.Path {
 		case "/":
-		case "/library":
+		case "/library", "/library/mcp", "/library/openapi":
 			page, title = "directory", "The library · Gist"
+			if libraryKind == "mcp" {
+				title = "MCP servers · Gist"
+			} else if libraryKind == "openapi" {
+				title = "OpenAPI integrations · Gist"
+			}
 		case "/library/server":
 			page, title = "directory-detail", "Integration details · Gist"
 		case "/workspace":
@@ -139,12 +165,15 @@ func Handler() http.Handler {
 			return
 		}
 		var body bytes.Buffer
-		if err := pages.ExecuteTemplate(&body, page, nil); err != nil {
+		if err := pages.ExecuteTemplate(&body, page, struct{ Kind string }{libraryKind}); err != nil {
 			http.Error(w, "Page unavailable", http.StatusInternalServerError)
 			return
 		}
 		var out bytes.Buffer
 		data := siteData{Title: title, Page: page, Description: "Discover reusable skills and tools. Bring the right context to Zati and other AI clients with Gist.", Body: template.HTML(body.String())}
+		if page == "directory" {
+			data.Canonical = publicOrigin + r.URL.Path
+		}
 		if err := pages.ExecuteTemplate(&out, "layout", data); err != nil {
 			http.Error(w, "Page unavailable", http.StatusInternalServerError)
 			return

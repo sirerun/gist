@@ -63,6 +63,7 @@ type webAPI struct {
 	catalog                                    webCatalog
 	bookmarks                                  bookmarkStore
 	publicIndex                                *directory.Index
+	publicApps                                 *directory.AppIndex
 	directory                                  privateDirectoryStore
 	origin, audience, workspace, workspaceName string
 	cursorKey                                  []byte
