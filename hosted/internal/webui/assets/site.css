@@ -397,14 +397,14 @@ h1{font-size:65px}
 
 /* Public app and connector tiles share one layout on home and library pages. */
 .integration-grid.catalog-grid{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:12px}
-.integration-grid .app-card{position:relative;min-width:0;aspect-ratio:1;height:auto;min-height:0;padding:14px 10px 12px;border:0;box-sizing:border-box;align-items:stretch}
+.integration-grid .app-card{position:relative;min-width:0;aspect-ratio:1;height:auto;min-height:0;padding:10px;border:0;box-sizing:border-box;align-items:stretch}
 .integration-grid .directory-card-content{display:flex;flex:1;min-width:0;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:inherit;text-decoration:none}
-.integration-grid .directory-card-heading{width:100%;flex-direction:column;justify-content:flex-start;gap:14px}
+.integration-grid .directory-card-heading{width:100%;flex-direction:column;justify-content:flex-start;gap:6px}
 .integration-grid .directory-card-heading h2{width:100%;margin:0;font-size:15px;line-height:1.2;letter-spacing:-.2px;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-height:36px}
 .directory-logo-frame{display:grid;place-items:center;flex:none;width:44px;height:44px;overflow:hidden;border:0;border-radius:50%}
 .directory-logo-frame .directory-logo{display:block;width:62%;height:62%;padding:0;border:0;border-radius:0;background:transparent;object-fit:contain}
 .integration-grid .directory-card-description{display:none}
-.integration-grid .directory-card-use-case{width:100%;height:18px;max-height:18px;flex:none;margin:6px 0 0;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;font-size:10px;line-height:18px;opacity:0;transition:opacity .16s ease}
+.integration-grid .directory-card-use-case{width:100%;height:14px;max-height:14px;flex:none;margin:4px 0 0;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;font-size:10px;line-height:14px;opacity:0;transition:opacity .16s ease}
 .integration-grid .app-card:is(:hover,:focus-within) .directory-card-use-case{opacity:1}
 .integration-grid .bookmark-control{position:absolute;top:7px;right:7px;z-index:1;margin:0}
 .integration-grid .bookmark-control .bookmark-icon-button{width:30px;height:30px;padding:6px}
