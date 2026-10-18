@@ -145,6 +145,32 @@ func TestPersonalBookmarksPostgresIsolationAndPersistence(t *testing.T) {
 	if w := request(second, "GET", "/app/api/bookmarks", ""); w.Code != 401 {
 		t.Fatalf("revoked HTTP read %d", w.Code)
 	}
+	// Stale entries stay removable, and tag filtering applies only to saved rows.
+	p.Subject = compositionSubject
+	if err := store.set(ctx, p, "mcp:removed", true); err != nil {
+		t.Fatal(err)
+	}
+	if w := request(first, "GET", "/app/api/bookmarks?view=entries", ""); w.Code != 200 || !strings.Contains(w.Body.String(), `"kind":"unavailable"`) {
+		t.Fatalf("missing entry %d %s", w.Code, w.Body)
+	}
+	if err := store.set(ctx, p, "mcp:removed", false); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.set(ctx, p, id, true); err != nil {
+		t.Fatal(err)
+	}
+	for _, filter := range []string{"tag=GITHUB", "q=research%20github"} {
+		if w := request(first, "GET", "/app/api/bookmarks?view=entries&"+filter, ""); w.Code != 200 || !strings.Contains(w.Body.String(), id) {
+			t.Fatalf("saved filter %s: %d %s", filter, w.Code, w.Body)
+		}
+	}
+	if w := request(first, "GET", "/app/api/bookmarks?view=entries&tag=nosuchtag", ""); w.Code != 200 || strings.Contains(w.Body.String(), id) {
+		t.Fatal("tag filter ignored")
+	}
+	if err := store.set(ctx, p, id, false); err != nil {
+		t.Fatal(err)
+	}
+
 	// Saved view pages the user's entire collection, with search independent of page.
 	public, err := index.Search(directory.Query{Limit: 50})
 	if err != nil {

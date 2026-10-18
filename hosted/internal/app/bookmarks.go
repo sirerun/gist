@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -47,7 +48,11 @@ func (h *webAPI) serveBookmarks(w http.ResponseWriter, r *http.Request) {
 	r = r.WithContext(ctx)
 	p, status := h.principal(r)
 	if status != 200 {
-		webError(w, status, "sign_in_required", "Sign in to use your bookmarks.")
+		if status == 401 {
+			webError(w, status, "sign_in_required", "Sign in to use your bookmarks.")
+		} else {
+			webError(w, status, "unavailable", "Bookmarks unavailable.")
+		}
 		return
 	}
 	if h.bookmarks == nil || h.publicIndex == nil {
@@ -81,7 +86,9 @@ func (h *webAPI) serveBookmarks(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		if err = h.bookmarks.set(ctx, p, id, r.Method == "PUT"); err != nil {
-			if errors.Is(err, errBookmarksFull) {
+			if errors.Is(err, errDirectoryDenied) {
+				webError(w, 403, "permission_denied", "Your workspace access changed. Reload before trying again.")
+			} else if errors.Is(err, errBookmarksFull) {
 				webError(w, 409, "bookmark_limit", "You can save up to 200 bookmarks.")
 			} else {
 				webError(w, 503, "unavailable", "Could not update bookmarks.")
@@ -91,8 +98,13 @@ func (h *webAPI) serveBookmarks(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(204)
 		return
 	}
-	if !webQueryKeys(v, "view", "q", "kind", "tag", "offset") || len(v.Get("q")) > 200 || len(v.Get("tag")) > 200 || (v.Get("kind") != "" && v.Get("kind") != "mcp" && v.Get("kind") != "openapi") || (v.Get("view") != "" && v.Get("view") != "entries") {
+	if !webQueryKeys(v, "view", "q", "kind", "tag", "offset") || len(v.Get("q")) > 200 || len(v.Get("tag")) > 64 || (v.Get("kind") != "" && v.Get("kind") != "mcp" && v.Get("kind") != "openapi") || (v.Get("view") != "" && v.Get("view") != "entries") {
 		webError(w, 400, "invalid_query", "Invalid bookmark query.")
+		return
+	}
+	queryTerms := bookmarkTerms(v.Get("q"))
+	if len(queryTerms) > 16 {
+		webError(w, 400, "invalid_query", "Use at most 16 search terms.")
 		return
 	}
 	ids, err := h.bookmarks.list(ctx, p)
@@ -116,7 +128,7 @@ func (h *webAPI) serveBookmarks(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	items := []directory.Record{}
-	query := strings.ToLower(strings.TrimSpace(v.Get("q")))
+	tagFilter := strings.ToLower(strings.TrimSpace(v.Get("tag")))
 	for _, id := range ids {
 		record, ok := h.publicIndex.Get(id)
 		if !ok {
@@ -125,10 +137,10 @@ func (h *webAPI) serveBookmarks(w http.ResponseWriter, r *http.Request) {
 		if kind := v.Get("kind"); kind != "" && record.Kind != kind {
 			continue
 		}
-		if query != "" && !strings.Contains(strings.ToLower(record.Title+" "+record.ID+" "+record.Description+" "+strings.Join(record.Tags, " ")), query) {
+		if !bookmarkTextMatches(record, queryTerms) {
 			continue
 		}
-		if tag := v.Get("tag"); tag != "" {
+		if tag := tagFilter; tag != "" {
 			found := false
 			for _, t := range record.Tags {
 				if t == tag {
@@ -163,6 +175,27 @@ func (h *webAPI) serveBookmarks(w http.ResponseWriter, r *http.Request) {
 		next = strconv.Itoa(end)
 	}
 	h.write(w, map[string]any{"items": items[offset:end], "total": total, "next_cursor": next})
+}
+
+// Match the directory index's Unicode word-prefix AND search semantics.
+func bookmarkTerms(s string) []string {
+	return strings.FieldsFunc(strings.ToLower(s), func(c rune) bool { return !unicode.IsLetter(c) && !unicode.IsNumber(c) })
+}
+func bookmarkTextMatches(record directory.Record, terms []string) bool {
+	words := bookmarkTerms(record.Title + " " + record.ID + " " + record.Description + " " + record.ServiceID + " " + strings.Join(record.Tags, " "))
+	for _, term := range terms {
+		found := false
+		for _, word := range words {
+			if strings.HasPrefix(word, term) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
 }
 
 type postgresBookmarks struct{ pool *pgxpool.Pool }
