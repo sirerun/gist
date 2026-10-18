@@ -18,3 +18,9 @@ The browser fixture used the real application handlers and an isolated PostgreSQ
 ## Release requirements
 
 Apply forward migration `012_personal_bookmarks.sql` and provision/verify the reviewed runtime grants (`SELECT, INSERT, DELETE` on `directory_bookmarks`) before deploying the updated application. The server does not apply migrations on startup. Production remains unchanged by this source delivery.
+
+## Independent review corrections
+
+A headless Claude Code review using the exact `claude-opus-5-5` model requested changes for bookmark sign-in targets and identified additional UI issues. The revised code uses the existing fixed `/library` sign-in return destination, loads personal state independently of public catalog rendering, refreshes all bookmark controls after state changes, uses a steady accessible toggle name and a real guest sign-in link, and preserves saved-view cards, focus and pagination during removal. Saved search uses the catalog's Unicode word-prefix AND semantics; denied writes have a distinct permission error.
+
+Added four Node behavioral tests for public rendering during unresolved authentication, guest link destinations, shared-control retry/session-expiry updates, toggle naming, and removal focus/pagination. Added an enrollment test that extracts shipped directory sign-in URLs and exercises the actual start handler. PostgreSQL integration now also covers missing entries, tag filtering and reordered search terms. Focused app/PostgreSQL, enrollment, web UI and JavaScript tests pass after these corrections. Follow-up independent review is required before merge.

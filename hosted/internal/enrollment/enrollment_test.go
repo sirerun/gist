@@ -5,10 +5,12 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"github.com/sirerun/gist/hosted/internal/webui"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -641,6 +643,25 @@ func TestWorkspaceReturnTargetsStayExact(t *testing.T) {
 		loginFailure(w, httptest.NewRequest(http.MethodGet, CallbackPath, nil), path, 403, "private failure", "access_denied")
 		if w.Code != 303 || w.Header().Get("Location") != "/signin?error=access_denied" {
 			t.Fatalf("failure %q %d", path, w.Code)
+		}
+	}
+}
+
+// Exercise every shipped static sign-in URL, including the shared bookmark link,
+// against the actual enrollment handler rather than just inspecting its label.
+func TestDirectorySignInTargetsAreAccepted(t *testing.T) {
+	h, _ := testHandler(t, newMemoryStore(), fakeAuth{})
+	asset := httptest.NewRecorder()
+	webui.Handler().ServeHTTP(asset, httptest.NewRequest(http.MethodGet, "/assets/directory.js", nil))
+	paths := regexp.MustCompile(`/auth/github/start\?return_to=[^"\s]*`).FindAllString(asset.Body.String(), -1)
+	if asset.Code != 200 || len(paths) == 0 {
+		t.Fatal("directory sign-in links missing")
+	}
+	for _, path := range paths {
+		out := httptest.NewRecorder()
+		h.start(out, httptest.NewRequest(http.MethodGet, path, nil))
+		if out.Code != http.StatusFound {
+			t.Fatalf("directory sign-in %q returned %d: %s", path, out.Code, out.Body)
 		}
 	}
 }
