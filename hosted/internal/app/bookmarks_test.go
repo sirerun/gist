@@ -18,7 +18,7 @@ func (p publicBookmarkProbe) set(context.Context, ports.Principal, string, bool)
 
 func TestBookmarkEntriesKeepIntakePrivate(t *testing.T) {
 	h, _, _ := testWebAPI()
-	idx, err := directory.Default()
+	idx, err := directory.DefaultPublic()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,6 +40,16 @@ func TestBookmarkEntriesKeepIntakePrivate(t *testing.T) {
 		if strings.Contains(strings.ToLower(w.Body.String()), secret) {
 			t.Fatalf("bookmark response leaked %q", secret)
 		}
+	}
+	w = httptest.NewRecorder()
+	h.serveBookmarks(w, httptest.NewRequest("GET", "/app/api/bookmarks?view=entries&q=listed+by+make", nil))
+	if w.Code != 200 || !strings.Contains(w.Body.String(), `"total":0`) {
+		t.Fatalf("saved search indexes hidden intake: %d %s", w.Code, w.Body)
+	}
+	w = httptest.NewRecorder()
+	h.serveBookmarks(w, httptest.NewRequest("GET", "/app/api/bookmarks?view=entries&q=contacts+companies+deals", nil))
+	if w.Code != 200 || !strings.Contains(w.Body.String(), `"service_id":"hubspot"`) {
+		t.Fatalf("saved search missing public purpose: %d %s", w.Code, w.Body)
 	}
 }
 

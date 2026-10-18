@@ -1,9 +1,50 @@
 package directory
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"strings"
 )
+
+// DefaultPublic indexes only publicly exposed purpose and connection metadata.
+// The operator snapshot remains available through Default. A separate revision
+// prevents raw-snapshot cursors or descriptor selections from crossing views.
+func DefaultPublic() (*Index, error) {
+	original, err := Default()
+	if err != nil {
+		return nil, err
+	}
+	return PublicIndexOf(original)
+}
+
+func PublicIndexOf(original *Index) (*Index, error) {
+	if original == nil {
+		return nil, fmt.Errorf("public directory: missing index")
+	}
+	entries := make([]Record, 0, len(original.ids))
+	for _, id := range original.ids {
+		raw, err := json.Marshal(PublicRecordOf(original.records[id]))
+		if err != nil {
+			return nil, err
+		}
+		var record Record
+		if err := json.Unmarshal(raw, &record); err != nil {
+			return nil, err
+		}
+		entries = append(entries, record)
+	}
+	raw, err := json.Marshal(entries)
+	if err != nil {
+		return nil, err
+	}
+	sum := sha256.Sum256(append([]byte("gist.public-directory/v1\n"), raw...))
+	digest := hex.EncodeToString(sum[:])
+	snapshot := Snapshot{Format: SnapshotFormat, Revision: "sha256:" + digest, GeneratedAt: original.snapshot.GeneratedAt,
+		Sources: []Source{{ID: "gist", URL: "https://gist.sire.run/library", Revision: original.snapshot.Revision, SHA256: digest, RetrievedAt: original.snapshot.GeneratedAt, Attribution: "Gist public catalog"}}, Entries: entries}
+	return New(snapshot)
+}
 
 // PublicRecordOf copies user-facing connection metadata while dropping the
 // private intake, reachability and qualification details held by Record.
@@ -62,6 +103,9 @@ func PublicExportOf(export Export) PublicExport {
 }
 
 func publicDescription(record Record) string {
+	if app, ok := publicAppForService(record.ServiceID); ok && strings.TrimSpace(app.Description) != "" {
+		return app.Description
+	}
 	description := strings.TrimSpace(record.Description)
 	lower := strings.ToLower(description)
 	for _, marker := range []string{
@@ -71,6 +115,9 @@ func publicDescription(record Record) string {
 		"this reachability check",
 		"source listing",
 		"workflow qualification",
+		"endpoint check",
+		"no-credential",
+		"does not test tools",
 	} {
 		if strings.Contains(lower, marker) {
 			if app, ok := publicAppForService(record.ServiceID); ok && strings.TrimSpace(app.Description) != "" {

@@ -214,7 +214,7 @@ func newWithStores(ctx context.Context, cfg Config, pool *pgxpool.Pool, objects 
 		pool.Close()
 		return nil, maintenanceErr
 	}
-	publicIndex, err := directory.Default()
+	publicIndex, err := directory.DefaultPublic()
 	if err != nil {
 		pool.Close()
 		return nil, fmt.Errorf("app: public directory: %w", err)
