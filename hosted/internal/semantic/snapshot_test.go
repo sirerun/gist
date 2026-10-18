@@ -172,3 +172,19 @@ func TestCompressedSnapshotChecksTrailerBeforePublication(t *testing.T) {
 		t.Fatal("oversized compressed artifact accepted")
 	}
 }
+
+func TestUnconfiguredPublicSearchReportsLexicalFallback(t *testing.T) {
+	index, err := directory.DefaultPublic()
+	if err != nil {
+		t.Fatal(err)
+	}
+	apps, err := directory.DefaultApps(index)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := New(index, apps, nil, nil)
+	result, err := s.Search(context.Background(), directory.Query{Text: "gmail", Limit: 10})
+	if err != nil || result.SearchMode != "lexical_fallback" || result.Total == 0 {
+		t.Fatalf("fallback: %+v %v", result, err)
+	}
+}
