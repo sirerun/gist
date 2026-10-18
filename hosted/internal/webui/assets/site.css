@@ -412,3 +412,22 @@ h1{font-size:65px}
 
 .directory-logo.app-logo,#directory-results .directory-logo.app-logo{padding:0;border:0;background:transparent;object-fit:contain}
 .app-connection{display:block;margin-top:12px}
+
+/* Compact app tiles reserve their hover detail slot, keeping the grid steady. */
+#directory-results.catalog-grid{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:12px}
+#directory-results .app-card{height:156px;min-height:156px;padding:14px 10px 12px}
+#directory-results .app-card .directory-card-content{justify-content:center}
+#directory-results .app-card .directory-card-heading{gap:8px}
+#directory-results .app-card .directory-logo{width:48px;height:48px;border-radius:14px}
+#directory-results .app-card .directory-card-heading h2{font-size:15px;line-height:1.2;min-height:36px;letter-spacing:-.2px}
+#directory-results .app-card .directory-card-description{display:none}
+#directory-results .app-card .directory-card-use-case,
+#directory-results .app-card:is(:hover,:focus-within) .directory-card-use-case{height:18px;max-height:18px;flex:none;margin:6px 0 0;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;font-size:10px;line-height:18px}
+#directory-results .app-card .directory-card-use-case{opacity:0;transition:opacity .16s ease}
+#directory-results .app-card:is(:hover,:focus-within) .directory-card-use-case{opacity:1}
+.directory-card-arrow{position:absolute;top:7px;right:7px;display:grid;place-items:center;width:22px;height:22px;border:1px solid var(--line);border-radius:50%;background:var(--cream);color:var(--green);font:14px/1 var(--sans);opacity:0;transition:opacity .16s ease}
+.app-card:is(:hover,:focus-within) .directory-card-arrow{opacity:1}
+@media(max-width:700px){#directory-results.catalog-grid{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:10px}}
+@media(max-width:450px){#directory-results.catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#directory-results .app-card{height:148px;min-height:148px;padding:12px 9px 10px}#directory-results .app-card .directory-logo{width:44px;height:44px}#directory-results .app-card .directory-card-heading h2{font-size:14px}}
+@media(hover:none){#directory-results .app-card .directory-card-use-case{opacity:1}}
+@media(prefers-reduced-motion:reduce){#directory-results .app-card .directory-card-use-case,.directory-card-arrow{transition:none}}
