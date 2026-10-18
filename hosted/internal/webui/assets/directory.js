@@ -115,8 +115,11 @@
     icon.alt = ""; icon.width = 54; icon.height = 54; icon.loading = "lazy";
     heading.append(icon, el("h2", record.name || record.slug));
     c.append(heading, el("p", record.description || "Explore this app and its connection options.", "directory-card-description"));
-    const categories = (record.categories || []).map(category => category.name).filter(Boolean).slice(0, 2).join(" · ");
-    if (categories) c.append(el("p", categories, "directory-card-use-case"));
+    const category = (record.categories || []).filter(category => category.slug !== "app-families").map(category => category.name).find(Boolean) || "";
+    c.append(el("p", category, "directory-card-use-case"));
+    const arrow = el("span", "↗", "directory-card-arrow");
+    arrow.setAttribute("aria-hidden", "true");
+    c.append(arrow);
     const wrapper = el("article", undefined, "catalog-card directory-card app-card");
     wrapper.append(c); return wrapper;
   }

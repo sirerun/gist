@@ -99,3 +99,11 @@ test('app details show local PNG brand tiles and unavailable entries are not lab
 test('connector cards use the local brand manifest without extending the API record',async()=>{
  const f=fixture({icons:{github:'/assets/apps/github.png'}});await flush();assert.ok(f.ids['home-directory'].walk().some(n=>n.src==='/assets/apps/github.png'&&n.className.includes('app-logo')));
 });
+
+test('minimal app tiles show one useful category and a decorative navigation arrow',async()=>{
+ const f=fixture({page:'directory',handle:url=>url.startsWith('/api/directory/apps?')?{data:{items:[{slug:'gmail',name:'Gmail',description:'Search email',categories:[{slug:'app-families',name:'App Families'},{slug:'communication',name:'Communication'},{slug:'productivity',name:'Productivity'}]}],total:1,categories:[]}}:undefined});
+ await flush();const nodes=f.ids['directory-results'].walk();
+ const category=nodes.find(n=>n.className==='directory-card-use-case');assert.equal(category.textContent,'Communication');
+ const arrow=nodes.find(n=>n.className==='directory-card-arrow');assert.equal(arrow.attrs['aria-hidden'],'true');
+ assert.ok(nodes.some(n=>n.href==='/library/server?app=gmail'));
+});
