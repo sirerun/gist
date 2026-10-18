@@ -42,6 +42,15 @@ workspace isolation and client execution authority remain. This explicit scope
 also includes implementation and population through the existing AWS release
 path, without real-provider or paid-call authority implied by catalog intake.
 
+Current public catalog reset (2026-10-17): the owner chose the deduplicated union
+of apps listed by n8n OR Make, admitting only vendor-official HTTPS MCP endpoints
+or raw public OpenAPI specifications. T-DIR.40-54 below supersede the earlier
+bulk public intake policy prospectively; historical task completion and receipts
+remain unchanged. This is an initial explicitly evidenced subset, not complete
+n8n/Make coverage. Existing private records, stable bookmark identities and
+merged icon/card work are preserved; migration012 and deployment remain separate
+gates. No new credential, account, tool execution or model-call authority follows.
+
 ### Dispatch disposition and precedence
 
 This section supersedes older continuation instructions, milestone tables and unqualified “current” infrastructure notes below, which are dated historical records. All original task rows, IDs, completion states and acceptance evidence remain. Unfinished gateway rows depend on the permanently non-dispatchable retirement sentinel; catalog provenance rows .31/.35 are retained under catalog ownership with replacement prerequisites. Unfinished prior hosted/guidance rows depend on the hold sentinel. A bounded repair/current-consumer obligation requires a separately recorded scoped resumption, not blanket reactivation. No held or retired row is counted complete. The library terminal depends on neither the retired graph nor hosted production.
@@ -2436,3 +2445,49 @@ roots. T-DIR.31-34 stay open. No alternate claim or partial codec success may
 stand in for that complete integration, canonical ResultArtifact and final-context
 projection. All unique source work and actual evidence remain protected for
 an explicit continuation after producer ownership is released.
+
+
+### Vendor-only public catalog reset — 2026-10-17
+
+The settled policy is n8n OR Make app membership, followed by independent vendor
+ownership and actual route evidence. A Make module, n8n operation, app-directory
+listing, community MCP package or vendor marketing page alone is not an admitted
+MCP/OpenAPI descriptor. MCP requires the vendor's literal HTTPS endpoint;
+OpenAPI requires the vendor's raw public JSON/YAML specification. Deduplication
+uses explicit service identities and aliases while preserving distinct approved
+implementations. Labels and source provenance do not grant executable authority.
+
+The previous 6,495-entry bulk snapshot remains historical intake/release evidence,
+not the current public admission target. Keep its immutable source receipts and
+all prior task IDs/statuses. New source uses a small, explicitly reviewed known
+subset; complete Make enumeration is not required to establish known individual
+members, and partial inventory cannot support a complete-coverage claim. Private
+custom entries and personal bookmark rows/UUIDs remain intact. Source-merged
+card icons PR97 and bookmarks PR99 are retained and still require deployment
+acceptance; migration012_personal_bookmarks.sql and its restricted runtime grants
+must qualify before enabling the new image. The
+[reset receipt](receipts/2026-10-17-vendor-directory-reset.md) separates discovery,
+source checks, review/landing, SQL/runtime release and actual live evidence.
+
+The current-session coordinator owns the shared plan claim and integrates the
+coherent reset candidate. Source/library and focused verification authors have
+disjoint ownership; the final reviewer is a non-author. All inherit the active
+session's model, effort and permissions. Local source/check routes are available;
+full checks use the existing qualified bounded Linux route where appropriate.
+These route labels are not executor admission or fresh deployment authority.
+
+- [x] T-DIR.40 Record settled vendor-only public catalog requirements  Owner: coordinator  Est: TBD  kind: agent  stage: preflight  acc: [Owner-selected deduplicated n8n-or-Make membership plus vendor-official HTTPS MCP or raw OpenAPI admission is recorded with private/bookmark/icon preservation, explicit initial subset and no implied execution or complete-coverage claim]
+- [ ] T-DIR.41 Freeze source policy and compatibility design  Owner: catalog-owner  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-DIR.40]  acc: [Current ADR and source design define app-level membership, independent vendor ownership and raw route evidence, exact alias and stable-ID rules, package/community exclusions, reproducible provenance and public-only reset boundaries; private records and bookmark identity handling are explicit]
+- [ ] T-DIR.42 Implement bounded vendor-official snapshot reset  Owner: catalog-owner  Est: TBD  kind: agent  stage: implement  blocked-by: [T-DIR.41]  acc: [Deterministic explicit known-member records replace bulk public candidates with independently evidenced vendor HTTPS MCP or raw OpenAPI routes; deduplication and source links preserve stable IDs where applicable, merged card icons and bookmark behavior, and no upstream tools or supplied private URLs are executed or probed]
+- [ ] T-DIR.43 Qualify existing bookmark migration012 and runtime grants  Owner: database-verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.41]  acc: [Exact landed migration012 bytes, ledger compatibility and explicit minimal runtime-role grants pass fresh and upgrade PostgreSQL checks under the real restricted role; forced tenant RLS, current membership, personal subject isolation and private UUID/bookmark-row preservation hold; no historical migration is rewritten]
+- [ ] T-DIR.44 Verify curated source policy and reproducibility  Owner: source-verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.42]  acc: [Affected directory and CLI race/vet/validation plus deterministic regeneration and negative policy tests pass on exact source; every shipped row has app membership and vendor route evidence, no package/community/bulk-intake leakage, and source discovery limitations are stated without complete-coverage or Featured claims]
+- [ ] T-DIR.45 Verify public and private API and browser regression paths  Owner: integration-verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.42, T-DIR.43]  acc: [Actual request tests and desktop/mobile browser checks cover curated browse/search/detail/export, merged logo/tag cards, personal bookmark persistence and concurrent identity isolation, removed public descriptor handling, anonymous denial, CSRF and current/revoked membership; existing private record UUIDs and data remain intact]
+- [ ] T-DIR.46 Independently review the complete reset candidate  Owner: independent-reviewer  Est: TBD  kind: agent  stage: review  blocked-by: [T-DIR.43, T-DIR.44, T-DIR.45]  acc: [Non-author approves exact base/head and aggregate T-DIR.41-45 scope including source evidence, public policy, identity/bookmark preservation, migration012/grants, API/browser checks and conformance; all accepted findings are fixed and affected checks and exact-head re-review pass]
+- [ ] T-DIR.47 Guardedly merge the reviewed catalog reset  Owner: coordinator  Est: TBD  kind: agent  stage: merge  blocked-by: [T-DIR.46]  acc: [Current reviewed head/base, required checks or authorized fallback and branch policy permit exact-head guarded GitHub rebase merge with no unrelated or unreviewed changes]
+- [ ] T-DIR.48 Verify landed source and migration release inputs  Owner: landed-verifier  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.47]  acc: [Fresh remote main reaches reviewed source with exact tree parity, affected checks and Wazi conformance remain valid, and the receipt pins source/snapshot/migration/runtime-role inputs without claiming deployment]
+- [ ] T-DIR.49 Build and qualify the immutable release image  Owner: release-operator  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.48]  acc: [Existing approved build pipeline produces a source-pinned immutable image from landed main, records actual build and image digest, and preserves merged icons/bookmarks plus exact migration012 manifest; failures retain the prior live image and are not retry-looped]
+- [ ] T-DIR.50 Review database recovery and saved deployment preflight  Owner: deployment-operator-and-independent-reviewer  Est: TBD  kind: agent  stage: preflight  blocked-by: [T-DIR.43, T-DIR.49]  acc: [Current authorized production scope, available recovery snapshot, exact database migration ledger and current minimal grants are inspected; saved existing-stack IaC preview and migration012/apply/rollback sequence are independently reviewed with data-preservation checks and no secret or permission expansion]
+- [ ] T-DIR.51 Apply reviewed migration012 and minimal grants  Owner: database-operator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.50]  acc: [Only the reviewed missing migration012 and explicit bookmark runtime privileges are applied within existing authority, or exact already-applied ledger/grant equivalence is observed without mutation; real restricted-role readiness, forced RLS and preexisting private/bookmark data checks pass before image activation]
+- [ ] T-DIR.52 Deploy the reviewed vendor catalog image  Owner: deployment-operator  Est: TBD  kind: agent  stage: deploy  blocked-by: [T-DIR.49, T-DIR.51]  acc: [Reviewed saved IaC activation uses the exact qualified image on existing AWS resources, preserves credentials/data/recovery and reaches completed healthy rollout; actual source/image/task/configuration revisions and rollback target are recorded]
+- [ ] T-DIR.53 Verify live curated discovery and personal library behavior  Owner: live-verifier  Est: TBD  kind: agent  stage: verify  blocked-by: [T-DIR.52]  acc: [Live gist.sire.run API/MCP and desktop/mobile browser observe the exact curated snapshot and preserved icon/card design; an authorized same-user bookmark save/reload/remove journey and private read/preservation checks pass while anonymous/foreign access stays denied, or unmet owner-session prerequisites remain explicitly open; no provider/account/model execution is inferred]
+- [ ] T-DIR.54 Complete catalog reset operations and evidence handoff  Owner: coordinator  Est: TBD  kind: agent  stage: verify-landed  blocked-by: [T-DIR.53]  acc: [Final receipt binds reviewed and landed source, image, migration/grants, production observations and recovery target; ongoing source refresh/admission and incomplete n8n/Make coverage limits are documented, old bulk public policy is prospectively superseded without deleting history, and no persistent watcher or unqualified Featured claim remains]

@@ -2,6 +2,14 @@
 
 ## Public discovery and featured integrations — 2026-10-17
 
+[ADR024](adr/024-vendor-only-directory-admission.md) updates public population:
+reviewed app membership in n8n or Make, deduplicated by explicit app identity,
+and vendor-official remote MCP or raw OpenAPI routes only. The offline curated
+snapshot replaces the previous bulk intake. Stable surviving IDs, private UUID
+entries, personal bookmarks and card icons are preserved; there is no public
+auto-increment table to reset. This does not change client execution ownership
+or the Featured workflow qualification standard.
+
 [ADR023](adr/023-public-directory-and-featured-integrations.md) records public
 discovery, private custom descriptors, official MCP preference with Mint for
 gaps, and Zati-tested server/skill featured bundles. Its separate directory
