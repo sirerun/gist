@@ -7,33 +7,34 @@ it does not install a server or connect a provider account.
 
 ## Current coverage
 
-The pinned intake contains **6,495 candidates**: 3,914 MCP entries and 2,581
-OpenAPI entries. It combines the reviewed Sire Run API registry with a bounded
-40-page official MCP Registry sample. It is not the entire official registry
-or every server on the internet. Distinct implementations and versions remain
-separate; counts do not mean unique apps or tested workflows.
+The reviewed replacement contains **13 vendor-official MCP connectors**, one
+per app: Gmail, Google Calendar, Google Drive, GitHub, Slack, Notion, Linear,
+Stripe, Sentry, Jira, Confluence, Cloudflare and Exa. Each app is listed in
+[n8n](https://n8n.io/integrations/); membership in
+[Make](https://www.make.com/integrations) is also eligible. We deduplicate the
+union by reviewed app identity. We do not import n8n nodes or Make modules.
+This is an admitted subset, not complete directory coverage.
 
-n8n's integration coverage is a benchmark for useful app operations. We do not
-import or execute n8n nodes. mcpservers.org provides discovery leads; its listing
-or official labels do not supply Gist workflow qualification.
+Each descriptor links vendor setup documentation. Listing membership and
+vendor publication are checked separately. Credentials, scope selection,
+execution and provider charges remain with your client. Vendor-official does
+not mean tested in Zati. There are **zero Featured connectors**.
 
-| Need | Initial recommendation | Useful read-only operations | Current setup requirement |
-| --- | --- | --- | --- |
-| Mail | Gmail official MCP (Developer Preview) | Search unread threads; retrieve selected threads | Preview enrollment, enabled Gmail APIs, agent-enabled OAuth client and caller-owned read-only authorization; explicit thread mapping and schema admission still needed |
-| Calendar | Google Calendar | List events in a bounded window | Community OpenAPI + Mint; caller-owned authorization; client transport compatibility still needed |
-| Files | Google Drive | Search approved folders; inspect selected file metadata | Community OpenAPI + Mint; scope and folder admission still needed |
-| Code review | GitHub official MCP | Read a public PR and selected changed files | Vendor endpoint and client-owned authorization; admit exact read tools |
-| Web research | Brave official MCP package | Search a topic; cite selected public sources | Client with local package support, or separately qualified compatible hosting; provider account may be required |
+| Need | Setup candidate | Requirements |
+| --- | --- | --- |
+| Mail | Gmail official MCP | Google Developer Preview enrollment, enabled APIs and agent-enabled OAuth client |
+| Calendar | Google Calendar official MCP | Preview enrollment and client-owned OAuth; select permitted calendar tools |
+| Files | Google Drive official MCP | Preview enrollment, client-owned OAuth and appropriate file scope |
+| Code review | GitHub official MCP | GitHub authorization and explicit tool admission |
+| Web research | Exa official MCP | Vendor-documented no-key route, service limits and explicit client admission |
 
-The original publication contained 6,494 candidates. This refresh adds Google’s
-[official Gmail MCP endpoint](https://developers.google.com/workspace/gmail/api/guides/configure-mcp-server)
-and retains the Mint/OpenAPI alternative. The five recommendations link to
-immutable screening skill sources and digests.
-
-These five are **recommended candidates**. None is featured. Featured requires a useful real workflow tested in Zati, a reusable
-skill, documented setup and unexpired evidence tied to the exact descriptor,
-tool/schema, skill and client versions. API reachability, fixture success and
-vendor maintenance do not meet that standard on their own.
+The first four remain recommended setup candidates with immutable screening
+skill links. Existing read-only skills are not automatically compatible with
+provider schemas. The old community Google OpenAPI alternatives and local
+Brave package route were removed from the public snapshot under the approved
+vendor-endpoint policy. Private custom entries and saved bookmarks are
+preserved; a bookmark for a removed entry appears as unavailable and can be
+removed by its owner.
 
 Current Zati source supports admitted Streamable HTTP MCP profiles with bearer
 or no authentication. It does not automatically run arbitrary local packages,

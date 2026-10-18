@@ -17,16 +17,32 @@ func TestDefaultSnapshot(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	if i.Count() < 6000 {
+	if i.Count() != 13 {
 		t.Fatalf("unexpected count %d", i.Count())
 	}
 	q, e := i.Search(Query{Tag: "zati-essentials", Limit: 100})
-	if e != nil || q.Total != 5 {
+	if e != nil || q.Total != 4 {
 		t.Fatalf("essentials %+v %v", q, e)
 	}
 	for _, r := range q.Items {
 		if !r.Recommended || r.Featured || len(r.Verification) != 0 {
 			t.Fatalf("imported qualification claim %s", r.ID)
+		}
+	}
+	all, err := i.Search(Query{Limit: 100})
+	if err != nil {
+		t.Fatal(err)
+	}
+	services := map[string]bool{}
+	for _, r := range all.Items {
+		if !r.Official || r.OfficialEvidenceURL == "" || services[r.ServiceID] || r.Kind != "mcp" || len(r.Remotes) == 0 {
+			t.Fatalf("unadmitted public connector: %s", r.ID)
+		}
+		services[r.ServiceID] = true
+	}
+	for _, removed := range []string{"openapi:google-gmail", "openapi:google-calendar", "openapi:google-drive", "mcp:com.brave/brave-search"} {
+		if _, ok := i.Get(removed); ok {
+			t.Fatalf("retired route remains: %s", removed)
 		}
 	}
 	data := DefaultSnapshot()
