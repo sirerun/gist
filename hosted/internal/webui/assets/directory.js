@@ -117,7 +117,7 @@
   }
   async function home() {
     const target = document.getElementById("home-directory");
-    try { const result = await api("/api/directory?limit=6"); target.replaceChildren(...result.items.slice(0,6).map(card)); if (!target.children.length) target.append(link("Browse integrations →", "/library", "text-link")); }
+    try { const result = await api("/api/directory/apps?limit=6"); target.replaceChildren(...result.items.slice(0,6).map(appCard)); if (!target.children.length) target.append(link("Browse integrations →", "/library", "text-link")); }
     catch (_) { target.replaceChildren(link("Browse the public library →", "/library", "text-link")); }
   }
   function directory() {
