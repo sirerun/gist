@@ -13,6 +13,6 @@ Owner request: keep card hover to one category; replace query-string detail URLs
 
 ## Verification
 
-Local Node behavior tests16/16, Go webui tests/vet and desktop/mobile browser checks cover readable initial HTML, canonical URLs, permanent redirects, unknown routes, public sitemap, hover simplicity, no horizontal overflow and JavaScript-disabled app content. Browser widths1440/390/320. Public API data in the local browser harness is read from production; the page, assets and server routes are the candidate. This is not deployed acceptance.
+Local Node behavior tests17/17, Go webui tests/vet and desktop/mobile browser checks cover readable initial HTML, canonical URLs, permanent redirects, unknown routes, public sitemap, hover simplicity, no horizontal overflow and JavaScript-disabled app content. Browser widths1440/390/320. Public API data in the local browser harness is read from production; the page, assets and server routes are the candidate. This is not deployed acceptance.
 
 Production evidence is recorded separately after the immutable build and reviewed IaC release.

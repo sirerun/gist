@@ -8,7 +8,7 @@ const records = [
   {id:'community', service_id:'linkedin-ads-library', title:'LinkedIn Ads Library', kind:'mcp', official:false, server_listing_url:'https://registry.example.com/server'},
 ];
 const flush = () => new Promise(resolve => setImmediate(resolve));
-function fixture({page='home', search='', handle, icons={}}={}) {
+function fixture({page='home', search='', pathname='/library', handle, icons={}}={}) {
   const calls=[], listeners={}; let document;
   class Element {
     constructor(tag) { this.tag=tag; this.children=[];this.attrs={};this.dataset={};this.handlers={};this.hidden=false;this.className='';this.textContent='';this.classList={toggle(){}}; }
@@ -27,7 +27,7 @@ function fixture({page='home', search='', handle, icons={}}={}) {
   for(const id of ['home-directory','directory-search','directory-query','directory-tag','directory-results','directory-status','directory-notice','directory-more','bookmark-filter','directory-detail']) {ids[id]=new Element('div');ids[id].value='';root.append(ids[id]);}
   document={body:root,activeElement:root,createElement:tag=>new Element(tag),getElementById:id=>ids[id],querySelectorAll:selector=>selector==='.bookmark-control'?root.walk().filter(e=>e.className==='bookmark-control'):[],addEventListener:(name,fn)=>{(listeners[name]??=[]).push(fn);},dispatchEvent:e=>{for(const fn of listeners[e.type]||[])fn(e);}};
   const fetch=async(url,options={})=>{calls.push({url,options});let response=await handle?.(url,options);if(!response){if(url==='/api/directory?limit=6'||url.startsWith('/api/directory?'))response={data:{items:records,total:2}};else if(url==='/app/api/session')response={data:{authenticated:true,csrf_token:'token'}};else response={data:{ids:[]}};}return {ok:!response.status||response.status<400,status:response.status||200,json:async()=>response.data};};
-  vm.runInNewContext(source,{GIST_APP_ICONS:icons,document,fetch,URL,URLSearchParams,TextEncoder,WeakMap,Set,Event:class{constructor(type){this.type=type}},CustomEvent:class{constructor(type,options){this.type=type;Object.assign(this,options)}},location:{search,pathname:'/library'},history:{replaceState(){}},console});
+  vm.runInNewContext(source,{GIST_APP_ICONS:icons,document,fetch,URL,URLSearchParams,TextEncoder,WeakMap,Set,Event:class{constructor(type){this.type=type}},CustomEvent:class{constructor(type,options){this.type=type;Object.assign(this,options)}},location:{search,pathname},history:{replaceState(){}},console});
   return {root,ids,calls,document,controls:()=>root.walk().filter(e=>e.className==='bookmark-control'),click:async el=>{if(el.disabled)throw Error('disabled');el.focus();await el.handlers.click({preventDefault(){}});await flush();}};
 }
 test('public cards render while authentication is unresolved; guest links use an allowed return URL',async()=>{
@@ -121,4 +121,8 @@ test('load more keeps its space and existing cards while a page is loading',asyn
 test('library cards omit descriptions and expose only one hover category',async()=>{
  const f=fixture({handle:url=>url==='/api/directory?limit=6'?{data:{items:[{...records[0],description:'Long description stays on the detail page.',tags:['Communication','Productivity']}],total:1}}:undefined});await flush();
  const nodes=f.ids['home-directory'].walk();assert.ok(!nodes.some(n=>n.className==='directory-card-description'));assert.ok(nodes.some(n=>n.className==='directory-card-use-case'&&n.textContent==='Communication'));assert.ok(nodes.some(n=>n.href==='/connectors/github'));
+});
+
+test('clean connector path wins over conflicting legacy query parameters',async()=>{
+ const f=fixture({page:'directory-detail',pathname:'/connectors/github',search:'?id=other&app=gmail',handle:url=>url==='/api/directory/item?id=github'?{data:records[0]}:undefined});await flush();assert.ok(f.calls.some(c=>c.url==='/api/directory/item?id=github'));assert.ok(!f.calls.some(c=>c.url.startsWith('/api/directory/app?')));assert.ok(f.ids['directory-detail'].walk().some(n=>n.textContent==='GitHub'));
 });
