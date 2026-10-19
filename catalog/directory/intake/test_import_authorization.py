@@ -97,10 +97,12 @@ class ImportAuthorizationTests(unittest.TestCase):
         self.guide.pop('api_url_template')
         self.guide.update(kind='native-api', protocol='mysql', methods=['password'], endpoint_inputs=['HOST', 'USERNAME'])
         self.assertEqual(self.run_import()[0]['routes'][0]['protocol'], 'mysql')
-        self.guide.update(kind='http-api', url='https://vendor.example/api', methods=['hmac'])
+        self.guide.update(kind='http-api', url='https://vendor.example/api')
         self.guide.pop('protocol')
         self.guide.pop('endpoint_inputs')
-        self.assertEqual(self.run_import()[0]['routes'][0]['format'], V2)
+        for method in ['hmac', 'oauth1a']:
+            self.guide['methods'] = [method]
+            self.assertEqual(self.run_import()[0]['routes'][0]['format'], V2)
 
     def test_rdstation_language_query_is_source_only(self):
         url = 'https://developers.rdstation.com/reference/authentication?lng=pt-BR'

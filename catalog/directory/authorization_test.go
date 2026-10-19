@@ -189,3 +189,16 @@ func TestNativeAndPrivateEndpointMetadataContainNamesOnly(t *testing.T) {
 		}
 	}
 }
+
+func TestOAuth1aRequiresVersion2(t *testing.T) {
+	guide := AuthorizationGuide{Format: AuthorizationFormatV2, ID: "api:fixture", Title: "Fixture", Status: "documented", Kind: "http-api", APIURL: "https://example.com/rest/V1", Methods: []string{"oauth1a"}, Remotes: []PublicRemote{}, SetupURL: "https://example.com/docs", Steps: []string{"Complete the provider's OAuth 1.0a exchange and sign requests in the client."}, Sources: []AuthorizationSource{{URL: "https://example.com/docs", CheckedAt: "2026-10-19"}}, CredentialOwner: "client"}
+	body, _ := json.Marshal([]AuthorizationGuide{guide})
+	if _, err := parseAuthorization(body); err != nil {
+		t.Fatal(err)
+	}
+	guide.Format = AuthorizationFormat
+	body, _ = json.Marshal([]AuthorizationGuide{guide})
+	if _, err := parseAuthorization(body); err == nil {
+		t.Fatal("OAuth 1.0a accepted in a v1 guide")
+	}
+}
