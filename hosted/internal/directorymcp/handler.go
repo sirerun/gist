@@ -164,13 +164,18 @@ func (h *Handler) call(ctx context.Context, w http.ResponseWriter, call request)
 	switch params.Name {
 	case "gist_directory_apps":
 		var args struct {
-			Query    string `json:"query"`
-			Category string `json:"category"`
-			Offset   int    `json:"offset"`
-			Limit    *int   `json:"limit"`
+			Query       string          `json:"query"`
+			Category    string          `json:"category"`
+			Connectable json.RawMessage `json:"connectable"`
+			Offset      int             `json:"offset"`
+			Limit       *int            `json:"limit"`
 		}
 		if !decodeArgs(params.Arguments, &args) {
 			h.fail(w, call.ID, -32602, "Invalid app search arguments")
+			return
+		}
+		if len(args.Connectable) > 0 && string(args.Connectable) != "true" && string(args.Connectable) != "false" {
+			h.fail(w, call.ID, -32602, "Connectable must be a boolean")
 			return
 		}
 		limit := 24
@@ -181,7 +186,7 @@ func (h *Handler) call(ctx context.Context, w http.ResponseWriter, call request)
 			h.fail(w, call.ID, -32602, "Invalid app search bounds")
 			return
 		}
-		query := directory.AppQuery{Text: args.Query, Category: args.Category, Offset: args.Offset, Limit: limit}
+		query := directory.AppQuery{Text: args.Query, Category: args.Category, ConnectableOnly: string(args.Connectable) == "true", Offset: args.Offset, Limit: limit}
 		var result directory.AppResult
 		var err error
 		if search, ok := h.search.(AppSearcher); ok {
@@ -374,7 +379,7 @@ func toolList() []map[string]any {
 	}
 	id := map[string]any{"type": "string", "minLength": 1, "maxLength": 512, "description": "Exact ID returned by gist_directory_search."}
 	return []map[string]any{
-		{"name": "gist_directory_apps", "description": "Search the complete app inventory using the same hosted search as the Library. Follow an exact returned slug with gist_directory_authorization using app and version 2 for reviewed MCP/direct API routes and explicit gaps. Listings do not grant connection or execution.", "annotations": annotations, "inputSchema": schema(map[string]any{"query": map[string]any{"type": "string", "maxLength": 512}, "category": map[string]any{"type": "string", "maxLength": 200}, "offset": map[string]any{"type": "integer", "minimum": 0, "maximum": directory.MaxEntries}, "limit": map[string]any{"type": "integer", "minimum": 1, "maximum": 100}}, []string{})},
+		{"name": "gist_directory_apps", "description": "Search the complete app inventory using the same hosted search as the Library. Follow an exact returned slug with gist_directory_authorization using app and version 2 for reviewed MCP/direct API routes and explicit gaps. Listings do not grant connection or execution.", "annotations": annotations, "inputSchema": schema(map[string]any{"query": map[string]any{"type": "string", "maxLength": 512}, "category": map[string]any{"type": "string", "maxLength": 200}, "connectable": map[string]any{"type": "boolean", "description": "Only apps with at least one documented MCP/API/native setup route. Does not imply tested connectivity or account eligibility."}, "offset": map[string]any{"type": "integer", "minimum": 0, "maximum": directory.MaxEntries}, "limit": map[string]any{"type": "integer", "minimum": 1, "maximum": 100}}, []string{})},
 		{"name": "gist_directory_search", "description": "Search admitted MCP server and OpenAPI connection descriptors by name, use case or type. For the complete app inventory use gist_directory_apps, then request authorization guidance by app slug. No connection or execution.", "annotations": annotations, "inputSchema": schema(map[string]any{"query": map[string]any{"type": "string", "maxLength": 200}, "kind": map[string]any{"type": "string", "enum": []string{"", "mcp", "openapi"}}, "tag": map[string]any{"type": "string", "maxLength": 64}, "cursor": map[string]any{"type": "string", "maxLength": 2048}, "limit": map[string]any{"type": "integer", "minimum": 1, "maximum": 50}}, []string{})},
 		{"name": "gist_directory_get", "description": "Read a public integration's description, connection details and setup links by exact ID.", "annotations": annotations, "inputSchema": schema(map[string]any{"id": id}, []string{"id"})},
 		{"name": "gist_directory_authorization", "description": "Read direct-provider authorization guidance by exact connector ID or app slug. Covers all catalog apps with explicit gaps; never invents MCP routes. Provide exactly one of id or app. Use version 2 for tenant/private endpoint inputs and native protocols; version 1 preserves strict clients. Clients own credentials and authorization.", "annotations": annotations, "inputSchema": map[string]any{"type": "object", "properties": map[string]any{"id": id, "app": map[string]any{"type": "string", "minLength": 1, "maxLength": 256, "description": "Exact app slug returned by gist_directory_apps or REST app search."}, "version": map[string]any{"type": "integer", "enum": []int{1, 2}, "default": 1}}, "oneOf": []map[string]any{{"required": []string{"id"}}, {"required": []string{"app"}}}, "additionalProperties": false}},

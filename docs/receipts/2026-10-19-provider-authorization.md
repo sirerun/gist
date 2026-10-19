@@ -163,3 +163,27 @@ coverage gap, not a tested connection. Its setup research was prioritized.
 This release had 729 explicit app entries; exact source responses were
 639 documented, six partial, 121 needing research, 11 platform modules and
 2603 without a verified route. The complete source audit remained open.
+
+## Provider-source audit and connectable filter
+
+The app-specific audit now covers the complete imported inventory, using original
+provider/operator documentation for MCP, direct HTTP/OpenAPI and native routes.
+Existing admitted connector joins remain separate. Researched missing contracts,
+ambiguous product identities, private partner documentation and platform modules
+have explicit statuses and source notes. Coverage does not mean every provider
+has a qualified route, client adapter or eligible user account.
+
+The Library offers an optional **Connectable only** checkbox, shareable through
+`/library?connectable=true`. REST `/api/directory/apps?connectable=true` and MCP
+`gist_directory_apps` with `{"connectable":true}` use the same filter. An app
+qualifies when at least one v2 setup route is documented, including partial apps
+with a documented route. Gaps and platform-only entries are hidden. Provider
+approval, subscriptions, user roles, private endpoint inputs and client adapters
+remain requirements; no provider connection is marked tested.
+
+Filtering precedes pagination and semantic candidate selection and is preserved
+by category/search navigation and the personalized catalog. Default app JSON and
+unfiltered inventory behavior remain compatible. REST/MCP reject invalid boolean
+values, including explicit MCP null. Tests cover full filtered pagination,
+ranked candidates, REST/MCP parity, personalized results and browser URL state.
+Deployment and live acceptance receipts are recorded separately after rollout.

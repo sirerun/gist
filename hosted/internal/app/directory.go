@@ -72,9 +72,17 @@ func (h *directoryAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var result any
 	switch r.URL.Path {
 	case "/api/directory/apps":
-		if !webQueryKeys(v, "q", "category", "offset", "limit") {
+		if !webQueryKeys(v, "q", "category", "offset", "limit", "connectable") {
 			webError(w, 400, "invalid_query", "Unsupported query parameters.")
 			return
+		}
+		connectable := false
+		if v.Has("connectable") {
+			if v.Get("connectable") != "true" && v.Get("connectable") != "false" {
+				webError(w, 400, "invalid_query", "Connectable must be true or false.")
+				return
+			}
+			connectable = v.Get("connectable") == "true"
 		}
 		limit, offset := 24, 0
 		if v.Has("limit") {
@@ -95,7 +103,7 @@ func (h *directoryAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			webError(w, 503, "service_unavailable", "App directory unavailable.")
 			return
 		}
-		query := directory.AppQuery{Text: v.Get("q"), Category: v.Get("category"), Offset: offset, Limit: limit}
+		query := directory.AppQuery{Text: v.Get("q"), Category: v.Get("category"), ConnectableOnly: connectable, Offset: offset, Limit: limit}
 		if h.search != nil {
 			result, err = h.search.SearchApps(r.Context(), query)
 		} else {

@@ -24,7 +24,7 @@ function fixture({page='directory', search='', pathname='/library/mcp', handle, 
     walk(){return this.children.flatMap(c=>[c,...(c.walk?.()||[])]);}
   }
   const root=new Element('body');root.dataset.page=page;const ids={};
-  for(const id of ['home-directory','directory-search','directory-query','directory-tag','directory-results','directory-status','directory-notice','directory-more','bookmark-filter','directory-detail']) {ids[id]=new Element('div');ids[id].value='';root.append(ids[id]);}
+  for(const id of ['home-directory','directory-search','directory-query','directory-tag','directory-connectable','directory-connectable-label','directory-results','directory-status','directory-notice','directory-more','bookmark-filter','directory-detail']) {ids[id]=new Element('div');ids[id].value='';root.append(ids[id]);}
   document={body:root,activeElement:root,createElement:tag=>new Element(tag),getElementById:id=>ids[id],querySelectorAll:selector=>selector==='.bookmark-control'?root.walk().filter(e=>e.className==='bookmark-control'):[],addEventListener:(name,fn)=>{(listeners[name]??=[]).push(fn);},dispatchEvent:e=>{for(const fn of listeners[e.type]||[])fn(e);}};
   const fetch=async(url,options={})=>{calls.push({url,options});let response=await handle?.(url,options);if(!response){if(url.startsWith('/api/directory/apps?'))response={data:{items:[{slug:'github',name:'GitHub',icon_url:'/assets/apps/github.png',background_color:'#112233',categories:[{slug:'development',name:'Development'}]}],total:1}};else if(url==='/api/directory?limit=16'||url.startsWith('/api/directory?'))response={data:{items:records,total:2}};else if(url==='/app/api/session')response={data:{authenticated:true,csrf_token:'token'}};else response={data:{ids:[]}};}return {ok:!response.status||response.status<400,status:response.status||200,json:async()=>response.data};};
   vm.runInNewContext(source,{GIST_APP_ICONS:icons,GIST_APP_ICON_COLORS:colors,document,fetch,URL,URLSearchParams,TextEncoder,WeakMap,Set,Event:class{constructor(type){this.type=type}},CustomEvent:class{constructor(type,options){this.type=type;Object.assign(this,options)}},location:{search,pathname},history:{replaceState(_state,_title,url){historyURLs.push(url)}},console});
@@ -171,4 +171,16 @@ test('connector details display provider guidance as reference text with source 
  assert.ok(nodes.some(n=>n.tag==='li'&&n.textContent==='Review provider consent'));
  assert.ok(nodes.some(n=>n.href==='https://docs.example.com/mcp'));
  assert.ok(!f.calls.some(c=>c.url.startsWith('https://docs.example.com')));
+});
+
+test('connectable filter persists in app URLs, resets pagination and reaches personalized catalog',async()=>{
+ const f=fixture({pathname:'/library',search:'?q=leads&connectable=true',handle:url=>url==='/app/api/bookmarks'?{data:{ids:['github']}}:undefined});
+ await flush();await flush();
+ assert.equal(f.ids['directory-connectable'].checked,true);
+ assert.ok(f.calls.some(c=>c.url.startsWith('/api/directory/apps?')&&c.url.includes('connectable=true')));
+ assert.ok(f.calls.some(c=>c.url.startsWith('/app/api/bookmarks?')&&c.url.includes('connectable=true')));
+ assert.ok(f.historyURLs.at(-1).includes('connectable=true'));
+ f.ids['directory-connectable'].checked=false;await f.ids['directory-connectable'].handlers.change();await flush();
+ assert.ok(!f.historyURLs.at(-1).includes('connectable='));
+ assert.ok(!f.calls.at(-1).url.includes('offset='));
 });

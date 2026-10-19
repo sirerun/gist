@@ -302,6 +302,9 @@ func (s *Service) SearchApps(ctx context.Context, q directory.AppQuery) (directo
 		if !ok {
 			return false
 		}
+		if q.ConnectableOnly && !a.Connectable() {
+			return false
+		}
 		if q.Category == "" {
 			return true
 		}

@@ -178,3 +178,62 @@ func TestAppPriorityIsAppliedBeforePagingWithoutChangingDefaultOrder(t *testing.
 		}
 	}
 }
+
+func TestConnectableFilterUsesDocumentedRoutesBeforePagination(t *testing.T) {
+	index, err := DefaultPublic()
+	if err != nil {
+		t.Fatal(err)
+	}
+	apps, err := DefaultApps(index)
+	if err != nil {
+		t.Fatal(err)
+	}
+	all, err := apps.Search(AppQuery{Limit: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	first, err := apps.Search(AppQuery{ConnectableOnly: true, Limit: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.Total == 0 || first.Total >= all.Total || first.NextOffset == nil {
+		t.Fatalf("filter totals: all=%d filtered=%+v", all.Total, first)
+	}
+	seen := map[string]bool{}
+	for offset := 0; ; {
+		page, err := apps.Search(AppQuery{ConnectableOnly: true, Offset: offset, Limit: 100})
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, a := range page.Items {
+			if seen[a.Slug] {
+				t.Fatal("duplicate pagination", a.Slug)
+			}
+			seen[a.Slug] = true
+			g, err := AuthorizationForAppV2(a, index)
+			if err != nil {
+				t.Fatal(err)
+			}
+			documented := false
+			for _, r := range g.Routes {
+				documented = documented || r.Status == "documented"
+			}
+			if !documented {
+				t.Fatal("unconnectable app leaked", a.Slug, g.Status)
+			}
+		}
+		if page.NextOffset == nil {
+			break
+		}
+		offset = *page.NextOffset
+	}
+	if len(seen) != first.Total {
+		t.Fatalf("pagination count %d != %d", len(seen), first.Total)
+	}
+	// Ranking must retain a later connectable item when earlier candidates lack setup.
+	fixture := &AppIndex{items: []App{{Slug: "gap"}, {Slug: "ready", connectable: true}}, bySlug: map[string]int{"gap": 0, "ready": 1}}
+	ranked, err := fixture.SearchRanked(AppQuery{ConnectableOnly: true, Limit: 1}, []string{"gap", "ready"})
+	if err != nil || ranked.Total != 1 || len(ranked.Items) != 1 || ranked.Items[0].Slug != "ready" {
+		t.Fatalf("ranked filter %+v %v", ranked, err)
+	}
+}
