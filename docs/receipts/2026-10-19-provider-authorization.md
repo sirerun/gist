@@ -81,3 +81,35 @@ Rollback for this release is the previous square-card image
 `sha256:419f9b4570c0d62c788b4e407da15d968ead82a8b2d3a621a419a7ea1ccd5267`
 through reviewed IaC. The owner-approved square card geometry and rounded
 corners are unchanged by this authorization work.
+
+## Opt-in v2 rollout
+
+Gist PR131 landed as `b6083ffa96ca1e7c7b1fd64a0d32a3e714e5fa5a`,
+with the exact independently approved tree
+`a6b6b0506d721ef9914f668795bd9952139bdecd`. Foundation PR314 landed
+as `fb5bb442d3c0f3e47059eba3a6e39c8311b068f7`, retaining its reviewed tree.
+CodeBuild `gist-registry-image:20257897-4d32-4b9d-8abb-512647ef9ada`
+succeeded for that source and produced digest
+`sha256:45dba9dcce5774ee48f2fe6aa4463ef138bf1d878e40295fc1a346babcc60726`.
+The final image passed the no-network model/index smoke: 768 dimensions,
+verified public index, 32 matches, 12.87 seconds.
+
+The reviewed saved deployment plan SHA256 was
+`3fbe099535ecb2e88e0caa1cd8e79639a69f9ae1cd373b3722448373cde6845c`.
+Apply succeeded with only the image/task reference changes. Live v2 responses
+passed for Shopify templates, ActiveCampaign endpoint inputs, native MySQL,
+Xero, and the AI Tools platform-module classification. REST/MCP responses
+matched; default v1 projections omitted v2 fields; invalid MCP versions were
+rejected. Existing descriptor guidance, OpenAPI and hybrid search checks also
+passed. These are metadata acceptance checks, not provider authorizations.
+
+Use `/api/directory/authorization?app=shopify&version=2`, or call
+`gist_directory_authorization` with `{"app":"shopify","version":2}`.
+The release contains 159 explicit app entries: 134 documented, 16 needing
+research, and nine platform modules. Existing connector joins can contribute
+other routes. Full inventory coverage remains open.
+
+PR132 separately landed 60 more reviewed app entries as
+`b33d863265164d63af1bef52664d6172927427f6`, with tested tree
+`105bf2d8997af2d9e78f5a354c6b948b2418f074`. Its image build and rollout
+are separate from the live v2 acceptance above. Source alone is not deployment.
