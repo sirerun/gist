@@ -4,7 +4,7 @@ Gist by Sire Run, Inc. supplies public integration discovery and context for Zat
 
 ## When to use Gist
 
-Use Gist when a user wants an MCP server or OpenAPI connection for an app, when a workflow needs an exact endpoint and setup instructions, or when a client must inspect and export a connection descriptor. Use app inventory to explore software categories; only connector_ids identify available setup routes.
+Use Gist when a user wants an MCP server or OpenAPI connection for an app, when a workflow needs an exact endpoint and setup instructions, or when a client must inspect and export a connection descriptor. Search the complete app inventory, then request version2 authorization guidance by exact app slug for reviewed MCP and direct API routes. The connector_ids field identifies separately admitted descriptors that can be retrieved and exported.
 
 For context indexing and retrieval inside an application, use the Gist Go library or local CLI. For private workspace artifacts, use the separately authorized registry only after the user has the required workspace access.
 
@@ -13,10 +13,10 @@ For context indexing and retrieval inside an application, use the Gist Go librar
 Add https://gist.sire.run/directory/mcp using Streamable HTTP. Start with a narrow query:
 
 ```json
-{"name":"gist_directory_search","arguments":{"query":"gmail","kind":"mcp","limit":5}}
+{"name":"gist_directory_apps","arguments":{"query":"find leads for my startup","limit":5}}
 ```
 
-Use an exact returned ID with gist_directory_get, then gist_directory_export when the client needs a metadata-only gist.directory.entry/v1 descriptor. Keep the query and cursor unchanged when continuing a page. The current server supports MCP protocol versions 2025-06-18 and 2025-03-26.
+Use an exact returned app slug with gist_directory_authorization and {"app":"<slug>","version":2}. App search uses category, offset and limit; preserve query/category when continuing next_offset. For admitted connector descriptors, use gist_directory_search, then an exact returned ID with gist_directory_get and gist_directory_export for a metadata-only gist.directory.entry/v1 descriptor. Preserve the query and cursor for connector pagination. The current server supports MCP protocol versions 2025-06-18 and 2025-03-26.
 
 ## Use the public REST API
 

@@ -12,7 +12,7 @@ Browse the public app library, search available connection descriptors, inspect 
 
 ## Connect an agent or application
 
-Add https://gist.sire.run/directory/mcp as a Streamable HTTP server. It exposes gist_directory_search, gist_directory_get and gist_directory_export. Or call the public REST API: https://gist.sire.run/api/directory?q=calendar&limit=5. Neither interface executes provider tools.
+Add https://gist.sire.run/directory/mcp as a Streamable HTTP server. It exposes gist_directory_apps, gist_directory_search, gist_directory_get, gist_directory_authorization and gist_directory_export. Search apps, then request version2 authorization guidance with the exact app slug. Or call the public REST API: https://gist.sire.run/api/directory?q=calendar&limit=5. Neither interface executes provider tools.
 
 - [Developer guide](https://gist.sire.run/developers.md)
 - [OpenAPI description](https://gist.sire.run/openapi.json)

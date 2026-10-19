@@ -8,7 +8,10 @@ Gist receives no credentials and does not start an OAuth flow.
 
 ## Client contract
 
-1. Discover apps and their admitted connector IDs with the existing public APIs.
+1. Search the complete app inventory with MCP `gist_directory_apps` or REST
+   `GET /api/directory/apps?q=...`. Request guidance using an exact returned app
+   slug and version2. The separate `connector_ids` field identifies admitted
+   descriptors that support the existing get/export interfaces.
 2. Use an exact connector ID from discovery:
 
    ```http
