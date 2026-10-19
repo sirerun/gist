@@ -189,7 +189,7 @@
           setup.append(el("p","Choose an integration to see its setup details and connect it in your client."));
           for(const connectorID of r.connector_ids) setup.append(link("View connection details →","/connectors/"+encodeURIComponent(connectorID),"text-link app-connection"));
         } else setup.append(el("p","MCP connection details are not available yet."));
-        setup.append(link("Direct provider setup metadata →","/api/directory/authorization?"+new URLSearchParams({app}),"text-link"));
+        setup.append(link("Direct provider setup metadata →","/api/directory/authorization?"+new URLSearchParams({app,version:"2"}),"text-link"));
         target.append(setup); return;
       }
       if(!id){const e=new Error();e.status=400;throw e;}

@@ -103,7 +103,7 @@ func TestAuthorizationCoversEveryCatalogAppWithoutInventingRoutes(t *testing.T) 
 		if g.App != a.Slug || g.Name != a.Name {
 			t.Fatalf("wrong app guide %q", a.Slug)
 		}
-		if len(a.ConnectorIDs) == 0 && len(extra[a.Slug]) == 0 && (g.Status != "no_verified_route" || len(g.Routes) != 0) {
+		if len(a.ConnectorIDs) == 0 && len(extra[a.Slug].Routes) == 0 && (g.Status != "no_verified_route" || len(g.Routes) != 0) {
 			t.Fatalf("invented route %q", a.Slug)
 		}
 		for _, r := range g.Routes {
@@ -114,5 +114,78 @@ func TestAuthorizationCoversEveryCatalogAppWithoutInventingRoutes(t *testing.T) 
 	}
 	if len(apps.items) != 3380 {
 		t.Fatalf("catalog changed: got %d; update coverage receipt", len(apps.items))
+	}
+}
+
+func TestProviderEndpointTemplatesAndPrivateInputs(t *testing.T) {
+	for _, tc := range []struct {
+		value  string
+		inputs []string
+		valid  bool
+	}{
+		{"https://{shop}.myshopify.com/admin/api/2026-10/graphql.json", []string{"shop"}, true},
+		{"{BASE_URI}/restapi", []string{"BASE_URI"}, true},
+		{"https://{shop}.myshopify.com/admin", []string{"different"}, false},
+		{"https://user:password@{host}/api", []string{"host"}, false},
+		{"http://{host}/api", []string{"host"}, false},
+		{"https://example.com/api?token={secret}", []string{"secret"}, false},
+	} {
+		if got := safeEndpointTemplate(tc.value, tc.inputs); got != tc.valid {
+			t.Fatalf("template %q valid=%v", tc.value, got)
+		}
+	}
+	idx, err := DefaultPublic()
+	if err != nil {
+		t.Fatal(err)
+	}
+	apps, err := DefaultApps(idx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, slug := range []string{"shopify", "activecampaign"} {
+		a, ok := apps.Get(slug)
+		if !ok {
+			t.Fatal(slug)
+		}
+		v2, err := AuthorizationForAppV2(a, idx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(v2.Routes) == 0 || v2.Routes[0].Format != AuthorizationFormatV2 || len(v2.Routes[0].EndpointInputs) == 0 {
+			t.Fatalf("missing private/tenant inputs %s: %+v", slug, v2)
+		}
+		v1, err := AuthorizationForApp(a, idx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		raw, _ := json.Marshal(v1)
+		for _, field := range []string{"\"api_url_template\"", "\"endpoint_inputs\"", "\"protocol\"", "gist.directory.authorization/v2"} {
+			if strings.Contains(string(raw), field) {
+				t.Fatalf("v1 schema changed: %s", raw)
+			}
+		}
+	}
+}
+
+func TestNativeAndPrivateEndpointMetadataContainNamesOnly(t *testing.T) {
+	base := AuthorizationGuide{Format: AuthorizationFormatV2, ID: "api:database", Title: "Database", Status: "documented", Kind: "native-api", Protocol: "postgresql", EndpointInputs: []string{"HOST", "PORT", "DATABASE", "USERNAME"}, Methods: []string{"password"}, Remotes: []PublicRemote{}, SetupURL: "https://www.postgresql.org/docs/current/client-authentication.html", CredentialNames: []string{"PASSWORD"}, Steps: []string{"Configure the database connection in the client."}, Sources: []AuthorizationSource{{URL: "https://www.postgresql.org/docs/current/client-authentication.html", CheckedAt: "2026-10-19"}}, CredentialOwner: "client"}
+	body, _ := json.Marshal([]AuthorizationGuide{base})
+	if _, err := parseAuthorization(body); err != nil {
+		t.Fatal(err)
+	}
+	for _, change := range []func(*AuthorizationGuide){
+		func(g *AuthorizationGuide) { g.EndpointInputs = []string{"https://private.example/mcp?token=secret"} },
+		func(g *AuthorizationGuide) { g.APIURL = "https://database.example" },
+		func(g *AuthorizationGuide) { g.Format = AuthorizationFormat },
+		func(g *AuthorizationGuide) { g.CredentialOwner = "gist" },
+	} {
+		raw, _ := json.Marshal(base)
+		var g AuthorizationGuide
+		_ = json.Unmarshal(raw, &g)
+		change(&g)
+		raw, _ = json.Marshal([]AuthorizationGuide{g})
+		if _, err := parseAuthorization(raw); err == nil {
+			t.Fatal("invalid native/private endpoint accepted")
+		}
 	}
 }

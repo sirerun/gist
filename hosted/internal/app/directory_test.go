@@ -344,3 +344,30 @@ func TestPublicAppAuthorizationBySlug(t *testing.T) {
 		}
 	}
 }
+
+func TestAppAuthorizationVersionNegotiation(t *testing.T) {
+	idx, err := directory.DefaultPublic()
+	if err != nil {
+		t.Fatal(err)
+	}
+	apps, err := directory.DefaultApps(idx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := &directoryAPI{index: idx, apps: apps, origin: "https://gist.example"}
+	w := webRequest(h, "GET", "/api/directory/authorization?app=shopify&version=2", "")
+	var g directory.AppAuthorization
+	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &g) != nil || g.Format != "gist.directory.app-authorization/v2" || len(g.Routes) == 0 || g.Routes[0].APIURLTemplate == "" {
+		t.Fatalf("v2: %d %s", w.Code, w.Body)
+	}
+	w = webRequest(h, "GET", "/api/directory/authorization?app=shopify", "")
+	if w.Code != 200 || strings.Contains(w.Body.String(), `"api_url_template"`) {
+		t.Fatalf("v1: %d %s", w.Code, w.Body)
+	}
+	for _, version := range []string{"", "0", "3", "-1", "garbage"} {
+		w := webRequest(h, "GET", "/api/directory/authorization?app=shopify&version="+version, "")
+		if w.Code != 400 {
+			t.Fatalf("invalid version %q: %d", version, w.Code)
+		}
+	}
+}

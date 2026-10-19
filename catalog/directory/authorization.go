@@ -9,6 +9,8 @@ import (
 	"io"
 	"net/url"
 	"reflect"
+	"regexp"
+	"strings"
 	"sync"
 	"time"
 )
@@ -17,6 +19,10 @@ import (
 // consumers can adopt richer setup metadata without changing discovery schemas.
 // They contain no credentials and never initiate network requests or OAuth.
 const AuthorizationFormat = "gist.directory.authorization/v1"
+const AuthorizationFormatV2 = "gist.directory.authorization/v2"
+
+var endpointField = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]{0,63}$`)
+var endpointPlaceholder = regexp.MustCompile(`\{([A-Za-z_][A-Za-z0-9_]{0,63})\}`)
 
 //go:embed authorization.json
 var authorizationJSON []byte
@@ -27,6 +33,9 @@ type AuthorizationSource struct {
 }
 
 type AuthorizationGuide struct {
+	APIURLTemplate   string                `json:"api_url_template,omitempty"`
+	EndpointInputs   []string              `json:"endpoint_inputs,omitempty"`
+	Protocol         string                `json:"protocol,omitempty"`
 	Kind             string                `json:"kind"`
 	APIURL           string                `json:"api_url,omitempty"`
 	Format           string                `json:"format"`
@@ -65,7 +74,7 @@ func parseAuthorization(raw []byte) (map[string]AuthorizationGuide, error) {
 	}
 	out := make(map[string]AuthorizationGuide, len(guides))
 	for _, g := range guides {
-		if g.Format != AuthorizationFormat || g.ID == "" || !bounded(g.ID, 200) || g.Title == "" || !bounded(g.Title, 200) || g.ConnectionTested || g.CredentialOwner != "client" {
+		if (g.Format != AuthorizationFormat && g.Format != AuthorizationFormatV2) || g.ID == "" || !bounded(g.ID, 200) || g.Title == "" || !bounded(g.Title, 200) || g.ConnectionTested || g.CredentialOwner != "client" {
 			return nil, fmt.Errorf("invalid authorization identity %q", g.ID)
 		}
 		if _, ok := out[g.ID]; ok {
@@ -88,24 +97,51 @@ func parseAuthorization(raw []byte) (map[string]AuthorizationGuide, error) {
 				return nil, errors.New("invalid source date")
 			}
 		}
-		if g.Kind != "mcp" && g.Kind != "http-api" && g.Kind != "openapi" {
+		if g.Format == AuthorizationFormat && (g.APIURLTemplate != "" || len(g.EndpointInputs) > 0 || g.Protocol != "") {
+			return nil, errors.New("v2 route details in v1 guide")
+		}
+		if len(g.EndpointInputs) > 16 {
+			return nil, errors.New("too many endpoint inputs")
+		}
+		for _, name := range g.EndpointInputs {
+			if !endpointField.MatchString(name) {
+				return nil, errors.New("endpoint input names only")
+			}
+		}
+		if g.Kind != "mcp" && g.Kind != "http-api" && g.Kind != "openapi" && g.Kind != "native-api" {
 			return nil, errors.New("invalid authorization route kind")
 		}
-		if g.Kind == "mcp" {
-			if len(g.Remotes) == 0 || g.APIURL != "" {
-				return nil, errors.New("invalid MCP authorization route")
+		switch g.Kind {
+		case "mcp":
+			if g.APIURL != "" || g.APIURLTemplate != "" || g.Protocol != "" || (len(g.Remotes) == 0) == (len(g.EndpointInputs) == 0) {
+				return nil, errors.New("choose exact MCP remotes or private endpoint inputs")
 			}
-		} else if len(g.Remotes) != 0 || !safeSourceURL(g.APIURL) {
-			return nil, errors.New("invalid API authorization route")
+		case "native-api":
+			if g.Format != AuthorizationFormatV2 || !endpointField.MatchString(g.Protocol) || len(g.EndpointInputs) == 0 || len(g.Remotes) > 0 || g.APIURL != "" || g.APIURLTemplate != "" {
+				return nil, errors.New("invalid native API inputs")
+			}
+		default:
+			if len(g.Remotes) > 0 || g.Protocol != "" || (g.APIURL != "" && g.APIURLTemplate != "") || (g.APIURL == "" && g.APIURLTemplate == "" && len(g.EndpointInputs) == 0) {
+				return nil, errors.New("choose exact API URL or template")
+			}
+			if g.APIURL != "" && !safeURL(g.APIURL, false) {
+				return nil, errors.New("invalid API URL")
+			}
+			if g.APIURLTemplate != "" && !safeEndpointTemplate(g.APIURLTemplate, g.EndpointInputs) {
+				return nil, errors.New("invalid API URL template")
+			}
 		}
 		for _, r := range g.Remotes {
-			if !safeURL(r.URL, false) || (r.Transport != "sse" && r.Transport != "streamable-http") {
-				return nil, errors.New("invalid authorization remote")
+			if !safeURL(r.URL, false) || (r.Transport != "sse" && r.Transport != "streamable-http" && !(g.Format == AuthorizationFormatV2 && r.Transport == "unknown")) {
+				return nil, fmt.Errorf("%s: invalid authorization remote", g.ID)
 			}
 		}
 		for _, m := range g.Methods {
+			if g.Format == AuthorizationFormat && (m == "password" || m == "client_certificate" || m == "ssh_key" || m == "hmac") {
+				return nil, errors.New("v2 authentication method in v1 guide")
+			}
 			switch m {
-			case "oauth2", "api_key", "bearer", "none", "basic", "aws_sigv4":
+			case "oauth2", "api_key", "bearer", "none", "basic", "aws_sigv4", "password", "client_certificate", "ssh_key", "hmac":
 			default:
 				return nil, errors.New("invalid authorization method")
 			}
@@ -131,6 +167,38 @@ func parseAuthorization(raw []byte) (map[string]AuthorizationGuide, error) {
 	return out, nil
 }
 
+// Templates are descriptive only; neither the template nor client inputs are
+// substituted or fetched by Gist. Reject credentials, query strings and hidden
+// placeholders, and require every placeholder to have a declared input name.
+func safeEndpointTemplate(value string, inputs []string) bool {
+	if !bounded(value, 2048) {
+		return false
+	}
+	names := map[string]bool{}
+	for _, name := range inputs {
+		names[name] = true
+	}
+	matches := endpointPlaceholder.FindAllStringSubmatch(value, -1)
+	if len(matches) == 0 {
+		return false
+	}
+	for _, match := range matches {
+		if !names[match[1]] {
+			return false
+		}
+	}
+	substituted := endpointPlaceholder.ReplaceAllString(value, "example.com")
+	if strings.HasPrefix(value, matches[0][0]) {
+		suffix := strings.TrimPrefix(value, matches[0][0])
+		if suffix == "" || strings.HasPrefix(suffix, "/") {
+			substituted = endpointPlaceholder.ReplaceAllString("https://example.com"+suffix, "example.com")
+		}
+	}
+	return !strings.ContainsAny(substituted, "{}") && safeURL(substituted, false)
+}
+
+func sourceDate(value string) bool { _, err := time.Parse("2006-01-02", value); return err == nil }
+
 func safeSourceURL(s string) bool {
 	if !bounded(s, 2048) {
 		return false
@@ -140,6 +208,29 @@ func safeSourceURL(s string) bool {
 		return false
 	}
 	u.Fragment = ""
+	if u.RawQuery != "" {
+		allowed := map[string]bool{}
+		switch u.Hostname() {
+		case "learn.microsoft.com":
+			allowed = map[string]bool{"view": true, "tabs": true, "preserve-view": true}
+		case "shopify.dev":
+			allowed = map[string]bool{"lang": true}
+		case "www.postman.com":
+			allowed = map[string]bool{"entity": true}
+		case "developers.rdstation.com":
+			allowed = map[string]bool{"lng": true}
+		}
+		q, err := url.ParseQuery(u.RawQuery)
+		if err != nil || len(q) == 0 {
+			return false
+		}
+		for k, values := range q {
+			if !allowed[k] || len(values) != 1 || !bounded(values[0], 256) {
+				return false
+			}
+		}
+		u.RawQuery = ""
+	}
 	return safeURL(u.String(), false)
 }
 
