@@ -137,3 +137,29 @@ The exact source handler evaluated all 3380 apps: 543 documented, six partial,
 These counts include existing connector joins, not only explicit app entries.
 They are documentation/metadata coverage, not tested provider connections.
 Remaining provider-source collection remains open.
+
+## Full app search through public MCP
+
+Gist PR137 landed as `df20ee9e0ebea7b46f630a0d83a2ecbc5ad334ed`,
+with independently approved tree `f5ff2068bec48d43ca923a6b4f333fc24291cfea`.
+Foundation PR318 landed as `499aff2e3807687129de12f1d233b4c5a53598f0`.
+The qualified image digest was
+`sha256:08bfa28e7131ca1d1b139c0fb3ce31d49f136763ec97ca94fc185048e8f3dc58`;
+its model/index smoke passed without network access in 12.844 seconds.
+Saved deployment plan SHA256:
+`aa4a55ecc2f0cc7048bb9ac30c3c6204680197945068d2d61adbc449f304029a`.
+ECS task revision30 completed with one running task and the existing envelope.
+
+The additive public tool `gist_directory_apps` uses the same hosted SearchApps
+service as the Library and REST API. After rollout completion, the exact owner
+query "find leads for my startup" returned the same 32 hybrid candidates across
+REST and MCP, with exact response equality for two paginated requests. Empty
+query browsing reported all 3380 apps. The read-only tool was discoverable,
+invalid/private arguments were rejected, and public client instructions listed
+it. Following a returned slug into v2 authorization also matched REST/MCP.
+The first result, StoreLeads, reported no verified route; that was an honest
+coverage gap, not a tested connection. Its setup research was prioritized.
+
+This release had 729 explicit app entries; exact source responses were
+639 documented, six partial, 121 needing research, 11 platform modules and
+2603 without a verified route. The complete source audit remained open.
