@@ -154,7 +154,7 @@ func PublicFallback(p string) bool {
 		return false
 	}
 	switch p {
-	case "/mcp", "/directory/mcp", "/healthz", "/readyz", "/api/directory", "/api/directory/item", "/api/directory/export", "/api/directory/apps", "/api/directory/app":
+	case "/mcp", "/directory/mcp", "/healthz", "/readyz", "/api/directory", "/api/directory/item", "/api/directory/authorization", "/api/directory/export", "/api/directory/apps", "/api/directory/app":
 		return false
 	}
 	return true
@@ -176,7 +176,7 @@ func machineRoute(w http.ResponseWriter, r *http.Request) bool {
 	if r.URL.Path == "/api" {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		if r.Method != http.MethodHead {
-			_ = json.NewEncoder(w).Encode(map[string]any{"name": "Gist public catalog API", "version": "1.0.0", "authentication": "none", "openapi_url": publicOrigin + "/openapi.json", "docs_url": publicOrigin + "/developers", "mcp_url": publicOrigin + "/directory/mcp", "endpoints": []string{"/api/directory", "/api/directory/item", "/api/directory/export", "/api/directory/apps", "/api/directory/app"}})
+			_ = json.NewEncoder(w).Encode(map[string]any{"name": "Gist public catalog API", "version": "1.0.0", "authentication": "none", "openapi_url": publicOrigin + "/openapi.json", "docs_url": publicOrigin + "/developers", "mcp_url": publicOrigin + "/directory/mcp", "endpoints": []string{"/api/directory", "/api/directory/item", "/api/directory/authorization", "/api/directory/export", "/api/directory/apps", "/api/directory/app"}})
 		}
 		return true
 	}

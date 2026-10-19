@@ -189,6 +189,7 @@
           setup.append(el("p","Choose an integration to see its setup details and connect it in your client."));
           for(const connectorID of r.connector_ids) setup.append(link("View connection details →","/connectors/"+encodeURIComponent(connectorID),"text-link app-connection"));
         } else setup.append(el("p","MCP connection details are not available yet."));
+        setup.append(link("Direct provider setup metadata →","/api/directory/authorization?"+new URLSearchParams({app}),"text-link"));
         target.append(setup); return;
       }
       if(!id){const e=new Error();e.status=400;throw e;}
@@ -202,6 +203,19 @@
       for(const pkg of r.packages||[]) {setup.append(el("h3","Package · "+pkg.registry),el("pre",pkg.identifier+(pkg.version?" @ "+pkg.version:"")));}
       if(r.openapi) {setup.append(el("p","Use the OpenAPI specification with a compatible client or adapter."));sourceLink(setup,"OpenAPI specification",r.openapi.spec_url);sourceLink(setup,"Mint generation guide",r.openapi.mint_guide_url);}
       sourceLink(setup,"Authentication setup",r.auth?.setup_url);sourceLink(setup,"Project",r.homepage);sourceLink(setup,"Repository",r.repository);target.append(setup);
+      try {
+        const guide=await api("/api/directory/authorization?"+new URLSearchParams({id}));
+        if(guide.format==="gist.directory.authorization/v1") {
+          const section=el("section");section.append(el("h2","Provider authorization"));
+          section.append(el("p",guide.status==="documented"?"Provider documentation reviewed. A connection has not been tested in your client.":"Authorization instructions for this exact connection still need research."));
+          for(const requirement of guide.prerequisites||[])section.append(el("p",requirement));
+          if((guide.steps||[]).length){const steps=el("ol");for(const step of guide.steps)steps.append(el("li",step));section.append(steps);}
+          for(const note of guide.notes||[])section.append(el("p",note,"quiet"));
+          for(const source of guide.sources||[])sourceLink(section,"Provider documentation · "+source.checked_at,source.url);
+          section.append(el("p","Authorize and store credentials in your client. Gist does not receive provider credentials.","quiet"));
+          target.append(section);
+        }
+      } catch (_) { /* Existing setup links remain usable when guidance is unavailable. */ }
       if((r.skills||[]).length){const skillSection=el("section");skillSection.append(el("h2","Related skills"));for(const s of r.skills){skillSection.append(el("h3",s.title||s.id));sourceLink(skillSection,"Skill guide",s.url);}target.append(skillSection);}
       const status=el("p",undefined,"quiet"); target.append(button("Export setup descriptor",async()=>{try {const data=await api("/api/directory/export?"+new URLSearchParams({id}));const u=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)+"\n"],{type:"application/json"}));const a=link("",u);a.download="gist-integration.json";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);status.textContent="Descriptor downloaded. Review it in your client before use.";}catch(e){failure(status,e);}}),status);
     }catch(e){failure(target,e,detail);}finally{target.setAttribute("aria-busy","false");}

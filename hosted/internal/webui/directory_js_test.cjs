@@ -159,3 +159,16 @@ test('home and library app tiles expose identical markup without connector bookm
  const home=fixture({page:'home',handle:url=>url.startsWith('/api/directory/apps?')?{data:{items:apps,total:60}}:undefined});await flush();assert.equal(home.ids['home-directory'].children.length,16);assert.ok(home.calls.some(c=>c.url==='/api/directory/apps?limit=16'));
  const library=fixture({page:'directory',pathname:'/library',handle:url=>{if(!url.startsWith('/api/directory/apps?'))return;const q=new URL(url,'https://gist.example').searchParams,start=Number(q.get('offset')||0),limit=Number(q.get('limit'));return {data:{items:apps.slice(start,start+limit),total:60,next_offset:start+limit<60?start+limit:0}};}});await flush();assert.equal(library.ids['directory-results'].children.length,40);await library.click(library.ids['directory-more']);assert.equal(library.ids['directory-results'].children.length,60);assert.equal(new Set(library.ids['directory-results'].children.map(n=>n.dataset.appSlug)).size,60);assert.ok(library.calls.some(c=>c.url.includes('limit=40')&&c.url.includes('offset=40')));
  });
+
+test('connector details display provider guidance as reference text with source links',async()=>{
+ const f=fixture({page:'directory-detail',pathname:'/connectors/github',handle:url=>{
+  if(url==='/api/directory/item?id=github')return {data:records[0]};
+  if(url==='/api/directory/authorization?id=github')return {data:{format:'gist.directory.authorization/v1',status:'documented',prerequisites:['Register your client'],steps:['Review provider consent'],notes:['Not tested with your account'],sources:[{url:'https://docs.example.com/mcp',checked_at:'2026-10-19'}]}};
+ }});
+ await flush();assert.ok(f.calls.some(c=>c.url==='/api/directory/authorization?id=github'));
+ const nodes=f.ids['directory-detail'].walk();
+ assert.ok(nodes.some(n=>n.textContent==='Register your client'));
+ assert.ok(nodes.some(n=>n.tag==='li'&&n.textContent==='Review provider consent'));
+ assert.ok(nodes.some(n=>n.href==='https://docs.example.com/mcp'));
+ assert.ok(!f.calls.some(c=>c.url.startsWith('https://docs.example.com')));
+});

@@ -1,0 +1,4598 @@
+[
+  {
+    "id": "mcp:agentic-commerce",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "No reliable first-party authorization instructions for this exact catalog route were established in this bounded review. Do not infer authentication from reachability or from another route."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Agentic Commerce",
+    "remotes": [
+      {
+        "url": "https://mcp-agentic-commerce.netlify.app/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:ai.exa/exa",
+    "status": "documented",
+    "methods": [
+      "none"
+    ],
+    "setup_url": "https://exa.ai/mcp",
+    "credential_names": [],
+    "prerequisites": [
+      "MCP client supporting Streamable HTTP"
+    ],
+    "steps": [
+      "Add https://mcp.exa.ai/mcp directly to the MCP client. No API key is required."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://exa.ai/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Public service limits apply; account workflow not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Exa",
+    "remotes": [
+      {
+        "url": "https://mcp.exa.ai/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:airtable",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://support.airtable.com/articles/9897799762-using-the-airtable-mcp-server",
+    "credential_names": [],
+    "prerequisites": [
+      "Airtable account and bases",
+      "Organization permission to use third-party integrations"
+    ],
+    "steps": [
+      "Add https://mcp.airtable.com/mcp to an OAuth-capable MCP client.",
+      "Sign in to Airtable and authorize access only to the intended bases."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://support.airtable.com/articles/9897799762-using-the-airtable-mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The official overview also points to personal-access-token setup; this guide records the verified OAuth path only.",
+      "Permissions mirror the authorizing user; an administrator may need to allowlist the integration."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Airtable",
+    "remotes": [
+      {
+        "url": "https://mcp.airtable.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:alkemi",
+    "status": "documented",
+    "methods": [
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://github.com/alkemi-ai/alkemi-mcp",
+    "credential_names": [
+      "BEARER_TOKEN"
+    ],
+    "prerequisites": [
+      "Alkemi account and permission to the intended data products"
+    ],
+    "steps": [
+      "Obtain an API key at datalab.alkemi.ai.",
+      "Use that key as the bearer credential for https://api.alkemi.cloud/mcp; the operator wrapper calls it BEARER_TOKEN."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://github.com/alkemi-ai/alkemi-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "PRODUCT_ID is an optional data-product selector in the operator wrapper, not an OAuth scope."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Alkemi",
+    "remotes": [
+      {
+        "url": "https://api.alkemi.cloud/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:amplitude",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://amplitude.com/docs/amplitude-ai/amplitude-mcp",
+    "credential_names": [],
+    "prerequisites": [
+      "Amplitude organization access",
+      "Appropriate project permissions"
+    ],
+    "steps": [
+      "Add https://mcp.amplitude.com/mcp to an OAuth-capable MCP client.",
+      "Sign in to Amplitude and complete consent for the intended organization."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://github.com/amplitude/mcp-server-guide",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://amplitude.com/docs/amplitude-ai/amplitude-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The catalog route is US; EU data residency uses a different documented endpoint."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Amplitude",
+    "remotes": [
+      {
+        "url": "https://mcp.amplitude.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:apify",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://docs.apify.com/mcp",
+    "credential_names": [
+      "APIFY_TOKEN (optional API-token alternative)"
+    ],
+    "prerequisites": [
+      "Apify account for Actor runs and storage access",
+      "Remote MCP client"
+    ],
+    "steps": [
+      "Add https://mcp.apify.com/ and complete Apify OAuth sign-in.",
+      "Alternatively obtain an API token from Apify Console API & Integrations and supply Authorization: Bearer with that token."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.apify.com/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Default route requires authentication. Unauthenticated discovery-only tools require a separately restricted tools query parameter; not the default catalog route."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Apify",
+    "remotes": [
+      {
+        "url": "https://mcp.apify.com/",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:app.linear/linear",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://linear.app/docs/mcp",
+    "credential_names": [
+      "Linear API key or OAuth access token (optional alternative)"
+    ],
+    "prerequisites": [
+      "Linear account and workspace access"
+    ],
+    "steps": [
+      "Add https://mcp.linear.app/mcp and complete OAuth consent.",
+      "For token mode, supply an authorized Linear API key or OAuth access token using Authorization: Bearer."
+    ],
+    "scopes": [
+      "read"
+    ],
+    "sources": [
+      {
+        "url": "https://linear.app/docs/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Interactive OAuth supports dynamic client registration.",
+      "Request the read scope for read-only access; the standard route otherwise offers read/write tools."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Linear",
+    "remotes": [
+      {
+        "url": "https://mcp.linear.app/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:apple-developer-documentation-rag",
+    "status": "documented",
+    "methods": [
+      "none"
+    ],
+    "setup_url": "https://github.com/BingoWon/apple-rag-mcp",
+    "credential_names": [],
+    "prerequisites": [
+      "Streamable HTTP MCP client"
+    ],
+    "steps": [
+      "Add https://mcp.apple-rag.com to the MCP client; the operator permits initial queries without a token."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://github.com/BingoWon/apple-rag-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Community operator, not Apple. An optional MCP Token from apple-rag.com increases quota; its exact transport was not established in this review."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Apple Developer Documentation (RAG)",
+    "remotes": [
+      {
+        "url": "https://mcp.apple-rag.com",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:appwrite-docs",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://appwrite.io/docs/tooling/ai/vibe-coding/bolt",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://appwrite.io/docs/tooling/ai/vibe-coding/bolt",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Current Appwrite setup documentation describes the separate management server https://mcp.appwrite.io with OAuth; it does not establish authorization for catalog route https://mcp-for-docs.appwrite.io. Historical documentation or cached snippets must not be used to declare the old route unauthenticated."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Appwrite Docs",
+    "remotes": [
+      {
+        "url": "https://mcp-for-docs.appwrite.io",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:asana",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://developers.asana.com/docs/integrating-with-asanas-mcp-server",
+    "credential_names": [
+      "OAuth client ID",
+      "OAuth client secret"
+    ],
+    "prerequisites": [
+      "Asana account",
+      "Pre-registered MCP app",
+      "Client supporting OAuth and PKCE"
+    ],
+    "steps": [
+      "In Asana developer console create an MCP app; register the client redirect URI.",
+      "Configure permitted workspaces under Manage distribution.",
+      "Complete user OAuth authorization and send the resulting access token as Authorization: Bearer to https://mcp.asana.com/v2/mcp."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://developers.asana.com/docs/integrating-with-asanas-mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Dynamic client registration is not supported. MCP-app tokens cannot call the standard Asana API.",
+      "MCP apps do not require specific scopes; the guide says omit scope or use default."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Asana",
+    "remotes": [
+      {
+        "url": "https://mcp.asana.com/v2/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:astro-docs",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://docs.astro.build/en/guides/build-with-ai/",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.astro.build/en/guides/build-with-ai/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The operator documents this exact remote route and credential-free configuration examples, but an explicit authentication policy was not established; do not substitute third-party no-auth claims."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Astro Docs",
+    "remotes": [
+      {
+        "url": "https://mcp.docs.astro.build/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:beat-and-raise-sec-filings",
+    "status": "documented",
+    "methods": [
+      "none"
+    ],
+    "setup_url": "https://www.beatandraise.com/mcp",
+    "credential_names": [],
+    "prerequisites": [
+      "Remote MCP client"
+    ],
+    "steps": [
+      "Add https://mcp.beatandraise.com/mcp. The operator documents no signup or API key for current MCP use."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://www.beatandraise.com/mcp",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://beatandraise.com/terms",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Current free access is discretionary and may change."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Beat and Raise (SEC Filings)",
+    "remotes": [
+      {
+        "url": "https://mcp.beatandraise.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:behavioral-prediction",
+    "status": "documented",
+    "methods": [
+      "api_key"
+    ],
+    "setup_url": "https://chainaware.ai/learn/prediction-mcp/index.html",
+    "credential_names": [
+      "CHAINAWARE_API_KEY"
+    ],
+    "prerequisites": [
+      "SSE MCP client",
+      "ChainAware API key for production use"
+    ],
+    "steps": [
+      "Use https://prediction.mcp.chainaware.ai/sse.",
+      "Obtain production access from chainaware.ai/support; follow the operator instructions for the X-API-Key header and apiKey tool argument."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://chainaware.ai/learn/prediction-mcp/index.html",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Operator documentation says free testing needs no signup but production needs an API key. It separately says every tool call requires apiKey; client implementation must reconcile these instructions before production."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Behavioral Prediction",
+    "remotes": [
+      {
+        "url": "https://prediction.mcp.chainaware.ai/sse",
+        "transport": "sse"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:biocontext-knowledgebase",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://docs.kb.biocontext.ai/latest/",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.kb.biocontext.ai/latest/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The operator confirms this exact hosted route and fair-use access. Explicit authorization requirements remain unverified."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "BioContext Knowledgebase",
+    "remotes": [
+      {
+        "url": "https://mcp.biocontext.ai/mcp/",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:blooio-imessages",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://docs.blooio.com/authentication",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.blooio.com/authentication",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Retrieved operator API-key documentation covers the general Blooio API, not the catalog /v3 MCP route; do not assume identical authentication."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Blooio iMessages",
+    "remotes": [
+      {
+        "url": "https://mcp.blooio.com/v3",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:box",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://support.box.com/hc/ja/articles/43847256139923-Box-MCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E7%AE%A1%E7%90%86",
+    "credential_names": [
+      "OAuth client ID",
+      "OAuth client secret"
+    ],
+    "prerequisites": [
+      "Box account",
+      "Box administrator permission to configure the integration"
+    ],
+    "steps": [
+      "In Box Admin Console Integrations, configure Custom Box MCP Server.",
+      "Add Integration Credentials, register the client redirect URI and copy the generated client ID and secret.",
+      "Configure https://mcp.box.com in the MCP client and complete individual Box OAuth authorization."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://support.box.com/hc/ja/articles/43847256139923-Box-MCP%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%AE%E7%AE%A1%E7%90%86",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://support.box.com/hc/en-us/articles/43615620258195-Announcing-the-new-remote-Box-MCP-Server-GA-release",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The official administration guide says dynamic client registration is not supported.",
+      "Enable the documented Manage AI permission in the Box integration configuration; no machine scope identifier inferred.",
+      "The current administration guide says MCP availability is across plans, while the older GA announcement says Business and above. Confirm current plan/tool entitlements before enabling AI operations."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Box",
+    "remotes": [
+      {
+        "url": "https://mcp.box.com",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:bright-data",
+    "status": "documented",
+    "methods": [
+      "api_key"
+    ],
+    "setup_url": "https://docs.brightdata.com/products/mcp-server/remote/quickstart",
+    "credential_names": [
+      "Bright Data API token"
+    ],
+    "prerequisites": [
+      "Bright Data account"
+    ],
+    "steps": [
+      "Obtain the Bright Data API token through the account onboarding flow.",
+      "Configure the documented https://mcp.brightdata.com/mcp route with the token query parameter using private credential custody."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.brightdata.com/products/mcp-server/remote/quickstart",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "No username is required for MCP. Do not reuse native-proxy usernames.",
+      "Token-bearing URLs are credentials; do not place real values in catalog data or logs."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Bright Data",
+    "remotes": [
+      {
+        "url": "https://mcp.brightdata.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:browserless",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://docs.browserless.io/mcp/browserless-mcp-server/setup",
+    "credential_names": [
+      "Browserless API token (optional alternative)"
+    ],
+    "prerequisites": [
+      "Browserless account",
+      "MCP client"
+    ],
+    "steps": [
+      "Add https://mcp.browserless.io/mcp and sign in with Browserless OAuth.",
+      "Alternatively get an API token from the account dashboard and supply Authorization: Bearer."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.browserless.io/mcp/browserless-mcp-server/setup",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Vendor also supports a token query parameter; prefer its documented header mode where supported."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Browserless",
+    "remotes": [
+      {
+        "url": "https://mcp.browserless.io/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:canva",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://www.canva.dev/docs/apps/mcp/access/",
+    "credential_names": [
+      "OAuth client ID",
+      "OAuth client secret (Developer Portal path)"
+    ],
+    "prerequisites": [
+      "Canva account for each user",
+      "Canva-recognized OAuth client"
+    ],
+    "steps": [
+      "Create an app in the Canva Developer Portal, enable Canva MCP and register the client redirect URLs.",
+      "Configure the resulting client credentials and connect to https://mcp.canva.com/mcp.",
+      "Have each user sign in to Canva and authorize their own account."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://www.canva.dev/docs/apps/mcp/access/",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://www.canva.dev/docs/apps/mcp/verify-app/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Secretless CIMD clients use a separate redirect-URI allowlist application path. DCR is deprecated; do not assume unrestricted registration.",
+      "Some tools require Canva Pro or higher."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Canva",
+    "remotes": [
+      {
+        "url": "https://mcp.canva.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:clickup",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://developer.clickup.com/docs/connect-an-ai-assistant-to-clickups-mcp-server",
+    "credential_names": [],
+    "prerequisites": [
+      "ClickUp account and Workspace access",
+      "OAuth 2.1 with PKCE-capable MCP client"
+    ],
+    "steps": [
+      "Add https://mcp.clickup.com/mcp.",
+      "Complete ClickUp OAuth sign-in and authorize the intended Workspace."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://developer.clickup.com/docs/connect-an-ai-assistant-to-clickups-mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Vendor explicitly rejects own API keys or manually supplied access tokens for MCP authentication."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "ClickUp",
+    "remotes": [
+      {
+        "url": "https://mcp.clickup.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:close",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "api_key"
+    ],
+    "setup_url": "https://help.close.com/integrations/close-mcp-server",
+    "credential_names": [
+      "Close-API-Key (API-key alternative)",
+      "Close-Scope (permission selector)"
+    ],
+    "prerequisites": [
+      "Close account and organization access"
+    ],
+    "steps": [
+      "Add https://mcp.close.com/mcp and complete OAuth consent, selecting the intended organization and access.",
+      "Alternatively provide Close-API-Key plus Close-Scope headers using an authorized Close API key."
+    ],
+    "scopes": [
+      "mcp.read",
+      "mcp.write_safe",
+      "mcp.write_destructive"
+    ],
+    "sources": [
+      {
+        "url": "https://help.close.com/integrations/close-mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "OAuth supports dynamic client registration. Close-Scope controls read, write-safe or destructive tools."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Close",
+    "remotes": [
+      {
+        "url": "https://mcp.close.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:cloudflare",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://developers.cloudflare.com/agents/model-context-protocol/cloudflare/servers-for-cloudflare/",
+    "credential_names": [],
+    "prerequisites": [
+      "Cloudflare account with access to the intended resources"
+    ],
+    "steps": [
+      "Add https://mcp.cloudflare.com/mcp to the MCP client.",
+      "Sign in to Cloudflare and select permissions during OAuth authorization."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://developers.cloudflare.com/agents/model-context-protocol/cloudflare/servers-for-cloudflare/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Only this Cloudflare API endpoint is covered; other Cloudflare MCP servers are distinct routes."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Cloudflare",
+    "remotes": [
+      {
+        "url": "https://mcp.cloudflare.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:coingecko",
+    "status": "documented",
+    "methods": [
+      "none"
+    ],
+    "setup_url": "https://mcp.api.coingecko.com/",
+    "credential_names": [],
+    "prerequisites": [
+      "SSE-capable MCP client for the catalog route"
+    ],
+    "steps": [
+      "Add https://mcp.api.coingecko.com/sse without an API key."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://mcp.api.coingecko.com/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The vendor calls this beta public access with variable fair-use rate limits. The separate Pro route requires different setup."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "CoinGecko",
+    "remotes": [
+      {
+        "url": "https://mcp.api.coingecko.com/sse",
+        "transport": "sse"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:com.adpeekly/linkedin-ads-library",
+    "status": "documented",
+    "methods": [
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://adpeekly.com/mcp",
+    "credential_names": [
+      "AdPeekly API key"
+    ],
+    "prerequisites": [
+      "AdPeekly account"
+    ],
+    "steps": [
+      "Sign up on AdPeekly and obtain the key shown on the MCP page.",
+      "Use the operator-provided connector configuration for https://spkftjsjduykrvzeuzld.supabase.co/functions/v1/mcp-server; use bearer-header mode when supported."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://adpeekly.com/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The vendor also documents a /YOUR_KEY URL suffix. That suffix is secret material, not a public catalog URL.",
+      "This is an independent LinkedIn Ads Library service; no LinkedIn login, OAuth or ad account is required."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "LinkedIn Ads Library",
+    "remotes": [
+      {
+        "url": "https://spkftjsjduykrvzeuzld.supabase.co/functions/v1/mcp-server",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:company-ethics-information-boikot",
+    "status": "documented",
+    "methods": [
+      "none"
+    ],
+    "setup_url": "https://github.com/boikot-xyz/boikot",
+    "credential_names": [],
+    "prerequisites": [
+      "Remote MCP client"
+    ],
+    "steps": [
+      "Add https://mcp.boikot.xyz/mcp; the operator explicitly documents no authentication."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://github.com/boikot-xyz/boikot",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Community company-ethics lookup service, not an account connection."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Company Ethics Information (Boikot)",
+    "remotes": [
+      {
+        "url": "https://mcp.boikot.xyz/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:confluence",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://support.atlassian.com/atlassian-ai-gateway/docs/get-started-with-the-atlassian-remote-mcp-server/",
+    "credential_names": [],
+    "prerequisites": [
+      "Atlassian account with Confluence access",
+      "Administrator policy allowing the MCP connection"
+    ],
+    "steps": [
+      "Add https://mcp.atlassian.com/v2/mcp.",
+      "Complete Atlassian OAuth authorization with the intended account and review granted product access."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://support.atlassian.com/atlassian-ai-gateway/docs/get-started-with-the-atlassian-remote-mcp-server/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "This shared Atlassian endpoint can expose other Atlassian products according to permissions.",
+      "Vendor also offers optional API-token authentication; this guide records only the verified OAuth path. Some enriched tools consume Rovo credits."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Confluence",
+    "remotes": [
+      {
+        "url": "https://mcp.atlassian.com/v2/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:contextual-ai",
+    "status": "documented",
+    "methods": [
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://docs.contextual.ai/quickstarts/mcp-server",
+    "credential_names": [
+      "Contextual AI API key",
+      "Contextual Agent ID"
+    ],
+    "prerequisites": [
+      "Contextual AI account and authorized RAG agent"
+    ],
+    "steps": [
+      "Obtain an API key and the intended agent ID in Contextual AI.",
+      "Configure https://mcp.app.contextual.ai/mcp/ with Authorization: Bearer containing the API key.",
+      "When using query, supply the intended agent_id and follow the documented api_key tool parameter contract."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.contextual.ai/quickstarts/mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The operator example uses both a Bearer header and an api_key query-tool argument. Keep credentials in client secret custody rather than conversational text."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Contextual AI",
+    "remotes": [
+      {
+        "url": "https://mcp.app.contextual.ai/mcp/",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:coresignal",
+    "status": "documented",
+    "methods": [
+      "api_key"
+    ],
+    "setup_url": "https://coresignal.com/blog/coresignal-mcp-server/",
+    "credential_names": [
+      "Coresignal API key"
+    ],
+    "prerequisites": [
+      "Coresignal account and available data credits"
+    ],
+    "steps": [
+      "Get an API key from the Coresignal account.",
+      "Send it in the apikey header to https://mcp.coresignal.com/mcp."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://coresignal.com/blog/coresignal-mcp-server/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Legacy /mcp route uses API-key setup documented by the vendor. New /mcp/v2 OAuth documentation must not be substituted for this catalog route."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Coresignal",
+    "remotes": [
+      {
+        "url": "https://mcp.coresignal.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:crossbeam",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://help.crossbeam.com/en/articles/12601327-crossbeam-mcp-server",
+    "credential_names": [],
+    "prerequisites": [
+      "Crossbeam Full Access or Sales seat",
+      "Role allowed to use MCP",
+      "Available Crossbeam credits"
+    ],
+    "steps": [
+      "Add https://mcp.crossbeam.com/mcp.",
+      "Complete OAuth 2.1 PKCE sign-in and consent."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://help.crossbeam.com/en/articles/12601327-crossbeam-mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The vendor documents dynamic client registration and read-only tools."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Crossbeam",
+    "remotes": [
+      {
+        "url": "https://mcp.crossbeam.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:currency-conversion",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "No reliable first-party authorization instructions for this exact catalog route were established in this bounded review. Do not infer authentication from reachability or from another route."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Currency Conversion",
+    "remotes": [
+      {
+        "url": "https://currency-mcp.wesbos.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:currenttimeutc",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://github.com/jairampatel/currenttimeutc-mcp",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://github.com/jairampatel/currenttimeutc-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Operator repository names this route and shows calls without credentials, but does not state an explicit MCP authorization policy."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "CurrentTimeUTC",
+    "remotes": [
+      {
+        "url": "https://a.currenttimeutc.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:deepwiki",
+    "status": "documented",
+    "methods": [
+      "none"
+    ],
+    "setup_url": "https://docs.devin.ai/work-with-devin/deepwiki-mcp",
+    "credential_names": [],
+    "prerequisites": [
+      "Remote MCP client"
+    ],
+    "steps": [
+      "Add https://mcp.deepwiki.com/mcp. No authentication is required for public repository documentation."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.devin.ai/work-with-devin/deepwiki-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Private repository access is outside this public DeepWiki route."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "DeepWiki",
+    "remotes": [
+      {
+        "url": "https://mcp.deepwiki.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:devcycle",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://docs.devcycle.com/cli/docs/mcp/",
+    "credential_names": [],
+    "prerequisites": [
+      "DevCycle account"
+    ],
+    "steps": [
+      "Add https://mcp.devcycle.com/mcp.",
+      "Complete DevCycle OAuth authentication, then choose the intended project with select_project."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.devcycle.com/cli/docs/mcp/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Remote route uses OAuth. Local CLI client-ID/client-secret environment configuration does not apply to this hosted route."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "DevCycle",
+    "remotes": [
+      {
+        "url": "https://mcp.devcycle.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:dice-rolling",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "No reliable first-party authorization instructions for this exact catalog route were established in this bounded review. Do not infer authentication from reachability or from another route."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Dice Rolling",
+    "remotes": [
+      {
+        "url": "https://dice-rolling-mcp.vercel.app/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:dropbox",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://help.dropbox.com/integrations/connect-dropbox-mcp-server",
+    "credential_names": [
+      "Dropbox app key (OAuth client ID)",
+      "Dropbox app secret (OAuth client secret)"
+    ],
+    "prerequisites": [
+      "Dropbox account",
+      "Custom MCP client: registered Dropbox scoped-access app configured for Full Dropbox and the actual client OAuth redirect URI"
+    ],
+    "steps": [
+      "For a custom client such as Zati, create an app in Dropbox App Console using Scoped access and Full Dropbox.",
+      "Enable the permissions documented in the official Other MCP clients section and register the exact client OAuth redirect URI.",
+      "Configure https://mcp.dropbox.com/mcp with the app key and app secret; complete individual Dropbox OAuth authorization."
+    ],
+    "scopes": [
+      "files.metadata.read",
+      "files.content.read",
+      "files.content.write",
+      "sharing.write",
+      "account_info.read",
+      "sharing.read",
+      "file_requests.read",
+      "file_requests.write"
+    ],
+    "sources": [
+      {
+        "url": "https://help.dropbox.com/integrations/connect-dropbox-mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Popular pre-integrated clients have separate illustrated setup. Do not assume their managed OAuth client identity is available to Zati.",
+      "The official custom-client guide lists the permissions above; client/tool requirements must be reviewed before authorization.",
+      "Paper-tool availability varies by client."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Dropbox",
+    "remotes": [
+      {
+        "url": "https://mcp.dropbox.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:excel-to-json",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://s.wtsolutions.cn/excel-to-json-mcp",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://s.wtsolutions.cn/excel-to-json-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Operator documents this exact route as SSE, while the catalog labels it Streamable HTTP. Setup examples omit credentials but do not explicitly state no authentication."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Excel to JSON",
+    "remotes": [
+      {
+        "url": "https://mcp.wtsolutions.cn/excel-to-json-mcp-sse",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:flight-search",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "No reliable first-party authorization instructions for this exact catalog route were established in this bounded review. Do not infer authentication from reachability or from another route."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Flight Search",
+    "remotes": [
+      {
+        "url": "https://flights.fctolabs.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:fulcra-context",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://www.fulcradynamics.com/developers",
+    "credential_names": [],
+    "prerequisites": [
+      "Fulcra Context account or first-connection account creation",
+      "Streamable HTTP MCP client"
+    ],
+    "steps": [
+      "Add https://mcp.fulcradynamics.com/mcp.",
+      "Complete Fulcra OAuth sign-in with the intended Context account and review data access."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://www.fulcradynamics.com/developers",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "No local server installation is required for this hosted route."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Fulcra Context",
+    "remotes": [
+      {
+        "url": "https://mcp.fulcradynamics.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:galileo",
+    "status": "documented",
+    "methods": [
+      "api_key"
+    ],
+    "setup_url": "https://docs.galileo.ai/getting-started/mcp/setup-galileo-mcp",
+    "credential_names": [
+      "Galileo-API-Key"
+    ],
+    "prerequisites": [
+      "Galileo account and API key"
+    ],
+    "steps": [
+      "Generate an API key from the Galileo API keys page.",
+      "Configure https://api.galileo.ai/mcp/http/mcp using the Galileo-API-Key header and Accept: text/event-stream."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.galileo.ai/getting-started/mcp/setup-galileo-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Self-hosted Galileo deployments use a different deployment-specific URL; this guide covers the catalog hosted endpoint."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Galileo",
+    "remotes": [
+      {
+        "url": "https://api.galileo.ai/mcp/http/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:gitlab",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "bearer"
+    ],
+    "setup_url": "https://docs.gitlab.com/user/model_context_protocol/mcp_server/",
+    "credential_names": [
+      "OAuth client ID (only when pre-registration is required)",
+      "Fine-grained personal access token (optional alternative)"
+    ],
+    "prerequisites": [
+      "GitLab account",
+      "MCP access enabled for the top-level group on GitLab.com"
+    ],
+    "steps": [
+      "Add https://gitlab.com/api/v4/mcp and complete OAuth authorization.",
+      "If dynamic client registration is disabled, register a non-confidential OAuth app with the mcp scope and the exact client redirect URI.",
+      "Alternatively use the documented fine-grained personal access token with MCP tool resource Execute permission."
+    ],
+    "scopes": [
+      "mcp"
+    ],
+    "sources": [
+      {
+        "url": "https://docs.gitlab.com/user/model_context_protocol/mcp_server/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Legacy personal, project and group access tokens do not qualify, even with api scope."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "GitLab",
+    "remotes": [
+      {
+        "url": "https://gitlab.com/api/v4/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:gitmcp",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://gitmcp.io/",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://gitmcp.io/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Operator documents public repository access and the /docs route, but an explicit authentication policy was not found in the retrieved page."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "GitMCP",
+    "remotes": [
+      {
+        "url": "https://gitmcp.io/docs",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:gohighlevel",
+    "status": "documented",
+    "methods": [
+      "bearer"
+    ],
+    "setup_url": "https://help.gohighlevel.com/support/solutions/articles/155000005741-how-to-setup-and-use-the-highlevel-mcp-server",
+    "credential_names": [
+      "Private Integration Token",
+      "locationId"
+    ],
+    "prerequisites": [
+      "HighLevel sub-account access",
+      "Private Integration Token with required scopes",
+      "Sub-account/location ID"
+    ],
+    "steps": [
+      "In the intended sub-account open Settings > Private Integrations and create an integration with the needed scopes.",
+      "Configure https://services.leadconnectorhq.com/mcp/ with Authorization: Bearer containing that token and the locationId header."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://help.gohighlevel.com/support/solutions/articles/155000005741-how-to-setup-and-use-the-highlevel-mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The newer /mcp/openai/v2/ OAuth endpoint is a different route. Do not apply its authentication instructions to this catalog URL."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "GoHighLevel",
+    "remotes": [
+      {
+        "url": "https://services.leadconnectorhq.com/mcp/",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:google-calendar",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://developers.google.com/workspace/calendar/api/guides/configure-mcp-server",
+    "credential_names": [
+      "OAuth client ID",
+      "OAuth client secret"
+    ],
+    "prerequisites": [
+      "Membership in the Google Workspace Developer Preview Program",
+      "Google Cloud project and Google account",
+      "Required Calendar APIs and Google Calendar MCP API enabled",
+      "OAuth consent configuration"
+    ],
+    "steps": [
+      "Enable the required Calendar APIs and calendarmcp.googleapis.com in the Google Cloud project.",
+      "Configure OAuth consent and required scopes; create the OAuth client with the actual client redirect URI and select Use this client for an AI-powered agent.",
+      "Configure https://calendarmcp.googleapis.com/mcp/v1 using that OAuth client and complete user consent."
+    ],
+    "scopes": [
+      "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
+      "https://www.googleapis.com/auth/calendar.events.freebusy",
+      "https://www.googleapis.com/auth/calendar.events.readonly"
+    ],
+    "sources": [
+      {
+        "url": "https://developers.google.com/workspace/calendar/api/guides/configure-mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Register the actual Zati callback URI; do not copy another product callback URI.",
+      "Offline refresh requires access_type=offline; offline_access scope alone is insufficient."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Google Calendar",
+    "remotes": [
+      {
+        "url": "https://calendarmcp.googleapis.com/mcp/v1",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:google-drive",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://developers.google.com/workspace/drive/api/guides/configure-mcp-server",
+    "credential_names": [
+      "OAUTH_CLIENT_ID",
+      "OAUTH_CLIENT_SECRET"
+    ],
+    "prerequisites": [
+      "Google Workspace Developer Preview Program membership",
+      "Google Cloud project",
+      "MCP client with OAuth support"
+    ],
+    "steps": [
+      "Enable drive.googleapis.com and drivemcp.googleapis.com in the Google Cloud project.",
+      "Configure Google Auth Platform branding, audience and the documented MCP scopes.",
+      "Create a web OAuth client with the chosen MCP client callback; select Use this client for an AI-powered agent.",
+      "Configure the client ID and secret in the MCP client, connect to the catalog remote URL and complete Google sign-in."
+    ],
+    "scopes": [
+      "https://www.googleapis.com/auth/drive.readonly",
+      "https://www.googleapis.com/auth/drive.file"
+    ],
+    "sources": [
+      {
+        "url": "https://developers.google.com/workspace/drive/api/guides/configure-mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Scopes are the setup guide's documented pair; request only permissions required by the intended tools.",
+      "For refresh tokens Google documents access_type=offline; offline_access alone is insufficient."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Google Drive",
+    "remotes": [
+      {
+        "url": "https://drivemcp.googleapis.com/mcp/v1",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:google-gmail",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://developers.google.com/workspace/gmail/api/guides/configure-mcp-server",
+    "credential_names": [
+      "OAUTH_CLIENT_ID",
+      "OAUTH_CLIENT_SECRET"
+    ],
+    "prerequisites": [
+      "Google Workspace Developer Preview Program membership",
+      "Google Cloud project",
+      "MCP client with OAuth support"
+    ],
+    "steps": [
+      "Enable gmail.googleapis.com and gmailmcp.googleapis.com in the Google Cloud project.",
+      "Configure Google Auth Platform branding, audience and the documented MCP scopes.",
+      "Create a web OAuth client with the chosen MCP client callback; select Use this client for an AI-powered agent.",
+      "Configure the client ID and secret in the MCP client, connect to the catalog remote URL and complete Google sign-in."
+    ],
+    "scopes": [
+      "https://www.googleapis.com/auth/gmail.readonly",
+      "https://www.googleapis.com/auth/gmail.compose"
+    ],
+    "sources": [
+      {
+        "url": "https://developers.google.com/workspace/gmail/api/guides/configure-mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Scopes are the setup guide's documented pair; request only permissions required by the intended tools.",
+      "For refresh tokens Google documents access_type=offline; offline_access alone is insufficient."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Gmail",
+    "remotes": [
+      {
+        "url": "https://gmailmcp.googleapis.com/mcp/v1",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:googleads",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://insights.hireotto.com/p/connect-google-ads-to-claude-using-mcp",
+    "credential_names": [],
+    "prerequisites": [
+      "Google account with access to the intended Google Ads accounts"
+    ],
+    "steps": [
+      "Add https://googleads.hireotto.com/mcp to the MCP client.",
+      "Initiate Google Ads authentication, open the returned OAuth link and sign in.",
+      "Review permissions, select the Google Ads accounts and save the selection."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://insights.hireotto.com/p/connect-google-ads-to-claude-using-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "This route is operated by HireOtto, not Google's separate official self-hosted MCP.",
+      "The operator guide does not require a Google Cloud project or developer token."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "GoogleAds",
+    "remotes": [
+      {
+        "url": "https://googleads.hireotto.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:goweb3",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://github.com/roadahead1/goweb3_mcp_server",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://github.com/roadahead1/goweb3_mcp_server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Operator repository documents the GoWeb3 remote route and an unauthenticated-looking client example, but does not explicitly establish authentication requirements; no credential method inferred."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "GoWeb3",
+    "remotes": [
+      {
+        "url": "https://mcp.goweb3.fyi/mcp/",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:gralio",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://market.gralio.ai/mcp",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://market.gralio.ai/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Operator page now documents https://market.gralio.ai/mcp/sse, while the catalog route is https://gralio.ai/mcp/sse. Exact endpoint equivalence and authentication requirements were not established."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Gralio",
+    "remotes": [
+      {
+        "url": "https://gralio.ai/mcp/sse",
+        "transport": "sse"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:grep",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://vercel.com/blog/grep-a-million-github-repositories-via-mcp",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://vercel.com/blog/grep-a-million-github-repositories-via-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Operator documents https://mcp.grep.app with credential-free configuration examples. Explicit authentication requirements were not stated; no none/auth assumption promoted."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Grep",
+    "remotes": [
+      {
+        "url": "https://mcp.grep.app",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:gumlet",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://docs.gumlet.com/resources/mcp",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.gumlet.com/resources/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Current operator guide documents https://mcp.gumlet.com/mcp/v1 with GUMLET_API_KEY; catalog route is https://docs.gumlet.com/mcp. Exact-route equivalence was not established; do not send a key to the catalog route without reconciliation."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Gumlet",
+    "remotes": [
+      {
+        "url": "https://docs.gumlet.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:higgsfield",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://higgsfield.ai/creator-hub/help-center/integrations/how-do-i-connect-higgsfield-to-ai-agent",
+    "credential_names": [],
+    "prerequisites": [
+      "Active paid Higgsfield subscription"
+    ],
+    "steps": [
+      "Add https://mcp.higgsfield.ai/mcp as a custom connector.",
+      "Use Connect, sign in in the Higgsfield authorization window and authorize."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://higgsfield.ai/creator-hub/help-center/integrations/how-do-i-connect-higgsfield-to-ai-agent",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://mcp.higgsfield.ai/.well-known/oauth-protected-resource/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Operator protected-resource metadata identifies the exact catalog MCP resource and authorization-code PKCE flow.",
+      "No API key is required; exact host redirect/client registration requirements must follow discovered provider metadata."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Higgsfield",
+    "remotes": [
+      {
+        "url": "https://mcp.higgsfield.ai/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:himalayas-remote-jobs",
+    "status": "documented",
+    "methods": [
+      "none",
+      "oauth2"
+    ],
+    "setup_url": "https://himalayas.app/docs/ai-agents",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [
+      "Connect to https://mcp.himalayas.app/mcp for public job, company and salary tools.",
+      "For personal profiles, application tracking or employer features, complete the Himalayas account OAuth consent flow."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://himalayas.app/docs/ai-agents",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Public tools require no account or API key; personal and employer tools use OAuth 2.1 with PKCE."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Himalayas Remote Jobs",
+    "remotes": [
+      {
+        "url": "https://mcp.himalayas.app/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:hmr-docs",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "Direct operator documentation for authentication on this exact catalog route was not established in the bounded research pass."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "HMR Docs",
+    "remotes": [
+      {
+        "url": "https://pyth-on-line.promplate.dev/hmr/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:hubspot",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://developers.hubspot.com/docs/apps/developer-platform/build-apps/integrate-with-the-remote-hubspot-mcp-server",
+    "credential_names": [
+      "OAuth client ID",
+      "OAuth client secret"
+    ],
+    "prerequisites": [
+      "HubSpot account",
+      "MCP client implementing OAuth with PKCE"
+    ],
+    "steps": [
+      "Create a HubSpot MCP auth app and configure its redirect URL.",
+      "Configure the MCP client with https://mcp.hubspot.com and that app's client ID, client secret and matching redirect URL.",
+      "Complete OAuth with PKCE, select the HubSpot account and review permissions."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://developers.hubspot.com/docs/apps/developer-platform/build-apps/integrate-with-the-remote-hubspot-mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "This is the remote CRM MCP, distinct from HubSpot's developer MCP.",
+      "Permission availability follows the authorizing user; exact scope strings were not established."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "HubSpot",
+    "remotes": [
+      {
+        "url": "https://mcp.hubspot.com",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:hugging-face",
+    "status": "documented",
+    "methods": [
+      "none",
+      "oauth2",
+      "bearer"
+    ],
+    "setup_url": "https://huggingface.co/docs/hub/agents-mcp",
+    "credential_names": [
+      "HF_TOKEN"
+    ],
+    "prerequisites": [
+      "Hugging Face account for personalized/authenticated tools"
+    ],
+    "steps": [
+      "Open Hugging Face MCP settings while signed in and select the intended client.",
+      "Use its generated configuration; anonymous access supplies default public tools.",
+      "For account-specific tools use the documented HF_TOKEN or OAuth configuration, including the documented ?login opt-in when applicable."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://huggingface.co/docs/hub/agents-mcp",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://github.com/huggingface/blog/blob/main/building-hf-mcp.md",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The first-party engineering article explicitly identifies hf.co/mcp and describes anonymous, token and OAuth access."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Hugging Face",
+    "remotes": [
+      {
+        "url": "https://hf.co/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:ilert",
+    "status": "documented",
+    "methods": [
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://docs.ilert.com/developer-docs/mcp-server/connect-ilert-to-an-llm",
+    "credential_names": [
+      "ILERT_AUTH_TOKEN"
+    ],
+    "prerequisites": [
+      "ilert account"
+    ],
+    "steps": [
+      "In ilert, open Profile > API Keys and create a user API key.",
+      "Configure https://mcp.ilert.com/mcp with Authorization: Bearer followed by that key."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.ilert.com/developer-docs/mcp-server/connect-ilert-to-an-llm",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "ilert",
+    "remotes": [
+      {
+        "url": "https://mcp.ilert.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:imagineart",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://www.imagine.art/mcp",
+    "credential_names": [],
+    "prerequisites": [
+      "ImagineArt account"
+    ],
+    "steps": [
+      "Add https://mcp.imagine.art as the remote server.",
+      "Complete the browser OAuth sign-in using the ImagineArt account."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://www.imagine.art/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "No API key is required. Generations consume the account's credits."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "ImagineArt",
+    "remotes": [
+      {
+        "url": "https://mcp.imagine.art",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:intercom",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "bearer"
+    ],
+    "setup_url": "https://developers.intercom.com/docs/guides/mcp",
+    "credential_names": [
+      "AUTH_HEADER"
+    ],
+    "prerequisites": [
+      "Intercom account with permission for the intended resources"
+    ],
+    "steps": [
+      "Connect to the documented Intercom MCP transport and complete browser OAuth, the recommended method.",
+      "Alternatively configure the API token as a Bearer credential in the MCP client."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://developers.intercom.com/docs/guides/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The guide documents both Streamable HTTP and the catalog SSE fallback; permission requirements depend on tools."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Intercom",
+    "remotes": [
+      {
+        "url": "https://mcp.intercom.com/sse",
+        "transport": "sse"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:io-aerospace",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://docs-mcp.io-aerospace.org/get-started/",
+    "credential_names": [],
+    "prerequisites": [
+      "An active IO Aerospace license for the signing-in email"
+    ],
+    "steps": [
+      "Use the full https://mcp.io-aerospace.org/mcp endpoint.",
+      "Let the client discover OAuth metadata and open WorkOS AuthKit sign-in.",
+      "Use the subscribed email address and the emailed one-time code."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs-mcp.io-aerospace.org/get-started/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "A valid sign-in alone does not grant a license. No API key is required."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "IO Aerospace",
+    "remotes": [
+      {
+        "url": "https://mcp.io-aerospace.org/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:io.github.github/github-mcp-server",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "bearer"
+    ],
+    "setup_url": "https://github.com/github/github-mcp-server/blob/main/docs/host-integration.md",
+    "credential_names": [],
+    "prerequisites": [
+      "GitHub account",
+      "Organization approval where its app access policy requires it"
+    ],
+    "steps": [
+      "Use a valid GitHub access token in the Authorization header.",
+      "For OAuth, configure an appropriate GitHub App or OAuth App for the MCP host and honor server discovery metadata.",
+      "Alternatively supply a pre-generated PAT through the client's secure credential configuration."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://github.com/github/github-mcp-server/blob/main/docs/host-integration.md",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Remote GitHub MCP does not support Dynamic Client Registration; the MCP host owns OAuth application setup.",
+      "Do not copy local stdio OAuth flags into the remote integration."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "GitHub",
+    "remotes": [
+      {
+        "url": "https://api.githubcopilot.com/mcp/",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:jira",
+    "status": "documented",
+    "methods": [
+      "api_key",
+      "basic",
+      "bearer"
+    ],
+    "setup_url": "https://support.atlassian.com/atlassian-ai-gateway/docs/configure-authentication-via-api-token/",
+    "credential_names": [],
+    "prerequisites": [
+      "Atlassian account and access to the intended site"
+    ],
+    "steps": [
+      "Ask the Atlassian administrator to enable token authentication if that mode is desired.",
+      "For a personal API token, follow the documented Basic authentication format using the account email and token.",
+      "For a service account API key, use the documented Authorization: Bearer API-key format.",
+      "Connect to https://mcp.atlassian.com/v2/mcp; respect the token scopes and explicitly selected cloudId."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://support.atlassian.com/atlassian-ai-gateway/docs/configure-authentication-via-api-token/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Do not send a personal API token as a Bearer credential: this guide distinguishes Basic personal-token mode from Bearer service-account API keys.",
+      "The guide links separate OAuth 2.1 setup; token mode may expose fewer tools."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Jira",
+    "remotes": [
+      {
+        "url": "https://mcp.atlassian.com/v2/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:justcall",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://developer.justcall.io/reference/authentication",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://developer.justcall.io/reference/authentication",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "JustCall REST API key/secret instructions retrieved, but authentication for the exact MCP operator route https://mcp.justcall.host/mcp was not established. REST credentials are not substituted."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "JustCall",
+    "remotes": [
+      {
+        "url": "https://mcp.justcall.host/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:kismet-travel",
+    "status": "documented",
+    "methods": [
+      "none",
+      "oauth2"
+    ],
+    "setup_url": "https://kismet.travel/connector",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [
+      "Connect to https://mcp.kismet.travel/mcp to browse and compare stays without an account.",
+      "For personal profiles and synchronized shortlists, initiate the optional Kismet OAuth sign-in."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://kismet.travel/connector",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Guest connector only. Developer MCP registration and developer:mcp scopes belong to a separate endpoint and are not copied here."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Kismet Travel",
+    "remotes": [
+      {
+        "url": "https://mcp.kismet.travel/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:kiwi-flight-search",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "Direct operator documentation for authentication on this exact catalog route was not established in the bounded research pass."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Kiwi Flight Search",
+    "remotes": [
+      {
+        "url": "https://mcp.kiwi.com",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:laei-ro",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "Direct operator documentation for authentication on this exact catalog route was not established in the bounded research pass."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "LaEi.ro",
+    "remotes": [
+      {
+        "url": "https://laei.ro/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:langchain-hub",
+    "status": "documented",
+    "methods": [
+      "none"
+    ],
+    "setup_url": "https://github.com/mcpcentral-io/langchain-prompts-mcp-server",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [
+      "Connect to https://mcp.prompts.mcpcentral.io/mcp to access the public prompt library without authentication."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://github.com/mcpcentral-io/langchain-prompts-mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Operator is MCP Central, not the LangChain vendor.",
+      "This guide covers only explicitly documented public unauthenticated access. The README mentions private API-key access, but its remote HTTP credential mapping is not established; private access remains unqualified."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "LangChain Hub",
+    "remotes": [
+      {
+        "url": "https://mcp.prompts.mcpcentral.io/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:linear-read-only",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://linear.app/docs/mcp",
+    "credential_names": [],
+    "prerequisites": [
+      "Linear account with access to the intended workspace"
+    ],
+    "steps": [
+      "Connect specifically to https://mcp.linear.app/mcp/readonly.",
+      "Complete OAuth 2.1 sign-in, or pass a supported Linear API key/OAuth token in Authorization: Bearer.",
+      "For an API key, restrict its permissions to Read."
+    ],
+    "scopes": [
+      "read"
+    ],
+    "sources": [
+      {
+        "url": "https://linear.app/docs/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The /readonly endpoint exposes read tools only; read is also a documented OAuth scope for the general endpoint."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Linear (read-only)",
+    "remotes": [
+      {
+        "url": "https://mcp.linear.app/mcp/readonly",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:listenetic",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "Direct operator documentation for authentication on this exact catalog route was not established in the bounded research pass."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Listenetic",
+    "remotes": [
+      {
+        "url": "https://mcp.listenetic.com/v1/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:lunarcrush",
+    "status": "documented",
+    "methods": [
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://lunarcrush.com/support",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [
+      "Obtain the account's LunarCrush API key.",
+      "Configure https://lunarcrush.ai/mcp with Authorization: Bearer followed by the key."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://lunarcrush.com/support",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The retrieved operator support example establishes the exact route and header; key issuance prerequisites and OAuth scope strings were not established."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "LunarCrush",
+    "remotes": [
+      {
+        "url": "https://lunarcrush.ai/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:mailerlite",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://developers.mailerlite.com/mcp",
+    "credential_names": [],
+    "prerequisites": [
+      "Mailerlite account"
+    ],
+    "steps": [
+      "Add https://mcp.mailerlite.com/mcp as a remote connector.",
+      "Follow the provider sign-in, choose the account and review the authorization request."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://developers.mailerlite.com/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "No developer app registration or exact scope strings were established by this guide."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "MailerLite",
+    "remotes": [
+      {
+        "url": "https://mcp.mailerlite.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:mailersend",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://developers.mailersend.com/mcp",
+    "credential_names": [],
+    "prerequisites": [
+      "Mailersend account"
+    ],
+    "steps": [
+      "Add https://mcp.mailersend.com/mcp as a remote connector.",
+      "Follow the provider sign-in, choose the account and review the authorization request."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://developers.mailersend.com/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "No developer app registration or exact scope strings were established by this guide."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "MailerSend",
+    "remotes": [
+      {
+        "url": "https://mcp.mailersend.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:make",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "Make intermediary excluded by user request. No Make onboarding/authentication route researched or recommended."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Make",
+    "remotes": [
+      {
+        "url": "https://mcp.make.com",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:marketo-engage",
+    "status": "documented",
+    "methods": [
+      "api_key"
+    ],
+    "setup_url": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/mcp-server",
+    "credential_names": [
+      "X-Marketo-Client-Id",
+      "X-Marketo-Client-Secret",
+      "X-Marketo-Munchkin-Id"
+    ],
+    "prerequisites": [
+      "Marketo Engage instance and API credentials with required permissions"
+    ],
+    "steps": [
+      "Obtain Marketo external-API client credentials and the Munchkin account ID using the linked Marketo authentication guidance.",
+      "Configure https://marketo-mcp.adobe.io/mcp with X-Marketo-Client-Id, X-Marketo-Client-Secret and X-Marketo-Munchkin-Id headers."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://experienceleague.adobe.com/en/docs/marketo-developer/marketo/mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The MCP wire authentication sends all three custom credential headers on every request. This is not an interactive OAuth browser-consent flow."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Marketo Engage",
+    "remotes": [
+      {
+        "url": "https://marketo-mcp.adobe.io/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:microsoft-entra-microsoft-365",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://learn.microsoft.com/en-us/graph/mcp-server/get-started",
+    "credential_names": [],
+    "prerequisites": [
+      "Microsoft Entra tenant",
+      "Application Administrator or Cloud Application Administrator for registration/consent"
+    ],
+    "steps": [
+      "Have an authorized tenant administrator provision the Microsoft MCP Server for Enterprise as documented.",
+      "For a custom MCP host, register a single-tenant application with the host's platform and callback URI.",
+      "Record application and tenant IDs, select scenario-specific delegated MCP permissions and obtain administrator consent.",
+      "Configure the client for https://mcp.svc.cloud.microsoft/enterprise and complete user sign-in."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://learn.microsoft.com/en-us/graph/mcp-server/get-started",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://learn.microsoft.com/graph/mcp-server/overview",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The retrieved guide supports delegated user-interactive permissions only; app-only workflows are not supported.",
+      "Scope selection depends on the intended Graph operation; no blanket permission set is prescribed here."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Microsoft Entra (Microsoft 365)",
+    "remotes": [
+      {
+        "url": "https://mcp.svc.cloud.microsoft/enterprise",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:microsoft-learn",
+    "status": "documented",
+    "methods": [
+      "none"
+    ],
+    "setup_url": "https://learn.microsoft.com/training/support/mcp",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [
+      "Add https://learn.microsoft.com/api/mcp to a Streamable HTTP MCP client."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://learn.microsoft.com/training/support/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Public documentation service; no authentication is required. It does not expose user profile or training history."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Microsoft Learn",
+    "remotes": [
+      {
+        "url": "https://learn.microsoft.com/api/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:mobile-text-alerts",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://developers.mobile-text-alerts.com/mcp-servers/actions-mcp-server",
+    "credential_names": [],
+    "prerequisites": [
+      "Mobile Text Alerts account"
+    ],
+    "steps": [
+      "Add https://mcp.mobile-text-alerts.com/mcp.",
+      "Complete the recommended OAuth 2.1 account sign-in and consent flow, or securely configure an API key as Authorization: Bearer."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://developers.mobile-text-alerts.com/mcp-servers/actions-mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The operator explicitly documents OAuth Dynamic Client Registration for this route."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Mobile Text Alerts",
+    "remotes": [
+      {
+        "url": "https://mcp.mobile-text-alerts.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:monday",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://developer.monday.com/api-reference/docs/build-on-monday-with-ai",
+    "credential_names": [],
+    "prerequisites": [
+      "monday.com account"
+    ],
+    "steps": [
+      "Connect to https://mcp.monday.com/mcp and complete OAuth sign-in.",
+      "For personal use/prototyping, obtain a personal API token from Developers > My access tokens and use Authorization: Bearer."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://developer.monday.com/api-reference/docs/build-on-monday-with-ai",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://developer.monday.com/api-reference/docs/mcp-api-token",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Personal tokens mirror UI permissions and are described for personal development, not shared production integrations.",
+      "The hosted Platform MCP is distinct from the local Apps MCP."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "monday.com",
+    "remotes": [
+      {
+        "url": "https://mcp.monday.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:neon",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://neon.com/guides/neon-mcp-server-github-copilot-vs-code",
+    "credential_names": [],
+    "prerequisites": [
+      "Neon account"
+    ],
+    "steps": [
+      "Use the catalog https://mcp.neon.tech/sse endpoint only when the MCP client needs the deprecated SSE transport.",
+      "Complete the Neon browser OAuth consent flow."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://neon.com/guides/neon-mcp-server-github-copilot-vs-code",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "API-key authentication is explicitly unsupported on SSE. Current recommended Streamable HTTP endpoint is https://mcp.neon.tech/mcp; changing route requires explicit catalog reconciliation."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Neon",
+    "remotes": [
+      {
+        "url": "https://mcp.neon.tech/sse",
+        "transport": "sse"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:notion",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://developers.notion.com/guides/mcp/get-started-with-mcp",
+    "credential_names": [],
+    "prerequisites": [
+      "Notion account with access to the intended workspace"
+    ],
+    "steps": [
+      "Add https://mcp.notion.com/mcp as the remote server.",
+      "Run the client's authentication action and complete OAuth to the intended Notion workspace."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://developers.notion.com/guides/mcp/get-started-with-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The hosted route is OAuth; local notion-mcp-server/internal integration token setup is a different deployment and is not substituted."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Notion",
+    "remotes": [
+      {
+        "url": "https://mcp.notion.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:opalstack",
+    "status": "documented",
+    "methods": [
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://docs.opalstack.com/user-guide/mcp/",
+    "credential_names": [],
+    "prerequisites": [
+      "Opalstack account"
+    ],
+    "steps": [
+      "In the Opalstack dashboard choose Vibe Deploy > Add MCP/API Token.",
+      "Name and create the token; save it through the client's secret configuration.",
+      "Configure https://my.opalstack.com/mcp with Authorization: Bearer followed by the token."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.opalstack.com/user-guide/mcp/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Opalstack",
+    "remotes": [
+      {
+        "url": "https://my.opalstack.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:parallel-ai-task-management",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://docs.parallel.ai/integrations/mcp/task-mcp",
+    "credential_names": [
+      "PARALLEL_API_KEY"
+    ],
+    "prerequisites": [
+      "Parallel account"
+    ],
+    "steps": [
+      "Add https://task-mcp.parallel.ai/mcp.",
+      "Complete the supported browser OAuth flow, or obtain a key from platform.parallel.ai and set Authorization: Bearer."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.parallel.ai/integrations/mcp/task-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Task MCP always requires authentication; job execution and available credits remain account-controlled."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Parallel.ai Task Management",
+    "remotes": [
+      {
+        "url": "https://task-mcp.parallel.ai/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:parallel-search",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://docs.parallel.ai/integrations/mcp/search-mcp",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.parallel.ai/integrations/mcp/search-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Current operator materials identify https://search.parallel.ai/mcp, while catalog uses https://search-mcp.parallel.ai/mcp. Do not silently replace endpoints or infer their authentication equivalence."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Parallel Search",
+    "remotes": [
+      {
+        "url": "https://search-mcp.parallel.ai/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:paypal",
+    "status": "documented",
+    "methods": [
+      "bearer"
+    ],
+    "setup_url": "https://developer.paypal.com/ai-tools/mcp-server",
+    "credential_names": [],
+    "prerequisites": [
+      "PayPal Developer account and application client credentials"
+    ],
+    "steps": [
+      "For live use configure https://mcp.paypal.com/sse; use the documented sandbox hostname for testing.",
+      "Follow the remote server token authorization instructions using PayPal Developer Dashboard client credentials.",
+      "Pass the resulting documented auth credential in Authorization: Bearer."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://developer.paypal.com/ai-tools/mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The retrieved guide describes client ID/secret based remote token authorization; it does not establish a generic dynamic client registration flow."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "PayPal",
+    "remotes": [
+      {
+        "url": "https://mcp.paypal.com/sse",
+        "transport": "sse"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:pdf4me",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://docs.pdf4me.com/",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.pdf4me.com/",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://github.com/pdf4me/pdf4me-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Operator docs advertise a local uvx PDF4me MCP configuration. Authentication instructions for exact hosted https://mcp.pdf4me.com/mcp were not retrieved; REST/Power Automate credentials are not substituted."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "PDF4me",
+    "remotes": [
+      {
+        "url": "https://mcp.pdf4me.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:pearl",
+    "status": "documented",
+    "methods": [
+      "api_key"
+    ],
+    "setup_url": "https://docs.pearl.com/api/docs/pearl-api-mcp-server/connecting-to-remote-pearl-api-mcp-server-from-clients",
+    "credential_names": [
+      "X-API-KEY"
+    ],
+    "prerequisites": [],
+    "steps": [
+      "Request a demo API key through Pearl support as described in the operator guide.",
+      "Configure the exact https://mcp.pearl.com/sse route with the X-API-KEY header."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.pearl.com/api/docs/pearl-api-mcp-server/connecting-to-remote-pearl-api-mcp-server-from-clients",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "A separate marketing quickstart shows /mcp and a Bearer header; those instructions are not substituted for the catalog /sse route."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Pearl",
+    "remotes": [
+      {
+        "url": "https://mcp.pearl.com/sse",
+        "transport": "sse"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:peek",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://www.peek.com/mcp",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://www.peek.com/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Operator documents exact https://mcp.peek.com as a free public travel-search service with URL-only configuration. Explicit no-auth language or an authorization contract was not established in the retrieved page."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Peek",
+    "remotes": [
+      {
+        "url": "https://mcp.peek.com",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:poku-labs-human-in-the-loop",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://www.pokulabs.com/terms",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://www.pokulabs.com/terms",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Provider terms mention API keys and MCP in general, but establish neither the exact mcp.pokulabs.com endpoint nor its credential flow.",
+      "No account authorization or tool execution was performed."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Poku Labs (Human-in-the-loop)",
+    "remotes": [
+      {
+        "url": "https://mcp.pokulabs.com",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:posthog",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://posthog.com/docs/model-context-protocol/vscode",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://posthog.com/docs/model-context-protocol/vscode",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Current direct setup documents OAuth/browser sign-in for https://mcp.posthog.com/mcp, whereas the catalog contains https://mcp.posthog.com/sse. Exact legacy route authentication is not established by this source. Review endpoint migration before marking setup documented.",
+      "No account authorization or tool execution was performed."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "PostHog",
+    "remotes": [
+      {
+        "url": "https://mcp.posthog.com/sse",
+        "transport": "sse"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:postman",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://learning.postman.com/docs/reference/postman-api/postman-mcp-server/postman-mcp-remote-server",
+    "credential_names": [
+      "POSTMAN_API_KEY"
+    ],
+    "prerequisites": [
+      "Postman account; OAuth-capable remote MCP client or a generated Postman API key."
+    ],
+    "steps": [
+      "Add https://mcp.postman.com/minimal as a remote HTTP MCP server.",
+      "Authorize through Postman OAuth, or send the Postman API key in Authorization: Bearer <POSTMAN_API_KEY>."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://learning.postman.com/docs/reference/postman-api/postman-mcp-server/postman-mcp-remote-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Postman",
+    "remotes": [
+      {
+        "url": "https://mcp.postman.com/minimal",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:pre-dev-architect",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://pre.dev/browser-agents",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://pre.dev/browser-agents",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Direct provider page confirms https://api.pre.dev/mcp and browser authorization, but now describes browser-agent functionality rather than the catalog Architect label. Protocol/credentials and service identity need reconciliation before marking setup documented.",
+      "No account authorization or tool execution was performed."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "pre.dev Architect",
+    "remotes": [
+      {
+        "url": "https://api.pre.dev/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:prisma-postgres-mcp-server",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://www.prisma.io/docs/ai/tools/mcp-server",
+    "credential_names": [],
+    "prerequisites": [
+      "Prisma account and access to a workspace; OAuth-capable remote MCP client."
+    ],
+    "steps": [
+      "Add https://mcp.prisma.io/mcp using Streamable HTTP.",
+      "Connect, sign in to Prisma, select the intended workspace and approve access."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://www.prisma.io/docs/ai/tools/mcp-server",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://www.prisma.io/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Official Prisma MCP landing page explicitly identifies OAuth sign-in.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Prisma Postgres MCP Server",
+    "remotes": [
+      {
+        "url": "https://mcp.prisma.io/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:reflag",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://docs.reflag.com/api/mcp",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.reflag.com/api/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Direct docs confirm exact https://app.reflag.com/api/mcp and instruct starting client authentication. They do not identify the authentication protocol or required credentials clearly enough for a typed method claim in this pass.",
+      "No account authorization or tool execution was performed."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Reflag",
+    "remotes": [
+      {
+        "url": "https://app.reflag.com/api/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:replicate",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://mcp.replicate.com/",
+    "credential_names": [],
+    "prerequisites": [
+      "Replicate account and API token."
+    ],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://mcp.replicate.com/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Operator explicitly documents the exact /sse route and entering a Replicate API token in a browser Log in and Approve flow. Retrieved page does not explicitly name OAuth or document a direct-header credential format; verify the authorization protocol before assigning a typed method.",
+      "No account authorization or tool execution was performed.",
+      "The retrieved documentation does not establish an exact authentication method for this catalog route; client setup instructions are not qualified."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Replicate",
+    "remotes": [
+      {
+        "url": "https://mcp.replicate.com/sse",
+        "transport": "sse"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:rostro",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://rostro.dev/guides/mcp",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://rostro.dev/guides/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Provider documents OAuth or an API key in Authorization: Bearer for https://proto.rostro.dev/mcp. Catalog URL has a trailing /mcp/; exact trailing-slash compatibility was not established. Account and API key page are documented, but verify the exact catalog route before promotion.",
+      "No account authorization or tool execution was performed."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Rostro",
+    "remotes": [
+      {
+        "url": "https://proto.rostro.dev/mcp/",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:rotunda",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://rotunda.bullpenstrategygroup.com/features/mcp",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://rotunda.bullpenstrategygroup.com/features/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Operator confirms the exact catalog URL and instructs signing in with Google to authorize. The page does not explicitly establish the MCP authorization protocol/client requirements, so no OAuth or API-key method is asserted here.",
+      "No account authorization or tool execution was performed."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Rotunda",
+    "remotes": [
+      {
+        "url": "https://rotunda.bullpenstrategygroup.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:saleor-commerce",
+    "status": "documented",
+    "methods": [
+      "api_key"
+    ],
+    "setup_url": "https://saleor.io/blog/saleor-mcp",
+    "credential_names": [
+      "X-Saleor-Auth-Token",
+      "X-Saleor-API-URL"
+    ],
+    "prerequisites": [
+      "Saleor Cloud environment on a .saleor.cloud domain.",
+      "Permission to create an app in the Saleor Dashboard."
+    ],
+    "steps": [
+      "In the Dashboard open Extensions, add an extension manually, and create the Saleor MCP app with the documented permissions.",
+      "Copy its token and configure https://mcp.saleor.app/mcp with X-Saleor-Auth-Token set to the token and X-Saleor-API-URL set to the Cloud GraphQL URL."
+    ],
+    "scopes": [
+      "MANAGE_ORDERS",
+      "MANAGE_PRODUCTS"
+    ],
+    "sources": [
+      {
+        "url": "https://saleor.io/blog/saleor-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Provider requires a Saleor app access token in the X-Saleor-Auth-Token header, not Authorization: Bearer. api_key denotes this configured app credential; permissions listed are Saleor app permissions rather than OAuth scopes. Hosted service supports only Saleor Cloud endpoints.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Saleor Commerce",
+    "remotes": [
+      {
+        "url": "https://mcp.saleor.app/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:salesforce",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/postman.html",
+    "credential_names": [
+      "client_id"
+    ],
+    "prerequisites": [
+      "Salesforce account and an External Client App configured for the intended client callback.",
+      "OAuth Authorization Code with S256 PKCE support."
+    ],
+    "steps": [
+      "Use the production server https://api.salesforce.com/platform/mcp/v1/platform/sobject-all.",
+      "Use the External Client App consumer key as client_id and its matching registered callback; run Salesforce authorization-code PKCE authorization.",
+      "Request documented mcp_api and refresh_token scopes; send the resulting access token as a Bearer authorization header."
+    ],
+    "scopes": [
+      "mcp_api",
+      "refresh_token"
+    ],
+    "sources": [
+      {
+        "url": "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/postman.html",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The provider Postman example leaves client_secret blank under PKCE. Its Postman-specific callback URLs must not be copied as Zati callbacks.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Salesforce",
+    "remotes": [
+      {
+        "url": "https://api.salesforce.com/platform/mcp/v1/platform/sobject-all",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:scamshield",
+    "status": "documented",
+    "methods": [
+      "none"
+    ],
+    "setup_url": "https://brokerchooser.com/scamshield-mcp-server",
+    "credential_names": [],
+    "prerequisites": [
+      "Client supporting Streamable HTTP."
+    ],
+    "steps": [
+      "Configure https://mcp.brokerchooser.com/servers/mcp as the remote server; no authentication credential is documented for this public endpoint."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://brokerchooser.com/scamshield-mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Provider explicitly labels the server public and authentication absent; 10 requests/minute per session and 60/minute per IP. The separate /servers/deep-research/safety route is not this catalog endpoint.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "ScamShield",
+    "remotes": [
+      {
+        "url": "https://mcp.brokerchooser.com/servers/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:semgrep",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "No retrieved direct provider/operator source established authentication for the exact catalog endpoint in this bounded research pass. Do not infer authentication from HTTP status or a directory listing."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Semgrep",
+    "remotes": [
+      {
+        "url": "https://mcp.semgrep.ai/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:sentry",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://mcp.sentry.dev/",
+    "credential_names": [],
+    "prerequisites": [
+      "Sentry account and an OAuth-capable HTTP MCP client."
+    ],
+    "steps": [
+      "Connect to https://mcp.sentry.dev/mcp.",
+      "Complete the Sentry account authorization flow opened by the first connection."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://mcp.sentry.dev/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Provider says all connections use OAuth; optional organization/project path scoping is documented.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Sentry",
+    "remotes": [
+      {
+        "url": "https://mcp.sentry.dev/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:seo-linkmap",
+    "status": "documented",
+    "methods": [
+      "none"
+    ],
+    "setup_url": "https://seolinkmap.com/documentation/how-to-connect-to-mcp-servers",
+    "credential_names": [],
+    "prerequisites": [
+      "Remote MCP-compatible client."
+    ],
+    "steps": [
+      "Add https://seolinkmap.com/mcp as a public MCP connection."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://seolinkmap.com/documentation/how-to-connect-to-mcp-servers",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://seolinkmap.com/documentation",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "This route is the public website/documentation server, not access to account-specific SEO projects. The private server uses a separate per-user /private-mcp/{UUID} route and OAuth.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "SEO LinkMap",
+    "remotes": [
+      {
+        "url": "https://seolinkmap.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:shutter-network",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "No retrieved direct provider/operator source established authentication for the exact catalog endpoint in this bounded research pass. Do not infer authentication from HTTP status or a directory listing."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Shutter Network",
+    "remotes": [
+      {
+        "url": "https://shutter-mcp-b76e270d48c5.herokuapp.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:simplescraper",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://simplescraper.io/blog/how-to-mcp",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://simplescraper.io/blog/how-to-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Provider tutorial uses the exact catalog URL and discusses OAuth 2.1, but much of the text is sample implementation guidance. A direct service-specific credential/account setup procedure remains to be established; do not treat sample scopes as deployed scopes.",
+      "No account authorization or tool execution was performed."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Simplescraper",
+    "remotes": [
+      {
+        "url": "https://mcp.simplescraper.io/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:slack",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://docs.slack.dev/ai/slack-mcp-server/",
+    "credential_names": [
+      "client_id",
+      "client_secret"
+    ],
+    "prerequisites": [
+      "A registered Slack app with a fixed app ID; it must be Marketplace-published or an internal app.",
+      "Workspace admin approval and appropriate user-token tool scopes."
+    ],
+    "steps": [
+      "Configure https://mcp.slack.com/mcp using Streamable HTTP.",
+      "Use the registered app identity and OAuth client credentials; use the provider authorization metadata to authorize a user.",
+      "Request only the tool-specific user scopes and exchange/refresh tokens through the documented Slack user OAuth endpoints."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.slack.dev/ai/slack-mcp-server/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Dynamic Client Registration and SSE are not supported. User scope requirements vary by tool; no universal scope list is asserted here. Source also links newer desktop PKCE support.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Slack",
+    "remotes": [
+      {
+        "url": "https://mcp.slack.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:square",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://developer.squareup.com/docs/mcp",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://developer.squareup.com/docs/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Official current route is https://mcp.squareup.com/mcp with OAuth. Catalog has /sse; exact legacy route support is not established. Provider additionally maintains a client allowlist; Zati registration cannot be assumed.",
+      "No account authorization or tool execution was performed."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Square",
+    "remotes": [
+      {
+        "url": "https://mcp.squareup.com/sse",
+        "transport": "sse"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:stripe",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://docs.stripe.com/mcp",
+    "credential_names": [
+      "AGENT_API_KEY"
+    ],
+    "prerequisites": [
+      "Stripe account and permissions for the selected sandbox or live environment."
+    ],
+    "steps": [
+      "Add https://mcp.stripe.com as a remote MCP server.",
+      "Prefer the Stripe OAuth consent flow and choose environment/account permissions.",
+      "For non-OAuth use, create an agent API key with appropriate permissions and send Authorization: Bearer <agent-api-key>."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.stripe.com/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Current docs require migration from full-access and ordinary restricted keys by November 30, 2026; use an agent-tagged key rather than assuming any Stripe secret key qualifies.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Stripe",
+    "remotes": [
+      {
+        "url": "https://mcp.stripe.com",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:stytch",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://stytch.com/blog/stytch-mcp-server/",
+    "credential_names": [],
+    "prerequisites": [
+      "Stytch workspace account and a client capable of remote MCP OAuth."
+    ],
+    "steps": [
+      "Configure https://mcp.stytch.dev/mcp with an OAuth-capable remote MCP client.",
+      "Complete Stytch account sign-in and consent in the provider flow."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://stytch.com/blog/stytch-mcp-server/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The provider post explicitly identifies OAuth-based authorization and includes the exact /mcp route in its mcp-remote example; it also documents a legacy /sse route.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Stytch",
+    "remotes": [
+      {
+        "url": "https://mcp.stytch.dev/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:supabase",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "bearer"
+    ],
+    "setup_url": "https://supabase.com/docs/guides/ai-tools/mcp",
+    "credential_names": [
+      "SUPABASE_ACCESS_TOKEN"
+    ],
+    "prerequisites": [
+      "Supabase account with access to the intended organization/project; remote MCP client."
+    ],
+    "steps": [
+      "Add https://mcp.supabase.com/mcp and complete Supabase OAuth, selecting the intended organization.",
+      "For documented noninteractive CI use, create an appropriately scoped personal access token and pass Authorization: Bearer <SUPABASE_ACCESS_TOKEN>."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://supabase.com/docs/guides/ai-tools/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Default hosted flow supports dynamic client registration and does not require manually creating a PAT or OAuth app. Project scoping/read-only settings should be chosen for the intended task; scopes are tool-dependent.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Supabase",
+    "remotes": [
+      {
+        "url": "https://mcp.supabase.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:superhuman-docs",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "No retrieved direct provider/operator source established authentication for the exact catalog endpoint in this bounded research pass. Do not infer authentication from HTTP status or a directory listing."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Superhuman Docs",
+    "remotes": [
+      {
+        "url": "https://docs.superhuman.com/apis/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:superhuman-mail",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://help.superhuman.com/hc/en-us/articles/46005696690317-Superhuman-Mail-MCP-Server",
+    "credential_names": [],
+    "prerequisites": [
+      "Superhuman Mail Business plan or higher and Ask AI enabled.",
+      "Superhuman Mail Chrome extension for authentication.",
+      "Remote MCP client; managed accounts may require administrator enablement."
+    ],
+    "steps": [
+      "Add https://mcp.mail.superhuman.com/mcp as an HTTP MCP server.",
+      "Start authentication and finish the Superhuman browser OAuth sign-in/consent flow."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://help.superhuman.com/hc/en-us/articles/46005696690317-Superhuman-Mail-MCP-Server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Provider explicitly documents Dynamic Client Registration; no client ID/secret is required for its illustrated DCR-capable client.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Superhuman Mail",
+    "remotes": [
+      {
+        "url": "https://mcp.mail.superhuman.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:svelte",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://svelte.dev/docs/ai/remote-setup",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://svelte.dev/docs/ai/remote-setup",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Direct setup confirms exact https://mcp.svelte.dev/mcp and provides configurations without credentials. It does not explicitly state authentication requirements; absence of a header example alone is not used to assert none.",
+      "No account authorization or tool execution was performed."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Svelte",
+    "remotes": [
+      {
+        "url": "https://mcp.svelte.dev/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:svelte-documentation",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "No retrieved direct provider/operator source established authentication for the exact catalog endpoint in this bounded research pass. Do not infer authentication from HTTP status or a directory listing."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Svelte Documentation",
+    "remotes": [
+      {
+        "url": "https://svelte-llm.stanislav.garden/mcp/sse",
+        "transport": "sse"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:tally",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "api_key"
+    ],
+    "setup_url": "https://tally.so/help/mcp",
+    "credential_names": [
+      "Tally API key"
+    ],
+    "prerequisites": [
+      "Tally account and an MCP-compatible remote client."
+    ],
+    "steps": [
+      "Add https://api.tally.so/mcp.",
+      "Use Connect and authorize the intended Tally workspace via OAuth."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://tally.so/help/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "OAuth is recommended; this provider page also states an API-key alternative exists, but does not specify its MCP header format. Do not infer that format from general API documentation.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Tally",
+    "remotes": [
+      {
+        "url": "https://api.tally.so/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:tavily-search",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://github.com/tavily-ai/tavily-mcp/blob/main/README.md",
+    "credential_names": [
+      "Tavily API key"
+    ],
+    "prerequisites": [
+      "Tavily account and remote MCP client."
+    ],
+    "steps": [
+      "Add https://mcp.tavily.com/mcp and complete the documented Tavily OAuth flow.",
+      "Alternatively send the Tavily API key in Authorization: Bearer <your-api-key> if the client supports headers."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://github.com/tavily-ai/tavily-mcp/blob/main/README.md",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "The source also supports an API key URL query parameter; prefer header custody to avoid embedding secrets in catalog URLs. No scopes are specified by this setup guide.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Tavily Search",
+    "remotes": [
+      {
+        "url": "https://mcp.tavily.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:timecamp",
+    "status": "documented",
+    "methods": [
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://my-mcp-server.timecamp-s-a.workers.dev/",
+    "credential_names": [
+      "TimeCamp API token"
+    ],
+    "prerequisites": [
+      "TimeCamp API token and SSE-capable remote MCP client."
+    ],
+    "steps": [
+      "Configure the exact /sse endpoint https://my-mcp-server.timecamp-s-a.workers.dev/sse.",
+      "Set Authorization: Bearer <TimeCamp API token>."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://my-mcp-server.timecamp-s-a.workers.dev/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Evidence is the operator endpoint own documentation; independent verification of operator identity and authenticated interoperability is not claimed.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "TimeCamp",
+    "remotes": [
+      {
+        "url": "https://my-mcp-server.timecamp-s-a.workers.dev/sse",
+        "transport": "sse"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:twelve-data",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://github.com/twelvedata/mcp/blob/main/README.md",
+    "credential_names": [],
+    "prerequisites": [
+      "Twelve Data account and an OAuth-capable remote MCP client.",
+      "Subscription/data entitlements for intended tools."
+    ],
+    "steps": [
+      "Configure exactly https://mcp.twelvedata.com/mcp with Streamable HTTP.",
+      "Follow the protected-resource metadata to the named authorization server; sign in to Twelve Data and authorize."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://github.com/twelvedata/mcp/blob/main/README.md",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Hosted flow uses OAuth with dynamic registration, not a pasted API key. Do not use host-root /register or host-root authorization-server metadata. The separately self-hosted API-key configuration is not the hosted route.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Twelve Data",
+    "remotes": [
+      {
+        "url": "https://mcp.twelvedata.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:twelvelabs",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://docs.twelvelabs.io/agents/advanced/model-context-protocol",
+    "credential_names": [],
+    "prerequisites": [
+      "TwelveLabs account and an MCP client supporting remote HTTP plus OAuth."
+    ],
+    "steps": [
+      "Add https://mcp.twelvelabs.io/jockey/mcp.",
+      "Select Connect and sign in to TwelveLabs when prompted."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.twelvelabs.io/agents/advanced/model-context-protocol",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "This is Jockey cross-video/collection access; the separate single-video server has moved to another host.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "TwelveLabs",
+    "remotes": [
+      {
+        "url": "https://mcp.twelvelabs.io/jockey/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:vapi",
+    "status": "documented",
+    "methods": [
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://docs.vapi.ai/sdk/mcp-server",
+    "credential_names": [
+      "VAPI_TOKEN"
+    ],
+    "prerequisites": [
+      "Vapi account and API key; Streamable HTTP MCP client."
+    ],
+    "steps": [
+      "Create or copy a Vapi API key.",
+      "Configure https://mcp.vapi.ai/mcp and send the key as Authorization: Bearer <VAPI_TOKEN>."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://docs.vapi.ai/sdk/mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "VAPI_TOKEN is the documented example environment variable containing the Vapi API key.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Vapi",
+    "remotes": [
+      {
+        "url": "https://mcp.vapi.ai/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:veed",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "No retrieved direct provider/operator source established authentication for the exact catalog endpoint in this bounded research pass. Do not infer authentication from HTTP status or a directory listing."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Veed",
+    "remotes": [
+      {
+        "url": "https://www.veed.io/api/v1/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:vlei-wiki",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "No retrieved direct provider/operator source established authentication for the exact catalog endpoint in this bounded research pass. Do not infer authentication from HTTP status or a directory listing."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "vLEI.wiki",
+    "remotes": [
+      {
+        "url": "https://mcp.vlei.wiki/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:waystation",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "No retrieved direct provider/operator source established authentication for the exact catalog endpoint in this bounded research pass. Do not infer authentication from HTTP status or a directory listing."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "WayStation",
+    "remotes": [
+      {
+        "url": "https://waystation.ai/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:webflow",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://developers.webflow.com/home/changelog/2026/1/17",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://developers.webflow.com/home/changelog/2026/1/17",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Official changelog explicitly says /sse is fully deprecated and directs clients to https://mcp.webflow.com/mcp. Current OAuth setup must not be attached to the catalog legacy /sse URL without migration.",
+      "No account authorization or tool execution was performed."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Webflow",
+    "remotes": [
+      {
+        "url": "https://mcp.webflow.com/sse",
+        "transport": "sse"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:windsor",
+    "status": "documented",
+    "methods": [
+      "oauth2",
+      "api_key",
+      "bearer"
+    ],
+    "setup_url": "https://mcp.windsor.ai/",
+    "credential_names": [
+      "Windsor.ai API key"
+    ],
+    "prerequisites": [
+      "Windsor.ai account and MCP-compatible client; connect intended data sources in Windsor."
+    ],
+    "steps": [
+      "Configure https://mcp.windsor.ai as the Streamable HTTP endpoint.",
+      "Complete Windsor OAuth on first connection, or send a Windsor API key in Authorization: Bearer <key>."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://mcp.windsor.ai/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Operator documents Dynamic Client Registration. Current operator page includes write actions, so this integration must not be represented as universally read-only.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Windsor",
+    "remotes": [
+      {
+        "url": "https://mcp.windsor.ai",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:wix",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://dev.wix.com/docs/api-reference/articles/ai-tools/wix-mcp/about-the-wix-mcp",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://dev.wix.com/docs/api-reference/articles/ai-tools/wix-mcp/about-the-wix-mcp",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Current direct docs specify https://mcp.wix.com/mcp, while catalog has /sse. They document account sign-in or API key plus wix-account-id for the new route; exact catalog-route support remains unestablished.",
+      "No account authorization or tool execution was performed."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Wix",
+    "remotes": [
+      {
+        "url": "https://mcp.wix.com/sse",
+        "transport": "sse"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:wordpress-trac",
+    "status": "needs_research",
+    "methods": [],
+    "setup_url": "https://github.com/WordPress/trac-mcp/blob/trunk/README.md",
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://github.com/WordPress/trac-mcp/blob/trunk/README.md",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Official repository says the catalog a8cai.workers.dev staging host is deprecated and runs older code; active staging is a8c-aiops.workers.dev and a separate production host is documented. Authentication for the exact old route is not established.",
+      "No account authorization or tool execution was performed."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "WordPress Trac",
+    "remotes": [
+      {
+        "url": "https://mcp-server-wporg-trac-staging.a8cai.workers.dev/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:zoom",
+    "status": "documented",
+    "methods": [
+      "oauth2"
+    ],
+    "setup_url": "https://developers.zoom.us/docs/mcp/servers/",
+    "credential_names": [
+      "client_id",
+      "client_secret"
+    ],
+    "prerequisites": [
+      "Zoom account with admin/developer authorization and licenses for the target product.",
+      "Manually registered General app on Zoom App Marketplace with intended redirect URI and tool scopes.",
+      "Authorization code flow with PKCE."
+    ],
+    "steps": [
+      "Create the client integration as a General app in Zoom App Marketplace.",
+      "Configure its callback and only scopes required by the selected Meetings tools.",
+      "Perform OAuth with PKCE using the app client credentials; call https://zoom.us/mcp/meeting/streamable with the resulting access token in Authorization: Bearer."
+    ],
+    "scopes": [],
+    "sources": [
+      {
+        "url": "https://developers.zoom.us/docs/mcp/servers/",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://developers.zoom.us/docs/mcp/servers/connect-to-zoom-mcp-servers/",
+        "checked_at": "2026-10-19"
+      }
+    ],
+    "notes": [
+      "Zoom explicitly does not support Dynamic Client Registration or Client ID Metadata Documents. Tool-specific scope strings must come from the product tools reference.",
+      "Documentation only; account authorization, Zati compatibility and provider tool execution were not tested."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "Zoom",
+    "remotes": [
+      {
+        "url": "https://zoom.us/mcp/meeting/streamable",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  },
+  {
+    "id": "mcp:zoominfo",
+    "status": "needs_research",
+    "methods": [],
+    "credential_names": [],
+    "prerequisites": [],
+    "steps": [],
+    "scopes": [],
+    "sources": [],
+    "notes": [
+      "No retrieved direct provider/operator source established authentication for the exact catalog endpoint in this bounded research pass. Do not infer authentication from HTTP status or a directory listing."
+    ],
+    "kind": "mcp",
+    "format": "gist.directory.authorization/v1",
+    "title": "ZoomInfo",
+    "remotes": [
+      {
+        "url": "https://mcp.zoominfo.com/mcp",
+        "transport": "streamable-http"
+      }
+    ],
+    "connection_tested": false,
+    "credential_owner": "client"
+  }
+]
