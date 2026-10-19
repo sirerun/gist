@@ -66,3 +66,29 @@ App responses also include separately reviewed direct HTTP API routes from
 `catalog/directory/app-authorization.json`. Apps without either a known MCP route
 or a reviewed direct API route return explicit coverage gaps. This release does
 not claim connection readiness for every app in the inventory.
+
+## App-specific endpoints and version2
+
+Use `GET /api/directory/authorization?app=shopify&version=2` or MCP
+`gist_directory_authorization` with `{"app":"shopify","version":2}` for
+`gist.directory.app-authorization/v2`. Version1 remains the default, with its
+original field set and status values. Connector-ID responses remain v1.
+
+Version2 routes can include `api_url_template`, named `endpoint_inputs`, and a
+`protocol` for `native-api` adapters. A provider-generated private MCP URL is a
+client input, not a URL that Gist stores. Template substitutions and endpoint
+values stay in the client. API/DB adapters must perform their own destination,
+credential and effect checks. A guide with `transport: unknown` does not guess
+between SSE and Streamable HTTP; the client must verify the transport.
+
+App-level `sources` and `notes` explain researched gaps and platform-specific
+modules. `not_applicable` requires source evidence that a listing is a platform
+module rather than an independently connectable provider. It does not mean the
+module's capabilities cannot be implemented through another tool. Version1
+omits routes requiring these new fields and points callers to version2.
+
+App route IDs identify guidance within an app response; they are not automatically
+admitted directory descriptor IDs. Retrieve those routes through the exact app
+slug. Existing connector IDs from directory discovery still use the ID selector.
+Documented URLs do not imply a passing endpoint probe, installed client adapter
+or usable provider account. Each of those has its own acceptance.

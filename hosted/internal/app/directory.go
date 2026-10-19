@@ -146,9 +146,17 @@ func (h *directoryAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		result = directory.PublicResultOf(search)
 	case "/api/directory/authorization":
-		if !webQueryKeys(v, "id", "app") || (v.Get("id") == "") == (v.Get("app") == "") {
+		if !webQueryKeys(v, "id", "app", "version") || (v.Get("id") == "") == (v.Get("app") == "") {
 			webError(w, 400, "invalid_query", "Choose exactly one connector ID or app slug.")
 			return
+		}
+		version := 1
+		if v.Has("version") {
+			version, err = strconv.Atoi(v.Get("version"))
+			if err != nil || (version != 1 && version != 2) {
+				webError(w, 400, "invalid_query", "Version must be 1 or 2.")
+				return
+			}
 		}
 		if slug := v.Get("app"); slug != "" {
 			if !webRefValue(slug, 256) {
@@ -164,7 +172,11 @@ func (h *directoryAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				webError(w, 404, "not_found", "App not found.")
 				return
 			}
-			result, err = directory.AuthorizationForApp(a, h.index)
+			if version == 2 {
+				result, err = directory.AuthorizationForAppV2(a, h.index)
+			} else {
+				result, err = directory.AuthorizationForApp(a, h.index)
+			}
 		} else {
 			if !webRefValue(v.Get("id"), 512) {
 				webError(w, 400, "invalid_query", "Choose an entry ID.")

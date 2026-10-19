@@ -692,6 +692,20 @@
               "minLength": 1,
               "maxLength": 256
             }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "description": "App guidance format version. Version 1 preserves the original strict response. Version 2 includes endpoint inputs, templates, native protocols and source-backed platform classifications.",
+            "schema": {
+              "type": "integer",
+              "enum": [
+                1,
+                2
+              ],
+              "default": 1
+            }
           }
         ],
         "responses": {
@@ -706,6 +720,9 @@
                     },
                     {
                       "$ref": "#/components/schemas/AppAuthorization"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AppAuthorizationV2"
                     }
                   ]
                 }
@@ -1346,6 +1363,250 @@
             "type": "array",
             "items": {
               "type": "string"
+            }
+          }
+        }
+      },
+      "AuthorizationRemoteV2": {
+        "type": "object",
+        "required": [
+          "url",
+          "transport"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "transport": {
+            "type": "string",
+            "enum": [
+              "sse",
+              "streamable-http",
+              "unknown"
+            ]
+          }
+        }
+      },
+      "AuthorizationGuideV2": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "format",
+          "id",
+          "title",
+          "status",
+          "remotes",
+          "connection_tested",
+          "credential_owner",
+          "sources",
+          "methods",
+          "credential_names",
+          "prerequisites",
+          "steps",
+          "scopes",
+          "notes",
+          "kind"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "gist.directory.authorization/v2"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "documented",
+              "needs_research"
+            ]
+          },
+          "remotes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuthorizationRemoteV2"
+            }
+          },
+          "setup_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "connection_tested": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          },
+          "credential_owner": {
+            "type": "string",
+            "enum": [
+              "client"
+            ]
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "url",
+                "checked_at"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "checked_at": {
+                  "type": "string",
+                  "format": "date"
+                }
+              }
+            }
+          },
+          "methods": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "credential_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "prerequisites": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "mcp",
+              "http-api",
+              "openapi",
+              "native-api"
+            ]
+          },
+          "api_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "api_url_template": {
+            "type": "string",
+            "description": "Provider-documented URL template. Substitute declared inputs in the client only."
+          },
+          "endpoint_inputs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Input field names only. Actual tenant or private endpoint values remain in the client."
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Native API protocol requiring a corresponding client adapter."
+          }
+        }
+      },
+      "AppAuthorizationV2": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "format",
+          "app",
+          "name",
+          "status",
+          "routes",
+          "notes"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "gist.directory.app-authorization/v2"
+            ]
+          },
+          "app": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "documented",
+              "partial",
+              "needs_research",
+              "no_verified_route",
+              "not_applicable"
+            ]
+          },
+          "routes": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/AuthorizationGuide"
+                },
+                {
+                  "$ref": "#/components/schemas/AuthorizationGuideV2"
+                }
+              ]
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "url",
+                "checked_at"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "checked_at": {
+                  "type": "string",
+                  "format": "date"
+                }
+              }
             }
           }
         }

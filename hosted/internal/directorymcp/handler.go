@@ -195,12 +195,20 @@ func (h *Handler) call(ctx context.Context, w http.ResponseWriter, call request)
 		value = directory.PublicResultOf(result)
 	case "gist_directory_authorization":
 		var args struct {
-			ID  string `json:"id"`
-			App string `json:"app"`
+			ID      string          `json:"id"`
+			App     string          `json:"app"`
+			Version json.RawMessage `json:"version"`
 		}
 		if !decodeArgs(params.Arguments, &args) || (args.ID == "") == (args.App == "") || len(args.ID) > 512 || len(args.App) > 256 {
 			h.fail(w, call.ID, -32602, "Choose exactly one connector ID or app slug")
 			return
+		}
+		version := 1
+		if len(args.Version) > 0 {
+			if bytes.Equal(bytes.TrimSpace(args.Version), []byte("null")) || json.Unmarshal(args.Version, &version) != nil || (version != 1 && version != 2) {
+				h.fail(w, call.ID, -32602, "Version must be 1 or 2")
+				return
+			}
 		}
 		var err error
 		if args.App != "" {
@@ -214,7 +222,11 @@ func (h *Handler) call(ctx context.Context, w http.ResponseWriter, call request)
 				h.toolError(w, call.ID, "App not found")
 				return
 			}
-			value, err = directory.AuthorizationForApp(a, h.index)
+			if version == 2 {
+				value, err = directory.AuthorizationForAppV2(a, h.index)
+			} else {
+				value, err = directory.AuthorizationForApp(a, h.index)
+			}
 		} else {
 			r, ok := h.index.Get(args.ID)
 			if !ok {
@@ -320,7 +332,7 @@ func toolList() []map[string]any {
 	return []map[string]any{
 		{"name": "gist_directory_search", "description": "Find MCP server and OpenAPI integrations by name, use case or connection type. No connection or execution.", "annotations": annotations, "inputSchema": schema(map[string]any{"query": map[string]any{"type": "string", "maxLength": 200}, "kind": map[string]any{"type": "string", "enum": []string{"", "mcp", "openapi"}}, "tag": map[string]any{"type": "string", "maxLength": 64}, "cursor": map[string]any{"type": "string", "maxLength": 2048}, "limit": map[string]any{"type": "integer", "minimum": 1, "maximum": 50}}, []string{})},
 		{"name": "gist_directory_get", "description": "Read a public integration's description, connection details and setup links by exact ID.", "annotations": annotations, "inputSchema": schema(map[string]any{"id": id}, []string{"id"})},
-		{"name": "gist_directory_authorization", "description": "Read direct-provider authorization guidance by exact connector ID or app slug. Covers all catalog apps with explicit gaps; never invents MCP routes. Provide exactly one of id or app. Clients own credentials and authorization.", "annotations": annotations, "inputSchema": map[string]any{"type": "object", "properties": map[string]any{"id": id, "app": map[string]any{"type": "string", "minLength": 1, "maxLength": 256}}, "oneOf": []map[string]any{{"required": []string{"id"}}, {"required": []string{"app"}}}, "additionalProperties": false}},
+		{"name": "gist_directory_authorization", "description": "Read direct-provider authorization guidance by exact connector ID or app slug. Covers all catalog apps with explicit gaps; never invents MCP routes. Provide exactly one of id or app. Use version 2 for tenant/private endpoint inputs and native protocols; version 1 preserves strict clients. Clients own credentials and authorization.", "annotations": annotations, "inputSchema": map[string]any{"type": "object", "properties": map[string]any{"id": id, "app": map[string]any{"type": "string", "minLength": 1, "maxLength": 256}, "version": map[string]any{"type": "integer", "enum": []int{1, 2}, "default": 1}}, "oneOf": []map[string]any{{"required": []string{"id"}}, {"required": []string{"app"}}}, "additionalProperties": false}},
 		{"name": "gist_directory_export", "description": "Export a metadata-only gist.directory.entry/v1 descriptor for review by Zati or another client. Does not connect, authorize or run it.", "annotations": annotations, "inputSchema": schema(map[string]any{"id": id}, []string{"id"})},
 	}
 }

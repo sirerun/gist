@@ -140,3 +140,26 @@ func TestProviderAuthorizationAppSelector(t *testing.T) {
 		t.Fatal("ambiguous selector accepted")
 	}
 }
+
+func TestAppAuthorizationV2MCP(t *testing.T) {
+	h := fixture(t)
+	w := invoke(h, `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"gist_directory_authorization","arguments":{"app":"shopify","version":2}}}`)
+	if !strings.Contains(w.Body.String(), "gist.directory.app-authorization/v2") || !strings.Contains(w.Body.String(), "api_url_template") {
+		t.Fatal(w.Body)
+	}
+	w = invoke(h, `{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"gist_directory_authorization","arguments":{"app":"shopify","version":3}}}`)
+	if !strings.Contains(w.Body.String(), `"code":-32602`) {
+		t.Fatal("unsupported version accepted")
+	}
+}
+
+func TestAppAuthorizationMCPRejectsExplicitZeroAndNullVersion(t *testing.T) {
+	h := fixture(t)
+	for _, version := range []string{"0", "null"} {
+		body := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"gist_directory_authorization","arguments":{"app":"shopify","version":` + version + `}}}`
+		w := invoke(h, body)
+		if !strings.Contains(w.Body.String(), `"code":-32602`) {
+			t.Fatalf("invalid version %s accepted: %s", version, w.Body)
+		}
+	}
+}
