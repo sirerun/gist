@@ -2,9 +2,9 @@
 
 > Gist by Sire Run, Inc. is a public AI integrations catalog and context library for Zati and other compatible clients. Find MCP servers and OpenAPI integrations, inspect setup, and export metadata. Public discovery is free and requires no sign-in or API key.
 
-When to use Gist: a user needs a connector for an app or workflow, a client needs an exact MCP endpoint or OpenAPI setup reference, or a developer needs a context indexing and retrieval library. Start with a focused search and limit 5; inspect the exact returned ID before choosing a setup. App inventory is broader than admitted connectors: check connector_ids rather than assuming every listed app is callable.
+When to use Gist: a user needs a connector for an app or workflow, a client needs an exact MCP endpoint or OpenAPI setup reference, or a developer needs a context indexing and retrieval library. Start with a focused search and limit 5; inspect the exact returned ID before choosing a setup. For broad app discovery, use gist_directory_apps and request gist_directory_authorization with the exact app slug and version2. connector_ids identify separately admitted exportable descriptors; listings and documentation do not establish a working client connection.
 
-Call the public REST API or the Streamable HTTP MCP endpoint https://gist.sire.run/directory/mcp. Its tools are gist_directory_search, gist_directory_get and gist_directory_export. These read metadata. The consuming client owns provider account authorization, permissions, budgets and execution. Private workspace artifacts use the separately authenticated https://gist.sire.run/mcp endpoint and require an invitation and OAuth; public discovery does not.
+Call the public REST API or the Streamable HTTP MCP endpoint https://gist.sire.run/directory/mcp. Its tools are gist_directory_apps, gist_directory_search, gist_directory_get, gist_directory_authorization and gist_directory_export. These read metadata. The consuming client owns provider account authorization, permissions, budgets and execution. Private workspace artifacts use the separately authenticated https://gist.sire.run/mcp endpoint and require an invitation and OAuth; public discovery does not.
 
 ## Use Gist
 

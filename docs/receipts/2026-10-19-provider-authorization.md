@@ -113,3 +113,27 @@ PR132 separately landed 60 more reviewed app entries as
 `b33d863265164d63af1bef52664d6172927427f6`, with tested tree
 `105bf2d8997af2d9e78f5a354c6b948b2418f074`. Its image build and rollout
 are separate from the live v2 acceptance above. Source alone is not deployment.
+
+## Expansion to 609 explicit app records
+
+Gist PR136 landed as `4909286e334d0b46435358a6c870dea9a306dcdd`,
+with reviewed/tested tree `48201d71e6423c97a74b2606ec3336acbe8c2b96`.
+Foundation PR317 landed as `488eb12de3a0ea0a5d70414091be5ef4bfc08a67`.
+The source-pinned ARM build passed; final image smoke verified 768 dimensions,
+the public index and 32 matches without network access in 12.609 seconds.
+Image digest: `sha256:54b7ba099d7abaa78ef87f33ef65c3157968dc77471f5ba44d1ae06466db5c33`.
+Saved plan SHA256:
+`8ab2edd10b642f5988ad9e5395c9fb8db88eb043ab41128b757943dcfba2aff9`.
+Only image/task references changed; ECS task revision29 completed with one
+running task and the existing CPU/memory envelope.
+
+Live REST/MCP guidance parity passed, including Magento OAuth 1.0a, prior
+API/native routes and invalid-version rejection. Default v1 remained compatible.
+Existing descriptor and OpenAPI checks passed; semantic search remained hybrid
+with 32 candidates. Guidance responses use Cache-Control: no-store.
+
+The exact source handler evaluated all 3380 apps: 543 documented, six partial,
+97 needing research, 11 platform modules and 2723 with no verified route.
+These counts include existing connector joins, not only explicit app entries.
+They are documentation/metadata coverage, not tested provider connections.
+Remaining provider-source collection remains open.

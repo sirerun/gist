@@ -4,7 +4,7 @@ Gist by Sire Run, Inc. offers anonymous public catalog discovery, a Go context l
 
 ## Public REST API: no key or sign-in
 
-The API entry point is https://gist.sire.run/api. The OpenAPI 3.0 description at https://gist.sire.run/openapi.json defines six read-only operations, typed parameters, pagination, response schemas and errors. These operations are suitable for OpenAPI-to-function adapters.
+The API entry point is https://gist.sire.run/api. The OpenAPI 3.0 description at https://gist.sire.run/openapi.json defines seven read-only operations, typed parameters, pagination, response schemas and errors. These operations are suitable for OpenAPI-to-function adapters.
 
 ```sh
 curl -sS 'https://gist.sire.run/api/directory?q=calendar&limit=5'
@@ -15,7 +15,9 @@ Use an exact id returned by search with GET /api/directory/item?id=... or GET /a
 
 ## Public MCP server
 
-Add https://gist.sire.run/directory/mcp with Streamable HTTP transport and no authentication. The tools are gist_directory_search, gist_directory_get and gist_directory_export. The server supports MCP protocol versions 2025-06-18 and 2025-03-26. Connection metadata is published at https://gist.sire.run/server.json using the MCP Registry schema; this does not claim registration in an external directory.
+Add https://gist.sire.run/directory/mcp with Streamable HTTP transport and no authentication. The tools are gist_directory_apps, gist_directory_search, gist_directory_get, gist_directory_authorization and gist_directory_export. The server supports MCP protocol versions 2025-06-18 and 2025-03-26. Connection metadata is published at https://gist.sire.run/server.json using the MCP Registry schema; this does not claim registration in an external directory.
+
+For the complete app catalog, call gist_directory_apps with {"query":"find leads for my startup","limit":5}. It uses the same hosted semantic search as the Library and REST app search. Follow an exact returned slug with gist_directory_authorization using {"app":"<slug>","version":2} for reviewed MCP/direct API routes, endpoint input names and explicit research gaps. Connector IDs remain the separate interface for retrieving/exporting admitted descriptors.
 
 ## Pagination and errors
 

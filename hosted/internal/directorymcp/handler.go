@@ -21,6 +21,10 @@ type Searcher interface {
 	Search(context.Context, directory.Query) (directory.Result, error)
 }
 
+type AppSearcher interface {
+	SearchApps(context.Context, directory.AppQuery) (directory.AppResult, error)
+}
+
 type Handler struct {
 	search     Searcher
 	index      *directory.Index
@@ -158,6 +162,46 @@ func (h *Handler) call(ctx context.Context, w http.ResponseWriter, call request)
 	}
 	var value any
 	switch params.Name {
+	case "gist_directory_apps":
+		var args struct {
+			Query    string `json:"query"`
+			Category string `json:"category"`
+			Offset   int    `json:"offset"`
+			Limit    *int   `json:"limit"`
+		}
+		if !decodeArgs(params.Arguments, &args) {
+			h.fail(w, call.ID, -32602, "Invalid app search arguments")
+			return
+		}
+		limit := 24
+		if args.Limit != nil {
+			limit = *args.Limit
+		}
+		if limit < 1 || limit > 100 || args.Offset < 0 || args.Offset > directory.MaxEntries || len(args.Query) > 512 || len(args.Category) > 200 {
+			h.fail(w, call.ID, -32602, "Invalid app search bounds")
+			return
+		}
+		query := directory.AppQuery{Text: args.Query, Category: args.Category, Offset: args.Offset, Limit: limit}
+		var result directory.AppResult
+		var err error
+		if search, ok := h.search.(AppSearcher); ok {
+			result, err = search.SearchApps(ctx, query)
+		} else {
+			h.appsOnce.Do(func() { h.apps, h.appsErr = directory.DefaultApps(h.index) })
+			if h.appsErr != nil {
+				h.toolError(w, call.ID, "App directory unavailable")
+				return
+			}
+			result, err = h.apps.Search(query)
+		}
+		if err != nil {
+			h.fail(w, call.ID, -32602, "Invalid app query")
+			return
+		}
+		if result.SearchMode != "" {
+			w.Header().Set("X-Gist-Search-Mode", result.SearchMode)
+		}
+		value = result
 	case "gist_directory_search":
 		var q struct {
 			Query  string `json:"query"`
@@ -330,6 +374,7 @@ func toolList() []map[string]any {
 	}
 	id := map[string]any{"type": "string", "minLength": 1, "maxLength": 512, "description": "Exact ID returned by gist_directory_search."}
 	return []map[string]any{
+		{"name": "gist_directory_apps", "description": "Search the complete app inventory using the same hosted search as the Library. Follow an exact returned slug with gist_directory_authorization using app and version 2 for reviewed MCP/direct API routes and explicit gaps. Listings do not grant connection or execution.", "annotations": annotations, "inputSchema": schema(map[string]any{"query": map[string]any{"type": "string", "maxLength": 512}, "category": map[string]any{"type": "string", "maxLength": 200}, "offset": map[string]any{"type": "integer", "minimum": 0, "maximum": directory.MaxEntries}, "limit": map[string]any{"type": "integer", "minimum": 1, "maximum": 100}}, []string{})},
 		{"name": "gist_directory_search", "description": "Find MCP server and OpenAPI integrations by name, use case or connection type. No connection or execution.", "annotations": annotations, "inputSchema": schema(map[string]any{"query": map[string]any{"type": "string", "maxLength": 200}, "kind": map[string]any{"type": "string", "enum": []string{"", "mcp", "openapi"}}, "tag": map[string]any{"type": "string", "maxLength": 64}, "cursor": map[string]any{"type": "string", "maxLength": 2048}, "limit": map[string]any{"type": "integer", "minimum": 1, "maximum": 50}}, []string{})},
 		{"name": "gist_directory_get", "description": "Read a public integration's description, connection details and setup links by exact ID.", "annotations": annotations, "inputSchema": schema(map[string]any{"id": id}, []string{"id"})},
 		{"name": "gist_directory_authorization", "description": "Read direct-provider authorization guidance by exact connector ID or app slug. Covers all catalog apps with explicit gaps; never invents MCP routes. Provide exactly one of id or app. Use version 2 for tenant/private endpoint inputs and native protocols; version 1 preserves strict clients. Clients own credentials and authorization.", "annotations": annotations, "inputSchema": map[string]any{"type": "object", "properties": map[string]any{"id": id, "app": map[string]any{"type": "string", "minLength": 1, "maxLength": 256}, "version": map[string]any{"type": "integer", "enum": []int{1, 2}, "default": 1}}, "oneOf": []map[string]any{{"required": []string{"id"}}, {"required": []string{"app"}}}, "additionalProperties": false}},

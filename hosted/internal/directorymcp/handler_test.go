@@ -103,6 +103,25 @@ func TestDiscoveryMCPTransportGuards(t *testing.T) {
 	}
 }
 
+func TestAppInventorySearchAndBounds(t *testing.T) {
+	h := fixture(t)
+	w := invoke(h, `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"gist_directory_apps","arguments":{"limit":1}}}`)
+	var response struct {
+		Result struct {
+			StructuredContent directory.AppResult `json:"structuredContent"`
+		} `json:"result"`
+	}
+	if json.Unmarshal(w.Body.Bytes(), &response) != nil || response.Result.StructuredContent.Total != 3380 || len(response.Result.StructuredContent.Items) != 1 || response.Result.StructuredContent.NextOffset == nil {
+		t.Fatalf("full inventory unavailable: %s", w.Body.String())
+	}
+	for _, args := range []string{`{"limit":0}`, `{"limit":101}`, `{"offset":-1}`, `{"workspace":"private"}`} {
+		w = invoke(h, `{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"gist_directory_apps","arguments":`+args+`}}`)
+		if !strings.Contains(w.Body.String(), `"code":-32602`) {
+			t.Fatalf("invalid app arguments accepted: %s", w.Body.String())
+		}
+	}
+}
+
 func TestProviderAuthorizationTool(t *testing.T) {
 	h := fixture(t)
 	w := invoke(h, `{"jsonrpc":"2.0","id":1,"method":"tools/list"}`)

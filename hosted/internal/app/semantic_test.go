@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -65,5 +66,18 @@ func TestHostedDirectoryAndMCPShareSemanticSearch(t *testing.T) {
 	var appResult directory.AppResult
 	if response.Code != 200 || json.Unmarshal(response.Body.Bytes(), &appResult) != nil || response.Header().Get("X-Gist-Search-Mode") != "hybrid" || len(appResult.Items) == 0 {
 		t.Fatalf("Library apps %d %s", response.Code, response.Body.String())
+	}
+	request = httptest.NewRequest("POST", "/directory/mcp", strings.NewReader(`{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"gist_directory_apps","arguments":{"query":"find leads for my startup"}}}`))
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "application/json, text/event-stream")
+	response = httptest.NewRecorder()
+	mcp.ServeHTTP(response, request)
+	var toolResult struct {
+		Result struct {
+			StructuredContent directory.AppResult `json:"structuredContent"`
+		} `json:"result"`
+	}
+	if response.Code != 200 || json.Unmarshal(response.Body.Bytes(), &toolResult) != nil || response.Header().Get("X-Gist-Search-Mode") != "hybrid" || !reflect.DeepEqual(appResult, toolResult.Result.StructuredContent) {
+		t.Fatalf("App REST/MCP parity failed: %d %s", response.Code, response.Body.String())
 	}
 }
