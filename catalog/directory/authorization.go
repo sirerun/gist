@@ -137,11 +137,11 @@ func parseAuthorization(raw []byte) (map[string]AuthorizationGuide, error) {
 			}
 		}
 		for _, m := range g.Methods {
-			if g.Format == AuthorizationFormat && (m == "password" || m == "client_certificate" || m == "ssh_key" || m == "hmac") {
+			if g.Format == AuthorizationFormat && (m == "password" || m == "client_certificate" || m == "ssh_key" || m == "hmac" || m == "oauth1a") {
 				return nil, errors.New("v2 authentication method in v1 guide")
 			}
 			switch m {
-			case "oauth2", "api_key", "bearer", "none", "basic", "aws_sigv4", "password", "client_certificate", "ssh_key", "hmac":
+			case "oauth2", "api_key", "bearer", "none", "basic", "aws_sigv4", "password", "client_certificate", "ssh_key", "hmac", "oauth1a":
 			default:
 				return nil, errors.New("invalid authorization method")
 			}

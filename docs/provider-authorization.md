@@ -81,6 +81,9 @@ values stay in the client. API/DB adapters must perform their own destination,
 credential and effect checks. A guide with `transport: unknown` does not guess
 between SSE and Streamable HTTP; the client must verify the transport.
 
+The v2 method `oauth1a` identifies OAuth 1.0a token exchange and request signing;
+it is distinct from `oauth2` and is omitted from the default v1 projection.
+
 App-level `sources` and `notes` explain researched gaps and platform-specific
 modules. `not_applicable` requires source evidence that a listing is a platform
 module rather than an independently connectable provider. It does not mean the

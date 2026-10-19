@@ -16,7 +16,7 @@ from urllib.parse import parse_qs, urlsplit
 V1 = 'gist.directory.authorization/v1'
 V2 = 'gist.directory.authorization/v2'
 BASE_METHODS = {'oauth2', 'api_key', 'bearer', 'basic', 'aws_sigv4', 'none'}
-V2_METHODS = {'password', 'client_certificate', 'ssh_key', 'hmac'}
+V2_METHODS = {'password', 'client_certificate', 'ssh_key', 'hmac', 'oauth1a'}
 FIELD = re.compile(r'^[A-Za-z_][A-Za-z0-9_]{0,63}$')
 PLACEHOLDER = re.compile(r'\{([A-Za-z_][A-Za-z0-9_]{0,63})\}')
 ROUTE_FIELDS = {'kind', 'url', 'transport', 'methods', 'credential_names', 'prerequisites', 'steps', 'scopes', 'sources', 'notes', 'setup_url', 'api_url_template', 'endpoint_inputs', 'protocol'}
