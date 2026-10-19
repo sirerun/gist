@@ -278,3 +278,69 @@ func TestPublicHubSpotAppHasAdmittedRoute(t *testing.T) {
 		t.Fatalf("HubSpot route %+v %v", app, err)
 	}
 }
+
+func TestPublicProviderAuthorizationRoute(t *testing.T) {
+	idx, err := directory.DefaultPublic()
+	if err != nil {
+		t.Fatal(err)
+	}
+	public := &directoryAPI{index: idx, origin: "https://gist.example"}
+	app := requestContext{directory: public, admission: func() error { return errDirectoryDenied }, rest: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { t.Fatal("private REST reached") })}
+	id := "mcp:app.linear/linear"
+	response := webRequest(app, "GET", "/api/directory/authorization?id="+url.QueryEscape(id), "")
+	if response.Code != 200 {
+		t.Fatalf("%d %s", response.Code, response.Body)
+	}
+	var guide directory.AuthorizationGuide
+	if err := json.Unmarshal(response.Body.Bytes(), &guide); err != nil {
+		t.Fatal(err)
+	}
+	if guide.Format != directory.AuthorizationFormat || guide.ID != id || guide.ConnectionTested || guide.CredentialOwner != "client" {
+		t.Fatalf("invalid guide %+v", guide)
+	}
+	item := webRequest(public, "GET", "/api/directory/item?id="+url.QueryEscape(id), "")
+	if !strings.Contains(item.Header().Get("Link"), "/api/directory/authorization?id=") {
+		t.Fatal("missing authorization discovery link")
+	}
+	var record directory.Record
+	decoder := json.NewDecoder(strings.NewReader(item.Body.String()))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&record); err != nil {
+		t.Fatalf("descriptor compatibility: %v", err)
+	}
+	for _, path := range []string{"/api/directory/authorization", "/api/directory/authorization?id=missing", "/api/directory/authorization?id=" + url.QueryEscape(id) + "&token=secret"} {
+		w := webRequest(public, "GET", path, "")
+		if w.Code != 400 && w.Code != 404 {
+			t.Fatalf("bad query %q accepted: %d", path, w.Code)
+		}
+	}
+}
+
+func TestPublicAppAuthorizationBySlug(t *testing.T) {
+	idx, err := directory.DefaultPublic()
+	if err != nil {
+		t.Fatal(err)
+	}
+	apps, err := directory.DefaultApps(idx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := &directoryAPI{index: idx, apps: apps, origin: "https://gist.example"}
+	w := webRequest(h, "GET", "/api/directory/authorization?app=google-sheets", "")
+	if w.Code != 200 {
+		t.Fatalf("%d %s", w.Code, w.Body)
+	}
+	var g directory.AppAuthorization
+	if err := json.Unmarshal(w.Body.Bytes(), &g); err != nil {
+		t.Fatal(err)
+	}
+	if g.App != "google-sheets" || g.Format != "gist.directory.app-authorization/v1" || g.Status != "documented" || len(g.Routes) != 1 || g.Routes[0].Kind != "http-api" {
+		t.Fatal(w.Body)
+	}
+	for _, u := range []string{"/api/directory/authorization?app=missing", "/api/directory/authorization?app=google-sheets&id=mcp%3Aairtable", "/api/directory/authorization?app=google-sheets&app=slack"} {
+		w := webRequest(h, "GET", u, "")
+		if w.Code != 400 && w.Code != 404 {
+			t.Fatalf("invalid app selector %s %d", u, w.Code)
+		}
+	}
+}

@@ -168,7 +168,7 @@ func TestPublicOpenAPIIsSelfDescribing(t *testing.T) {
 			}
 		}
 	}
-	if len(seen) != 6 {
+	if len(seen) != 7 {
 		t.Fatal("unexpected public operation count", len(seen))
 	}
 }

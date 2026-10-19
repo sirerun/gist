@@ -1,0 +1,453 @@
+[
+  {
+    "slug": "google-sheets",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [
+          "OAuth client ID",
+          "OAuth client secret when required for the registered client type"
+        ],
+        "prerequisites": [
+          "Google Cloud project with Sheets API enabled",
+          "OAuth consent configuration and registered client appropriate to the application platform"
+        ],
+        "steps": [
+          "Register the client and its actual callback using Google Workspace credential setup.",
+          "Choose the least-privilege supported Sheets scope for the intended operations and obtain user consent.",
+          "Call the documented v4 Sheets resources using the resulting OAuth access token."
+        ],
+        "scopes": [
+          "https://www.googleapis.com/auth/spreadsheets.readonly",
+          "https://www.googleapis.com/auth/spreadsheets",
+          "https://www.googleapis.com/auth/drive.file"
+        ],
+        "sources": [
+          {
+            "url": "https://developers.google.com/workspace/sheets/api/reference/rest",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.google.com/workspace/sheets/api/scopes",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.google.com/workspace/guides/create-credentials",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "notes": [
+          "Scopes listed are alternatives, not a requirement to request all. drive.file is the recommended per-file access option; spreadsheets scopes cover entire spreadsheet files, not individual sheets.",
+          "The Google Discovery document is not mislabeled as OpenAPI. No MCP route is asserted by this record.",
+          "Direct API documentation only; no account authorization, operation execution or Zati adapter acceptance was performed."
+        ],
+        "api_url": "https://sheets.googleapis.com",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:google-sheets",
+        "title": "Google Sheets",
+        "status": "documented",
+        "remotes": [],
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.google.com/workspace/sheets/api/reference/rest"
+      }
+    ]
+  },
+  {
+    "slug": "openai-gpt-3",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key",
+          "bearer"
+        ],
+        "credential_names": [
+          "OPENAI_API_KEY"
+        ],
+        "prerequisites": [
+          "OpenAI API account/project access and permission to create the intended API key"
+        ],
+        "steps": [
+          "Create an API key in the intended OpenAI API project.",
+          "Send Authorization: Bearer with the API key to the documented API resources.",
+          "When required by organization/project membership, specify the documented OpenAI-Organization and OpenAI-Project headers."
+        ],
+        "scopes": [],
+        "sources": [
+          {
+            "url": "https://developers.openai.com/api/reference/overview",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "notes": [
+          "The inventory display name is OpenAI (ChatGPT, Whisper); this route is the OpenAI API and does not establish access to a consumer ChatGPT account.",
+          "Direct API documentation only; no account authorization, operation execution or Zati adapter acceptance was performed."
+        ],
+        "api_url": "https://api.openai.com/v1",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:openai-gpt-3",
+        "title": "OpenAI (ChatGPT, Whisper)",
+        "status": "documented",
+        "remotes": [],
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.openai.com/api/reference/overview"
+      }
+    ]
+  },
+  {
+    "slug": "anthropic-claude",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key",
+          "bearer"
+        ],
+        "credential_names": [
+          "Claude Console API key"
+        ],
+        "prerequisites": [
+          "Claude Console account and API key with permission to the intended workspace"
+        ],
+        "steps": [
+          "Generate the intended API key in Claude Console.",
+          "Use the documented Authorization: Bearer API-key header; x-api-key remains a supported legacy alternative.",
+          "Include the required anthropic-version and content-type headers. Supply anthropic-workspace-id when using a multi-workspace key."
+        ],
+        "scopes": [],
+        "sources": [
+          {
+            "url": "https://platform.claude.com/docs/en/api/overview",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "notes": [
+          "Workload Identity Federation is separately documented but not asserted as a configured integration here. Cloud-provider Claude offerings use different IAM paths.",
+          "Direct API documentation only; no account authorization, operation execution or Zati adapter acceptance was performed."
+        ],
+        "api_url": "https://api.anthropic.com",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:anthropic-claude",
+        "title": "Anthropic Claude",
+        "status": "documented",
+        "remotes": [],
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://platform.claude.com/docs/en/api/overview"
+      }
+    ]
+  },
+  {
+    "slug": "amazon-ses",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "aws_sigv4"
+        ],
+        "credential_names": [
+          "AWS access key ID",
+          "AWS secret access key",
+          "AWS session token when temporary credentials are used"
+        ],
+        "prerequisites": [
+          "AWS account and IAM principal authorized for the intended SES operations",
+          "Correct SES region and account sending restrictions reviewed"
+        ],
+        "steps": [
+          "Select the SES region matching the intended account resources; the recorded URL is the documented us-west-1 example endpoint.",
+          "Use an AWS SDK/approved credential provider or sign requests with AWS Signature Version 4.",
+          "Include the STS security token when credentials are temporary; constrain IAM permissions to the intended SES operations and identities."
+        ],
+        "scopes": [],
+        "sources": [
+          {
+            "url": "https://docs.aws.amazon.com/general/latest/gr/ses.html",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://docs.aws.amazon.com/ses/latest/APIReference-V2/CommonParameters.html",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://docs.aws.amazon.com/ses/latest/dg/control-user-access.html",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "notes": [
+          "This is the HTTPS SES API, not SMTP. SMTP credentials and endpoints are a separate route.",
+          "aws_sigv4 names the required request-signing protocol, not a static Bearer token; the regional URL must remain configurable.",
+          "SES sandbox and sending-identity restrictions still apply.",
+          "Direct API documentation only; no account authorization, operation execution or Zati adapter acceptance was performed."
+        ],
+        "api_url": "https://email.us-west-1.amazonaws.com",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:amazon-ses",
+        "title": "Amazon SES",
+        "status": "documented",
+        "remotes": [],
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://docs.aws.amazon.com/general/latest/gr/ses.html"
+      }
+    ]
+  },
+  {
+    "slug": "telegram",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "Telegram bot token"
+        ],
+        "prerequisites": [
+          "Telegram account and a bot created through BotFather"
+        ],
+        "steps": [
+          "Create the bot with BotFather using /newbot and retain its bot token in secret custody.",
+          "Construct HTTPS Bot API calls using the documented /bot<token>/METHOD_NAME path."
+        ],
+        "scopes": [],
+        "sources": [
+          {
+            "url": "https://core.telegram.org/bots/api",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://core.telegram.org/bots/tutorial",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "notes": [
+          "The token authenticates the bot, not the user Telegram account.",
+          "Credential-bearing request paths must not be persisted as public catalog URLs or logged unredacted. No Bearer-header substitution is documented here.",
+          "Direct API documentation only; no account authorization, operation execution or Zati adapter acceptance was performed."
+        ],
+        "api_url": "https://api.telegram.org",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:telegram",
+        "title": "Telegram Bot",
+        "status": "documented",
+        "remotes": [],
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://core.telegram.org/bots/api"
+      }
+    ]
+  },
+  {
+    "slug": "twilio",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "basic"
+        ],
+        "credential_names": [
+          "TWILIO_ACCOUNT_SID",
+          "TWILIO_API_KEY",
+          "TWILIO_API_SECRET",
+          "TWILIO_AUTH_TOKEN (operation-specific alternative)"
+        ],
+        "prerequisites": [
+          "Twilio account and credentials authorized for the target account/resources"
+        ],
+        "steps": [
+          "Create an API key with permissions appropriate to the intended operation.",
+          "Use HTTP Basic authentication with API key SID as username and API key secret as password.",
+          "For operations whose guide requires Account SID and Auth Token, use that documented Basic-auth pair instead."
+        ],
+        "scopes": [],
+        "sources": [
+          {
+            "url": "https://www.twilio.com/docs/usage/requests-to-twilio",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "notes": [
+          "Main, Standard and Restricted keys have different resource access; do not assume every key can administer Accounts.",
+          "Product APIs can use distinct domains and versions; this record establishes the documented api.twilio.com route only.",
+          "Direct API documentation only; no account authorization, operation execution or Zati adapter acceptance was performed."
+        ],
+        "api_url": "https://api.twilio.com",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:twilio",
+        "title": "Twilio",
+        "status": "documented",
+        "remotes": [],
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://www.twilio.com/docs/usage/requests-to-twilio"
+      }
+    ]
+  },
+  {
+    "slug": "sendgrid",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key",
+          "bearer"
+        ],
+        "credential_names": [
+          "SendGrid API key"
+        ],
+        "prerequisites": [
+          "SendGrid account and permission to generate an API key"
+        ],
+        "steps": [
+          "Create the intended API key in the SendGrid account with permissions for the chosen operations.",
+          "Call the v3 API using Authorization: Bearer with that key."
+        ],
+        "scopes": [],
+        "sources": [
+          {
+            "url": "https://www.twilio.com/docs/sendgrid/api-reference/how-to-use-the-sendgrid-v3-api/authentication",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "notes": [
+          "This is SendGrid API authentication, not an SMTP password. Sender/domain setup and permission requirements depend on the selected operations and remain separate qualification.",
+          "Direct API documentation only; no account authorization, operation execution or Zati adapter acceptance was performed."
+        ],
+        "api_url": "https://api.sendgrid.com/v3",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:sendgrid",
+        "title": "SendGrid",
+        "status": "documented",
+        "remotes": [],
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://www.twilio.com/docs/sendgrid/api-reference/how-to-use-the-sendgrid-v3-api/authentication"
+      }
+    ]
+  },
+  {
+    "slug": "whatsapp-business-cloud",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "bearer"
+        ],
+        "credential_names": [
+          "Meta user or system-user access token",
+          "WhatsApp Business Account ID",
+          "Business phone number ID"
+        ],
+        "prerequisites": [
+          "Meta business portfolio",
+          "WhatsApp Business Account",
+          "Business phone number",
+          "Meta app with the needed WhatsApp permissions"
+        ],
+        "steps": [
+          "Complete the WhatsApp Cloud API setup for the intended business assets.",
+          "Obtain a permitted user or system-user access token using the provider flow and use Authorization: Bearer.",
+          "Select a currently supported Graph API version and the intended phone-number/business resource identifiers."
+        ],
+        "scopes": [
+          "whatsapp_business_management",
+          "whatsapp_business_messaging"
+        ],
+        "sources": [
+          {
+            "url": "https://www.postman.com/meta/whatsapp-business-platform/collection/wlk6lh4/whatsapp-cloud-api",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://www.postman.com/meta/whatsapp-business-platform/request/13382743-c953a6a4-3457-4845-91c6-e13e1db9f5ba",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://www.postman.com/meta/whatsapp-business-platform/documentation/wlk6lh4/whatsapp-cloud-api",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://www.postman.com/meta",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "notes": [
+          "Sources are Meta-published official API collection and request examples. The developers.facebook.com page returned HTTP 429 during this review; no retry loop was used.",
+          "business_management is an additional conditional permission for business-portfolio queries, not a universal requirement.",
+          "Do not hardcode the historical Graph API version in an example as the current required version.",
+          "Direct API documentation only; no account authorization, operation execution or Zati adapter acceptance was performed."
+        ],
+        "api_url": "https://graph.facebook.com",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:whatsapp-business-cloud",
+        "title": "WhatsApp Business Cloud",
+        "status": "documented",
+        "remotes": [],
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://www.postman.com/meta/whatsapp-business-platform/collection/wlk6lh4/whatsapp-cloud-api"
+      }
+    ]
+  },
+  {
+    "slug": "linkedin",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "oauth2",
+          "bearer"
+        ],
+        "credential_names": [
+          "LinkedIn OAuth client ID",
+          "LinkedIn OAuth client secret"
+        ],
+        "prerequisites": [
+          "Registered LinkedIn developer application",
+          "Approval for the API products/permissions the integration requires",
+          "Registered actual client redirect URI"
+        ],
+        "steps": [
+          "Configure the application in LinkedIn Developer Portal and obtain client credentials.",
+          "Run the documented member authorization-code flow for member data and request only application-approved scopes.",
+          "Exchange the authorization code and send the resulting access token using Authorization: Bearer."
+        ],
+        "scopes": [],
+        "sources": [
+          {
+            "url": "https://learn.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://learn.microsoft.com/en-us/linkedin/shared/authentication/authentication",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://learn.microsoft.com/en-us/linkedin/talent/versioning-announcement",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "notes": [
+          "The base host covers documented APIs; choose the specific approved product route. Versioned /rest APIs require a LinkedIn-Version header.",
+          "Product access and scopes vary, so no universal scope set is asserted. Programmatic refresh is limited to enabled partner applications; do not promise refresh-token availability.",
+          "Direct API documentation only; no account authorization, operation execution or Zati adapter acceptance was performed."
+        ],
+        "api_url": "https://api.linkedin.com",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:linkedin",
+        "title": "LinkedIn",
+        "status": "documented",
+        "remotes": [],
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://learn.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow"
+      }
+    ]
+  }
+]

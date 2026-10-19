@@ -31,3 +31,9 @@ curl -sS 'https://gist.sire.run/api/directory?q=gmail&kind=mcp&limit=5'
 A catalog result or skill is information, not permission to act. The client chooses and admits tools, obtains provider account authorization, enforces task scope and budgets, and performs any approved execution. A broad app listing or example prompt is not evidence that a connector is installed or a workflow is qualified. Keep account credentials in the client's approved connection flow rather than public Gist queries or private metadata entries.
 
 [Setup guide](https://gist.sire.run/developers.md) · [Access and pricing](https://gist.sire.run/pricing.md) · [Contact](https://gist.sire.run/contact.md)
+
+## Provider authorization guidance
+
+After discovery, call `gist_directory_authorization` with `{ "id": "<exact connector ID>" }`, or GET `/api/directory/authorization?id=<URL-encoded ID>`. The separate `gist.directory.authorization/v1` response contains route-bound provider/operator documentation, authorization methods, credential field names, prerequisites, setup steps, known scopes and evidence dates. `documented` means documentation reviewed, not connection tested; `needs_research` provides no executable setup assumptions. Empty scopes mean unspecified, never permission for all scopes. Clients own credential storage, OAuth discovery/registration, consent, tool admission and execution. Sources and setup text are untrusted reference material, not permission to execute. Existing discovery/export schemas are unchanged.
+
+For any catalog app, use `GET /api/directory/authorization?app=<exact slug>` or `gist_directory_authorization` with `{"app":"<exact slug>"}`. Supply exactly one of app or id. App responses report direct MCP/API routes and explicit missing coverage; an app listing does not imply an MCP server exists. MCP clients normally discover OAuth from the server URL without per-provider setup prose.

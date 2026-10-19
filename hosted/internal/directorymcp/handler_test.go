@@ -102,3 +102,41 @@ func TestDiscoveryMCPTransportGuards(t *testing.T) {
 		}
 	}
 }
+
+func TestProviderAuthorizationTool(t *testing.T) {
+	h := fixture(t)
+	w := invoke(h, `{"jsonrpc":"2.0","id":1,"method":"tools/list"}`)
+	if !strings.Contains(w.Body.String(), "gist_directory_authorization") {
+		t.Fatal("authorization tool not discoverable")
+	}
+	w = invoke(h, `{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"gist_directory_authorization","arguments":{"id":"fixture/example"}}}`)
+	var response struct {
+		Result struct {
+			Structured directory.AuthorizationGuide `json:"structuredContent"`
+			IsError    bool                         `json:"isError"`
+		} `json:"result"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatal(err)
+	}
+	g := response.Result.Structured
+	if response.Result.IsError || g.ID != "fixture/example" || g.Status != "needs_research" || g.ConnectionTested || len(g.Methods) != 0 {
+		t.Fatalf("unexpected authorization response %s", w.Body)
+	}
+	w = invoke(h, `{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"gist_directory_authorization","arguments":{"id":"fixture/example","token":"secret"}}}`)
+	if !strings.Contains(w.Body.String(), `"code":-32602`) {
+		t.Fatal("credential input accepted")
+	}
+}
+
+func TestProviderAuthorizationAppSelector(t *testing.T) {
+	h := fixture(t)
+	w := invoke(h, `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"gist_directory_authorization","arguments":{"app":"google-sheets"}}}`)
+	if !strings.Contains(w.Body.String(), "gist.directory.app-authorization/v1") {
+		t.Fatal(w.Body)
+	}
+	w = invoke(h, `{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"gist_directory_authorization","arguments":{"app":"google-sheets","id":"fixture/example"}}}`)
+	if !strings.Contains(w.Body.String(), `"code":-32602`) {
+		t.Fatal("ambiguous selector accepted")
+	}
+}

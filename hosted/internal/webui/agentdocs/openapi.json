@@ -661,6 +661,119 @@
           }
         }
       }
+    },
+    "/api/directory/authorization": {
+      "get": {
+        "operationId": "getGistProviderAuthorization",
+        "summary": "Read provider authorization guidance",
+        "description": "Provider/operator-sourced setup metadata for the exact connector route. Documented does not mean connection tested. Clients perform OAuth, store credentials and admit tools. Empty scopes mean unspecified. Supply exactly one of id (connector) or app (catalog app slug). All catalog apps return a coverage response, including explicit missing routes.",
+        "tags": [
+          "Public catalog"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Exact integration ID returned by search; do not invent an ID.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          },
+          {
+            "name": "app",
+            "in": "query",
+            "required": false,
+            "description": "Exact catalog app slug; mutually exclusive with id.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful public metadata response. No provider connection or execution is performed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/AuthorizationGuide"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AppAuthorization"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query; correct the parameters before retrying.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Cross-origin browser request denied; use the site origin or a server-side client.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested catalog entry was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not allowed; use GET.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Concurrent capacity is full; back off before retrying.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service temporarily unavailable; retry with backoff.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1057,6 +1170,185 @@
           "mcp_url",
           "endpoints"
         ]
+      },
+      "AuthorizationGuide": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "format",
+          "id",
+          "title",
+          "status",
+          "remotes",
+          "connection_tested",
+          "credential_owner",
+          "sources",
+          "methods",
+          "credential_names",
+          "prerequisites",
+          "steps",
+          "scopes",
+          "notes",
+          "kind"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "gist.directory.authorization/v1"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "documented",
+              "needs_research"
+            ]
+          },
+          "remotes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Remote"
+            }
+          },
+          "setup_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "connection_tested": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          },
+          "credential_owner": {
+            "type": "string",
+            "enum": [
+              "client"
+            ]
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "url",
+                "checked_at"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "checked_at": {
+                  "type": "string",
+                  "format": "date"
+                }
+              }
+            }
+          },
+          "methods": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "credential_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "prerequisites": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "mcp",
+              "http-api",
+              "openapi"
+            ]
+          },
+          "api_url": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "AppAuthorization": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "format",
+          "app",
+          "name",
+          "status",
+          "routes",
+          "notes"
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "gist.directory.app-authorization/v1"
+            ]
+          },
+          "app": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "documented",
+              "partial",
+              "needs_research",
+              "no_verified_route"
+            ]
+          },
+          "routes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuthorizationGuide"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       }
     }
   },

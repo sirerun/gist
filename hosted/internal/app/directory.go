@@ -24,7 +24,7 @@ import (
 )
 
 func publicDirectoryPath(path string) bool {
-	return path == "/api/directory" || path == "/api/directory/item" || path == "/api/directory/export" || path == "/api/directory/apps" || path == "/api/directory/app"
+	return path == "/api/directory/authorization" || path == "/api/directory" || path == "/api/directory/item" || path == "/api/directory/export" || path == "/api/directory/apps" || path == "/api/directory/app"
 }
 
 type directoryAPI struct {
@@ -145,6 +145,42 @@ func (h *directoryAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		result = directory.PublicResultOf(search)
+	case "/api/directory/authorization":
+		if !webQueryKeys(v, "id", "app") || (v.Get("id") == "") == (v.Get("app") == "") {
+			webError(w, 400, "invalid_query", "Choose exactly one connector ID or app slug.")
+			return
+		}
+		if slug := v.Get("app"); slug != "" {
+			if !webRefValue(slug, 256) {
+				webError(w, 400, "invalid_query", "Choose an app slug.")
+				return
+			}
+			if h.apps == nil {
+				webError(w, 503, "service_unavailable", "App directory unavailable.")
+				return
+			}
+			a, ok := h.apps.Get(slug)
+			if !ok {
+				webError(w, 404, "not_found", "App not found.")
+				return
+			}
+			result, err = directory.AuthorizationForApp(a, h.index)
+		} else {
+			if !webRefValue(v.Get("id"), 512) {
+				webError(w, 400, "invalid_query", "Choose an entry ID.")
+				return
+			}
+			record, ok := h.index.Get(v.Get("id"))
+			if !ok {
+				webError(w, 404, "not_found", "Directory entry not found.")
+				return
+			}
+			result, err = directory.AuthorizationFor(record)
+		}
+		if err != nil {
+			webError(w, 503, "service_unavailable", "Authorization guidance unavailable.")
+			return
+		}
 	case "/api/directory/item", "/api/directory/export":
 		if !webQueryKeys(v, "id") || !webRefValue(v.Get("id"), 512) {
 			webError(w, 400, "invalid_query", "Choose an entry ID.")
@@ -156,6 +192,7 @@ func (h *directoryAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		result = directory.PublicRecordOf(record)
+		w.Header().Set("Link", "</api/directory/authorization?id="+url.QueryEscape(record.ID)+">; rel=\"describedby\"; type=\"application/json\"")
 		if r.URL.Path == "/api/directory/export" {
 			result = directory.PublicExportOf(directory.Export{Format: directory.ExportFormat, Record: record})
 		}

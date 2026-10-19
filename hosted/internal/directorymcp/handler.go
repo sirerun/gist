@@ -10,6 +10,7 @@ import (
 	"mime"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/sirerun/gist/catalog/directory"
 )
@@ -23,6 +24,9 @@ type Searcher interface {
 type Handler struct {
 	search     Searcher
 	index      *directory.Index
+	appsOnce   sync.Once
+	apps       *directory.AppIndex
+	appsErr    error
 	origin     string
 	concurrent chan struct{}
 }
@@ -189,6 +193,40 @@ func (h *Handler) call(ctx context.Context, w http.ResponseWriter, call request)
 			w.Header().Set("X-Gist-Search-Mode", result.SearchMode)
 		}
 		value = directory.PublicResultOf(result)
+	case "gist_directory_authorization":
+		var args struct {
+			ID  string `json:"id"`
+			App string `json:"app"`
+		}
+		if !decodeArgs(params.Arguments, &args) || (args.ID == "") == (args.App == "") || len(args.ID) > 512 || len(args.App) > 256 {
+			h.fail(w, call.ID, -32602, "Choose exactly one connector ID or app slug")
+			return
+		}
+		var err error
+		if args.App != "" {
+			h.appsOnce.Do(func() { h.apps, h.appsErr = directory.DefaultApps(h.index) })
+			if h.appsErr != nil {
+				h.toolError(w, call.ID, "App directory unavailable")
+				return
+			}
+			a, ok := h.apps.Get(args.App)
+			if !ok {
+				h.toolError(w, call.ID, "App not found")
+				return
+			}
+			value, err = directory.AuthorizationForApp(a, h.index)
+		} else {
+			r, ok := h.index.Get(args.ID)
+			if !ok {
+				h.toolError(w, call.ID, "Directory entry not found")
+				return
+			}
+			value, err = directory.AuthorizationFor(r)
+		}
+		if err != nil {
+			h.toolError(w, call.ID, "Authorization guidance unavailable")
+			return
+		}
 	case "gist_directory_get", "gist_directory_export":
 		var args struct {
 			ID string `json:"id"`
@@ -282,6 +320,7 @@ func toolList() []map[string]any {
 	return []map[string]any{
 		{"name": "gist_directory_search", "description": "Find MCP server and OpenAPI integrations by name, use case or connection type. No connection or execution.", "annotations": annotations, "inputSchema": schema(map[string]any{"query": map[string]any{"type": "string", "maxLength": 200}, "kind": map[string]any{"type": "string", "enum": []string{"", "mcp", "openapi"}}, "tag": map[string]any{"type": "string", "maxLength": 64}, "cursor": map[string]any{"type": "string", "maxLength": 2048}, "limit": map[string]any{"type": "integer", "minimum": 1, "maximum": 50}}, []string{})},
 		{"name": "gist_directory_get", "description": "Read a public integration's description, connection details and setup links by exact ID.", "annotations": annotations, "inputSchema": schema(map[string]any{"id": id}, []string{"id"})},
+		{"name": "gist_directory_authorization", "description": "Read direct-provider authorization guidance by exact connector ID or app slug. Covers all catalog apps with explicit gaps; never invents MCP routes. Provide exactly one of id or app. Clients own credentials and authorization.", "annotations": annotations, "inputSchema": map[string]any{"type": "object", "properties": map[string]any{"id": id, "app": map[string]any{"type": "string", "minLength": 1, "maxLength": 256}}, "oneOf": []map[string]any{{"required": []string{"id"}}, {"required": []string{"app"}}}, "additionalProperties": false}},
 		{"name": "gist_directory_export", "description": "Export a metadata-only gist.directory.entry/v1 descriptor for review by Zati or another client. Does not connect, authorize or run it.", "annotations": annotations, "inputSchema": schema(map[string]any{"id": id}, []string{"id"})},
 	}
 }
