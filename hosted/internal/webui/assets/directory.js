@@ -122,10 +122,11 @@
   }
   function directory() {
     const form = document.getElementById("directory-search"), query = document.getElementById("directory-query"), tag = document.getElementById("directory-tag"), results = document.getElementById("directory-results"), status = document.getElementById("directory-status"), notice = document.getElementById("directory-notice"), more = document.getElementById("directory-more");
-    const params = new URLSearchParams(location.search); query.value = params.get("q") || ""; tag.value = params.get("category") || params.get("tag") || "";
+    const connectable = document.getElementById("directory-connectable"), connectableLabel = document.getElementById("directory-connectable-label");
+    const params = new URLSearchParams(location.search); if(connectable)connectable.checked=params.get("connectable")==="true"; query.value = params.get("q") || ""; tag.value = params.get("category") || params.get("tag") || "";
     const pathKind = ({"/library/mcp":"mcp","/library/openapi":"openapi"})[location.pathname];
     let kind = pathKind || (["mcp","openapi"].includes(params.get("kind")) ? params.get("kind") : ""), cursor = "", generation = 0, total = 0;
-    function filters() { tag.disabled = Boolean(kind); document.querySelectorAll("[data-directory-kind]").forEach(b=>{const active=b.dataset.directoryKind===kind; b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));}); }
+    function filters() { if(connectableLabel)connectableLabel.hidden=Boolean(kind); tag.disabled = Boolean(kind); document.querySelectorAll("[data-directory-kind]").forEach(b=>{const active=b.dataset.directoryKind===kind; b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));}); }
     async function load(append = false, preserve = false) {
       const own=++generation, personalized=bookmarkState==="ready"&&bookmarkIDs.size>0, appView=!kind;
       const pageLimit=personalized?100:appView?100:50;
@@ -133,6 +134,7 @@
       if(!append&&!preserve)more.hidden=true;more.disabled=true;results.setAttribute("aria-busy","true");notice.replaceChildren();
       const p=new URLSearchParams({limit:String(Math.min(pageLimit,wanted))});
       if(query.value.trim())p.set("q",query.value.trim());if(kind)p.set("kind",kind);if(tag.value)p.set(appView&&!personalized?"category":"tag",tag.value);
+      if(appView&&connectable?.checked)p.set("connectable","true");
       if(append&&cursor)p.set(personalized||appView?"offset":"cursor",cursor);
       const visible=new URLSearchParams(p);for(const key of ["limit","cursor","offset","kind","saved"])visible.delete(key);
       if(appView&&visible.has("tag")){visible.set("category",visible.get("tag"));visible.delete("tag");}
@@ -166,7 +168,7 @@
         status.textContent="Search unavailable";failure(notice,e,()=>load(append,preserve));}}
       finally{if(own===generation){results.setAttribute("aria-busy","false");more.disabled=false;}}
     }
-    form.addEventListener("submit",e=>{e.preventDefault();load();}); tag.addEventListener("change",()=>load());
+    form.addEventListener("submit",e=>{e.preventDefault();load();}); tag.addEventListener("change",()=>load()); connectable?.addEventListener("change",()=>load());
     document.querySelectorAll("[data-directory-kind]").forEach(b=>b.addEventListener("click",()=>{kind=b.dataset.directoryKind;tag.value="";filters();load();}));
     document.addEventListener("bookmarks-changed",()=>load(false,true));
     bookmarksReady.then(()=>{if(bookmarkState==="ready"&&bookmarkIDs.size)load(false,true);});

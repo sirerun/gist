@@ -491,6 +491,16 @@
               "maximum": 100,
               "default": 24
             }
+          },
+          {
+            "name": "connectable",
+            "in": "query",
+            "description": "Only apps with a documented MCP, API or native setup route. Account approval, credentials and compatible client adapters are still required; connections are not tested.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {

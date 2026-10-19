@@ -80,4 +80,35 @@ func TestHostedDirectoryAndMCPShareSemanticSearch(t *testing.T) {
 	if response.Code != 200 || json.Unmarshal(response.Body.Bytes(), &toolResult) != nil || response.Header().Get("X-Gist-Search-Mode") != "hybrid" || !reflect.DeepEqual(appResult, toolResult.Result.StructuredContent) {
 		t.Fatalf("App REST/MCP parity failed: %d %s", response.Code, response.Body.String())
 	}
+	for _, suffix := range []string{"&connectable=true", "&connectable=false"} {
+		response = httptest.NewRecorder()
+		handler.ServeHTTP(response, httptest.NewRequest("GET", "/api/directory/apps?q=find+leads+for+my+startup"+suffix, nil))
+		var filtered directory.AppResult
+		if response.Code != 200 || json.Unmarshal(response.Body.Bytes(), &filtered) != nil {
+			t.Fatalf("filtered REST %d %s", response.Code, response.Body)
+		}
+		flag := strings.TrimPrefix(suffix, "&connectable=")
+		request = httptest.NewRequest("POST", "/directory/mcp", strings.NewReader(`{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"gist_directory_apps","arguments":{"query":"find leads for my startup","connectable":`+flag+`}}}`))
+		request.Header.Set("Content-Type", "application/json")
+		request.Header.Set("Accept", "application/json, text/event-stream")
+		response = httptest.NewRecorder()
+		mcp.ServeHTTP(response, request)
+		if response.Code != 200 || json.Unmarshal(response.Body.Bytes(), &toolResult) != nil || !reflect.DeepEqual(filtered, toolResult.Result.StructuredContent) {
+			t.Fatalf("filtered REST/MCP parity %s", response.Body)
+		}
+		if flag == "true" {
+			for _, a := range filtered.Items {
+				full, _ := apps.Get(a.Slug)
+				if !full.Connectable() {
+					t.Fatal("gap leaked", a.Slug)
+				}
+			}
+		}
+	}
+	response = httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest("GET", "/api/directory/apps?connectable=yes", nil))
+	if response.Code != 400 {
+		t.Fatal("invalid boolean accepted")
+	}
+
 }

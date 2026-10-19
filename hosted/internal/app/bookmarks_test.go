@@ -139,7 +139,28 @@ func TestBookmarkCatalogRanksBeforePaginationAndKeepsPublicProjection(t *testing
 	if strings.Contains(raw, `"id":"mcp:google-gmail"`) && all.Items[0].ID != "mcp:google-gmail" {
 		t.Fatal("another user's priority leaked")
 	}
-	for _, q := range []string{"limit=0", "limit=101", "offset=-1"} {
+	appIndex, err := directory.DefaultApps(idx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want, err := appIndex.Search(directory.AppQuery{ConnectableOnly: true, Limit: 100})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var filtered struct {
+		Items []directory.App `json:"items"`
+		Total int             `json:"total"`
+	}
+	raw = request("/app/api/bookmarks?view=catalog&connectable=true&limit=100")
+	if json.Unmarshal([]byte(raw), &filtered) != nil || filtered.Total != want.Total || len(filtered.Items) != len(want.Items) {
+		t.Fatalf("personalized filter mismatch %s", raw)
+	}
+	for n, a := range filtered.Items {
+		if a.Slug != want.Items[n].Slug {
+			t.Fatal("personalized filter ordering differs", a.Slug)
+		}
+	}
+	for _, q := range []string{"connectable=yes", "limit=0", "limit=101", "offset=-1"} {
 		w := httptest.NewRecorder()
 		h.serveBookmarks(w, httptest.NewRequest("GET", "/app/api/bookmarks?view=catalog&"+q, nil))
 		if w.Code != 400 {

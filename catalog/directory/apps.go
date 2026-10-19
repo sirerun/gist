@@ -17,6 +17,7 @@ var defaultApps []byte
 // App describes a discoverable application. Only ConnectorIDs identify admitted
 // connection descriptors; an application listing itself grants no connection.
 type App struct {
+	connectable     bool
 	Slug            string        `json:"slug"`
 	Name            string        `json:"name"`
 	Description     string        `json:"description"`
@@ -31,6 +32,8 @@ type AppCategory struct {
 }
 type AppQuery struct {
 	Text, Category string
+	// ConnectableOnly requires at least one documented setup route, not a tested connection.
+	ConnectableOnly bool
 	// PriorityConnectorIDs affects ordering only; callers retain ownership of saved state.
 	PriorityConnectorIDs []string
 	Offset, Limit        int
@@ -116,8 +119,24 @@ func ParseApps(raw []byte, connectors *Index) (*AppIndex, error) {
 		idx.bySlug[r.Slug] = len(idx.items)
 		idx.items = append(idx.items, App{Slug: r.Slug, Name: r.Name, Description: r.Description, Categories: r.Categories, IconURL: icon, BackgroundColor: r.BackgroundColor, ConnectorIDs: ids})
 	}
+	for n, app := range idx.items {
+		guide, err := AuthorizationForAppV2(app, connectors)
+		if err != nil {
+			return nil, err
+		}
+		for _, route := range guide.Routes {
+			if route.Status == "documented" {
+				idx.items[n].connectable = true
+				break
+			}
+		}
+	}
 	return idx, nil
 }
+
+// Connectable reports documented setup availability, not account or endpoint qualification.
+func (a App) Connectable() bool { return a.connectable }
+
 func cloneApp(a App) App {
 	a.Categories = append([]AppCategory{}, a.Categories...)
 	a.ConnectorIDs = append([]string(nil), a.ConnectorIDs...)
@@ -208,6 +227,9 @@ func (i *AppIndex) search(q AppQuery, slugs []string, ranked bool) (AppResult, e
 	}
 	text := strings.ToLower(q.Text)
 	for _, a := range ordered {
+		if q.ConnectableOnly && !a.Connectable() {
+			continue
+		}
 		if !ranked && text != "" && !strings.Contains(strings.ToLower(a.Name+" "+a.Slug+" "+a.Description), text) {
 			continue
 		}

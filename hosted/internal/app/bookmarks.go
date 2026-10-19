@@ -99,7 +99,7 @@ func (h *webAPI) serveBookmarks(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(204)
 		return
 	}
-	if !webQueryKeys(v, "view", "q", "kind", "tag", "offset", "limit") || len(v.Get("q")) > 200 || len(v.Get("tag")) > 64 || (v.Get("kind") != "" && v.Get("kind") != "mcp" && v.Get("kind") != "openapi") || (v.Get("view") != "" && v.Get("view") != "entries" && v.Get("view") != "catalog") {
+	if !webQueryKeys(v, "view", "q", "kind", "tag", "offset", "limit", "connectable") || len(v.Get("q")) > 200 || len(v.Get("tag")) > 64 || (v.Get("kind") != "" && v.Get("kind") != "mcp" && v.Get("kind") != "openapi") || (v.Get("view") != "" && v.Get("view") != "entries" && v.Get("view") != "catalog") {
 		webError(w, 400, "invalid_query", "Invalid bookmark query.")
 		return
 	}
@@ -265,6 +265,10 @@ func (s postgresBookmarks) set(ctx context.Context, p ports.Principal, id string
 // Bookmark IDs never enter public URLs, caches or directory search responses.
 func (h *webAPI) serveBookmarkCatalog(w http.ResponseWriter, r *http.Request, ids []string) {
 	q := r.URL.Query()
+	if q.Has("connectable") && q.Get("connectable") != "true" && q.Get("connectable") != "false" {
+		webError(w, 400, "invalid_query", "Connectable must be true or false.")
+		return
+	}
 	offset, limit := 0, 24
 	var err error
 	if q.Has("offset") {
@@ -298,7 +302,7 @@ func (h *webAPI) serveBookmarkCatalog(w http.ResponseWriter, r *http.Request, id
 				return
 			}
 		}
-		query := directory.AppQuery{Text: q.Get("q"), Category: q.Get("tag"), PriorityConnectorIDs: ids, Offset: offset, Limit: limit}
+		query := directory.AppQuery{Text: q.Get("q"), Category: q.Get("tag"), ConnectableOnly: q.Get("connectable") == "true", PriorityConnectorIDs: ids, Offset: offset, Limit: limit}
 		var result directory.AppResult
 		var e error
 		if h.publicSearch != nil {

@@ -98,3 +98,5 @@ admitted directory descriptor IDs. Retrieve those routes through the exact app
 slug. Existing connector IDs from directory discovery still use the ID selector.
 Documented URLs do not imply a passing endpoint probe, installed client adapter
 or usable provider account. Each of those has its own acceptance.
+
+Use `connectable=true` on `/api/directory/apps` or `{"connectable":true}` with `gist_directory_apps` to hide apps without a documented setup route. The Library offers the same “Connectable only” filter. This includes MCP and direct API/native routes; client adapters, provider account eligibility and credentials remain required. It does not certify a tested connection. Preserve the filter during pagination.
