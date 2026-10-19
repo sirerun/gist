@@ -7503,5 +7503,3041 @@
         "checked_at": "2026-10-19"
       }
     ]
+  },
+  {
+    "slug": "teamleader",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [
+          "client_id",
+          "client_secret"
+        ],
+        "prerequisites": [
+          "Register an integration in the Teamleader Focus Marketplace build area and choose its scopes."
+        ],
+        "steps": [
+          "Register the client and its redirect URI.",
+          "Complete the user OAuth authorization-code flow and exchange the code using the confidential client credentials.",
+          "Send the access token with API requests."
+        ],
+        "scopes": [],
+        "notes": [
+          "The provider API uses RPC-style resource/action endpoints. No hosted MCP route was qualified."
+        ],
+        "sources": [
+          {
+            "url": "https://github.com/teamleadercrm/api/blob/master/src/authentication.apib",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://github.com/teamleadercrm/api/blob/master/apiary.apib",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.focus.teamleader.eu",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:teamleader",
+        "title": "Teamleader",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://github.com/teamleadercrm/api/blob/master/src/authentication.apib"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://github.com/teamleadercrm/api/blob/master/src/authentication.apib",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://github.com/teamleadercrm/api/blob/master/apiary.apib",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "short-cm",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "Short.io API key"
+        ],
+        "prerequisites": [
+          "Short.io account and a configured short-link domain."
+        ],
+        "steps": [
+          "Obtain the API key from the account API settings.",
+          "Send the key directly in the Authorization header; do not add a Bearer prefix."
+        ],
+        "scopes": [],
+        "notes": [],
+        "sources": [
+          {
+            "url": "https://docs.short.io/articles/api-reference/Technical%20questions/how-to-use-the-short.io-api",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.short.io/docs/creating-your-first-short-link",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.short.io",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:short-cm",
+        "title": "Short.io",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://docs.short.io/articles/api-reference/Technical%20questions/how-to-use-the-short.io-api"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://docs.short.io/articles/api-reference/Technical%20questions/how-to-use-the-short.io-api",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://developers.short.io/docs/creating-your-first-short-link",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "fathom",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "Fathom API key"
+        ],
+        "prerequisites": [
+          "Fathom meeting-assistant account."
+        ],
+        "steps": [
+          "In User Settings > API Access generate an API key.",
+          "Send the key in X-Api-Key for API requests."
+        ],
+        "scopes": [],
+        "notes": [
+          "Keys are user-scoped: recorded meetings or meetings shared with the user/Team only. Admin keys do not unlock other users private meetings.",
+          "An official remote MCP URL is also documented at https://api.fathom.ai/mcp with browser authorization prompts, but the retrieved MCP guide does not specify the exact auth protocol. This record qualifies the explicit REST authentication contract."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.fathom.ai/quickstart",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://help.fathom.video/en/articles/8368641",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.fathom.ai/mcp-docs/index",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.fathom.ai/mcp-docs/claude",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.fathom.ai/external/v1",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:fathom",
+        "title": "Fathom",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.fathom.ai/quickstart"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://developers.fathom.ai/quickstart",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://help.fathom.video/en/articles/8368641",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://developers.fathom.ai/mcp-docs/index",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://developers.fathom.ai/mcp-docs/claude",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "spotify",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [
+          "client_id",
+          "client_secret for confidential clients"
+        ],
+        "prerequisites": [
+          "Register a Spotify developer application with the actual client redirect URI.",
+          "Development-mode app owner needs Premium; users must be allowlisted and the current new-app allowance is five users."
+        ],
+        "steps": [
+          "Choose the authorization-code flow; use PKCE for clients that cannot keep a secret.",
+          "Request only scopes needed for the selected Spotify endpoints.",
+          "Complete browser consent and send the resulting access token as Authorization: Bearer."
+        ],
+        "scopes": [],
+        "notes": [
+          "Public rollout requires the separate extended-quota eligibility/review path; development access does not establish unrestricted availability."
+        ],
+        "sources": [
+          {
+            "url": "https://developer.spotify.com/documentation/web-api/concepts/authorization",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developer.spotify.com/documentation/web-api/concepts/api-calls",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.spotify.com/v1",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:spotify",
+        "title": "Spotify",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developer.spotify.com/documentation/web-api/concepts/authorization"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://developer.spotify.com/documentation/web-api/concepts/authorization",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://developer.spotify.com/documentation/web-api/concepts/api-calls",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "bluesky",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "none"
+        ],
+        "credential_names": [],
+        "prerequisites": [],
+        "steps": [
+          "Call supported public app.bsky GET endpoints using their documented /xrpc/ method paths."
+        ],
+        "scopes": [],
+        "notes": [
+          "This route covers public AppView reads only. Account writes/private data require PDS authorization and are not qualified by this record."
+        ],
+        "sources": [
+          {
+            "url": "https://bsky.network/docs/category/http-reference/",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://public.api.bsky.app",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:bluesky",
+        "title": "Bluesky",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://bsky.network/docs/category/http-reference/"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://bsky.network/docs/category/http-reference/",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "attio",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [],
+        "prerequisites": [
+          "Active Attio workspace and an MCP client."
+        ],
+        "steps": [
+          "Add the official remote MCP URL.",
+          "Complete Attio browser sign-in and workspace authorization."
+        ],
+        "scopes": [],
+        "notes": [
+          "Access follows the signed-in user workspace permissions.",
+          "Transport was not established by the reviewed source; the client must verify it."
+        ],
+        "sources": [
+          {
+            "url": "https://attio.com/apps/mcp",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://mcp.attio.com/mcp",
+            "transport": "unknown"
+          }
+        ],
+        "format": "gist.directory.authorization/v2",
+        "id": "app-mcp:attio",
+        "title": "Attio",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://attio.com/apps/mcp"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://attio.com/apps/mcp",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "knack",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "X-Knack-Application-Id",
+          "X-Knack-REST-API-KEY"
+        ],
+        "prerequisites": [
+          "Knack application and its REST API credentials."
+        ],
+        "steps": [
+          "Obtain the application ID and REST API key from the application settings.",
+          "Send both named headers for object-based record requests from a trusted backend."
+        ],
+        "scopes": [],
+        "notes": [
+          "Object-based API keys provide app-level data access; they are not the per-user view authorization path. The newer Runtime Data API has a separate OAuth/tenant endpoint contract."
+        ],
+        "sources": [
+          {
+            "url": "https://docs.knack.com/reference/retrieving-one-record",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://docs.knack.com/v3/reference/object-based-requests",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.knack.com/v1",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:knack",
+        "title": "Knack",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://docs.knack.com/reference/retrieving-one-record"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://docs.knack.com/reference/retrieving-one-record",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://docs.knack.com/v3/reference/object-based-requests",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "aircall",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "basic",
+          "oauth2"
+        ],
+        "credential_names": [
+          "api_id and api_token for own-company Basic authentication",
+          "client_id and client_secret for OAuth partner apps"
+        ],
+        "prerequisites": [
+          "Aircall account; multi-company applications use the OAuth partner path."
+        ],
+        "steps": [
+          "For own-company access obtain the API ID/token in Aircall and send HTTP Basic with api_id as username and api_token as password.",
+          "For multi-company integrations obtain OAuth app credentials and use the documented browser authorization-code flow."
+        ],
+        "scopes": [],
+        "notes": [],
+        "sources": [
+          {
+            "url": "https://developers.aircall.io/api-references",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.aircall.io/v1",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:aircall",
+        "title": "Aircall",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.aircall.io/api-references"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://developers.aircall.io/api-references",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "postmark",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "X-Postmark-Server-Token or X-Postmark-Account-Token as required by endpoint"
+        ],
+        "prerequisites": [
+          "Postmark account; server token needs server-admin/account-admin/owner access, account token needs owner or account-admin access."
+        ],
+        "steps": [
+          "Find the server token in that server API Tokens tab, or account token in the account API Tokens tab.",
+          "Send the endpoint-appropriate named token header."
+        ],
+        "scopes": [],
+        "notes": [
+          "Server and account tokens have different authority and are not interchangeable."
+        ],
+        "sources": [
+          {
+            "url": "https://postmarkapp.com/developer/api/overview",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.postmarkapp.com",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:postmark",
+        "title": "Postmark",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://postmarkapp.com/developer/api/overview"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://postmarkapp.com/developer/api/overview",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "mistral-ai",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "bearer"
+        ],
+        "credential_names": [
+          "MISTRAL_API_KEY"
+        ],
+        "prerequisites": [
+          "Mistral API account and API key."
+        ],
+        "steps": [
+          "Create an API key in Mistral Studio.",
+          "Send Authorization: Bearer with the key."
+        ],
+        "scopes": [],
+        "notes": [],
+        "sources": [
+          {
+            "url": "https://docs.mistral.ai/api",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.mistral.ai/v1",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:mistral-ai",
+        "title": "Mistral AI",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://docs.mistral.ai/api"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://docs.mistral.ai/api",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "sendpulse",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "bearer",
+          "oauth2"
+        ],
+        "credential_names": [
+          "API key OR client_id and client_secret"
+        ],
+        "prerequisites": [
+          "SendPulse account with API access enabled in Account settings > API."
+        ],
+        "steps": [
+          "For a static credential generate an API key in Account settings > API > API keys and send Authorization: Bearer.",
+          "Alternatively obtain Client credentials and exchange them using grant_type=client_credentials at /oauth/access_token; send the resulting Bearer token."
+        ],
+        "scopes": [],
+        "notes": [
+          "Official MCP URL exists at https://mcp.sendpulse.com/mcp; its setup page labels browser sign-in as basic and X-Client-ID/X-Client-Secret headers as OAuth. Exact custom-client MCP wire authentication needs clarification, so this record qualifies the explicit REST route."
+        ],
+        "sources": [
+          {
+            "url": "https://sendpulse.com/integrations/api",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://sendpulse.com/knowledge-base/account-settings/mcp-server",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.sendpulse.com",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:sendpulse",
+        "title": "SendPulse",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://sendpulse.com/integrations/api"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://sendpulse.com/integrations/api",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://sendpulse.com/knowledge-base/account-settings/mcp-server",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "smoove",
+    "status": "needs_research",
+    "routes": [],
+    "notes": [
+      "Official Swagger and knowledge-base pages confirm REST API/API-key support, but the retrievable primary material did not establish the exact REST authentication header/query name. Keep the route unqualified rather than copy the separate form-subscribe webhook contract."
+    ],
+    "sources": [
+      {
+        "url": "https://rest.smoove.io/",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://postman.smoove.io/",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "sevdesk",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "sevDesk API token"
+        ],
+        "prerequisites": [
+          "sevDesk account with access to the API token."
+        ],
+        "steps": [
+          "Obtain the API token in sevDesk.",
+          "Send its raw value in Authorization, without a Bearer prefix.",
+          "Set a meaningful User-Agent identifying the integration."
+        ],
+        "scopes": [],
+        "notes": [
+          "The documented token is user-linked; token regeneration invalidates the old token."
+        ],
+        "sources": [
+          {
+            "url": "https://api.sevdesk.de/",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://tech.sevdesk.com/api_news/posts/2025_02_06-authentication-method-removed/",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://my.sevdesk.de/api/v1",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:sevdesk",
+        "title": "sevDesk",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://api.sevdesk.de/"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://api.sevdesk.de/",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://tech.sevdesk.com/api_news/posts/2025_02_06-authentication-method-removed/",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "printnode",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "basic"
+        ],
+        "credential_names": [
+          "PrintNode API key"
+        ],
+        "prerequisites": [
+          "PrintNode account."
+        ],
+        "steps": [
+          "Generate an API key in the PrintNode account.",
+          "Use HTTPS Basic authentication with the API key as username and an empty password."
+        ],
+        "scopes": [],
+        "notes": [],
+        "sources": [
+          {
+            "url": "https://www.printnode.com/en/docs/api/curl",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.printnode.com",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:printnode",
+        "title": "PrintNode",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://www.printnode.com/en/docs/api/curl"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://www.printnode.com/en/docs/api/curl",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "metricool",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [],
+        "prerequisites": [
+          "Metricool account on any plan, including Free; existing plan usage limits still apply."
+        ],
+        "steps": [
+          "Add the production MCP URL using the client HTTP/OAuth connection method.",
+          "Sign in to Metricool and authorize browser access."
+        ],
+        "scopes": [],
+        "notes": [
+          "OAuth grants broad account access including brands, metrics, publishing, inbox, ads, and connected file accounts. A separate X-Mc-Auth API-key alternative requires API plan access; it is not required for URL-based OAuth.",
+          "Transport was not established by the reviewed source; the client must verify it."
+        ],
+        "sources": [
+          {
+            "url": "https://help.metricool.com/how-to-connect-metricools-mcp-eqp9h",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://ai.metricool.com/mcp",
+            "transport": "unknown"
+          }
+        ],
+        "format": "gist.directory.authorization/v2",
+        "id": "app-mcp:metricool",
+        "title": "Metricool",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://help.metricool.com/how-to-connect-metricools-mcp-eqp9h"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://help.metricool.com/how-to-connect-metricools-mcp-eqp9h",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "inoreader",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [
+          "client_id",
+          "client_secret"
+        ],
+        "prerequisites": [
+          "Register an application in Inoreader preferences and configure its redirect URI and permitted read/write access."
+        ],
+        "steps": [
+          "Redirect the user to the Inoreader OAuth consent page with state and selected scopes.",
+          "Exchange the authorization code through the backend with the client credentials.",
+          "Send Authorization: Bearer with the access token and refresh it when required."
+        ],
+        "scopes": [
+          "read",
+          "write (optional; only when write operations are needed)"
+        ],
+        "notes": [
+          "Separate AppId/AppKey request headers are for legacy ClientLogin; the operator recommends OAuth for new applications."
+        ],
+        "sources": [
+          {
+            "url": "https://www.inoreader.com/developers/register-app",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://www.inoreader.com/developers/api-endpoint",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://www.inoreader.com/developers/oauth",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://www.inoreader.com/developers/app-auth",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://www.inoreader.com/reader/api/0",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:inoreader",
+        "title": "Inoreader",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://www.inoreader.com/developers/register-app"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://www.inoreader.com/developers/register-app",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://www.inoreader.com/developers/api-endpoint",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://www.inoreader.com/developers/oauth",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://www.inoreader.com/developers/app-auth",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "retell-ai",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "bearer"
+        ],
+        "credential_names": [
+          "Retell API key"
+        ],
+        "prerequisites": [
+          "Retell AI account with dashboard API-key access."
+        ],
+        "steps": [
+          "Find the API key in the Retell dashboard.",
+          "Send Authorization: Bearer with the key to the documented endpoint version."
+        ],
+        "scopes": [],
+        "notes": [],
+        "sources": [
+          {
+            "url": "https://docs.retellai.com/api-references/list-agents",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.retellai.com",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:retell-ai",
+        "title": "Retell AI",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://docs.retellai.com/api-references/list-agents"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://docs.retellai.com/api-references/list-agents",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "smsapi",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "oauth2",
+          "bearer"
+        ],
+        "credential_names": [
+          "Static OAuth2 token only for manual-token alternative"
+        ],
+        "prerequisites": [
+          "Active SMSAPI account and an MCP client."
+        ],
+        "steps": [
+          "Add the MCP URL and complete browser OAuth Webflow; no Authorization header is needed for that flow.",
+          "Alternatively generate a token in Customer Panel > API Settings > OAuth Tokens with the needed permissions and send Authorization: Bearer."
+        ],
+        "scopes": [],
+        "notes": [
+          "The root exposes all tool groups. Select a documented group endpoint and token permissions for the required features; no universal scope is assumed."
+        ],
+        "sources": [
+          {
+            "url": "https://www.smsapi.com/docs/mcp/",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://mcp.smsapi.io/",
+            "transport": "streamable-http"
+          }
+        ],
+        "format": "gist.directory.authorization/v1",
+        "id": "app-mcp:smsapi",
+        "title": "SMSAPI",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://www.smsapi.com/docs/mcp/"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://www.smsapi.com/docs/mcp/",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "google-cloud-storage",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [
+          "Google OAuth access token or workload credentials used to obtain one"
+        ],
+        "prerequisites": [
+          "Google Cloud project and a principal with the necessary bucket/object IAM permissions."
+        ],
+        "steps": [
+          "Configure the documented user or workload authentication method.",
+          "Obtain an access token and send Authorization: Bearer for authenticated JSON API requests."
+        ],
+        "scopes": [],
+        "notes": [
+          "Object uploads use the separately documented /upload/storage/v1 endpoint. Permanent service-account keys are not universally required."
+        ],
+        "sources": [
+          {
+            "url": "https://docs.cloud.google.com/storage/docs/authentication",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://docs.cloud.google.com/storage/docs/request-endpoints",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://docs.cloud.google.com/storage/docs/reading-objects",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://storage.googleapis.com/storage/v1",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:google-cloud-storage",
+        "title": "Google Cloud Storage",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://docs.cloud.google.com/storage/docs/authentication"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://docs.cloud.google.com/storage/docs/authentication",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://docs.cloud.google.com/storage/docs/request-endpoints",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://docs.cloud.google.com/storage/docs/reading-objects",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "memberstack",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [],
+        "prerequisites": [
+          "Memberstack dashboard account and a compatible remote MCP client."
+        ],
+        "steps": [
+          "Add the official MCP URL.",
+          "Complete the Memberstack dashboard browser authorization using OAuth 2.1 with PKCE.",
+          "Select the correct app/project and environment before app-specific operations."
+        ],
+        "scopes": [],
+        "notes": [
+          "The operator labels this MCP server Beta.",
+          "Transport was not established by the reviewed source; the client must verify it."
+        ],
+        "sources": [
+          {
+            "url": "https://docs.memberstack.com/hc/en-us/articles/41661556042267-Memberstack-MCP-Server-Beta",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://mcp.memberstack.com/mcp",
+            "transport": "unknown"
+          }
+        ],
+        "format": "gist.directory.authorization/v2",
+        "id": "app-mcp:memberstack",
+        "title": "Memberstack",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://docs.memberstack.com/hc/en-us/articles/41661556042267-Memberstack-MCP-Server-Beta"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://docs.memberstack.com/hc/en-us/articles/41661556042267-Memberstack-MCP-Server-Beta",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "pennylane-v2",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "bearer"
+        ],
+        "credential_names": [
+          "Company API token"
+        ],
+        "prerequisites": [
+          "Essential plan or higher; only Executives and Accountants can access the Developers tab."
+        ],
+        "steps": [
+          "In Management > Settings > Connectivity > Developers generate an API token for the company.",
+          "Choose API V2 read-only or read/write permissions and expiry.",
+          "Copy the token once and send Authorization: Bearer."
+        ],
+        "scopes": [],
+        "notes": [
+          "Each token belongs to one company and enforces its selected permissions."
+        ],
+        "sources": [
+          {
+            "url": "https://pennylane.readme.io/docs/generating-my-api-token",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://app.pennylane.com/api/external/v2",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:pennylane-v2",
+        "title": "Pennylane V2",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://pennylane.readme.io/docs/generating-my-api-token"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://pennylane.readme.io/docs/generating-my-api-token",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "google-g-suite",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [
+          "OAuth client ID",
+          "OAuth client secret for confidential-client flow"
+        ],
+        "prerequisites": [
+          "Google Workspace organization and an authorized administrator; enable the Admin SDK API and configure the OAuth application/consent screen."
+        ],
+        "steps": [
+          "Register the OAuth application with its actual redirect URI.",
+          "Choose Directory API scopes appropriate to the operation and complete administrator browser consent.",
+          "Send the access token with API requests."
+        ],
+        "scopes": [],
+        "notes": [
+          "Example read-only user listing scope is https://www.googleapis.com/auth/admin.directory.user.readonly; other resources require their own scopes. Public applications using covered user-data scopes may require Google verification."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.google.com/workspace/admin/directory/v1/quickstart/python",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.google.com/workspace/admin/directory/v1/guides/authorizing",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.google.com/workspace/admin/directory/reference/rest",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://admin.googleapis.com/admin/directory/v1",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:google-g-suite",
+        "title": "Google Workspace Admin",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.google.com/workspace/admin/directory/v1/quickstart/python"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://developers.google.com/workspace/admin/directory/v1/quickstart/python",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://developers.google.com/workspace/admin/directory/v1/guides/authorizing",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://developers.google.com/workspace/admin/directory/reference/rest",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "circle-so",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "bearer"
+        ],
+        "credential_names": [
+          "Circle Admin API token"
+        ],
+        "prerequisites": [
+          "Circle Business plan or higher and community administrator access."
+        ],
+        "steps": [
+          "In the Circle community go to Developers > Tokens and create an Admin API token.",
+          "Send Authorization: Bearer with that token."
+        ],
+        "scopes": [],
+        "notes": [
+          "This is the recommended Admin API v2 route; member-context Headless APIs have a separate authorization contract."
+        ],
+        "sources": [
+          {
+            "url": "https://api.circle.so/",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://api.circle.so/apis/admin-api",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://app.circle.so/api/headless/admin/v1",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:circle-so",
+        "title": "Circle",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://api.circle.so/"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://api.circle.so/",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://api.circle.so/apis/admin-api",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "lemlist",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "oauth2",
+          "api_key"
+        ],
+        "credential_names": [
+          "X-API-Key only for API-key alternative"
+        ],
+        "prerequisites": [
+          "lemlist account/team and a compatible remote MCP client."
+        ],
+        "steps": [
+          "Add the official MCP URL and complete browser OAuth, choosing the team.",
+          "For API-key access instead generate a key in Settings > Team > Integrations and send X-API-Key."
+        ],
+        "scopes": [],
+        "notes": [
+          "OAuth is recommended and supports discovery, dynamic client registration, PKCE, and refresh.",
+          "Transport was not established by the reviewed source; the client must verify it."
+        ],
+        "sources": [
+          {
+            "url": "https://developer.lemlist.com/mcp/setup",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://app.lemlist.com/mcp",
+            "transport": "unknown"
+          }
+        ],
+        "format": "gist.directory.authorization/v2",
+        "id": "app-mcp:lemlist",
+        "title": "lemlist",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developer.lemlist.com/mcp/setup"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://developer.lemlist.com/mcp/setup",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "origami",
+    "status": "needs_research",
+    "routes": [],
+    "notes": [
+      "Inventory capabilities and the operator website corroborate the Origami.ms business platform rather than Origami Risk. Operator documentation confirms an API, but the retrieved primary sources do not establish the direct API base path and exact wire authentication. Keep the route unqualified."
+    ],
+    "sources": [
+      {
+        "url": "https://origami.ms/",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "flodesk",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "basic",
+          "oauth2"
+        ],
+        "credential_names": [
+          "Flodesk API key for private integrations",
+          "client_id and client_secret for approved OAuth partner integrations"
+        ],
+        "prerequisites": [
+          "Flodesk account; public partner applications must apply for OAuth access."
+        ],
+        "steps": [
+          "For a private integration obtain the account API key and use HTTP Basic with that key as username and an empty password.",
+          "For an approved partner application configure the registered OAuth client and use the authorization-code browser flow."
+        ],
+        "scopes": [],
+        "notes": [
+          "The documented partner OAuth scope is all, granting full API access; it is not a fine-grained per-resource scope."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.flodesk.com/",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.flodesk.com/v1",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:flodesk",
+        "title": "Flodesk",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.flodesk.com/"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://developers.flodesk.com/",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "grow",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "userId",
+          "pageCode",
+          "apiKey for approved multi-business/platform integrations"
+        ],
+        "prerequisites": [
+          "Grow Payments (formerly Meshulam) business onboarding.",
+          "Live processing requires Grow integration review and issuance of production identifiers; platform integrations also require commercial approval."
+        ],
+        "steps": [
+          "Obtain identifiers for the intended environment and payment flow directly from Grow.",
+          "For direct-business requests supply userId and pageCode as documented by the endpoint.",
+          "For an approved platform managing multiple businesses also supply its apiKey and the target business identifiers."
+        ],
+        "scopes": [],
+        "notes": [
+          "This is Grow Payments, not Grow BI. Authentication uses provider-specific request parameters, not an assumed Authorization Bearer header.",
+          "Calls must originate server-side. Credentials and identifiers differ between sandbox and production; published sample identifiers are not customer production credentials."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.grow.business/",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.grow.business/reference/authentication",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.grow.business/reference/api-guidelines-for-platforms-system-integrators",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.grow.business/reference/live-environment",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.grow.business/reference/regular-payment-overview",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://secure.meshulam.co.il/api/light/server/1.0",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:grow",
+        "title": "Grow",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.grow.business/"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://developers.grow.business/",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://developers.grow.business/reference/authentication",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://developers.grow.business/reference/api-guidelines-for-platforms-system-integrators",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://developers.grow.business/reference/live-environment",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://developers.grow.business/reference/regular-payment-overview",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "apitemplate-io",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "X-API-KEY"
+        ],
+        "prerequisites": [
+          "APITemplate.io account; select the intended personal/team workspace."
+        ],
+        "steps": [
+          "Open API Integration > API Key in the APITemplate account.",
+          "Copy an active key for the intended workspace and send it in X-API-KEY."
+        ],
+        "scopes": [],
+        "notes": [
+          "Team API keys are separate from personal keys."
+        ],
+        "sources": [
+          {
+            "url": "https://apitemplate.io/docs/getting-started/get-api-key/",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://rest.apitemplate.io/v2",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:apitemplate-io",
+        "title": "APITemplate.io",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://apitemplate.io/docs/getting-started/get-api-key/"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://apitemplate.io/docs/getting-started/get-api-key/",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "ringcentral",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [],
+        "prerequisites": [
+          "RingCentral account with the API permissions required by selected tools."
+        ],
+        "steps": [
+          "Add the RingEX Phone remote MCP URL.",
+          "Complete the RingCentral browser OAuth flow."
+        ],
+        "scopes": [],
+        "notes": [
+          "Preview/Labs service. The server registry describes SSE while the specific current setup instructs Streamable HTTP; transport is left generic HTTP pending live protocol qualification. Phone route covers call/message/fax/voicemail tools; separate official routes cover chat and administration.",
+          "Transport was not established by the reviewed source; the client must verify it."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.ringcentral.com/mcp/servers/",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.ringcentral.com/mcp/servers/ringex-phone-setup/",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://mcp.labs.ringcentral.com/ringex/phone",
+            "transport": "unknown"
+          }
+        ],
+        "format": "gist.directory.authorization/v2",
+        "id": "app-mcp:ringcentral",
+        "title": "RingCentral",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.ringcentral.com/mcp/servers/"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://developers.ringcentral.com/mcp/servers/",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://developers.ringcentral.com/mcp/servers/ringex-phone-setup/",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "assembly-ai",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "ASSEMBLYAI_API_KEY"
+        ],
+        "prerequisites": [
+          "AssemblyAI account and API key."
+        ],
+        "steps": [
+          "Obtain the API key from the AssemblyAI account.",
+          "Send its raw value in Authorization; do not add Bearer."
+        ],
+        "scopes": [],
+        "notes": [
+          "This record covers REST transcription; streaming and LLM Gateway use different documented service hosts."
+        ],
+        "sources": [
+          {
+            "url": "https://www.assemblyai.com/docs/coding-agent-prompts",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://www.assemblyai.com/docs/guides/task-endpoint-ai-coach",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.assemblyai.com/v2",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:assembly-ai",
+        "title": "AssemblyAI",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://www.assemblyai.com/docs/coding-agent-prompts"
+      }
+    ],
+    "notes": [],
+    "sources": [
+      {
+        "url": "https://www.assemblyai.com/docs/coding-agent-prompts",
+        "checked_at": "2026-10-19"
+      },
+      {
+        "url": "https://www.assemblyai.com/docs/guides/task-endpoint-ai-coach",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "pinecone",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "api_key",
+          "bearer"
+        ],
+        "credential_names": [
+          "Pinecone API key"
+        ],
+        "prerequisites": [
+          "Pinecone account with an Assistant and access to its files."
+        ],
+        "steps": [
+          "Copy the Assistant Host and Assistant Name from the Pinecone console.",
+          "Construct the documented assistant-specific /mcp/assistants/{assistant_name} endpoint on that host in the client only.",
+          "Configure Authorization: Bearer with the Pinecone API key."
+        ],
+        "scopes": [],
+        "notes": [
+          "This qualifies the hosted Assistant context surface, not a generic database-management MCP.",
+          "The complete provider-specific endpoint stays in the client; no example tenant host is published."
+        ],
+        "sources": [
+          {
+            "url": "https://docs.pinecone.io/guides/assistant/mcp-server",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "endpoint_inputs": [
+          "PINECONE_ASSISTANT_MCP_URL"
+        ],
+        "format": "gist.directory.authorization/v2",
+        "id": "app-mcp:pinecone",
+        "title": "Pinecone",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://docs.pinecone.io/guides/assistant/mcp-server"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "tiime-apps",
+    "status": "needs_research",
+    "routes": [],
+    "notes": [
+      "Tiime states its direct API is available only on request to software publishers through a partnership. Exact endpoint and wire authentication were not publicly established; Make is excluded as intermediary."
+    ],
+    "sources": [
+      {
+        "url": "https://support.tiime.fr/fr/articles/26240-proposez-vous-une-api",
+        "checked_at": "2026-10-19"
+      }
+    ]
+  },
+  {
+    "slug": "google-vertex-ai",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [
+          "Google Cloud credentials or OAuth client credentials for chosen flow"
+        ],
+        "prerequisites": [
+          "Google Cloud project with Agent Platform API enabled and billing configured.",
+          "MCP Tool User and Agent Platform User permissions, or equivalent custom permissions."
+        ],
+        "steps": [
+          "Select the documented region and toolset appropriate to the task.",
+          "Configure Google Cloud OAuth authentication in the MCP client using the identity permitted on the project.",
+          "Use the generate toolset endpoint only for supported generation tools."
+        ],
+        "scopes": [],
+        "notes": [
+          "Current provider documentation names this Gemini Enterprise Agent Platform; retained slug is google-vertex-ai.",
+          "US-central1 generate endpoint is one documented toolset. Other operations and regions have separate documented endpoints."
+        ],
+        "sources": [
+          {
+            "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/use-agent-platform-mcp",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/mcp",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://us-central1-aiplatform.googleapis.com/mcp/generate",
+            "transport": "streamable-http"
+          }
+        ],
+        "format": "gist.directory.authorization/v1",
+        "id": "app-mcp:google-vertex-ai",
+        "title": "Gemini Enterprise Agent Platform",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/use-agent-platform-mcp"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "superchat",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "X-API-KEY"
+        ],
+        "prerequisites": [
+          "Superchat account with administrator access to API settings."
+        ],
+        "steps": [
+          "Copy the token from Settings > API.",
+          "Send it as X-API-KEY on HTTPS requests."
+        ],
+        "scopes": [],
+        "notes": [
+          "Operator documents global read/write access for this token."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.superchat.com/reference/authentication",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.superchat.com/docs/getting-started-send-your-first-message",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.superchat.com/v1.0",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:superchat",
+        "title": "Superchat",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.superchat.com/reference/authentication"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "smartsheet",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "oauth2",
+          "api_key",
+          "bearer"
+        ],
+        "credential_names": [
+          "SMARTSHEET_API_TOKEN (API-token alternative)"
+        ],
+        "prerequisites": [
+          "Business, Enterprise or Advanced Work Management plan.",
+          "Access to the production server in the chosen region; OAuth requires a provider-supported client."
+        ],
+        "steps": [
+          "Use the MCP URL for the account region.",
+          "With a supported client complete Smartsheet OAuth; otherwise generate an API token and send Authorization: Bearer."
+        ],
+        "scopes": [],
+        "notes": [
+          "EU and Australia use https://mcp.smartsheet.eu and https://mcp.smartsheet.au respectively.",
+          "Retrieved operator setup calls transport http; it does not explicitly establish a protocol revision.",
+          "Transport was not established by the reviewed source; the client must verify it."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.smartsheet.com/ai-mcp/smartsheet/install-the-smartsheet-mcp-server",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.smartsheet.com/ai-mcp/smartsheet/mcp-quickstart",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://mcp.smartsheet.com",
+            "transport": "unknown"
+          }
+        ],
+        "format": "gist.directory.authorization/v2",
+        "id": "app-mcp:smartsheet",
+        "title": "Smartsheet",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.smartsheet.com/ai-mcp/smartsheet/install-the-smartsheet-mcp-server"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "asaas",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "access_token API key"
+        ],
+        "prerequisites": [
+          "Asaas production account and API key for that environment."
+        ],
+        "steps": [
+          "Create an API key in the environment being used.",
+          "Send access_token with the key and User-Agent identifying the application."
+        ],
+        "scopes": [],
+        "notes": [
+          "Sandbox uses https://api-sandbox.asaas.com/v3 and separate keys.",
+          "access_token is a custom header, not an OAuth Bearer scheme."
+        ],
+        "sources": [
+          {
+            "url": "https://docs.asaas.com/docs/authentication-2",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.asaas.com/v3",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:asaas",
+        "title": "Asaas",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://docs.asaas.com/docs/authentication-2"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "bigin-by-zoho",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [
+          "Client ID",
+          "Client Secret"
+        ],
+        "prerequisites": [
+          "Bigin account and application registration in the Zoho API Console."
+        ],
+        "steps": [
+          "Register the application and callback in the appropriate data center.",
+          "Complete the documented user authorization flow for operation-specific Bigin scopes.",
+          "Send Authorization: Zoho-oauthtoken with the access token."
+        ],
+        "scopes": [],
+        "notes": [
+          "Default US API base; use the actual account data-center domain."
+        ],
+        "sources": [
+          {
+            "url": "https://www.bigin.com/developer/docs/apis/register-client.html",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://www.bigin.com/developer/docs/apis/v2/use-access-token-api-request.html",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://www.zohoapis.com/bigin/v2",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:bigin-by-zoho",
+        "title": "Bigin by Zoho CRM",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://www.bigin.com/developer/docs/apis/register-client.html"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "prestashop",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "basic"
+        ],
+        "credential_names": [
+          "Webservice access key"
+        ],
+        "prerequisites": [
+          "PrestaShop installation with Webservice enabled and key permissions for required resources."
+        ],
+        "steps": [
+          "Enable the shop Webservice and create an access key with selected resource permissions.",
+          "Use HTTPS Basic authentication with the key as username and an empty password.",
+          "Use the /api/ endpoint relative to the actual installation, including any installation subdirectory."
+        ],
+        "scopes": [],
+        "notes": [
+          "The installation endpoint is supplied by its operator; no universal prestashop.com endpoint is asserted."
+        ],
+        "sources": [
+          {
+            "url": "https://devdocs.prestashop-project.org/8/webservice/getting-started/",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://devdocs.prestashop-project.org/8/webservice/tutorials/testing-access/",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "endpoint_inputs": [
+          "PRESTASHOP_WEBSERVICE_URL"
+        ],
+        "format": "gist.directory.authorization/v2",
+        "id": "api:prestashop",
+        "title": "PrestaShop",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://devdocs.prestashop-project.org/8/webservice/getting-started/"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "follow-up-boss",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "basic",
+          "api_key"
+        ],
+        "credential_names": [
+          "Follow Up Boss API key"
+        ],
+        "prerequisites": [
+          "Active Follow Up Boss account and access to Admin > API."
+        ],
+        "steps": [
+          "Copy the user API key from Admin > API.",
+          "Use HTTPS Basic authentication with API key as username and blank password."
+        ],
+        "scopes": [],
+        "notes": [
+          "API key permissions follow its user. OAuth is a separate provider-supported path; key authentication requires Basic, not Bearer."
+        ],
+        "sources": [
+          {
+            "url": "https://docs.followupboss.com/reference/authentication",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://docs.followupboss.com/reference/getting-started",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.followupboss.com/v1",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:follow-up-boss",
+        "title": "Follow Up Boss",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://docs.followupboss.com/reference/authentication"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "pipefy",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "oauth2",
+          "bearer"
+        ],
+        "credential_names": [
+          "Service account client credentials"
+        ],
+        "prerequisites": [
+          "Pipefy service account with permissions for the target organisation and resources."
+        ],
+        "steps": [
+          "Create/configure a Pipefy service account using the provider authentication guide.",
+          "Obtain its OAuth2 access token and send Authorization: Bearer to the GraphQL endpoint."
+        ],
+        "scopes": [],
+        "notes": [
+          "Personal Access Tokens are deprecated; service accounts are the recommended long-term integration method.",
+          "The prose authentication page says Authentication, but its linked endpoint curl example uses Authorization; this record follows that executable example."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.pipefy.com/reference/authentication",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.pipefy.com/reference/the-graphql-endpoint",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.pipefy.com/graphql",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:pipefy",
+        "title": "Pipefy",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.pipefy.com/reference/authentication"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "shipstation",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "ShipStation V2 API key"
+        ],
+        "prerequisites": [
+          "ShipStation product account with V2 API access."
+        ],
+        "steps": [
+          "Generate/copy the V2 key from API Settings or the ShipStation API dashboard.",
+          "Send API-Key on each HTTPS request."
+        ],
+        "scopes": [],
+        "notes": [
+          "Legacy V1 credentials use a different API; do not substitute them for the V2 key."
+        ],
+        "sources": [
+          {
+            "url": "https://docs.shipstation.com/authentication",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.shipstation.com/v2",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:shipstation",
+        "title": "ShipStation",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://docs.shipstation.com/authentication"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "squarespace",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "none"
+        ],
+        "credential_names": [],
+        "prerequisites": [
+          "MCP-compatible client."
+        ],
+        "steps": [
+          "Configure the official remote endpoint.",
+          "Use its public domain-discovery tools without a key or account."
+        ],
+        "scopes": [],
+        "notes": [
+          "Only public domain-name generation/search is qualified by this MCP route. It does not authorize merchant site administration or register domains.",
+          "Transport not explicitly named in retrieved guide.",
+          "Transport was not established by the reviewed source; the client must verify it."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.squarespace.com/mcp/overview",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.squarespace.com/mcp/connect-a-client",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://mcp.squarespace.com/mcp",
+            "transport": "unknown"
+          }
+        ],
+        "format": "gist.directory.authorization/v2",
+        "id": "app-mcp:squarespace",
+        "title": "Squarespace",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.squarespace.com/mcp/overview"
+      },
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key",
+          "oauth2",
+          "bearer"
+        ],
+        "credential_names": [
+          "Site API key or OAuth access token"
+        ],
+        "prerequisites": [
+          "Squarespace merchant site with API access and appropriate resource permissions."
+        ],
+        "steps": [
+          "Generate a scoped site API key or complete the registered OAuth flow.",
+          "Send Authorization: Bearer with the key/token and a descriptive User-Agent."
+        ],
+        "scopes": [],
+        "notes": [
+          "Use the API-version and resource path from the selected Commerce API reference. Squarespace Extensions must use OAuth."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.squarespace.com/commerce-apis/authentication-and-permissions",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.squarespace.com/commerce-apis/making-requests",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.squarespace.com",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:squarespace:2",
+        "title": "Squarespace",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.squarespace.com/commerce-apis/authentication-and-permissions"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "smartsuite",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "API key",
+          "ACCOUNT-ID workspace identifier"
+        ],
+        "prerequisites": [
+          "SmartSuite account with access to the intended workspace and resources."
+        ],
+        "steps": [
+          "Copy the personal API key from profile API Token settings.",
+          "Send Authorization: Token followed by the key and ACCOUNT-ID for the workspace."
+        ],
+        "scopes": [],
+        "notes": [
+          "Third-party multi-user integrations should use the separately documented registered OAuth flow.",
+          "Token is the literal header scheme; it is not Bearer.",
+          "The API Token menu item is shown to Administrators; other users can find their personal token by scrolling their profile settings."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.smartsuite.com/",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers-embed.smartsuite.com/docs/authentication",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://app.smartsuite.com/api/v1",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:smartsuite",
+        "title": "SmartSuite",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.smartsuite.com/"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "holded",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [],
+        "prerequisites": [
+          "Holded account with API access enabled."
+        ],
+        "steps": [
+          "Configure the remote endpoint and complete Holded browser login.",
+          "Authorize the connection with Analyst, Operator or selected custom permissions within the user permissions."
+        ],
+        "scopes": [],
+        "notes": [
+          "Analyst is read-only; Operator can modify records."
+        ],
+        "sources": [
+          {
+            "url": "https://www.holded.com/en-us/developers/mcp",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://mcp.holded.com/mcp",
+            "transport": "streamable-http"
+          }
+        ],
+        "format": "gist.directory.authorization/v1",
+        "id": "app-mcp:holded",
+        "title": "Holded",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://www.holded.com/en-us/developers/mcp"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "heygen",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [],
+        "prerequisites": [
+          "HeyGen account with available plan credits and compatible remote MCP client."
+        ],
+        "steps": [
+          "Configure the official hosted MCP URL.",
+          "Complete OAuth on first connection using the HeyGen account."
+        ],
+        "scopes": [],
+        "notes": [
+          "The official operator repository states OAuth and existing-plan credit usage. Its type http does not independently establish a specific transport revision.",
+          "Transport was not established by the reviewed source; the client must verify it."
+        ],
+        "sources": [
+          {
+            "url": "https://github.com/heygen-com/skills/blob/master/mcp.json",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://mcp.heygen.com/mcp/v1/",
+            "transport": "unknown"
+          }
+        ],
+        "format": "gist.directory.authorization/v2",
+        "id": "app-mcp:heygen",
+        "title": "HeyGen",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://github.com/heygen-com/skills/blob/master/mcp.json"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "google-chat",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [
+          "OAUTH_CLIENT_ID",
+          "OAUTH_CLIENT_SECRET"
+        ],
+        "prerequisites": [
+          "Google Workspace Developer Preview Program membership.",
+          "Cloud project with Google Chat API and Chat MCP API enabled."
+        ],
+        "steps": [
+          "Configure OAuth consent using the provider guide; configure the Chat app when enabling write operations.",
+          "Create a web OAuth client using the actual callback and select the AI-powered agent option.",
+          "Configure the MCP URL and client credentials locally, then complete Google user consent."
+        ],
+        "scopes": [
+          "https://www.googleapis.com/auth/chat.spaces.readonly",
+          "https://www.googleapis.com/auth/chat.memberships.readonly",
+          "https://www.googleapis.com/auth/chat.messages.readonly",
+          "https://www.googleapis.com/auth/chat.messages.create",
+          "https://www.googleapis.com/auth/chat.users.readstate"
+        ],
+        "notes": [
+          "Provider guide lists these scopes; select required app scopes and preserve their read/write distinctions.",
+          "Configure a Chat app for write operations; read-only operations do not require that additional app configuration."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.google.com/workspace/chat/api/guides/configure-mcp-server",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://chatmcp.googleapis.com/mcp/v1",
+            "transport": "streamable-http"
+          }
+        ],
+        "format": "gist.directory.authorization/v1",
+        "id": "app-mcp:google-chat",
+        "title": "Google Chat",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.google.com/workspace/chat/api/guides/configure-mcp-server"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "chatwork",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "x-chatworktoken"
+        ],
+        "prerequisites": [
+          "Chatwork account with API-token access."
+        ],
+        "steps": [
+          "Obtain the account API token.",
+          "Send it in x-chatworktoken on every HTTPS request."
+        ],
+        "scopes": [],
+        "notes": [
+          "Operator describes this token as non-expiring and full-access. A separate OAuth2 flow is also available."
+        ],
+        "sources": [
+          {
+            "url": "https://developer.chatwork.com/docs/endpoints",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developer.chatwork.com/reference/get-me",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.chatwork.com/v2",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:chatwork",
+        "title": "Chatwork",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developer.chatwork.com/docs/endpoints"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "getresponse",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "GetResponse API key"
+        ],
+        "prerequisites": [
+          "GetResponse account with API access."
+        ],
+        "steps": [
+          "Generate a key in the provider API settings.",
+          "Send X-Auth-Token with api-key followed by the key."
+        ],
+        "scopes": [],
+        "notes": [
+          "GetResponse MAX and OAuth integrations have additional or alternative authentication requirements."
+        ],
+        "sources": [
+          {
+            "url": "https://apidocs.getresponse.com/v3/authentication",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://apidocs.getresponse.com/v3/quick-start",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.getresponse.com/v3",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:getresponse",
+        "title": "GetResponse",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://apidocs.getresponse.com/v3/authentication"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "perspective",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [],
+        "prerequisites": [
+          "Perspective funnel-platform account and OAuth-capable client with S256 PKCE support."
+        ],
+        "steps": [
+          "Add the official MCP endpoint.",
+          "Let the client discover authorization metadata and dynamically register its callback when needed.",
+          "Complete Perspective account authorization with S256 PKCE."
+        ],
+        "scopes": [],
+        "notes": [
+          "Identity is the Perspective funnel platform, consistent with catalog website-building/marketing categories; not Google Perspective toxicity API or Perspective AI.",
+          "offline_access is documented for refresh access; no client secret required for the public-client flow."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.perspective.co/oauth/endpoints",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://intercom.help/perspective-funnels/en/articles/15620369-how-to-connect-perspective-mcp-with-ai-tools",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://api.perspective.co/mcp",
+            "transport": "streamable-http"
+          }
+        ],
+        "format": "gist.directory.authorization/v1",
+        "id": "app-mcp:perspective",
+        "title": "Perspective",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.perspective.co/oauth/endpoints"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "google-groups",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [
+          "Google OAuth client credentials"
+        ],
+        "prerequisites": [
+          "Google Workspace domain and authorised administrator with group permissions.",
+          "Cloud project with Admin SDK Directory API enabled."
+        ],
+        "steps": [
+          "Configure Google OAuth consent and the actual client callback.",
+          "Authorize the group-read scope for list reads, then send the Google access token for the authorised domain."
+        ],
+        "scopes": [
+          "https://www.googleapis.com/auth/admin.directory.group.readonly"
+        ],
+        "notes": [
+          "This qualifies Workspace group-directory list access, not Google Groups conversation content."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.google.com/workspace/admin/directory/reference/rest/v1/groups/list",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developers.google.com/workspace/admin/directory/v1/guides/authorizing",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://admin.googleapis.com/admin/directory/v1",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:google-groups",
+        "title": "Google Groups",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.google.com/workspace/admin/directory/reference/rest/v1/groups/list"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "two-chat",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [],
+        "prerequisites": [
+          "2Chat account and OAuth-capable remote MCP client."
+        ],
+        "steps": [
+          "Configure the official remote endpoint.",
+          "Complete 2Chat browser sign-in through the client-managed OAuth2.1 discovery/DCR and S256 PKCE flow."
+        ],
+        "scopes": [],
+        "notes": [
+          "MCP supports OAuth exclusively; the separate REST API key is not an MCP authentication option."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.2chat.co/docs/MCP/setup",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://mcp.2chat.io/mcp",
+            "transport": "streamable-http"
+          }
+        ],
+        "format": "gist.directory.authorization/v1",
+        "id": "app-mcp:two-chat",
+        "title": "2Chat",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.2chat.co/docs/MCP/setup"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "ecomail-cz",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "Ecomail API key"
+        ],
+        "prerequisites": [
+          "Ecomail account."
+        ],
+        "steps": [
+          "Open Manage your account > For developers and copy the API key.",
+          "Send the key header on each request from the executor/backend."
+        ],
+        "scopes": [],
+        "notes": [
+          "The literal header name is key, not Authorization. Browser-direct API calls are disallowed by provider CORS policy."
+        ],
+        "sources": [
+          {
+            "url": "https://docs.ecomail.cz/api-reference/introduction",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api2.ecomailapp.cz",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:ecomail-cz",
+        "title": "Ecomail.cz",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://docs.ecomail.cz/api-reference/introduction"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "ticktick",
+    "status": "needs_research",
+    "routes": [],
+    "notes": [
+      "Official developer documentation returned an access error during this pass. No private web API, third-party MCP or inferred OAuth scopes/endpoints are substituted."
+    ],
+    "sources": []
+  },
+  {
+    "slug": "zapier",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "oauth2",
+          "bearer"
+        ],
+        "credential_names": [
+          "Connection token (alternative for unsupported/headless clients)"
+        ],
+        "prerequisites": [
+          "Zapier account and Streamable HTTP MCP client."
+        ],
+        "steps": [
+          "For a supported client, connect the official endpoint and complete Zapier OAuth.",
+          "For unsupported/headless clients, create a server and connection token at mcp.zapier.com, then send Authorization: Bearer with that token."
+        ],
+        "scopes": [],
+        "notes": [
+          "This documents Zapier as the provider itself. It is not used as authorization evidence for another app.",
+          "Tokens are tied to one Zapier MCP server and stay in the executor; no token-bearing URL is published."
+        ],
+        "sources": [
+          {
+            "url": "https://docs.zapier.com/mcp/overview/how-connections-work",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://mcp.zapier.com/api/v1/connect",
+            "transport": "streamable-http"
+          }
+        ],
+        "format": "gist.directory.authorization/v1",
+        "id": "app-mcp:zapier",
+        "title": "Zapier",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://docs.zapier.com/mcp/overview/how-connections-work"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "constant-contact",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "oauth2",
+          "bearer"
+        ],
+        "credential_names": [
+          "client_id",
+          "client_secret (confidential client flow)"
+        ],
+        "prerequisites": [
+          "Registered V3 developer application and a Constant Contact account.",
+          "New apps are private to the creating user until provider approval for broader access."
+        ],
+        "steps": [
+          "Register the application and actual redirect URI.",
+          "Choose authorization-code or public-client PKCE flow and request operation-specific scopes.",
+          "Complete user consent and use the granted token; request offline_access only when refresh tokens are needed."
+        ],
+        "scopes": [],
+        "notes": [
+          "An API key is client_id for OAuth; it is not a standalone resource API credential."
+        ],
+        "sources": [
+          {
+            "url": "https://developer.constantcontact.com/api_guide/auth_overview.html",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developer.constantcontact.com/api_guide/getting-started/v3-technical-overview",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.cc.email/v3",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:constant-contact",
+        "title": "Constant Contact",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developer.constantcontact.com/api_guide/auth_overview.html"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "infusionsoft",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "Keap Service Account Key or Personal Access Token"
+        ],
+        "prerequisites": [
+          "Keap account and permissions for API-key settings."
+        ],
+        "steps": [
+          "Create a Service Account Key for a business integration, or a Personal Access Token for single-user development.",
+          "Send the credential in X-Keap-API-Key."
+        ],
+        "scopes": [],
+        "notes": [
+          "Keap is the current product identity for the retained Infusionsoft slug. OAuth is a separate supported option."
+        ],
+        "sources": [
+          {
+            "url": "https://help.infusionsoft.com/hc/en-us/articles/44637898916493-Create-API-Keys-for-Third-Party-Integrations",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developer.infusionsoft.com/postman-quick-start/",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.infusionsoft.com/crm/rest/v1",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:infusionsoft",
+        "title": "Keap",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://help.infusionsoft.com/hc/en-us/articles/44637898916493-Create-API-Keys-for-Third-Party-Integrations"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "podio",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [
+          "Client ID",
+          "Client Secret"
+        ],
+        "prerequisites": [
+          "Registered Podio application and access to the intended organisation/workspace."
+        ],
+        "steps": [
+          "Register the application and callback.",
+          "Use the documented server-side user authorization flow to obtain tokens.",
+          "Send Authorization: OAuth2 followed by the access token."
+        ],
+        "scopes": [],
+        "notes": [
+          "Resource requests use the literal OAuth2 header scheme; token_type bearer in token responses does not change that documented header."
+        ],
+        "sources": [
+          {
+            "url": "https://developers.podio.com/authentication",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "api_url": "https://api.podio.com",
+        "format": "gist.directory.authorization/v1",
+        "id": "api:podio",
+        "title": "Podio",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developers.podio.com/authentication"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "wix",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "api_key"
+        ],
+        "credential_names": [
+          "Wix API key",
+          "Wix account ID"
+        ],
+        "prerequisites": [
+          "Wix account and API key permitted for the desired account operations."
+        ],
+        "steps": [
+          "Create/copy the appropriately scoped Wix API key and account ID.",
+          "Configure the raw API key in Authorization and the account ID in wix-account-id in the MCP client."
+        ],
+        "scopes": [],
+        "notes": [
+          "Operator also documents interactive account sign-in; this route describes its API-key alternative.",
+          "Retrieved configuration uses type http, not an explicit transport revision.",
+          "Transport was not established by the reviewed source; the client must verify it."
+        ],
+        "sources": [
+          {
+            "url": "https://dev.wix.com/docs/overview/ai-the-wix-platform/the-wix-mcp",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://dev.wix.com/docs/api-reference/articles/rest-authentication/rest-api-authentication",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://mcp.wix.com/mcp",
+            "transport": "unknown"
+          }
+        ],
+        "format": "gist.directory.authorization/v2",
+        "id": "app-mcp:wix",
+        "title": "Wix",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://dev.wix.com/docs/overview/ai-the-wix-platform/the-wix-mcp"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "docuware",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "http-api",
+        "methods": [
+          "oauth2"
+        ],
+        "credential_names": [
+          "Registered application client ID",
+          "client secret when required by application registration"
+        ],
+        "prerequisites": [
+          "DocuWare Cloud or 7.11+ organisation with application registration and required document permissions."
+        ],
+        "steps": [
+          "Register the integration using the current DocuWare OAuth application-registration process.",
+          "Configure its actual redirect URI and complete authorization-code login for the organisation.",
+          "Use the issued access token with the organisation Platform REST endpoint."
+        ],
+        "scopes": [],
+        "notes": [
+          "This qualifies the current application-registration OAuth flow. Earlier DocuWare versions have different authentication paths.",
+          "Supply the actual installation Platform base URL in the client; no tenant hostname is invented."
+        ],
+        "sources": [
+          {
+            "url": "https://developer.docuware.com/faq.html",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://knowledgecenter.docuware.com/docs/oauth2-application-registration",
+            "checked_at": "2026-10-19"
+          },
+          {
+            "url": "https://developer.docuware.com/rest/index.html",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [],
+        "endpoint_inputs": [
+          "DOCUWARE_PLATFORM_URL"
+        ],
+        "format": "gist.directory.authorization/v2",
+        "id": "api:docuware",
+        "title": "DocuWare",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://developer.docuware.com/faq.html"
+      }
+    ],
+    "notes": [],
+    "sources": []
+  },
+  {
+    "slug": "abby",
+    "status": "documented",
+    "routes": [
+      {
+        "kind": "mcp",
+        "methods": [
+          "oauth2",
+          "bearer"
+        ],
+        "credential_names": [],
+        "prerequisites": [
+          "Abby entrepreneur invoicing/accounting account and compatible client."
+        ],
+        "steps": [
+          "Configure the official remote endpoint.",
+          "Follow the initial server authorization challenge through Abby browser consent.",
+          "Let the client send the granted access token as Authorization: Bearer."
+        ],
+        "scopes": [],
+        "notes": [
+          "Identity is the French Abby invoicing/accounting product, not ABBYY or another Abby service."
+        ],
+        "sources": [
+          {
+            "url": "https://docs.abby.fr/mcp/demarrer",
+            "checked_at": "2026-10-19"
+          }
+        ],
+        "remotes": [
+          {
+            "url": "https://api.abby.fr/mcp",
+            "transport": "streamable-http"
+          }
+        ],
+        "format": "gist.directory.authorization/v1",
+        "id": "app-mcp:abby",
+        "title": "Abby",
+        "status": "documented",
+        "connection_tested": false,
+        "credential_owner": "client",
+        "setup_url": "https://docs.abby.fr/mcp/demarrer"
+      }
+    ],
+    "notes": [],
+    "sources": []
   }
 ]
